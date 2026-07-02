@@ -1,0 +1,28 @@
+{
+  "name": "liguria-events-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static calendar & feed UI for Genoa events — Astro + Lit on GitHub Pages",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "bun test",
+    "lint": "eslint src",
+    "typecheck": "astro check && tsc --noEmit -p tsconfig.test.json",
+    "check": "bun run lint && bun run typecheck && bun test"
+  },
+  "dependencies": {
+    "astro": "^5.17.1",
+    "effect": "^3.19.4",
+    "lit": "^3.3.2"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4"
+  }
+}

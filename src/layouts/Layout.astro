@@ -1,0 +1,57 @@
+---
+import { Effect } from 'effect';
+import { loadEvents } from '../data/load-events.ts';
+import '../styles/global.css';
+
+type Props = Readonly<{ title: string }>;
+const { title } = Astro.props;
+
+const EVENTS_URL =
+  import.meta.env.EVENTS_URL ?? 'https://liguria-events-bot.igor-ganov.workers.dev/events.json';
+// Build-time boundary (AC-1.1): the Effect pipeline runs at the edge; a
+// failed fetch fails `astro build` and the previous deploy keeps serving.
+const payload = await Effect.runPromise(loadEvents(EVENTS_URL));
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="What's on in Genoa — auto-collected events calendar and feed"
+    />
+    <title>{title} · Liguria Events</title>
+  </head>
+  <body>
+    <header class="site-head">
+      <p class="site-title">🌊 Liguria Events</p>
+      <nav aria-label="Site">
+        <a href={base}>Calendar</a>
+        <a href={`${base}feed/`}>Feed</a>
+        <a href="https://t.me/liguria_events_bot" rel="noopener">Telegram bot</a>
+        <a
+          href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
+          rel="noopener">iCal</a
+        >
+      </nav>
+    </header>
+    <script
+      is:inline
+      type="application/json"
+      id="events-data"
+      set:html={JSON.stringify(payload.events)}
+    />
+    <main>
+      <slot />
+    </main>
+    <footer class="site-foot">
+      <p>
+        Collected automatically from visitgenoa.it, mentelocale.it, genovateatro.it,
+        palazzoducale.genova.it, portoantico.it · data as of {payload.generatedAt.slice(0, 16)}Z
+      </p>
+    </footer>
+  </body>
+</html>
