@@ -52,6 +52,27 @@ scheduled GitHub Action rebuilds the site so content stays fresh.
 - **AC-4.4** Interactive controls SHALL be keyboard-accessible buttons with
   visible focus and `aria-pressed` state on toggles.
 
+## US-5: Visual redesign (amendment 2026-07-02)
+
+- **AC-6.1 (Dark theme)** THE SYSTEM SHALL support light/dark themes with the
+  blog's mechanics: tokens on `:root[data-theme]`, no-flash init from
+  localStorage/OS preference, a header toggle with circular
+  view-transition reveal.
+- **AC-6.2 (Icons)** Categories SHALL render as inline SVG line icons (one
+  shared 24×24 set), not emoji; every event shows ALL its categories as
+  color-tinted tags (per-category hue tokens).
+- **AC-6.3 (Event pages)** Every event SHALL have a static detail page
+  `/event/<id>/`: cover image with source attribution, dates/time, venue,
+  the AI-generated summary (never source-copied), and links to every source
+  that listed the event.
+- **AC-6.4 (Mini-cards)** Feed entries and the calendar's Ongoing list SHALL
+  be mini cards (thumbnail, title, when/where, 2-line clamped summary,
+  category tags, free badge) linking to the event page; calendar day cells
+  hold compact category-tinted pills linking there too.
+- **AC-6.5 (Mobile)** THE SYSTEM SHALL be mobile-first: at ≤44rem the month
+  grid collapses into a day-by-day agenda (empty days hidden), header stays
+  sticky, cards compress.
+
 ## NFR
 
 - **AC-5.1** Code follows functional-frontend dogma: files ≤50 lines

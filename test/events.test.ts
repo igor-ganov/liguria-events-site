@@ -15,7 +15,7 @@ import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const make = (overrides: Partial<CompactEvent> & Pick<CompactEvent, 'id' | 's'>): CompactEvent => ({
   t: `Event ${overrides.id}`,
-  c: 'other',
+  c: ['other'],
   u: 'https://example.org',
   ...overrides,
 });
@@ -47,7 +47,7 @@ describe('coversDay / isUpcoming / maxIso', () => {
 });
 
 describe('filters', () => {
-  const events = [make({ id: 'm', s: '2026-07-04', c: 'music', f: true }), make({ id: 'o', s: '2026-07-05' })];
+  const events = [make({ id: 'm', s: '2026-07-04', c: ['music'], f: true }), make({ id: 'o', s: '2026-07-05' })];
   test('empty selection keeps all; selection narrows', () => {
     assert.equal(filterByCategories(new Set())(events).length, 2);
     assert.deepEqual(

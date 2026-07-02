@@ -7,7 +7,7 @@ import { filterFreeOnly } from '../../lib/events/filter-free-only.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { renderChips } from './render-chips.ts';
-import { renderEntry } from './render-entry.ts';
+import { renderMiniCard } from '../shared/render-mini-card.ts';
 import type { FeedHost } from './host.ts';
 
 const renderGroup = ([day, events]: readonly [string, readonly CompactEvent[]]): TemplateResult =>
@@ -15,7 +15,7 @@ const renderGroup = ([day, events]: readonly [string, readonly CompactEvent[]]):
     <section class="feed-group">
       <h3>${dayHeading(day)}</h3>
       <ul class="feed-list">
-        ${events.map(renderEntry)}
+        ${events.map(renderMiniCard)}
       </ul>
     </section>
   `;
