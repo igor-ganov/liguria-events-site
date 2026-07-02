@@ -7,9 +7,11 @@ export type FeedHost = {
   events: readonly CompactEvent[];
   selected: readonly Category[];
   freeOnly: boolean;
+  gemsOnly: boolean;
   readonly ctl: Readonly<{
     init: () => void;
     toggleCategory: (category: Category) => void;
     toggleFree: () => void;
+    toggleGems: () => void;
   }>;
 };

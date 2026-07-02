@@ -11,12 +11,14 @@ export class EventsFeed extends LitElement {
     events: { state: true },
     selected: { state: true },
     freeOnly: { state: true },
+    gemsOnly: { state: true },
   };
 
   public today = '';
   public events: readonly CompactEvent[] = [];
   public selected: readonly Category[] = [];
   public freeOnly = false;
+  public gemsOnly = false;
   public readonly ctl = makeFeedController(this);
 
   public override connectedCallback(): void {

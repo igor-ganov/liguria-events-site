@@ -110,6 +110,15 @@ describe('long-running split (AC-2.3 revised)', () => {
   });
 });
 
+describe('filterGemsOnly (AC-2.6)', () => {
+  test('off keeps all, on narrows to unusual', async () => {
+    const { filterGemsOnly } = await import('../src/lib/events/filter-gems-only.ts');
+    const events = [make({ id: 'g', s: '2026-07-04', x: true }), make({ id: 'n', s: '2026-07-05' })];
+    assert.equal(filterGemsOnly(false)(events).length, 2);
+    assert.deepEqual(filterGemsOnly(true)(events).map((event) => event.id), ['g']);
+  });
+});
+
 describe('formatWhen', () => {
   test('joins known parts only', () => {
     assert.equal(

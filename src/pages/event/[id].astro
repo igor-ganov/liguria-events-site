@@ -45,6 +45,7 @@ const { v: _venue, ...eventNoVenue } = event;
         ))
       }
       {freeLabel !== undefined && <span class="badge-free">{freeLabel}</span>}
+      {event.x === true && <span class="badge-gem">💎 hidden gem</span>}
     </div>
     <dl class="event-facts">
       <div><dt>When</dt><dd>{formatWhen(eventNoVenue)}</dd></div>

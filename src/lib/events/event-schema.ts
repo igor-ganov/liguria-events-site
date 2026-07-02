@@ -21,6 +21,7 @@ export const EventSchema = Schema.Struct({
   img: Schema.optional(Schema.String),
   d: Schema.optional(Schema.String),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
+  x: Schema.optional(Schema.Boolean),
 });
 
 export type CompactEvent = Schema.Schema.Type<typeof EventSchema>;

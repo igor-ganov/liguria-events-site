@@ -19,5 +19,9 @@ export const renderTags = (event: CompactEvent): TemplateResult => html`
       () => html`<span class="badge-free">free</span>`,
       () => html``,
     )}
+    ${branch(event.x === true)(
+      () => html`<span class="badge-gem">💎 gem</span>`,
+      () => html``,
+    )}
   </div>
 `;

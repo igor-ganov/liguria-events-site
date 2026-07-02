@@ -4,6 +4,7 @@ import { branch } from '../../lib/branch.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import { filterByCategories } from '../../lib/events/filter-by-categories.ts';
 import { filterFreeOnly } from '../../lib/events/filter-free-only.ts';
+import { filterGemsOnly } from '../../lib/events/filter-gems-only.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { renderChips } from './render-chips.ts';
@@ -21,8 +22,8 @@ const renderGroup = ([day, events]: readonly [string, readonly CompactEvent[]]):
   `;
 
 export const renderFeed = (host: FeedHost): TemplateResult => {
-  const filtered = filterFreeOnly(host.freeOnly)(
-    filterByCategories(new Set(host.selected))(host.events),
+  const filtered = filterGemsOnly(host.gemsOnly)(
+    filterFreeOnly(host.freeOnly)(filterByCategories(new Set(host.selected))(host.events)),
   );
   const groups = [...groupByDay(host.today)(filtered).entries()];
   return html`

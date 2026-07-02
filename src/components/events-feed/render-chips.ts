@@ -23,5 +23,8 @@ export const renderChips = (host: FeedHost): TemplateResult => html`
     <button class="chip chip--free" aria-pressed=${host.freeOnly} @click=${host.ctl.toggleFree}>
       Free only
     </button>
+    <button class="chip chip--gems" aria-pressed=${host.gemsOnly} @click=${host.ctl.toggleGems}>
+      💎 Hidden gems
+    </button>
   </div>
 `;

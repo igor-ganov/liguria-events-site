@@ -17,4 +17,7 @@ export const makeFeedController = (host: HostState): FeedHost['ctl'] => ({
   toggleFree: (): void => {
     host.freeOnly = !host.freeOnly;
   },
+  toggleGems: (): void => {
+    host.gemsOnly = !host.gemsOnly;
+  },
 });

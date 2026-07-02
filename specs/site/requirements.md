@@ -72,6 +72,10 @@ scheduled GitHub Action rebuilds the site so content stays fresh.
 - **AC-6.5 (Mobile)** THE SYSTEM SHALL be mobile-first: at ≤44rem the month
   grid collapses into a day-by-day agenda (empty days hidden), header stays
   sticky, cards compress.
+- **AC-6.6 (Hidden gems)** *(added 2026-07-02)* WHERE an event carries the
+  worker's `x` (unusual) flag THE SYSTEM SHALL show a 💎 badge on its card
+  and detail page, and the feed SHALL offer a "💎 Hidden gems" toggle that
+  filters to unusual events (composing AND with category/free filters).
 
 ## NFR
 
