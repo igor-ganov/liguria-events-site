@@ -23,7 +23,11 @@ scheduled GitHub Action rebuilds the site so content stays fresh.
   month with per-day event entries (category emoji + linked title).
 - **AC-2.2** WHEN the user activates prev/next month controls THE SYSTEM
   SHALL re-render the grid client-side without a page load.
-- **AC-2.3** Multi-day events SHALL appear on every day they cover.
+- **AC-2.3** *(revised 2026-07-02 after live review: months-long exhibitions
+  flooded every cell)* Events spanning ≤3 days SHALL appear on every day
+  they cover; longer-running events SHALL appear only on their start day
+  and in a dedicated "Ongoing" list rendered beside the grid for the
+  displayed month.
 - **AC-2.4** Days outside the displayed month SHALL be visually muted; today
   SHALL be highlighted.
 

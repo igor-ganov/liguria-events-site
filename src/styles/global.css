@@ -66,6 +66,11 @@ a:hover, a:focus-visible { text-decoration: underline; }
 .cal-events { list-style: none; margin: 0.25rem 0 0; padding: 0; font-size: 0.78rem; }
 .cal-events li { margin: 0 0 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* ── ongoing list under the calendar ─────────────────────────────── */
+.ongoing h3 { margin: 1.4rem 0 0.5rem; font-size: 1rem; color: var(--muted); }
+.ongoing-list { list-style: none; margin: 0; padding: 0; font-size: 0.9rem; }
+.ongoing-list li { margin: 0 0 0.3rem; }
+
 /* ── feed ────────────────────────────────────────────────────────── */
 .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.8rem 0 1.2rem; }
 .chip {

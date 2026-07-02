@@ -11,7 +11,8 @@ const EVENTS_URL =
 // Build-time boundary (AC-1.1): the Effect pipeline runs at the edge; a
 // failed fetch fails `astro build` and the previous deploy keeps serving.
 const payload = await Effect.runPromise(loadEvents(EVENTS_URL));
-const base = import.meta.env.BASE_URL;
+// BASE_URL comes without a trailing slash — normalize before joining paths.
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
 
 <!doctype html>
@@ -29,8 +30,8 @@ const base = import.meta.env.BASE_URL;
     <header class="site-head">
       <p class="site-title">🌊 Liguria Events</p>
       <nav aria-label="Site">
-        <a href={base}>Calendar</a>
-        <a href={`${base}feed/`}>Feed</a>
+        <a href={`${base}/`}>Calendar</a>
+        <a href={`${base}/feed/`}>Feed</a>
         <a href="https://t.me/liguria_events_bot" rel="noopener">Telegram bot</a>
         <a
           href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"

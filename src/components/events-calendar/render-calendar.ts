@@ -4,6 +4,7 @@ import { monthGrid } from '../../lib/calendar/month-grid.ts';
 import { monthTitle } from '../../lib/calendar/month-title.ts';
 import { WEEKDAYS } from '../../lib/calendar/weekdays.ts';
 import { renderDay } from './render-day.ts';
+import { renderOngoing } from './render-ongoing.ts';
 import type { CalendarHost } from './host.ts';
 
 export const renderCalendar = (host: CalendarHost): TemplateResult => html`
@@ -18,4 +19,5 @@ export const renderCalendar = (host: CalendarHost): TemplateResult => html`
       .flat()
       .map(renderDay(host))}
   </div>
+  ${renderOngoing(host)}
 `;

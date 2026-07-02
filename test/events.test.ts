@@ -81,6 +81,35 @@ describe('sortByStart / groupByDay', () => {
   });
 });
 
+describe('long-running split (AC-2.3 revised)', () => {
+  const short = make({ id: 'short', s: '2026-07-04', e: '2026-07-06' });
+  const long = make({ id: 'long', s: '2026-02-01', e: '2026-12-31' });
+  const single = make({ id: 'single', s: '2026-07-05' });
+
+  test('spanDays / isLongRunning boundary at 3 days', async () => {
+    const { spanDays } = await import('../src/lib/events/span-days.ts');
+    const { isLongRunning } = await import('../src/lib/events/is-long-running.ts');
+    assert.equal(spanDays(short), 3);
+    assert.equal(isLongRunning(short), false);
+    assert.equal(isLongRunning(long), true);
+    assert.equal(spanDays(single), 1);
+  });
+
+  test('dayCellEvents: short on covered days, long only on start day', async () => {
+    const { dayCellEvents } = await import('../src/lib/events/day-cell-events.ts');
+    const events = [short, long, single];
+    assert.deepEqual(dayCellEvents('2026-07-05')(events).map((event) => event.id), ['short', 'single']);
+    assert.deepEqual(dayCellEvents('2026-02-01')(events).map((event) => event.id), ['long']);
+    assert.deepEqual(dayCellEvents('2026-07-10')(events), []);
+  });
+
+  test('ongoingInMonth: long events overlapping the month, sorted', async () => {
+    const { ongoingInMonth } = await import('../src/lib/events/ongoing-in-month.ts');
+    assert.deepEqual(ongoingInMonth('2026-07')([short, long, single]).map((event) => event.id), ['long']);
+    assert.deepEqual(ongoingInMonth('2027-01')([long]), []);
+  });
+});
+
 describe('formatWhen', () => {
   test('joins known parts only', () => {
     assert.equal(
