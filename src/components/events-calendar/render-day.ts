@@ -7,6 +7,7 @@ import { eventPath } from '../../lib/event-path.ts';
 import { dayCellEvents } from '../../lib/events/day-cell-events.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { renderIcon } from '../shared/render-icon.ts';
@@ -20,19 +21,22 @@ const DAY_CLASS: Readonly<Record<DayKind, string>> = {
 
 const renderPill =
   (lang: Locale) =>
-  (event: CompactEvent): TemplateResult => html`
-    <li>
-      <a
-        class="cal-pill"
-        data-cat=${primaryCategory(event.c)}
-        href=${localizedUrl(lang, eventPath(event.id))}
-        title=${event.t}
-      >
-        ${renderIcon(primaryCategory(event.c), 12)}
-        <span>${event.t}</span>
-      </a>
-    </li>
-  `;
+  (event: CompactEvent): TemplateResult => {
+    const title = titleOf(lang)(event);
+    return html`
+      <li>
+        <a
+          class="cal-pill"
+          data-cat=${primaryCategory(event.c)}
+          href=${localizedUrl(lang, eventPath(event.id))}
+          title=${title}
+        >
+          ${renderIcon(primaryCategory(event.c), 12)}
+          <span>${title}</span>
+        </a>
+      </li>
+    `;
+  };
 
 export const renderDay =
   (host: CalendarHost) =>

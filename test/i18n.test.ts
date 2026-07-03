@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { isLocale } from '../src/lib/i18n/is-locale.ts';
 import { localizedUrl } from '../src/lib/i18n/localized-url.ts';
 import { descriptionOf } from '../src/lib/events/description-of.ts';
+import { titleOf } from '../src/lib/events/title-of.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 describe('isLocale', () => {
@@ -35,5 +36,15 @@ describe('descriptionOf', () => {
     assert.equal(descriptionOf('ru')(e), 'Русский');
     assert.equal(descriptionOf('en')(event({ en: 'only-en', it: '', ru: '' })), 'only-en');
     assert.equal(descriptionOf('en')(event()), '');
+  });
+});
+
+describe('titleOf (AC-2b.2)', () => {
+  const base: CompactEvent = { id: 'a', t: 'Sagra del pesto', s: '2026-07-04', c: ['food'], u: 'https://x' };
+  test('localized title wins; missing/empty falls back to the original', () => {
+    const withTl: CompactEvent = { ...base, tl: { en: 'Pesto festival', it: 'Sagra del pesto', ru: 'Фестиваль песто' } };
+    assert.equal(titleOf('ru')(withTl), 'Фестиваль песто');
+    assert.equal(titleOf('ru')(base), 'Sagra del pesto');
+    assert.equal(titleOf('it')({ ...base, tl: { en: 'X', it: '', ru: '' } }), 'Sagra del pesto');
   });
 });

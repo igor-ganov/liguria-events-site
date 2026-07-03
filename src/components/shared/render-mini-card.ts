@@ -3,6 +3,7 @@ import type { TemplateResult } from 'lit';
 import { branch } from '../../lib/branch.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
@@ -30,7 +31,7 @@ export const renderMiniCard = (event: CompactEvent, ui: Ui, lang: Locale): Templ
       <a class="mini-card" href=${localizedUrl(lang, eventPath(event.id))}>
         ${renderThumb(event)}
         <div class="mini-body">
-          <h4 class="mini-title">${event.t}</h4>
+          <h4 class="mini-title">${titleOf(lang)(event)}</h4>
           <span class="mini-when">${formatWhen(event)}</span>
           ${branch(desc === '')(
             () => html``,

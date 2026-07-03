@@ -18,6 +18,7 @@ const LocalizedTextSchema = Schema.Struct({
 export const EventSchema = Schema.Struct({
   id: Schema.String,
   t: Schema.String,
+  tl: Schema.optional(LocalizedTextSchema),
   s: Schema.String,
   e: Schema.optional(Schema.String),
   c: Schema.Array(Schema.Literal(...CATEGORIES)),

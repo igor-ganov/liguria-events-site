@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import { eventLinks } from '../../lib/events/event-links.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { eventPath } from '../../lib/event-path.ts';
@@ -15,22 +16,23 @@ const { lang, event } = Astro.props;
 const ui = await uiOf(lang);
 const links = eventLinks(event);
 const desc = descriptionOf(lang)(event);
+const title = titleOf(lang)(event);
 const photoSource = links[0]?.name ?? ui.photoBy;
 const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
 ---
 
-<Layout lang={lang} title={event.t} description={desc === '' ? event.t : desc} path={eventPath(event.id)}>
+<Layout lang={lang} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
   <article class="event-page">
     <a class="back-link" href={localizedUrl(lang)}>← {ui.headings.allEvents}</a>
     {
       event.img !== undefined && (
         <figure class="event-hero">
-          <img src={event.img} alt={event.t} loading="eager" />
+          <img src={event.img} alt={title} loading="eager" />
           <figcaption>{ui.photoBy}: {photoSource}</figcaption>
         </figure>
       )
     }
-    <h1>{event.t}</h1>
+    <h1>{title}</h1>
     <div class="event-tags">
       {
         event.c.map((category) => (
