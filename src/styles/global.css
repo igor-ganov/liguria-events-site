@@ -52,6 +52,11 @@
 /* Theme toggle: circular reveal via document.startViewTransition() (blog mechanics) */
 html:active-view-transition-type(theme) {
   view-transition-name: root;
+  /* Fold main (and any other named element) into the single root snapshot so
+     the WHOLE page reveals with the circle — otherwise main-content is its own
+     group and swaps instantly while only the chrome reveals, and the fixed FAB
+     glitches between the two groups. */
+  main { view-transition-name: none; }
   &::view-transition-group(root),
   &::view-transition-image-pair(root) { isolation: isolate; }
   &::view-transition-old(root) { animation: none; mix-blend-mode: normal; z-index: 1; }
