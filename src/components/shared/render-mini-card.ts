@@ -18,18 +18,20 @@ const renderThumb = (event: CompactEvent): TemplateResult =>
     () => html`<img class="mini-thumb" src=${event.img ?? ''} alt="" loading="lazy" />`,
   );
 
-/** The mini event card — feed entries, ongoing list (design: click-through). */
+/** The whole mini-card is the link to the event page (design: click-through). */
 export const renderMiniCard = (event: CompactEvent): TemplateResult => html`
-  <li class="mini-card">
-    ${renderThumb(event)}
-    <div class="mini-body">
-      <h4 class="mini-title"><a href=${eventUrl(event.id)}>${event.t}</a></h4>
-      <span class="mini-when">${formatWhen(event)}</span>
-      ${branch(event.d === undefined)(
-        () => html``,
-        () => html`<p class="mini-desc">${event.d}</p>`,
-      )}
-      ${renderTags(event)}
-    </div>
+  <li>
+    <a class="mini-card" href=${eventUrl(event.id)}>
+      ${renderThumb(event)}
+      <div class="mini-body">
+        <h4 class="mini-title">${event.t}</h4>
+        <span class="mini-when">${formatWhen(event)}</span>
+        ${branch(event.d === undefined)(
+          () => html``,
+          () => html`<p class="mini-desc">${event.d}</p>`,
+        )}
+        ${renderTags(event)}
+      </div>
+    </a>
   </li>
 `;

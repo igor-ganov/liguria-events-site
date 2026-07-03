@@ -1,6 +1,8 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
+import MobileMenu from '../components/MobileMenu.astro';
 import '../styles/global.css';
 
 type Props = Readonly<{ title: string; description?: string }>;
@@ -21,18 +23,25 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <meta name="description" content={description} />
     <meta name="theme-color" content="hsl(174 70% 30%)" />
     <title>{title} · Liguria Events</title>
+    <ClientRouter />
     <script is:inline>
       // No-flash theme init (blog mechanics): stored choice, else OS preference.
       // localStorage is shared across this user's project pages — accept only
       // our two values, anything else falls back to the OS preference.
       (function () {
-        var stored = localStorage.getItem('theme');
-        var valid = stored === 'dark' || stored === 'light';
-        document.documentElement.dataset['theme'] = valid
-          ? stored
-          : window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? 'dark'
-            : 'light';
+        var pick = function () {
+          var stored = localStorage.getItem('theme');
+          return stored === 'dark' || stored === 'light'
+            ? stored
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        };
+        document.documentElement.dataset['theme'] = pick();
+        // Re-apply before each SPA swap so the incoming page never flashes.
+        document.addEventListener('astro:before-swap', function (e) {
+          e.newDocument.documentElement.dataset['theme'] = pick();
+        });
       })();
     </script>
   </head>
@@ -73,6 +82,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     <main>
       <slot />
     </main>
+    <MobileMenu />
     <footer class="site-foot">
       <p>
         Collected automatically from visitgenoa.it, mentelocale.it, genovateatro.it,
@@ -81,7 +91,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </p>
     </footer>
     <script>
-      // Theme toggle with circular reveal (blog mechanics).
+      // Theme toggle with circular reveal (blog mechanics). Re-bound after each
+      // SPA swap; a per-button flag prevents double-binding.
       const html = document.documentElement;
       const setTheme = (theme: string): void => {
         html.dataset['theme'] = theme;
@@ -100,9 +111,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         html.style.setProperty('--r', `${r}px`);
         document.startViewTransition({ update: () => setTheme(next), types: ['theme'] });
       };
-      document
-        .querySelectorAll<HTMLElement>('[data-theme-toggle]')
-        .forEach((btn) => btn.addEventListener('click', toggle));
+      const bind = (): void => {
+        document.querySelectorAll<HTMLElement>('[data-theme-toggle]').forEach((btn) => {
+          if (btn.dataset['themeBound'] === 'true') return;
+          btn.dataset['themeBound'] = 'true';
+          btn.addEventListener('click', toggle);
+        });
+      };
+      bind();
+      document.addEventListener('astro:after-swap', bind);
     </script>
   </body>
 </html>

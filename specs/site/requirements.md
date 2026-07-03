@@ -77,6 +77,20 @@ scheduled GitHub Action rebuilds the site so content stays fresh.
   and detail page, and the feed SHALL offer a "💎 Hidden gems" toggle that
   filters to unusual events (composing AND with category/free filters).
 
+## US-6: Interaction polish (amendment 2026-07-02, blog mechanics)
+
+- **AC-7.1 (Whole-card link)** The entire event mini-card SHALL be the link to
+  its detail page, not just the title.
+- **AC-7.2 (No tap square)** Tappable elements SHALL set
+  `-webkit-tap-highlight-color: transparent`; feedback is the app's own
+  hover / active / focus-visible styling only.
+- **AC-7.3 (Flying menu)** On mobile THE SYSTEM SHALL show a draggable FAB
+  that snaps to the nearest corner (persisted in localStorage) and opens a
+  popup nav (links + theme toggle); the header nav is desktop-only.
+- **AC-7.4 (View transitions)** Cross-page navigation SHALL animate via the
+  View Transitions API (main-content slide), distinct from the theme
+  toggle's circular reveal; reduced-motion disables the slide.
+
 ## NFR
 
 - **AC-5.1** Code follows functional-frontend dogma: files ≤50 lines
