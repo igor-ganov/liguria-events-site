@@ -2,12 +2,19 @@
 // Flying menu — draggable FAB ported from the blog's MobileMenu: a 56px round
 // button fixed in one of four corners, dragged to snap to the nearest one
 // (persisted in localStorage), opening a popup nav anchored to that corner.
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; path: string }>;
+const { lang, path } = Astro.props;
+const ui = await uiOf(lang);
 const links = [
-  { href: `${base}/`, label: '🗓 Calendar' },
-  { href: `${base}/feed/`, label: '📋 Feed' },
-  { href: 'https://t.me/liguria_events_bot', label: '🤖 Telegram bot' },
-  { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', label: '📆 iCal' },
+  { href: localizedUrl(lang), label: `🗓 ${ui.nav.calendar}` },
+  { href: localizedUrl(lang, 'feed/'), label: `📋 ${ui.nav.feed}` },
+  { href: 'https://t.me/liguria_events_bot', label: `🤖 ${ui.nav.bot}` },
+  { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', label: `📆 ${ui.nav.ical}` },
 ];
 ---
 
@@ -45,6 +52,7 @@ const links = [
       {links.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
     </ul>
     <div class="fab-tools">
+      <LanguageSwitcher lang={lang} path={path} />
       <button class="theme-btn" aria-label="Toggle theme" data-theme-toggle>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <circle class="sun" cx="12" cy="12" r="5"></circle>

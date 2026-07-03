@@ -1,0 +1,17 @@
+---
+import EventDetail from '../../../components/views/EventDetail.astro';
+import { cachedEvents } from '../../../data/cached-events.ts';
+import { EVENTS_URL } from '../../../data/events-url.ts';
+import { LOCALES } from '../../../lib/i18n/locales.ts';
+
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+    payload.events.map((event) => ({ params: { lang, id: event.id }, props: { lang, event } })),
+  );
+};
+
+const { lang, event } = Astro.props;
+---
+
+<EventDetail lang={lang} event={event} />

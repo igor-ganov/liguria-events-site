@@ -1,12 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import CalendarView from '../components/views/CalendarView.astro';
 ---
 
-<Layout title="Calendar">
-  <h1 class="visually-hidden">Genoa events calendar</h1>
-  <events-calendar></events-calendar>
-</Layout>
-
-<script>
-  import '../components/events-calendar.ts';
-</script>
+<CalendarView lang="en" />

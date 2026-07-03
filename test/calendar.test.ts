@@ -7,6 +7,9 @@ import { dayKindOf } from '../src/lib/calendar/day-kind.ts';
 import { monthGrid } from '../src/lib/calendar/month-grid.ts';
 import { monthKeyOf } from '../src/lib/calendar/month-key-of.ts';
 import { monthTitle } from '../src/lib/calendar/month-title.ts';
+import { DEFAULT_PAGE_DATA } from '../src/components/shared/default-page-data.ts';
+
+const EN_UI = DEFAULT_PAGE_DATA.ui;
 
 describe('month key math', () => {
   test('monthKeyOf strips the day', () => {
@@ -17,8 +20,8 @@ describe('month key math', () => {
     assert.equal(addMonths('2026-01', -1), '2025-12');
     assert.equal(addMonths('2026-07', 0), '2026-07');
   });
-  test('monthTitle renders English month + year', () => {
-    assert.equal(monthTitle('2026-07'), 'July 2026');
+  test('monthTitle renders localized month + year', () => {
+    assert.equal(monthTitle(EN_UI)('2026-07'), 'July 2026');
   });
 });
 
@@ -49,7 +52,7 @@ describe('dayKindOf (AC-2.4)', () => {
 });
 
 describe('dayHeading', () => {
-  test('formats the feed group heading', () => {
-    assert.equal(dayHeading('2026-07-04'), 'Sat, 4 July');
+  test('formats the localized feed group heading', () => {
+    assert.equal(dayHeading(EN_UI)('2026-07-04'), 'Sat, 4 July');
   });
 });

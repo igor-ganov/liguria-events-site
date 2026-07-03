@@ -3,31 +3,39 @@ import { ClientRouter } from 'astro:transitions';
 import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import MobileMenu from '../components/MobileMenu.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { LOCALES } from '../lib/i18n/locales.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
 import '../styles/global.css';
 
-type Props = Readonly<{ title: string; description?: string }>;
-const { title, description = "What's on in Genoa — auto-collected events calendar and feed" } =
+type Props = Readonly<{ lang: Locale; title: string; description?: string; path?: string }>;
+const { lang, title, description = "What's on in Genoa — auto-collected events", path = '' } =
   Astro.props;
 
 // Build-time boundary (AC-1.1): a failed fetch fails `astro build`.
 const payload = await cachedEvents(EVENTS_URL);
-// BASE_URL comes without a trailing slash — normalize before joining paths.
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const ui = await uiOf(lang);
+const uiData = JSON.stringify({ lang, ui });
+const alternates = LOCALES.map((loc) => ({
+  loc,
+  href: new URL(localizedUrl(loc, path), Astro.site).toString(),
+}));
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="hsl(174 70% 30%)" />
     <title>{title} · Liguria Events</title>
+    {alternates.map(({ loc, href }) => <link rel="alternate" hreflang={loc} href={href} />)}
     <ClientRouter />
     <script is:inline>
-      // No-flash theme init (blog mechanics): stored choice, else OS preference.
-      // localStorage is shared across this user's project pages — accept only
-      // our two values, anything else falls back to the OS preference.
+      // No-flash theme init (blog mechanics): only our two values, else OS.
       (function () {
         var pick = function () {
           var stored = localStorage.getItem('theme');
@@ -38,7 +46,6 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
               : 'light';
         };
         document.documentElement.dataset['theme'] = pick();
-        // Re-apply before each SPA swap so the incoming page never flashes.
         document.addEventListener('astro:before-swap', function (e) {
           e.newDocument.documentElement.dataset['theme'] = pick();
         });
@@ -47,15 +54,16 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   </head>
   <body>
     <header class="site-head">
-      <p class="site-title"><a href={`${base}/`}>🌊 Liguria Events</a></p>
+      <p class="site-title"><a href={localizedUrl(lang)}>🌊 Liguria Events</a></p>
       <nav aria-label="Site">
-        <a href={`${base}/`}>Calendar</a>
-        <a href={`${base}/feed/`}>Feed</a>
-        <a href="https://t.me/liguria_events_bot" rel="noopener">Bot</a>
+        <a href={localizedUrl(lang)}>{ui.nav.calendar}</a>
+        <a href={localizedUrl(lang, 'feed/')}>{ui.nav.feed}</a>
+        <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
         <a
           href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
-          rel="noopener">iCal</a
+          rel="noopener">{ui.nav.ical}</a
         >
+        <LanguageSwitcher lang={lang} path={path} />
         <button class="theme-btn" aria-label="Toggle theme" data-theme-toggle>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="2" stroke-linecap="round">
@@ -73,26 +81,20 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
         </button>
       </nav>
     </header>
-    <script
-      is:inline
-      type="application/json"
-      id="events-data"
-      set:html={JSON.stringify(payload.events)}
-    />
+    <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />
+    <script is:inline type="application/json" id="ui-data" set:html={uiData} />
     <main>
       <slot />
     </main>
-    <MobileMenu />
+    <MobileMenu lang={lang} path={path} />
     <footer class="site-foot">
       <p>
-        Collected automatically from visitgenoa.it, mentelocale.it, genovateatro.it,
-        palazzoducale.genova.it, portoantico.it · data as of {payload.generatedAt.slice(0, 16)}Z ·
+        {ui.footer} · data as of {payload.generatedAt.slice(0, 16)}Z ·
         <a href="https://github.com/igor-ganov/liguria-events-site" rel="noopener">source</a>
       </p>
     </footer>
     <script>
-      // Theme toggle with circular reveal (blog mechanics). Re-bound after each
-      // SPA swap; a per-button flag prevents double-binding.
+      // Theme toggle with circular reveal (blog mechanics); re-bound after SPA swap.
       const html = document.documentElement;
       const setTheme = (theme: string): void => {
         html.dataset['theme'] = theme;

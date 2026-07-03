@@ -133,6 +133,14 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   background: var(--surface); color: var(--ink); cursor: pointer;
   transition: border-color var(--speed);
 }
+.lang-switch { display: inline-flex; gap: 0.15rem; align-items: center; }
+.lang-switch a {
+  padding: 0.15rem 0.4rem; border-radius: 0.4rem; font-size: 0.8rem; font-weight: 700;
+  color: var(--ink-2);
+}
+.lang-switch a[aria-current='true'] { background: var(--accent); color: var(--on-accent); }
+.lang-switch a:hover { text-decoration: none; color: var(--ink); }
+.lang-switch a[aria-current='true']:hover { color: var(--on-accent); }
 .theme-btn:hover { border-color: var(--accent); }
 .theme-btn .sun { display: none; }
 :root[data-theme='dark'] .theme-btn .sun { display: block; }

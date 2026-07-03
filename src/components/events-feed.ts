@@ -1,6 +1,9 @@
 import { LitElement } from 'lit';
 import type { Category } from '../lib/events/categories.ts';
 import type { CompactEvent } from '../lib/events/event-schema.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
+import type { Ui } from '../lib/i18n/ui-schema.ts';
+import { DEFAULT_PAGE_DATA } from './shared/default-page-data.ts';
 import { makeFeedController } from './events-feed/controller.ts';
 import { renderFeed } from './events-feed/render-feed.ts';
 
@@ -8,6 +11,8 @@ import { renderFeed } from './events-feed/render-feed.ts';
 export class EventsFeed extends LitElement {
   public static override properties = {
     today: { state: true },
+    locale: { state: true },
+    ui: { state: true },
     events: { state: true },
     selected: { state: true },
     freeOnly: { state: true },
@@ -15,6 +20,8 @@ export class EventsFeed extends LitElement {
   };
 
   public today = '';
+  public locale: Locale = 'en';
+  public ui: Ui = DEFAULT_PAGE_DATA.ui;
   public events: readonly CompactEvent[] = [];
   public selected: readonly Category[] = [];
   public freeOnly = false;

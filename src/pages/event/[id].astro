@@ -1,73 +1,14 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
-import { categoryLabel } from '../../lib/events/category-label.ts';
-import { eventLinks } from '../../lib/events/event-links.ts';
-import { formatWhen } from '../../lib/events/format-when.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
-import { iconSvg } from '../../lib/icons/icon-svg.ts';
 
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   return payload.events.map((event) => ({ params: { id: event.id }, props: { event } }));
 };
 
-type Props = Readonly<{ event: CompactEvent }>;
 const { event } = Astro.props;
-const links = eventLinks(event);
-const photoSource = links[0]?.name ?? 'source';
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const freeLabel = event.f === true ? 'free entry' : undefined;
-// formatWhen appends the venue — the facts grid shows it on its own row.
-const { v: _venue, ...eventNoVenue } = event;
 ---
 
-<Layout title={event.t} description={event.d ?? event.t}>
-  <article class="event-page">
-    <a class="back-link" href={`${base}/`}>← All events</a>
-    {
-      event.img !== undefined && (
-        <figure class="event-hero">
-          <img src={event.img} alt={event.t} loading="eager" />
-          <figcaption>photo: {photoSource}</figcaption>
-        </figure>
-      )
-    }
-    <h1>{event.t}</h1>
-    <div class="event-tags">
-      {
-        event.c.map((category) => (
-          <span class="cat-tag" data-cat={category}>
-            <Fragment set:html={iconSvg(category, 13)} />
-            {categoryLabel[category]}
-          </span>
-        ))
-      }
-      {freeLabel !== undefined && <span class="badge-free">{freeLabel}</span>}
-      {event.x === true && <span class="badge-gem">💎 hidden gem</span>}
-    </div>
-    <dl class="event-facts">
-      <div><dt>When</dt><dd>{formatWhen(eventNoVenue)}</dd></div>
-      {event.v !== undefined && <div><dt>Where</dt><dd>{event.v}</dd></div>}
-    </dl>
-    {event.d !== undefined && <p class="event-desc">{event.d}</p>}
-    <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">
-      Summary generated automatically from the sources below.
-    </p>
-    <section class="event-sources">
-      <h2>Sources</h2>
-      <ul>
-        {
-          links.map((link) => (
-            <li>
-              <a href={link.url} target="_blank" rel="noopener">
-                ↗ {link.name}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
-  </article>
-</Layout>
+<EventDetail lang="en" event={event} />

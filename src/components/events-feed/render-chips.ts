@@ -1,7 +1,6 @@
 import { html } from 'lit';
 import type { TemplateResult } from 'lit';
 import { CATEGORIES } from '../../lib/events/categories.ts';
-import { categoryLabel } from '../../lib/events/category-label.ts';
 import { renderIcon } from '../shared/render-icon.ts';
 import type { FeedHost } from './host.ts';
 
@@ -16,15 +15,15 @@ export const renderChips = (host: FeedHost): TemplateResult => html`
           aria-pressed=${host.selected.includes(category)}
           @click=${(): void => host.ctl.toggleCategory(category)}
         >
-          ${renderIcon(category, 14)} ${categoryLabel[category]}
+          ${renderIcon(category, 14)} ${host.ui.cat[category]}
         </button>
       `,
     )}
     <button class="chip chip--free" aria-pressed=${host.freeOnly} @click=${host.ctl.toggleFree}>
-      Free only
+      ${host.ui.chips.free}
     </button>
     <button class="chip chip--gems" aria-pressed=${host.gemsOnly} @click=${host.ctl.toggleGems}>
-      💎 Hidden gems
+      ${host.ui.chips.gems}
     </button>
   </div>
 `;

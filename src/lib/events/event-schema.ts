@@ -6,6 +6,13 @@ const SourceLinkSchema = Schema.Struct({
   url: Schema.String,
 });
 
+/** Per-language description map (en always present; it/ru fall back to en). */
+const LocalizedTextSchema = Schema.Struct({
+  en: Schema.String,
+  it: Schema.String,
+  ru: Schema.String,
+});
+
 /** Compact event as served by the worker's /events.json (AC-1.2):
  *  c=categories (1..3) img=cover d=AI summary l=other sources' links. */
 export const EventSchema = Schema.Struct({
@@ -19,7 +26,7 @@ export const EventSchema = Schema.Struct({
   h: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
-  d: Schema.optional(Schema.String),
+  d: Schema.optional(LocalizedTextSchema),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
   x: Schema.optional(Schema.Boolean),
 });

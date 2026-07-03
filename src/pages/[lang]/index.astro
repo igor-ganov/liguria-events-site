@@ -1,0 +1,11 @@
+---
+import CalendarView from '../../components/views/CalendarView.astro';
+import { LOCALES } from '../../lib/i18n/locales.ts';
+
+export const getStaticPaths = () =>
+  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+
+const { lang } = Astro.props;
+---
+
+<CalendarView lang={lang} />

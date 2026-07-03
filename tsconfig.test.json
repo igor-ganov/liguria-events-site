@@ -13,5 +13,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["test", "src/lib", "src/data"]
+  "include": ["test", "src/lib", "src/data"],
+  "exclude": ["src/lib/i18n/ui-of.ts", "src/data/cached-events.ts", "src/data/load-events.ts"]
 }

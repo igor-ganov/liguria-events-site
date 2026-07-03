@@ -12,9 +12,9 @@ export const renderOngoing = (host: CalendarHost): TemplateResult => {
     () => html``,
     () => html`
       <section class="ongoing">
-        <h3>Ongoing this month</h3>
+        <h3>${host.ui.headings.ongoing}</h3>
         <ul class="ongoing-list">
-          ${ongoing.map(renderMiniCard)}
+          ${ongoing.map((event) => renderMiniCard(event, host.ui, host.locale))}
         </ul>
       </section>
     `,

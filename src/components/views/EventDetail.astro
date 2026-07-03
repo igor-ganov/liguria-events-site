@@ -1,0 +1,67 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { eventLinks } from '../../lib/events/event-links.ts';
+import { formatWhen } from '../../lib/events/format-when.ts';
+import { descriptionOf } from '../../lib/events/description-of.ts';
+import type { CompactEvent } from '../../lib/events/event-schema.ts';
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { eventPath } from '../../lib/event-path.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; event: CompactEvent }>;
+const { lang, event } = Astro.props;
+const ui = await uiOf(lang);
+const links = eventLinks(event);
+const desc = descriptionOf(lang)(event);
+const photoSource = links[0]?.name ?? ui.photoBy;
+const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
+---
+
+<Layout lang={lang} title={event.t} description={desc === '' ? event.t : desc} path={eventPath(event.id)}>
+  <article class="event-page">
+    <a class="back-link" href={localizedUrl(lang)}>← {ui.headings.allEvents}</a>
+    {
+      event.img !== undefined && (
+        <figure class="event-hero">
+          <img src={event.img} alt={event.t} loading="eager" />
+          <figcaption>{ui.photoBy}: {photoSource}</figcaption>
+        </figure>
+      )
+    }
+    <h1>{event.t}</h1>
+    <div class="event-tags">
+      {
+        event.c.map((category) => (
+          <span class="cat-tag" data-cat={category}>
+            <Fragment set:html={iconSvg(category, 13)} />
+            {ui.cat[category]}
+          </span>
+        ))
+      }
+      {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+      {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+    </div>
+    <dl class="event-facts">
+      <div><dt>📅</dt><dd>{formatWhen(eventNoVenue)}</dd></div>
+      {event.v !== undefined && <div><dt>📍</dt><dd>{event.v}</dd></div>}
+    </dl>
+    {desc !== '' && <p class="event-desc">{desc}</p>}
+    <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
+    <section class="event-sources">
+      <h2>{ui.headings.sources}</h2>
+      <ul>
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.url} target="_blank" rel="noopener">
+                ↗ {link.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </article>
+</Layout>

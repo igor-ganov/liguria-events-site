@@ -1,0 +1,23 @@
+---
+import { LOCALES } from '../lib/i18n/locales.ts';
+import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; path: string }>;
+const { lang, path } = Astro.props;
+const LABEL: Readonly<Record<Locale, string>> = { en: 'EN', it: 'IT', ru: 'RU' };
+---
+
+<div class="lang-switch" role="group" aria-label="Language">
+  {
+    LOCALES.map((loc) => (
+      <a
+        href={localizedUrl(loc, path)}
+        hreflang={loc}
+        aria-current={loc === lang ? 'true' : 'false'}
+      >
+        {LABEL[loc]}
+      </a>
+    ))
+  }
+</div>

@@ -11,15 +11,17 @@ import { renderChips } from './render-chips.ts';
 import { renderMiniCard } from '../shared/render-mini-card.ts';
 import type { FeedHost } from './host.ts';
 
-const renderGroup = ([day, events]: readonly [string, readonly CompactEvent[]]): TemplateResult =>
-  html`
-    <section class="feed-group">
-      <h3>${dayHeading(day)}</h3>
-      <ul class="feed-list">
-        ${events.map(renderMiniCard)}
-      </ul>
-    </section>
-  `;
+const renderGroup =
+  (host: FeedHost) =>
+  ([day, events]: readonly [string, readonly CompactEvent[]]): TemplateResult =>
+    html`
+      <section class="feed-group">
+        <h3>${dayHeading(host.ui)(day)}</h3>
+        <ul class="feed-list">
+          ${events.map((event) => renderMiniCard(event, host.ui, host.locale))}
+        </ul>
+      </section>
+    `;
 
 export const renderFeed = (host: FeedHost): TemplateResult => {
   const filtered = filterGemsOnly(host.gemsOnly)(
@@ -29,8 +31,8 @@ export const renderFeed = (host: FeedHost): TemplateResult => {
   return html`
     ${renderChips(host)}
     ${branch(groups.length === 0)(
-      () => html`<p class="feed-empty">Nothing matches these filters yet.</p>`,
-      () => html`${groups.map(renderGroup)}`,
+      () => html`<p class="feed-empty">${host.ui.empty}</p>`,
+      () => html`${groups.map(renderGroup(host))}`,
     )}
   `;
 };

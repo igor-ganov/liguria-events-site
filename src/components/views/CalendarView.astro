@@ -1,0 +1,18 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale }>;
+const { lang } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.nav.calendar} path="">
+  <h1 class="visually-hidden">{ui.nav.calendar}</h1>
+  <events-calendar></events-calendar>
+</Layout>
+
+<script>
+  import '../../components/events-calendar.ts';
+</script>
