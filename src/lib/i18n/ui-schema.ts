@@ -14,6 +14,7 @@ export const PageDataSchema = Schema.Struct({
   ui: Schema.Struct({
     nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, bot: Schema.String, ical: Schema.String }),
     chips: Schema.Struct({ free: Schema.String, gems: Schema.String, clear: Schema.String }),
+    theme: Schema.Struct({ toggle: Schema.String, light: Schema.String, dark: Schema.String, system: Schema.String }),
     cat,
     weekdays: Schema.Array(Schema.String),
     months: Schema.Array(Schema.String),

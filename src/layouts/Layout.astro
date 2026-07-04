@@ -4,6 +4,7 @@ import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import MobileMenu from '../components/MobileMenu.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
@@ -75,24 +76,7 @@ const alternates = LOCALES.map((loc) => ({
           rel="noopener">{ui.nav.ical}</a
         >
         <LanguageSwitcher lang={lang} path={path} />
-        <button class="theme-btn" aria-label="Toggle theme" data-theme-toggle>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round">
-            <circle class="sun" cx="12" cy="12" r="5"></circle>
-            <line class="sun" x1="12" y1="1" x2="12" y2="3"></line>
-            <line class="sun" x1="12" y1="21" x2="12" y2="23"></line>
-            <line class="sun" x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line class="sun" x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line class="sun" x1="1" y1="12" x2="3" y2="12"></line>
-            <line class="sun" x1="21" y1="12" x2="23" y2="12"></line>
-            <line class="sun" x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line class="sun" x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-            <path class="moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-            <rect class="sys" x="3" y="4" width="18" height="13" rx="2"></rect>
-            <line class="sys" x1="8" y1="21" x2="16" y2="21"></line>
-            <line class="sys" x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-        </button>
+        <ThemeToggle ui={ui} />
       </nav>
     </header>
     <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />
@@ -114,12 +98,27 @@ const alternates = LOCALES.map((loc) => ({
       const html = document.documentElement;
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
       const NEXT: Record<string, string> = { light: 'dark', dark: 'system', system: 'light' };
+      const NAME_KEY: Record<string, string> = {
+        light: 'nameLight',
+        dark: 'nameDark',
+        system: 'nameSystem',
+      };
       const resolve = (pref: string): string =>
         pref === 'system' ? (mq.matches ? 'dark' : 'light') : pref;
+      // Relabel every toggle with the current mode (aria + visible menu label).
+      const syncButtons = (pref: string): void => {
+        document.querySelectorAll<HTMLElement>('[data-theme-toggle]').forEach((btn) => {
+          const name = btn.dataset[NAME_KEY[pref] ?? 'nameSystem'] ?? pref;
+          btn.setAttribute('aria-label', `${btn.dataset['label'] ?? ''} (${name})`);
+          const label = btn.querySelector<HTMLElement>('[data-theme-name]');
+          if (label) label.textContent = name;
+        });
+      };
       const applyPref = (pref: string): void => {
         html.dataset['theme'] = resolve(pref);
         html.dataset['themePref'] = pref;
         localStorage.setItem('theme', pref);
+        syncButtons(pref);
       };
       const cycle = (event: MouseEvent): void => {
         const pref = NEXT[html.dataset['themePref'] ?? 'system'] ?? 'light';
@@ -144,6 +143,7 @@ const alternates = LOCALES.map((loc) => ({
           btn.dataset['themeBound'] = 'true';
           btn.addEventListener('click', cycle);
         });
+        syncButtons(html.dataset['themePref'] ?? 'system');
       };
       bind();
       document.addEventListener('astro:after-swap', bind);

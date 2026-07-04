@@ -1,6 +1,7 @@
 ---
 nav: { calendar: 'Calendario', feed: 'Eventi', bot: 'Bot Telegram', ical: 'iCal' }
 chips: { free: 'Solo gratuiti', gems: '💎 Chicche', clear: 'Azzera' }
+theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 cat:
   music: Musica
   theatre: Teatro

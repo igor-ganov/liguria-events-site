@@ -1,6 +1,7 @@
 ---
 nav: { calendar: 'Calendar', feed: 'Feed', bot: 'Telegram bot', ical: 'iCal' }
 chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' }
+theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' }
 cat:
   music: Music
   theatre: Theatre

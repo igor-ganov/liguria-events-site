@@ -147,6 +147,13 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .lang-switch a:hover { text-decoration: none; color: var(--ink); }
 .lang-switch a[aria-current='true']:hover { color: var(--on-accent); }
 .theme-btn:hover { border-color: var(--accent); }
+/* Icon-only in the header; the mode name is hidden there but shown in the
+   labelled (mobile-menu) variant. */
+.theme-name { display: none; }
+.theme-btn--labelled {
+  width: auto; height: 38px; gap: 0.5rem; padding: 0 0.8rem; border-radius: 999px;
+}
+.theme-btn--labelled .theme-name { display: inline; font-size: 0.85rem; font-weight: 600; }
 /* Toggle icon reflects the user's CHOICE (data-theme-pref): sun=light,
    moon=dark, monitor=system. Default (system/unknown) shows the monitor. */
 .theme-btn .sun, .theme-btn .moon { display: none; }

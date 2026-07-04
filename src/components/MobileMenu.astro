@@ -3,6 +3,7 @@
 // button fixed in one of four corners, dragged to snap to the nearest one
 // (persisted in localStorage), opening a popup nav anchored to that corner.
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
@@ -53,23 +54,7 @@ const links = [
     </ul>
     <div class="fab-tools">
       <LanguageSwitcher lang={lang} path={path} />
-      <button class="theme-btn" aria-label="Toggle theme" data-theme-toggle>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle class="sun" cx="12" cy="12" r="5"></circle>
-          <line class="sun" x1="12" y1="1" x2="12" y2="3"></line>
-          <line class="sun" x1="12" y1="21" x2="12" y2="23"></line>
-          <line class="sun" x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line class="sun" x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line class="sun" x1="1" y1="12" x2="3" y2="12"></line>
-          <line class="sun" x1="21" y1="12" x2="23" y2="12"></line>
-          <line class="sun" x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line class="sun" x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          <path class="moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          <rect class="sys" x="3" y="4" width="18" height="13" rx="2"></rect>
-          <line class="sys" x1="8" y1="21" x2="16" y2="21"></line>
-          <line class="sys" x1="12" y1="17" x2="12" y2="21"></line>
-        </svg>
-      </button>
+      <ThemeToggle ui={ui} labelled />
     </div>
   </nav>
 </div>
