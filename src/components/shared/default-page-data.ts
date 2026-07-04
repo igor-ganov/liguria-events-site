@@ -5,9 +5,10 @@ import type { PageData } from '../../lib/i18n/ui-schema.ts';
 export const DEFAULT_PAGE_DATA: PageData = {
   lang: 'en',
   ui: {
-    nav: { calendar: 'Calendar', feed: 'Feed', bot: 'Telegram bot', ical: 'iCal' },
+    nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', bot: 'Telegram bot', ical: 'iCal' },
     chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' },
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
+    range: { from: 'From', to: 'To' },
     cat: {
       music: 'Music', theatre: 'Theatre', art: 'Art', food: 'Food', sport: 'Sport',
       family: 'Family', market: 'Markets', nightlife: 'Nightlife', culture: 'Culture',

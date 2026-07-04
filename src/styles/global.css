@@ -301,6 +301,26 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 /* [hidden] must win over the chip's own display, or the clear chip shows when
    it should be hidden (no filter active). */
 [hidden] { display: none !important; }
+/* Map page (MapLibre GL + self-hosted PMTiles) */
+.map-filters { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.8rem; }
+.map-dates { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.map-dates label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--ink-2); }
+.map-dates input {
+  border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.3rem 0.5rem;
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem;
+}
+.map-canvas {
+  height: min(72vh, 640px); width: 100%; border-radius: var(--radius-lg);
+  overflow: hidden; box-shadow: var(--shadow-md); background: var(--surface);
+}
+.map-canvas .maplibregl-canvas { border-radius: var(--radius-lg); }
+.map-pop-title { display: block; font-weight: 700; margin-bottom: 0.2rem; color: var(--ink); }
+.map-pop-when { color: var(--ink-2); font-size: 0.82rem; }
+.maplibregl-popup-content {
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 0.6rem; box-shadow: var(--shadow-md); padding: 0.6rem 0.8rem; font: inherit;
+}
+.maplibregl-popup-tip { border-top-color: var(--surface) !important; border-bottom-color: var(--surface) !important; }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-empty { color: var(--ink-2); }

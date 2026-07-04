@@ -1,0 +1,207 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { CATEGORIES } from '../../lib/events/categories.ts';
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale }>;
+const { lang } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.nav.map} path="map/">
+  <h1 class="visually-hidden">{ui.nav.map}</h1>
+  <div class="map-filters">
+    <div class="map-dates">
+      <label>{ui.range.from} <input type="date" data-map-from /></label>
+      <label>{ui.range.to} <input type="date" data-map-to /></label>
+    </div>
+    <div class="chips" role="group" aria-label="Filter by category">
+      {
+        CATEGORIES.map((category) => (
+          <button class="chip" data-cat={category} data-map-cat={category} aria-pressed="false">
+            <Fragment set:html={iconSvg(category, 14)} />
+            {ui.cat[category]}
+          </button>
+        ))
+      }
+      <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
+    </div>
+  </div>
+  <div class="map-canvas" data-map-canvas></div>
+</Layout>
+
+<script>
+  import maplibregl from 'maplibre-gl';
+  import 'maplibre-gl/dist/maplibre-gl.css';
+  import { Protocol } from 'pmtiles';
+  import lightStyle from '../../lib/map/styles/light.json';
+  import darkStyle from '../../lib/map/styles/dark.json';
+  import { mapEvents } from '../../lib/events/map-events.ts';
+  import { categoryColor } from '../../lib/events/category-color.ts';
+  import { primaryCategory } from '../../lib/events/primary-category.ts';
+  import { titleOf } from '../../lib/events/title-of.ts';
+  import { formatWhen } from '../../lib/events/format-when.ts';
+  import { eventPath } from '../../lib/event-path.ts';
+  import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+  import { readEventsIsland } from '../../components/shared/read-events-island.ts';
+  import { readUiIsland } from '../../components/shared/read-ui-island.ts';
+  import { isoToday } from '../../lib/calendar/iso-today.ts';
+  import type { Category } from '../../lib/events/categories.ts';
+
+  const B = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const escape = (s: string): string =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+
+  // Rewire the OpenMapTiles style onto the self-hosted pmtiles, glyphs and
+  // sprite; attribution is plain text (no flag, no external tile server).
+  const buildStyle = (dark: boolean): maplibregl.StyleSpecification => {
+    const style = structuredClone(dark ? darkStyle : lightStyle) as maplibregl.StyleSpecification;
+    style.sources = {
+      openmaptiles: {
+        type: 'vector',
+        url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`,
+        attribution: '© OpenMapTiles © OpenStreetMap contributors',
+      },
+    };
+    style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
+    style.sprite = `${B}/sprite/${dark ? 'dark' : 'light'}/sprite`;
+    for (const layer of style.layers) {
+      const layout = (layer as { layout?: Record<string, unknown> }).layout;
+      if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
+    }
+    return style;
+  };
+
+  const setup = (): void => {
+    const canvas = document.querySelector<HTMLElement>('[data-map-canvas]');
+    if (!canvas || canvas.dataset['ready'] === 'true') return;
+    canvas.dataset['ready'] = 'true';
+
+    maplibregl.addProtocol('pmtiles', new Protocol().tile);
+    const events = readEventsIsland();
+    const { lang } = readUiIsland();
+    const today = isoToday();
+    const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
+    const state = {
+      from: today,
+      to: sorted[sorted.length - 1] ?? today,
+      selected: new Set<Category>(),
+    };
+
+    const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
+    const map = new maplibregl.Map({
+      container: canvas,
+      style: buildStyle(isDark()),
+      center: [8.93, 44.41],
+      zoom: 9,
+      attributionControl: false,
+    });
+    map.addControl(
+      new maplibregl.AttributionControl({ compact: true, customAttribution: '© OpenMapTiles © OpenStreetMap contributors' }),
+    );
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+
+    const collection = (): GeoJSON.FeatureCollection => ({
+      type: 'FeatureCollection',
+      features: mapEvents(state.from, state.to, [...state.selected])(events).map((e) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [e.g![1], e.g![0]] },
+        properties: {
+          color: categoryColor(primaryCategory(e.c)),
+          title: escape(titleOf(lang)(e)),
+          when: escape(formatWhen(e)),
+          url: localizedUrl(lang, eventPath(e.id)),
+        },
+      })),
+    });
+
+    let fitted = false;
+    const fitToData = (fc: GeoJSON.FeatureCollection): void => {
+      const b = new maplibregl.LngLatBounds();
+      fc.features.forEach((f) => b.extend((f.geometry as GeoJSON.Point).coordinates as [number, number]));
+      if (!fitted && fc.features.length > 0) {
+        map.fitBounds(b, { padding: 48, maxZoom: 14, duration: 0 });
+        fitted = true;
+      }
+    };
+
+    const addLayer = (): void => {
+      const fc = collection();
+      if (map.getSource('events')) {
+        (map.getSource('events') as maplibregl.GeoJSONSource).setData(fc);
+      } else {
+        map.addSource('events', { type: 'geojson', data: fc });
+        map.addLayer({
+          id: 'events',
+          type: 'circle',
+          source: 'events',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': ['get', 'color'],
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff',
+          },
+        });
+        map.on('click', 'events', (ev) => {
+          const p = ev.features?.[0]?.properties as { title: string; when: string; url: string } | undefined;
+          if (!p) return;
+          new maplibregl.Popup({ closeButton: false })
+            .setLngLat(ev.lngLat)
+            .setHTML(
+              `<a class="map-pop-title" href="${p.url}">${p.title}</a><span class="map-pop-when">${p.when}</span>`,
+            )
+            .addTo(map);
+        });
+        map.on('mouseenter', 'events', () => (map.getCanvas().style.cursor = 'pointer'));
+        map.on('mouseleave', 'events', () => (map.getCanvas().style.cursor = ''));
+      }
+      fitToData(fc);
+    };
+
+    map.on('load', addLayer);
+
+    const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
+    const refresh = (): void => {
+      if (map.getSource('events')) (map.getSource('events') as maplibregl.GeoJSONSource).setData(collection());
+      if (clearEl) clearEl.hidden = state.selected.size === 0;
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-map-cat]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset['mapCat'] as Category;
+        const on = !state.selected.has(cat);
+        on ? state.selected.add(cat) : state.selected.delete(cat);
+        btn.setAttribute('aria-pressed', String(on));
+        refresh();
+      });
+    });
+    const fromEl = document.querySelector<HTMLInputElement>('[data-map-from]');
+    const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
+    if (fromEl) Object.assign(fromEl, { value: state.from, min: today, max: state.to });
+    if (toEl) Object.assign(toEl, { value: state.to, min: today, max: state.to });
+    fromEl?.addEventListener('change', () => {
+      state.from = fromEl.value;
+      refresh();
+    });
+    toEl?.addEventListener('change', () => {
+      state.to = toEl.value;
+      refresh();
+    });
+    clearEl?.addEventListener('click', () => {
+      state.selected.clear();
+      document.querySelectorAll('[data-map-cat]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      refresh();
+    });
+
+    // Live theme switch: swap the basemap style, then re-add the events layer.
+    new MutationObserver(() => {
+      map.setStyle(buildStyle(isDark()));
+      map.once('styledata', addLayer);
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  };
+
+  setup();
+  document.addEventListener('astro:after-swap', setup);
+</script>

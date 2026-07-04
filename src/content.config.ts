@@ -12,9 +12,10 @@ const cat = z.object({
 const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
-    nav: z.object({ calendar: z.string(), feed: z.string(), bot: z.string(), ical: z.string() }),
+    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), bot: z.string(), ical: z.string() }),
     chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
     theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
+    range: z.object({ from: z.string(), to: z.string() }),
     cat,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),

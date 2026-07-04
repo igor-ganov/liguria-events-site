@@ -1,7 +1,8 @@
 ---
-nav: { calendar: 'Календарь', feed: 'Лента', bot: 'Telegram-бот', ical: 'iCal' }
+nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', bot: 'Telegram-бот', ical: 'iCal' }
 chips: { free: 'Только бесплатные', gems: '💎 Необычное', clear: 'Сбросить' }
 theme: { toggle: 'Переключить тему', light: 'Светлая', dark: 'Тёмная', system: 'Системная' }
+range: { from: 'С', to: 'По' }
 cat:
   music: Музыка
   theatre: Театр

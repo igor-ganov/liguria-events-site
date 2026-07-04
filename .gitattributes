@@ -1,0 +1,3 @@
+*.pmtiles binary
+*.pbf binary
+public/sprite/** binary

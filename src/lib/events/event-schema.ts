@@ -25,6 +25,7 @@ export const EventSchema = Schema.Struct({
   f: Schema.optional(Schema.Boolean),
   v: Schema.optional(Schema.String),
   a: Schema.optional(Schema.String),
+  g: Schema.optional(Schema.Tuple(Schema.Number, Schema.Number)),
   h: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
