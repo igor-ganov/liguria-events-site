@@ -35,19 +35,30 @@ const alternates = LOCALES.map((loc) => ({
     {alternates.map(({ loc, href }) => <link rel="alternate" hreflang={loc} href={href} />)}
     <ClientRouter />
     <script is:inline>
-      // No-flash theme init (blog mechanics): only our two values, else OS.
+      // No-flash theme init: preference is 'light' | 'dark' | 'system'
+      // (default). 'system' resolves to the OS scheme. data-theme carries the
+      // RESOLVED scheme (drives colours + the map filter); data-theme-pref
+      // carries the user's choice (drives the toggle icon). The localStorage
+      // key is shared across the user's project pages — pages that only accept
+      // 'dark'/'light' treat 'system' as unknown and fall back to OS, which is
+      // exactly what 'system' means, so behaviour stays consistent.
       (function () {
-        var pick = function () {
-          var stored = localStorage.getItem('theme');
-          return stored === 'dark' || stored === 'light'
-            ? stored
-            : window.matchMedia('(prefers-color-scheme: dark)').matches
-              ? 'dark'
-              : 'light';
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        var pref = function () {
+          var s = localStorage.getItem('theme');
+          return s === 'dark' || s === 'light' || s === 'system' ? s : 'system';
         };
-        document.documentElement.dataset['theme'] = pick();
+        var resolve = function (p) {
+          return p === 'system' ? (mq.matches ? 'dark' : 'light') : p;
+        };
+        var apply = function (doc) {
+          var p = pref();
+          doc.documentElement.dataset['theme'] = resolve(p);
+          doc.documentElement.dataset['themePref'] = p;
+        };
+        apply(document);
         document.addEventListener('astro:before-swap', function (e) {
-          e.newDocument.documentElement.dataset['theme'] = pick();
+          apply(e.newDocument);
         });
       })();
     </script>
@@ -77,6 +88,9 @@ const alternates = LOCALES.map((loc) => ({
             <line class="sun" x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line class="sun" x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             <path class="moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            <rect class="sys" x="3" y="4" width="18" height="13" rx="2"></rect>
+            <line class="sys" x1="8" y1="21" x2="16" y2="21"></line>
+            <line class="sys" x1="12" y1="17" x2="12" y2="21"></line>
           </svg>
         </button>
       </nav>
@@ -94,16 +108,23 @@ const alternates = LOCALES.map((loc) => ({
       </p>
     </footer>
     <script>
-      // Theme toggle with circular reveal (blog mechanics); re-bound after SPA swap.
+      // Three-way theme cycle (light → dark → system) with circular reveal;
+      // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
+      // = user choice.
       const html = document.documentElement;
-      const setTheme = (theme: string): void => {
-        html.dataset['theme'] = theme;
-        localStorage.setItem('theme', theme);
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const NEXT: Record<string, string> = { light: 'dark', dark: 'system', system: 'light' };
+      const resolve = (pref: string): string =>
+        pref === 'system' ? (mq.matches ? 'dark' : 'light') : pref;
+      const applyPref = (pref: string): void => {
+        html.dataset['theme'] = resolve(pref);
+        html.dataset['themePref'] = pref;
+        localStorage.setItem('theme', pref);
       };
-      const toggle = (event: MouseEvent): void => {
-        const next = html.dataset['theme'] === 'dark' ? 'light' : 'dark';
+      const cycle = (event: MouseEvent): void => {
+        const pref = NEXT[html.dataset['themePref'] ?? 'system'] ?? 'light';
         if (!document.startViewTransition) {
-          setTheme(next);
+          applyPref(pref);
           return;
         }
         const { clientX: x, clientY: y } = event;
@@ -111,13 +132,17 @@ const alternates = LOCALES.map((loc) => ({
         html.style.setProperty('--x', `${x}px`);
         html.style.setProperty('--y', `${y}px`);
         html.style.setProperty('--r', `${r}px`);
-        document.startViewTransition({ update: () => setTheme(next), types: ['theme'] });
+        document.startViewTransition({ update: () => applyPref(pref), types: ['theme'] });
       };
+      // While on 'system', follow live OS scheme changes (no reveal).
+      mq.addEventListener('change', () => {
+        if (html.dataset['themePref'] === 'system') html.dataset['theme'] = resolve('system');
+      });
       const bind = (): void => {
         document.querySelectorAll<HTMLElement>('[data-theme-toggle]').forEach((btn) => {
           if (btn.dataset['themeBound'] === 'true') return;
           btn.dataset['themeBound'] = 'true';
-          btn.addEventListener('click', toggle);
+          btn.addEventListener('click', cycle);
         });
       };
       bind();

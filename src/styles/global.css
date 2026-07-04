@@ -147,9 +147,14 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .lang-switch a:hover { text-decoration: none; color: var(--ink); }
 .lang-switch a[aria-current='true']:hover { color: var(--on-accent); }
 .theme-btn:hover { border-color: var(--accent); }
-.theme-btn .sun { display: none; }
-:root[data-theme='dark'] .theme-btn .sun { display: block; }
-:root[data-theme='dark'] .theme-btn .moon { display: none; }
+/* Toggle icon reflects the user's CHOICE (data-theme-pref): sun=light,
+   moon=dark, monitor=system. Default (system/unknown) shows the monitor. */
+.theme-btn .sun, .theme-btn .moon { display: none; }
+.theme-btn .sys { display: block; }
+:root[data-theme-pref='light'] .theme-btn .sun { display: block; }
+:root[data-theme-pref='light'] .theme-btn .sys { display: none; }
+:root[data-theme-pref='dark'] .theme-btn .moon { display: block; }
+:root[data-theme-pref='dark'] .theme-btn .sys { display: none; }
 .site-foot { padding: 1.4rem clamp(0.7rem, 3vw, 1.5rem); color: var(--ink-2); font-size: 0.82rem; }
 
 /* ══ flying menu — draggable FAB (blog mechanics) ═══════════════════ */
@@ -372,7 +377,10 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .map-link { margin-left: 0.5rem; font-size: 0.82rem; color: var(--accent); white-space: nowrap; }
 .map-link:hover { text-decoration: underline; }
 .event-map { margin: 1.1rem 0 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
-.event-map iframe { width: 100%; height: 16rem; border: 0; display: block; }
+.event-map iframe { width: 100%; height: 16rem; border: 0; display: block; transition: filter var(--speed); }
+/* Google's embed has no dark mode; invert + hue-rotate to match a dark theme
+   (resolved data-theme, so 'system' follows the OS too). */
+:root[data-theme='dark'] .event-map iframe { filter: invert(0.92) hue-rotate(180deg); }
 .event-desc { font-size: 1.02rem; }
 .event-sources { margin-top: 1.3rem; }
 .event-sources h2 { font-size: 0.95rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }
