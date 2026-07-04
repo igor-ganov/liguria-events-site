@@ -375,6 +375,15 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(43, 131, 255, 0.4), 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .map-locate-btn { display: grid; place-items: center; color: var(--ink, #333); cursor: pointer; }
+.map-style-ctrl { overflow: hidden; }
+.map-style-select {
+  appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 0.8rem;
+  padding: 0.4rem 1.5rem 0.4rem 0.6rem;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='gray' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat; background-position: right 0.45rem center; background-size: 0.65rem;
+}
+.map-style-select:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .map-locate-btn--busy { opacity: 0.6; }
 .map-locate-btn--busy > svg { animation: map-spin 0.9s linear infinite; }
 @keyframes map-spin { to { transform: rotate(360deg); } }

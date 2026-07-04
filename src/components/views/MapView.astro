@@ -39,8 +39,11 @@ const ui = await uiOf(lang);
   import 'maplibre-gl/dist/maplibre-gl.css';
   import { Protocol } from 'pmtiles';
   import Supercluster from 'supercluster';
+  import brightStyle from '../../lib/map/styles/bright.json';
   import lightStyle from '../../lib/map/styles/light.json';
   import darkStyle from '../../lib/map/styles/dark.json';
+  import { inMapArea } from '../../lib/map/in-map-area.ts';
+  import { shouldRequestGeolocation } from '../../lib/map/should-request-geolocation.ts';
   import { mapEvents } from '../../lib/events/map-events.ts';
   import { categoryColor } from '../../lib/events/category-color.ts';
   import { primaryCategory } from '../../lib/events/primary-category.ts';
@@ -65,8 +68,13 @@ const ui = await uiOf(lang);
     return d.toISOString().slice(0, 10);
   };
 
-  const buildStyle = (dark: boolean): maplibregl.StyleSpecification => {
-    const style = structuredClone(dark ? darkStyle : lightStyle) as maplibregl.StyleSpecification;
+  const STYLES: Record<string, unknown> = { bright: brightStyle, light: lightStyle, dark: darkStyle };
+  // Available basemaps for the switcher; label shown in the control.
+  const STYLE_KEYS = ['bright', 'light', 'dark'] as const;
+
+  const buildStyle = (key: string): maplibregl.StyleSpecification => {
+    const dark = key === 'dark';
+    const style = structuredClone(STYLES[key] ?? lightStyle) as maplibregl.StyleSpecification;
     style.sources = {
       openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
       // Free, no-key elevation tiles (Mapzen/AWS Open Data) for terrain relief.
@@ -80,40 +88,47 @@ const ui = await uiOf(lang);
       },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
-    style.sprite = `${B}/sprite/${dark ? 'dark' : 'light'}/sprite`;
-    for (const layer of style.layers) {
-      const layout = (layer as { layout?: Record<string, unknown> }).layout;
-      if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
+    style.sprite = `${B}/sprite/${key}/sprite`;
+    // Bright already ships Noto Sans (self-hosted); the minimal styles reference
+    // fonts we don't host, so pin those to our single Regular face.
+    if (key !== 'bright') {
+      for (const layer of style.layers) {
+        const layout = (layer as { layout?: Record<string, unknown> }).layout;
+        if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
+      }
     }
-    // Relief (hillshade) under the roads/labels + a brighter main-road overlay.
+    // Relief (hillshade) under the roads/labels, for every basemap.
     const layers = style.layers as unknown as Array<Record<string, unknown>>;
     const hillshade = {
       id: 'hillshade',
       type: 'hillshade',
       source: 'dem',
       paint: {
-        'hillshade-exaggeration': 0.45,
-        'hillshade-shadow-color': dark ? '#000000' : '#5a5145',
+        'hillshade-exaggeration': dark ? 0.45 : 0.3,
+        'hillshade-shadow-color': dark ? '#000000' : '#6b6155',
         'hillshade-highlight-color': dark ? '#3a4654' : '#ffffff',
-      },
-    };
-    const roadHi = {
-      id: 'road-highlight',
-      type: 'line',
-      source: 'openmaptiles',
-      'source-layer': 'transportation',
-      filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: {
-        'line-color': dark ? '#8b98a8' : '#e2b96a',
-        'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 1.4, 15, 3.6],
-        'line-opacity': 0.85,
       },
     };
     const roadAt = layers.findIndex((l) => l['source-layer'] === 'transportation');
     layers.splice(roadAt >= 0 ? roadAt : 1, 0, hillshade);
-    const symAt = layers.findIndex((l) => l['type'] === 'symbol');
-    layers.splice(symAt >= 0 ? symAt : layers.length, 0, roadHi);
+    // The minimal styles have near-invisible roads; add a brighter overlay.
+    if (key !== 'bright') {
+      const roadHi = {
+        id: 'road-highlight',
+        type: 'line',
+        source: 'openmaptiles',
+        'source-layer': 'transportation',
+        filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': dark ? '#8b98a8' : '#e2b96a',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 1.4, 15, 3.6],
+          'line-opacity': 0.85,
+        },
+      };
+      const symAt = layers.findIndex((l) => l['type'] === 'symbol');
+      layers.splice(symAt >= 0 ? symAt : layers.length, 0, roadHi);
+    }
     return style;
   };
 
@@ -159,9 +174,16 @@ const ui = await uiOf(lang);
     readUrl();
 
     const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
+    const MAP_STYLE_KEY = 'map-style';
+    const savedStyle = (): string => {
+      const s = localStorage.getItem(MAP_STYLE_KEY) ?? '';
+      return (STYLE_KEYS as readonly string[]).includes(s) ? s : '';
+    };
+    const themeStyle = (): string => (isDark() ? 'dark' : 'bright');
+    const activeStyle = (): string => savedStyle() || themeStyle();
     const map = new maplibregl.Map({
       container: canvas,
-      style: buildStyle(isDark()),
+      style: buildStyle(activeStyle()),
       center: [8.93, 44.41],
       zoom: 9,
       attributionControl: false,
@@ -196,17 +218,9 @@ const ui = await uiOf(lang);
       canvas.appendChild(el);
       setTimeout(() => el.remove(), 4200);
     };
-    const inArea = (lon: number, lat: number): boolean =>
-      lon >= 8.2 && lon <= 9.75 && lat >= 44.05 && lat <= 44.7;
-
     let meMarker: maplibregl.Marker | undefined;
     const locateBtn = document.createElement('button');
-    const locate = (): void => {
-      if (!navigator.geolocation) {
-        say('error');
-        return;
-      }
-      locateBtn.classList.add('map-locate-btn--busy');
+    const requestPosition = (): void => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           locateBtn.classList.remove('map-locate-btn--busy');
@@ -218,7 +232,7 @@ const ui = await uiOf(lang);
             dot.className = 'map-me';
             meMarker = new maplibregl.Marker({ element: dot }).setLngLat(at).addTo(map);
           }
-          if (inArea(at[0], at[1])) {
+          if (inMapArea(at[0], at[1])) {
             map.easeTo({ center: at, zoom: Math.max(map.getZoom(), 14) });
           } else {
             say('outside');
@@ -230,6 +244,31 @@ const ui = await uiOf(lang);
         },
         { enableHighAccuracy: true, timeout: 9000, maximumAge: 60000 },
       );
+    };
+    const locate = (): void => {
+      if (!navigator.geolocation) {
+        say('error');
+        return;
+      }
+      locateBtn.classList.add('map-locate-btn--busy');
+      // A 'denied' origin never re-prompts — detect it and say so, instead of
+      // calling getCurrentPosition (which would silently do nothing).
+      const perms = navigator.permissions;
+      if (perms?.query) {
+        perms
+          .query({ name: 'geolocation' as PermissionName })
+          .then((st) => {
+            if (shouldRequestGeolocation(st.state)) {
+              requestPosition();
+            } else {
+              locateBtn.classList.remove('map-locate-btn--busy');
+              say('denied');
+            }
+          })
+          .catch(requestPosition);
+      } else {
+        requestPosition();
+      }
     };
     const locateControl = {
       onAdd(): HTMLElement {
@@ -250,6 +289,42 @@ const ui = await uiOf(lang);
       },
     };
     map.addControl(locateControl, 'top-left');
+
+    // Basemap switcher (Auto / Bright / Light / Dark), remembered per browser.
+    const STYLE_LABELS: Record<string, Record<string, string>> = {
+      auto: { en: 'Auto', it: 'Auto', ru: 'Авто' },
+      bright: { en: 'Bright', it: 'Vivace', ru: 'Яркая' },
+      light: { en: 'Light', it: 'Chiara', ru: 'Светлая' },
+      dark: { en: 'Dark', it: 'Scura', ru: 'Тёмная' },
+    };
+    const styleControl = {
+      onAdd(): HTMLElement {
+        const wrap = document.createElement('div');
+        wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group map-style-ctrl';
+        const sel = document.createElement('select');
+        sel.className = 'map-style-select';
+        sel.setAttribute('aria-label', 'Basemap style');
+        const label = (k: string): string => STYLE_LABELS[k]?.[lang] ?? STYLE_LABELS[k]?.['en'] ?? k;
+        for (const [value, key] of [['', 'auto'], ['bright', 'bright'], ['light', 'light'], ['dark', 'dark']] as const) {
+          const opt = document.createElement('option');
+          opt.value = value;
+          opt.textContent = label(key);
+          sel.appendChild(opt);
+        }
+        sel.value = savedStyle();
+        sel.addEventListener('change', () => {
+          if (sel.value) localStorage.setItem(MAP_STYLE_KEY, sel.value);
+          else localStorage.removeItem(MAP_STYLE_KEY);
+          map.setStyle(buildStyle(activeStyle()));
+        });
+        wrap.appendChild(sel);
+        return wrap;
+      },
+      onRemove(): void {
+        /* nothing to tear down */
+      },
+    };
+    map.addControl(styleControl, 'top-right');
 
     // ── popups ────────────────────────────────────────────────────────────────
     const openEvent = (e: CompactEvent, at: [number, number]): void => {
@@ -428,10 +503,10 @@ const ui = await uiOf(lang);
 
     syncControls();
 
-    new MutationObserver(() => map.setStyle(buildStyle(isDark()))).observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    });
+    // Follow the site theme only while the user hasn't pinned a basemap.
+    new MutationObserver(() => {
+      if (!savedStyle()) map.setStyle(buildStyle(themeStyle()));
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   };
 
   setup();
