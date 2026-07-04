@@ -357,11 +357,27 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .map-clus-thumb img { display: block; width: 46px; height: 46px; object-fit: cover; border-radius: 0.35rem; }
 .map-clus-text { display: flex; flex-direction: column; min-width: 0; }
 .map-clus-title { font-weight: 600; font-size: 0.86rem; color: var(--ink); line-height: 1.2; }
-.maplibregl-popup-content {
+/* High specificity (.map-canvas …) so these beat MapLibre's own popup CSS,
+   which is injected after global.css and would otherwise stay white. */
+.map-canvas .maplibregl-popup-content {
   background: var(--surface); color: var(--ink); border: 1px solid var(--line);
-  border-radius: 0.6rem; box-shadow: var(--shadow-md); padding: 0.55rem; font: inherit;
+  border-radius: 0.7rem; box-shadow: var(--shadow-md); padding: 0.55rem; font: inherit;
 }
-.maplibregl-popup-tip { border-top-color: var(--surface) !important; border-bottom-color: var(--surface) !important; }
+.map-canvas .maplibregl-popup-anchor-top .maplibregl-popup-tip { border-bottom-color: var(--surface); }
+.map-canvas .maplibregl-popup-anchor-bottom .maplibregl-popup-tip { border-top-color: var(--surface); }
+.map-canvas .maplibregl-popup-anchor-left .maplibregl-popup-tip { border-right-color: var(--surface); }
+.map-canvas .maplibregl-popup-anchor-right .maplibregl-popup-tip { border-left-color: var(--surface); }
+.map-canvas .maplibregl-popup-close-button { color: var(--ink-2); font-size: 1.1rem; padding: 0 0.35rem; }
+.map-canvas .maplibregl-popup-close-button:hover { background: transparent; color: var(--ink); }
+/* "You are here" marker + locate button */
+.map-me {
+  width: 16px; height: 16px; border-radius: 50%; background: #2b83ff;
+  border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(43, 131, 255, 0.4), 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.map-locate-btn { display: grid; place-items: center; color: var(--ink, #333); cursor: pointer; }
+:root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group { background: var(--surface); }
+:root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button { color: var(--ink); }
+:root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button + button { border-top-color: var(--line); }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-empty { color: var(--ink-2); }

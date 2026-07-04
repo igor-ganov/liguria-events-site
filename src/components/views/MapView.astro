@@ -69,6 +69,15 @@ const ui = await uiOf(lang);
     const style = structuredClone(dark ? darkStyle : lightStyle) as maplibregl.StyleSpecification;
     style.sources = {
       openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
+      // Free, no-key elevation tiles (Mapzen/AWS Open Data) for terrain relief.
+      dem: {
+        type: 'raster-dem',
+        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+        encoding: 'terrarium',
+        tileSize: 256,
+        maxzoom: 14,
+        attribution: '© Mapzen, USGS',
+      },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     style.sprite = `${B}/sprite/${dark ? 'dark' : 'light'}/sprite`;
@@ -76,6 +85,35 @@ const ui = await uiOf(lang);
       const layout = (layer as { layout?: Record<string, unknown> }).layout;
       if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
     }
+    // Relief (hillshade) under the roads/labels + a brighter main-road overlay.
+    const layers = style.layers as unknown as Array<Record<string, unknown>>;
+    const hillshade = {
+      id: 'hillshade',
+      type: 'hillshade',
+      source: 'dem',
+      paint: {
+        'hillshade-exaggeration': 0.45,
+        'hillshade-shadow-color': dark ? '#000000' : '#5a5145',
+        'hillshade-highlight-color': dark ? '#3a4654' : '#ffffff',
+      },
+    };
+    const roadHi = {
+      id: 'road-highlight',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'transportation',
+      filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: {
+        'line-color': dark ? '#8b98a8' : '#e2b96a',
+        'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 1.4, 15, 3.6],
+        'line-opacity': 0.85,
+      },
+    };
+    const roadAt = layers.findIndex((l) => l['source-layer'] === 'transportation');
+    layers.splice(roadAt >= 0 ? roadAt : 1, 0, hillshade);
+    const symAt = layers.findIndex((l) => l['type'] === 'symbol');
+    layers.splice(symAt >= 0 ? symAt : layers.length, 0, roadHi);
     return style;
   };
 
@@ -130,15 +168,49 @@ const ui = await uiOf(lang);
     });
     map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
-    map.addControl(
-      new maplibregl.GeolocateControl({
-        positionOptions: { enableHighAccuracy: true },
-        showUserLocation: true,
-        showAccuracyCircle: true,
-        trackUserLocation: false,
-      }),
-      'top-left',
-    );
+
+    // "Where am I" — a plain button that is ALWAYS clickable and prompts for
+    // geolocation permission on click (unlike GeolocateControl, which disables
+    // itself when permission is not yet granted).
+    let meMarker: maplibregl.Marker | undefined;
+    const locate = (): void => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const at: [number, number] = [pos.coords.longitude, pos.coords.latitude];
+          map.easeTo({ center: at, zoom: Math.max(map.getZoom(), 13) });
+          if (meMarker) {
+            meMarker.setLngLat(at);
+          } else {
+            const dot = document.createElement('div');
+            dot.className = 'map-me';
+            meMarker = new maplibregl.Marker({ element: dot }).setLngLat(at).addTo(map);
+          }
+        },
+        () => undefined,
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    };
+    const locateControl = {
+      onAdd(): HTMLElement {
+        const wrap = document.createElement('div');
+        wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'map-locate-btn';
+        btn.title = 'Find my location';
+        btn.setAttribute('aria-label', 'Find my location');
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+        btn.addEventListener('click', locate);
+        wrap.appendChild(btn);
+        return wrap;
+      },
+      onRemove(): void {
+        /* nothing to tear down */
+      },
+    };
+    map.addControl(locateControl, 'top-left');
 
     // ── popups ────────────────────────────────────────────────────────────────
     const openEvent = (e: CompactEvent, at: [number, number]): void => {
