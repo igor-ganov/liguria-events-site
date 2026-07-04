@@ -31,12 +31,7 @@ const ui = await uiOf(lang);
       <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
     </div>
   </div>
-  <div class="map-stage">
-    <div class="map-canvas" data-map-canvas></div>
-    <div class="map-google" data-map-google hidden>
-      <iframe title="Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-  </div>
+  <div class="map-canvas" data-map-canvas></div>
 </Layout>
 
 <script>
@@ -45,7 +40,6 @@ const ui = await uiOf(lang);
   import { Protocol } from 'pmtiles';
   import Supercluster from 'supercluster';
   import brightStyle from '../../lib/map/styles/bright.json';
-  import lightStyle from '../../lib/map/styles/light.json';
   import darkStyle from '../../lib/map/styles/dark.json';
   import { inMapArea } from '../../lib/map/in-map-area.ts';
   import { mapEvents } from '../../lib/events/map-events.ts';
@@ -72,13 +66,12 @@ const ui = await uiOf(lang);
     return d.toISOString().slice(0, 10);
   };
 
-  const STYLES: Record<string, unknown> = { bright: brightStyle, light: lightStyle, dark: darkStyle };
-  // Available basemaps for the switcher; label shown in the control.
-  const STYLE_KEYS = ['bright', 'light', 'dark'] as const;
+  // 'light' = OSM Bright (colourful, high contrast); 'dark' = retuned Dark Matter.
+  const STYLES: Record<string, unknown> = { light: brightStyle, dark: darkStyle };
 
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
-    const style = structuredClone(STYLES[key] ?? lightStyle) as maplibregl.StyleSpecification;
+    const style = structuredClone(STYLES[key] ?? brightStyle) as maplibregl.StyleSpecification;
     style.sources = {
       openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
       // Free, no-key elevation tiles (Mapzen/AWS Open Data) for terrain relief.
@@ -92,10 +85,10 @@ const ui = await uiOf(lang);
       },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
-    style.sprite = `${B}/sprite/${key}/sprite`;
-    // Bright already ships Noto Sans (self-hosted); the minimal styles reference
-    // fonts we don't host, so pin those to our single Regular face.
-    if (key !== 'bright') {
+    style.sprite = `${B}/sprite/${dark ? 'dark' : 'bright'}/sprite`;
+    // Light (OSM Bright) already ships self-hosted Noto Sans; Dark Matter
+    // references fonts we don't host, so pin those to our single Regular face.
+    if (dark) {
       for (const layer of style.layers) {
         const layout = (layer as { layout?: Record<string, unknown> }).layout;
         if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
@@ -115,8 +108,9 @@ const ui = await uiOf(lang);
     };
     const roadAt = layers.findIndex((l) => l['source-layer'] === 'transportation');
     layers.splice(roadAt >= 0 ? roadAt : 1, 0, hillshade);
-    // The minimal styles have near-invisible roads; add a brighter overlay.
-    if (key !== 'bright') {
+    // Dark Matter's roads stay subtle even after retuning; add a brighter
+    // major-road overlay so highways read clearly. (Light/OSM Bright is fine.)
+    if (dark) {
       const roadHi = {
         id: 'road-highlight',
         type: 'line',
@@ -125,9 +119,9 @@ const ui = await uiOf(lang);
         filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
         layout: { 'line-cap': 'round', 'line-join': 'round' },
         paint: {
-          'line-color': dark ? '#8b98a8' : '#e2b96a',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.4, 11, 1.4, 15, 3.6],
-          'line-opacity': 0.85,
+          'line-color': '#9aa6b5',
+          'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.5, 11, 1.8, 15, 4.2],
+          'line-opacity': 0.9,
         },
       };
       const symAt = layers.findIndex((l) => l['type'] === 'symbol');
@@ -177,16 +171,17 @@ const ui = await uiOf(lang);
     };
     readUrl();
 
+    // Basemap preference: 'auto' (follow the site theme) | 'light' | 'dark'.
     const MAP_STYLE_KEY = 'map-style';
-    const ALL_KEYS = [...STYLE_KEYS, 'google'];
-    const savedStyle = (): string => {
-      const s = localStorage.getItem(MAP_STYLE_KEY) ?? '';
-      return ALL_KEYS.includes(s) ? s : '';
+    const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
+    const pref = (): string => {
+      const s = localStorage.getItem(MAP_STYLE_KEY) ?? 'auto';
+      return s === 'light' || s === 'dark' ? s : 'auto';
     };
-    const activeStyle = (): string => savedStyle() || 'bright'; // high-contrast default
+    const resolvedKey = (): string => (pref() === 'auto' ? (isDark() ? 'dark' : 'light') : pref());
     const map = new maplibregl.Map({
       container: canvas,
-      style: buildStyle(activeStyle()),
+      style: buildStyle(resolvedKey()),
       center: [8.93, 44.41],
       zoom: 9,
       attributionControl: false,
@@ -280,49 +275,41 @@ const ui = await uiOf(lang);
     };
     map.addControl(locateControl, 'top-left');
 
-    // Basemap switcher (Bright / Light / Dark / Google), remembered per browser.
-    // Google is the keyless embed used on event cards — a plain reference map
-    // (Google's own tiles), without our event markers/clusters.
+    // Basemap switcher: Auto (follow the site theme) / Light / Dark. The DOM
+    // photo markers are overlays and survive setStyle, so every option keeps
+    // the events on the map. Choice persists; Auto tracks live theme changes.
     const STYLE_LABELS: Record<string, Record<string, string>> = {
-      bright: { en: 'Bright', it: 'Vivace', ru: 'Яркая' },
+      auto: { en: 'Auto', it: 'Auto', ru: 'Авто' },
       light: { en: 'Light', it: 'Chiara', ru: 'Светлая' },
       dark: { en: 'Dark', it: 'Scura', ru: 'Тёмная' },
-      google: { en: 'Google', it: 'Google', ru: 'Google' },
     };
-    const googleBox = document.querySelector<HTMLElement>('[data-map-google]');
-    const googleFrame = googleBox?.querySelector('iframe');
-    const applyBasemap = (key: string): void => {
-      if (key === 'google') {
-        const c = map.getCenter();
-        if (googleFrame) {
-          googleFrame.src = `https://maps.google.com/maps?q=${c.lat.toFixed(4)},${c.lng.toFixed(4)}&z=${Math.round(map.getZoom())}&output=embed`;
-        }
-        if (googleBox) googleBox.hidden = false;
-      } else {
-        if (googleBox) googleBox.hidden = true;
-        map.setStyle(buildStyle(key));
-      }
+    let loadedKey = resolvedKey();
+    const applyResolved = (): void => {
+      const key = resolvedKey();
+      if (key === loadedKey) return;
+      loadedKey = key;
+      map.setStyle(buildStyle(key));
     };
+    const styleSelect = document.createElement('select');
     const styleControl = {
       onAdd(): HTMLElement {
         const wrap = document.createElement('div');
         wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group map-style-ctrl';
-        const sel = document.createElement('select');
-        sel.className = 'map-style-select';
-        sel.setAttribute('aria-label', 'Basemap style');
+        styleSelect.className = 'map-style-select';
+        styleSelect.setAttribute('aria-label', 'Basemap style');
         const label = (k: string): string => STYLE_LABELS[k]?.[lang] ?? STYLE_LABELS[k]?.['en'] ?? k;
-        for (const key of ['bright', 'light', 'dark', 'google']) {
+        for (const key of ['auto', 'light', 'dark']) {
           const opt = document.createElement('option');
           opt.value = key;
           opt.textContent = label(key);
-          sel.appendChild(opt);
+          styleSelect.appendChild(opt);
         }
-        sel.value = activeStyle();
-        sel.addEventListener('change', () => {
-          localStorage.setItem(MAP_STYLE_KEY, sel.value);
-          applyBasemap(sel.value);
+        styleSelect.value = pref();
+        styleSelect.addEventListener('change', () => {
+          localStorage.setItem(MAP_STYLE_KEY, styleSelect.value);
+          applyResolved();
         });
-        wrap.appendChild(sel);
+        wrap.appendChild(styleSelect);
         return wrap;
       },
       onRemove(): void {
@@ -330,7 +317,16 @@ const ui = await uiOf(lang);
       },
     };
     map.addControl(styleControl, 'top-right');
-    if (savedStyle() === 'google') applyBasemap('google');
+    // While on Auto, follow the site theme live (data-theme is rewritten by the
+    // theme script, including OS changes under the 'system' preference).
+    new MutationObserver(() => {
+      if (pref() === 'auto') applyResolved();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', () => {
+        if (pref() === 'auto') applyResolved();
+      });
 
     // ── popups ────────────────────────────────────────────────────────────────
     const openEvent = (e: CompactEvent, at: [number, number]): void => {
