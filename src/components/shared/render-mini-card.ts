@@ -20,7 +20,14 @@ const renderThumb = (event: CompactEvent): TemplateResult =>
         ${renderIcon(primaryCategory(event.c), 26)}
       </div>
     `,
-    () => html`<img class="mini-thumb" src=${event.img ?? ''} alt="" loading="lazy" />`,
+    () =>
+      html`<img
+        class="mini-thumb"
+        src=${event.img ?? ''}
+        alt=""
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      />`,
   );
 
 /** The whole mini-card links to the (localized) event page. */

@@ -298,6 +298,9 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 /* Clear-selection chip: only rendered while a filter is active. */
 .chip--clear { border-color: var(--line); color: var(--ink-2); font-weight: 600; }
 .chip--clear:hover { border-color: var(--ink-2); color: var(--ink); }
+/* [hidden] must win over the chip's own display, or the clear chip shows when
+   it should be hidden (no filter active). */
+[hidden] { display: none !important; }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-empty { color: var(--ink-2); }
