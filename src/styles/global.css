@@ -314,11 +314,16 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   overflow: hidden; box-shadow: var(--shadow-md); background: var(--surface);
 }
 .map-canvas .maplibregl-canvas { border-radius: var(--radius-lg); }
-.map-pop-title { display: block; font-weight: 700; margin-bottom: 0.2rem; color: var(--ink); }
-.map-pop-when { color: var(--ink-2); font-size: 0.82rem; }
+.map-pop { display: block; text-decoration: none; color: inherit; }
+.map-pop-img {
+  display: block; width: 100%; height: 110px; object-fit: cover;
+  border-radius: 0.4rem; margin-bottom: 0.45rem;
+}
+.map-pop-title { display: block; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); line-height: 1.25; }
+.map-pop-when { display: block; color: var(--ink-2); font-size: 0.82rem; }
 .maplibregl-popup-content {
   background: var(--surface); color: var(--ink); border: 1px solid var(--line);
-  border-radius: 0.6rem; box-shadow: var(--shadow-md); padding: 0.6rem 0.8rem; font: inherit;
+  border-radius: 0.6rem; box-shadow: var(--shadow-md); padding: 0.55rem; font: inherit;
 }
 .maplibregl-popup-tip { border-top-color: var(--surface) !important; border-bottom-color: var(--surface) !important; }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }

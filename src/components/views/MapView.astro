@@ -26,6 +26,8 @@ const ui = await uiOf(lang);
           </button>
         ))
       }
+      <button class="chip chip--free" data-map-free aria-pressed="false">{ui.chips.free}</button>
+      <button class="chip chip--gems" data-map-gems aria-pressed="false">{ui.chips.gems}</button>
       <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
     </div>
   </div>
@@ -88,6 +90,8 @@ const ui = await uiOf(lang);
       from: today,
       to: sorted[sorted.length - 1] ?? today,
       selected: new Set<Category>(),
+      freeOnly: false,
+      gemsOnly: false,
     };
 
     const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
@@ -105,7 +109,9 @@ const ui = await uiOf(lang);
 
     const collection = (): GeoJSON.FeatureCollection => ({
       type: 'FeatureCollection',
-      features: mapEvents(state.from, state.to, [...state.selected])(events).map((e) => ({
+      features: mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(
+        events,
+      ).map((e) => ({
         type: 'Feature',
         geometry: { type: 'Point', coordinates: [e.g![1], e.g![0]] },
         properties: {
@@ -113,6 +119,7 @@ const ui = await uiOf(lang);
           title: escape(titleOf(lang)(e)),
           when: escape(formatWhen(e)),
           url: localizedUrl(lang, eventPath(e.id)),
+          img: e.img ?? '',
         },
       })),
     });
@@ -145,12 +152,17 @@ const ui = await uiOf(lang);
           },
         });
         map.on('click', 'events', (ev) => {
-          const p = ev.features?.[0]?.properties as { title: string; when: string; url: string } | undefined;
+          const p = ev.features?.[0]?.properties as
+            | { title: string; when: string; url: string; img: string }
+            | undefined;
           if (!p) return;
-          new maplibregl.Popup({ closeButton: false })
+          const thumb = p.img
+            ? `<img class="map-pop-img" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+            : '';
+          new maplibregl.Popup({ closeButton: false, maxWidth: '260px' })
             .setLngLat(ev.lngLat)
             .setHTML(
-              `<a class="map-pop-title" href="${p.url}">${p.title}</a><span class="map-pop-when">${p.when}</span>`,
+              `<a class="map-pop" href="${p.url}">${thumb}<span class="map-pop-title">${p.title}</span><span class="map-pop-when">${p.when}</span></a>`,
             )
             .addTo(map);
         });
@@ -163,9 +175,12 @@ const ui = await uiOf(lang);
     map.on('load', addLayer);
 
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
+    const freeEl = document.querySelector<HTMLButtonElement>('[data-map-free]');
+    const gemsEl = document.querySelector<HTMLButtonElement>('[data-map-gems]');
+    const anyFilter = (): boolean => state.selected.size > 0 || state.freeOnly || state.gemsOnly;
     const refresh = (): void => {
       if (map.getSource('events')) (map.getSource('events') as maplibregl.GeoJSONSource).setData(collection());
-      if (clearEl) clearEl.hidden = state.selected.size === 0;
+      if (clearEl) clearEl.hidden = !anyFilter();
     };
 
     document.querySelectorAll<HTMLButtonElement>('[data-map-cat]').forEach((btn) => {
@@ -176,6 +191,16 @@ const ui = await uiOf(lang);
         btn.setAttribute('aria-pressed', String(on));
         refresh();
       });
+    });
+    freeEl?.addEventListener('click', () => {
+      state.freeOnly = !state.freeOnly;
+      freeEl.setAttribute('aria-pressed', String(state.freeOnly));
+      refresh();
+    });
+    gemsEl?.addEventListener('click', () => {
+      state.gemsOnly = !state.gemsOnly;
+      gemsEl.setAttribute('aria-pressed', String(state.gemsOnly));
+      refresh();
     });
     const fromEl = document.querySelector<HTMLInputElement>('[data-map-from]');
     const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
@@ -191,7 +216,11 @@ const ui = await uiOf(lang);
     });
     clearEl?.addEventListener('click', () => {
       state.selected.clear();
-      document.querySelectorAll('[data-map-cat]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+      state.freeOnly = false;
+      state.gemsOnly = false;
+      document
+        .querySelectorAll('[data-map-cat], [data-map-free], [data-map-gems]')
+        .forEach((b) => b.setAttribute('aria-pressed', 'false'));
       refresh();
     });
 
