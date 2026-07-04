@@ -170,15 +170,47 @@ const ui = await uiOf(lang);
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
     // "Where am I" — a plain button that is ALWAYS clickable and prompts for
-    // geolocation permission on click (unlike GeolocateControl, which disables
-    // itself when permission is not yet granted).
+    // geolocation on click. Gives feedback (loading / toast) because the map
+    // only holds Liguria tiles: centring on a user elsewhere would look blank.
+    const MSG: Record<string, Record<string, string>> = {
+      outside: {
+        en: 'You are outside the map area (Genoa / Liguria).',
+        it: 'Sei fuori dall’area della mappa (Genova / Liguria).',
+        ru: 'Вы вне области карты (Генуя / Лигурия).',
+      },
+      denied: {
+        en: 'Location access is blocked — allow it in the browser.',
+        it: 'Accesso alla posizione bloccato — consentilo nel browser.',
+        ru: 'Доступ к геолокации запрещён — разрешите его в браузере.',
+      },
+      error: {
+        en: 'Could not determine your location.',
+        it: 'Impossibile determinare la posizione.',
+        ru: 'Не удалось определить местоположение.',
+      },
+    };
+    const say = (key: string): void => {
+      const el = document.createElement('div');
+      el.className = 'map-toast';
+      el.textContent = MSG[key]?.[lang] ?? MSG[key]?.['en'] ?? '';
+      canvas.appendChild(el);
+      setTimeout(() => el.remove(), 4200);
+    };
+    const inArea = (lon: number, lat: number): boolean =>
+      lon >= 8.2 && lon <= 9.75 && lat >= 44.05 && lat <= 44.7;
+
     let meMarker: maplibregl.Marker | undefined;
+    const locateBtn = document.createElement('button');
     const locate = (): void => {
-      if (!navigator.geolocation) return;
+      if (!navigator.geolocation) {
+        say('error');
+        return;
+      }
+      locateBtn.classList.add('map-locate-btn--busy');
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          locateBtn.classList.remove('map-locate-btn--busy');
           const at: [number, number] = [pos.coords.longitude, pos.coords.latitude];
-          map.easeTo({ center: at, zoom: Math.max(map.getZoom(), 13) });
           if (meMarker) {
             meMarker.setLngLat(at);
           } else {
@@ -186,24 +218,31 @@ const ui = await uiOf(lang);
             dot.className = 'map-me';
             meMarker = new maplibregl.Marker({ element: dot }).setLngLat(at).addTo(map);
           }
+          if (inArea(at[0], at[1])) {
+            map.easeTo({ center: at, zoom: Math.max(map.getZoom(), 14) });
+          } else {
+            say('outside');
+          }
         },
-        () => undefined,
-        { enableHighAccuracy: true, timeout: 10000 },
+        (err) => {
+          locateBtn.classList.remove('map-locate-btn--busy');
+          say(err.code === err.PERMISSION_DENIED ? 'denied' : 'error');
+        },
+        { enableHighAccuracy: true, timeout: 9000, maximumAge: 60000 },
       );
     };
     const locateControl = {
       onAdd(): HTMLElement {
         const wrap = document.createElement('div');
         wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group';
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'map-locate-btn';
-        btn.title = 'Find my location';
-        btn.setAttribute('aria-label', 'Find my location');
-        btn.innerHTML =
+        locateBtn.type = 'button';
+        locateBtn.className = 'map-locate-btn';
+        locateBtn.title = 'Find my location';
+        locateBtn.setAttribute('aria-label', 'Find my location');
+        locateBtn.innerHTML =
           '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
-        btn.addEventListener('click', locate);
-        wrap.appendChild(btn);
+        locateBtn.addEventListener('click', locate);
+        wrap.appendChild(locateBtn);
         return wrap;
       },
       onRemove(): void {

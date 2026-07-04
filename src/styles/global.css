@@ -375,6 +375,18 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   border: 3px solid #fff; box-shadow: 0 0 0 2px rgba(43, 131, 255, 0.4), 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 .map-locate-btn { display: grid; place-items: center; color: var(--ink, #333); cursor: pointer; }
+.map-locate-btn--busy { opacity: 0.6; }
+.map-locate-btn--busy > svg { animation: map-spin 0.9s linear infinite; }
+@keyframes map-spin { to { transform: rotate(360deg); } }
+/* Transient message over the map (out-of-area / permission denied). */
+.map-toast {
+  position: absolute; left: 50%; bottom: 1rem; transform: translateX(-50%);
+  max-width: 88%; z-index: 5; padding: 0.5rem 0.85rem; border-radius: 0.6rem;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  box-shadow: var(--shadow-md); font-size: 0.85rem; text-align: center;
+  animation: map-toast-in 0.18s ease;
+}
+@keyframes map-toast-in { from { opacity: 0; transform: translate(-50%, 6px); } }
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group { background: var(--surface); }
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button { color: var(--ink); }
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button + button { border-top-color: var(--line); }
