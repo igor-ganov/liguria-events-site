@@ -46,26 +46,23 @@ const ui = await uiOf(lang);
   import { titleOf } from '../../lib/events/title-of.ts';
   import { formatWhen } from '../../lib/events/format-when.ts';
   import { eventPath } from '../../lib/event-path.ts';
+  import { iconSvg } from '../../lib/icons/icon-svg.ts';
   import { localizedUrl } from '../../lib/i18n/localized-url.ts';
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
   import type { Category } from '../../lib/events/categories.ts';
+  import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
+  const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const escape = (s: string): string =>
+  const escapeHtml = (s: string): string =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-  // Rewire the OpenMapTiles style onto the self-hosted pmtiles, glyphs and
-  // sprite; attribution is plain text (no flag, no external tile server).
   const buildStyle = (dark: boolean): maplibregl.StyleSpecification => {
     const style = structuredClone(dark ? darkStyle : lightStyle) as maplibregl.StyleSpecification;
     style.sources = {
-      openmaptiles: {
-        type: 'vector',
-        url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`,
-        attribution: '© OpenMapTiles © OpenStreetMap contributors',
-      },
+      openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     style.sprite = `${B}/sprite/${dark ? 'dark' : 'light'}/sprite`;
@@ -86,13 +83,29 @@ const ui = await uiOf(lang);
     const { lang } = readUiIsland();
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
-    const state = {
-      from: today,
-      to: sorted[sorted.length - 1] ?? today,
-      selected: new Set<Category>(),
-      freeOnly: false,
-      gemsOnly: false,
+    const maxDate = sorted[sorted.length - 1] ?? today;
+    const state = { from: today, to: maxDate, selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
+
+    // ── filter state ⇄ URL (shareable) ──────────────────────────────────────
+    const readUrl = (): void => {
+      const p = new URLSearchParams(location.search);
+      (p.get('cat') ?? '').split(',').filter(Boolean).forEach((c) => state.selected.add(c as Category));
+      state.freeOnly = p.get('free') === '1';
+      state.gemsOnly = p.get('gems') === '1';
+      state.from = p.get('from') ?? today;
+      state.to = p.get('to') ?? maxDate;
     };
+    const writeUrl = (): void => {
+      const p = new URLSearchParams();
+      if (state.selected.size > 0) p.set('cat', [...state.selected].join(','));
+      if (state.freeOnly) p.set('free', '1');
+      if (state.gemsOnly) p.set('gems', '1');
+      if (state.from !== today) p.set('from', state.from);
+      if (state.to !== maxDate) p.set('to', state.to);
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `${location.pathname}?${qs}` : location.pathname);
+    };
+    readUrl();
 
     const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
     const map = new maplibregl.Map({
@@ -102,110 +115,116 @@ const ui = await uiOf(lang);
       zoom: 9,
       attributionControl: false,
     });
-    map.addControl(
-      new maplibregl.AttributionControl({ compact: true, customAttribution: '© OpenMapTiles © OpenStreetMap contributors' }),
-    );
+    map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+    // "Where am I" — centres on the user and shows them, only after they allow.
+    map.addControl(
+      new maplibregl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        showUserLocation: true,
+        showAccuracyCircle: true,
+        trackUserLocation: false,
+      }),
+      'top-left',
+    );
 
-    const collection = (): GeoJSON.FeatureCollection => ({
-      type: 'FeatureCollection',
-      features: mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(
-        events,
-      ).map((e) => ({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [e.g![1], e.g![0]] },
-        properties: {
-          color: categoryColor(primaryCategory(e.c)),
-          title: escape(titleOf(lang)(e)),
-          when: escape(formatWhen(e)),
-          url: localizedUrl(lang, eventPath(e.id)),
-          img: e.img ?? '',
-        },
-      })),
-    });
-
-    let fitted = false;
-    const fitToData = (fc: GeoJSON.FeatureCollection): void => {
-      const b = new maplibregl.LngLatBounds();
-      fc.features.forEach((f) => b.extend((f.geometry as GeoJSON.Point).coordinates as [number, number]));
-      if (!fitted && fc.features.length > 0) {
-        map.fitBounds(b, { padding: 48, maxZoom: 14, duration: 0 });
-        fitted = true;
-      }
+    // ── square photo markers (category-coloured frame + pointer) ─────────────
+    const openPopup = (e: CompactEvent & { g: readonly [number, number] }): void => {
+      const thumb = e.img
+        ? `<img class="map-pop-img" src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
+        : '';
+      new maplibregl.Popup({ closeButton: false, maxWidth: '260px', anchor: 'bottom', offset: 26 })
+        .setLngLat([e.g[1], e.g[0]])
+        .setHTML(
+          `<a class="map-pop" href="${localizedUrl(lang, eventPath(e.id))}">${thumb}` +
+            `<span class="map-pop-title">${escapeHtml(titleOf(lang)(e))}</span>` +
+            `<span class="map-pop-when">${escapeHtml(formatWhen(e))}</span></a>`,
+        )
+        .addTo(map);
     };
 
-    const addLayer = (): void => {
-      const fc = collection();
-      if (map.getSource('events')) {
-        (map.getSource('events') as maplibregl.GeoJSONSource).setData(fc);
+    const markerEl = (e: CompactEvent): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'ev-marker';
+      el.style.setProperty('--c', categoryColor(primaryCategory(e.c)));
+      const face = document.createElement('div');
+      face.className = 'ev-marker-face';
+      if (e.img) {
+        const img = document.createElement('img');
+        img.src = e.img;
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.alt = '';
+        face.appendChild(img);
       } else {
-        map.addSource('events', { type: 'geojson', data: fc });
-        map.addLayer({
-          id: 'events',
-          type: 'circle',
-          source: 'events',
-          paint: {
-            'circle-radius': 6,
-            'circle-color': ['get', 'color'],
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#ffffff',
-          },
-        });
-        map.on('click', 'events', (ev) => {
-          const p = ev.features?.[0]?.properties as
-            | { title: string; when: string; url: string; img: string }
-            | undefined;
-          if (!p) return;
-          const thumb = p.img
-            ? `<img class="map-pop-img" src="${p.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
-            : '';
-          new maplibregl.Popup({ closeButton: false, maxWidth: '260px' })
-            .setLngLat(ev.lngLat)
-            .setHTML(
-              `<a class="map-pop" href="${p.url}">${thumb}<span class="map-pop-title">${p.title}</span><span class="map-pop-when">${p.when}</span></a>`,
-            )
-            .addTo(map);
-        });
-        map.on('mouseenter', 'events', () => (map.getCanvas().style.cursor = 'pointer'));
-        map.on('mouseleave', 'events', () => (map.getCanvas().style.cursor = ''));
+        face.classList.add('ev-marker-face--icon');
+        face.innerHTML = iconSvg(primaryCategory(e.c), 22);
       }
-      fitToData(fc);
+      el.appendChild(face);
+      return el;
     };
 
-    map.on('load', addLayer);
+    const markers: maplibregl.Marker[] = [];
+    const renderMarkers = (fit: boolean): void => {
+      markers.forEach((m) => m.remove());
+      markers.length = 0;
+      const shown = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(
+        events,
+      );
+      const bounds = new maplibregl.LngLatBounds();
+      shown.forEach((e) => {
+        const point: [number, number] = [e.g![1], e.g![0]];
+        const el = markerEl(e);
+        el.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          openPopup(e as CompactEvent & { g: readonly [number, number] });
+        });
+        markers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(point).addTo(map));
+        bounds.extend(point);
+      });
+      if (fit && shown.length > 0) map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
+    };
 
+    map.on('load', () => renderMarkers(true));
+
+    // ── controls wiring ──────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
     const freeEl = document.querySelector<HTMLButtonElement>('[data-map-free]');
     const gemsEl = document.querySelector<HTMLButtonElement>('[data-map-gems]');
+    const catBtns = [...document.querySelectorAll<HTMLButtonElement>('[data-map-cat]')];
+    const fromEl = document.querySelector<HTMLInputElement>('[data-map-from]');
+    const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
     const anyFilter = (): boolean => state.selected.size > 0 || state.freeOnly || state.gemsOnly;
-    const refresh = (): void => {
-      if (map.getSource('events')) (map.getSource('events') as maplibregl.GeoJSONSource).setData(collection());
+
+    const syncControls = (): void => {
+      catBtns.forEach((b) => b.setAttribute('aria-pressed', String(state.selected.has(b.dataset['mapCat'] as Category))));
+      freeEl?.setAttribute('aria-pressed', String(state.freeOnly));
+      gemsEl?.setAttribute('aria-pressed', String(state.gemsOnly));
+      if (fromEl) Object.assign(fromEl, { value: state.from, min: today, max: maxDate });
+      if (toEl) Object.assign(toEl, { value: state.to, min: today, max: maxDate });
       if (clearEl) clearEl.hidden = !anyFilter();
     };
+    const refresh = (): void => {
+      writeUrl();
+      syncControls();
+      renderMarkers(false);
+    };
 
-    document.querySelectorAll<HTMLButtonElement>('[data-map-cat]').forEach((btn) => {
+    catBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         const cat = btn.dataset['mapCat'] as Category;
-        const on = !state.selected.has(cat);
-        on ? state.selected.add(cat) : state.selected.delete(cat);
-        btn.setAttribute('aria-pressed', String(on));
+        state.selected.has(cat) ? state.selected.delete(cat) : state.selected.add(cat);
         refresh();
       });
     });
     freeEl?.addEventListener('click', () => {
       state.freeOnly = !state.freeOnly;
-      freeEl.setAttribute('aria-pressed', String(state.freeOnly));
       refresh();
     });
     gemsEl?.addEventListener('click', () => {
       state.gemsOnly = !state.gemsOnly;
-      gemsEl.setAttribute('aria-pressed', String(state.gemsOnly));
       refresh();
     });
-    const fromEl = document.querySelector<HTMLInputElement>('[data-map-from]');
-    const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
-    if (fromEl) Object.assign(fromEl, { value: state.from, min: today, max: state.to });
-    if (toEl) Object.assign(toEl, { value: state.to, min: today, max: state.to });
     fromEl?.addEventListener('change', () => {
       state.from = fromEl.value;
       refresh();
@@ -218,17 +237,15 @@ const ui = await uiOf(lang);
       state.selected.clear();
       state.freeOnly = false;
       state.gemsOnly = false;
-      document
-        .querySelectorAll('[data-map-cat], [data-map-free], [data-map-gems]')
-        .forEach((b) => b.setAttribute('aria-pressed', 'false'));
       refresh();
     });
 
-    // Live theme switch: swap the basemap style, then re-add the events layer.
-    new MutationObserver(() => {
-      map.setStyle(buildStyle(isDark()));
-      map.once('styledata', addLayer);
-    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    syncControls(); // reflect URL state into the controls on load
+
+    new MutationObserver(() => map.setStyle(buildStyle(isDark()))).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
   };
 
   setup();
