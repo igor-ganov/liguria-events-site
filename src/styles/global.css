@@ -329,13 +329,34 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   border: 7px solid transparent; border-top-color: var(--c);
 }
 .ev-marker:hover .ev-marker-face { filter: brightness(1.06); }
+/* Cluster plaque: a stacked square with the count. */
+.ev-cluster-face {
+  position: relative; width: 44px; height: 44px; border-radius: 10px;
+  border: 3px solid var(--accent); background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-weight: 800; font-size: 0.95rem;
+  box-shadow: 3px 3px 0 -1px var(--surface), 4px 4px 0 -1px var(--accent), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+.ev-cluster::after { border-top-color: var(--accent); }
+.ev-cluster:hover .ev-cluster-face { filter: brightness(1.08); }
+/* Single-event popup */
 .map-pop { display: block; text-decoration: none; color: inherit; }
-.map-pop-img {
+.map-pop-thumb img {
   display: block; width: 100%; height: 110px; object-fit: cover;
   border-radius: 0.4rem; margin-bottom: 0.45rem;
 }
 .map-pop-title { display: block; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); line-height: 1.25; }
 .map-pop-when { display: block; color: var(--ink-2); font-size: 0.82rem; }
+/* Cluster combined card: scrollable list of the events it holds. */
+.map-clus-head { font-weight: 700; font-size: 0.85rem; color: var(--ink-2); margin-bottom: 0.35rem; }
+.map-clus-list { display: flex; flex-direction: column; gap: 0.15rem; max-height: 15rem; overflow-y: auto; }
+.map-clus-row {
+  display: flex; gap: 0.55rem; align-items: center; text-decoration: none; color: inherit;
+  padding: 0.35rem; border-radius: 0.5rem;
+}
+.map-clus-row:hover { background: var(--bg-sunken, rgba(127, 127, 127, 0.12)); }
+.map-clus-thumb img { display: block; width: 46px; height: 46px; object-fit: cover; border-radius: 0.35rem; }
+.map-clus-text { display: flex; flex-direction: column; min-width: 0; }
+.map-clus-title { font-weight: 600; font-size: 0.86rem; color: var(--ink); line-height: 1.2; }
 .maplibregl-popup-content {
   background: var(--surface); color: var(--ink); border: 1px solid var(--line);
   border-radius: 0.6rem; box-shadow: var(--shadow-md); padding: 0.55rem; font: inherit;

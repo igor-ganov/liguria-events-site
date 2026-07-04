@@ -38,6 +38,7 @@ const ui = await uiOf(lang);
   import maplibregl from 'maplibre-gl';
   import 'maplibre-gl/dist/maplibre-gl.css';
   import { Protocol } from 'pmtiles';
+  import Supercluster from 'supercluster';
   import lightStyle from '../../lib/map/styles/light.json';
   import darkStyle from '../../lib/map/styles/dark.json';
   import { mapEvents } from '../../lib/events/map-events.ts';
@@ -56,8 +57,13 @@ const ui = await uiOf(lang);
 
   const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const escapeHtml = (s: string): string =>
+  const esc = (s: string): string =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const plusDays = (iso: string, n: number): string => {
+    const d = new Date(`${iso}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + n);
+    return d.toISOString().slice(0, 10);
+  };
 
   const buildStyle = (dark: boolean): maplibregl.StyleSpecification => {
     const style = structuredClone(dark ? darkStyle : lightStyle) as maplibregl.StyleSpecification;
@@ -73,6 +79,8 @@ const ui = await uiOf(lang);
     return style;
   };
 
+  type EvProps = { ev: CompactEvent };
+
   const setup = (): void => {
     const canvas = document.querySelector<HTMLElement>('[data-map-canvas]');
     if (!canvas || canvas.dataset['ready'] === 'true') return;
@@ -81,19 +89,24 @@ const ui = await uiOf(lang);
     maplibregl.addProtocol('pmtiles', new Protocol().tile);
     const events = readEventsIsland();
     const { lang } = readUiIsland();
+    const href = (e: CompactEvent): string => localizedUrl(lang, eventPath(e.id));
+    const thumb = (e: CompactEvent): string =>
+      e.img ? `<img src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : '';
+
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
     const maxDate = sorted[sorted.length - 1] ?? today;
-    const state = { from: today, to: maxDate, selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
+    const weekAhead = plusDays(today, 7);
+    const defaultTo = weekAhead < maxDate ? weekAhead : maxDate; // upper filter defaults to +1 week
+    const state = { from: today, to: defaultTo, selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
 
-    // ── filter state ⇄ URL (shareable) ──────────────────────────────────────
     const readUrl = (): void => {
       const p = new URLSearchParams(location.search);
       (p.get('cat') ?? '').split(',').filter(Boolean).forEach((c) => state.selected.add(c as Category));
       state.freeOnly = p.get('free') === '1';
       state.gemsOnly = p.get('gems') === '1';
       state.from = p.get('from') ?? today;
-      state.to = p.get('to') ?? maxDate;
+      state.to = p.get('to') ?? defaultTo;
     };
     const writeUrl = (): void => {
       const p = new URLSearchParams();
@@ -101,7 +114,7 @@ const ui = await uiOf(lang);
       if (state.freeOnly) p.set('free', '1');
       if (state.gemsOnly) p.set('gems', '1');
       if (state.from !== today) p.set('from', state.from);
-      if (state.to !== maxDate) p.set('to', state.to);
+      if (state.to !== defaultTo) p.set('to', state.to);
       const qs = p.toString();
       history.replaceState(null, '', qs ? `${location.pathname}?${qs}` : location.pathname);
     };
@@ -117,7 +130,6 @@ const ui = await uiOf(lang);
     });
     map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
-    // "Where am I" — centres on the user and shows them, only after they allow.
     map.addControl(
       new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
@@ -128,22 +140,34 @@ const ui = await uiOf(lang);
       'top-left',
     );
 
-    // ── square photo markers (category-coloured frame + pointer) ─────────────
-    const openPopup = (e: CompactEvent & { g: readonly [number, number] }): void => {
-      const thumb = e.img
-        ? `<img class="map-pop-img" src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />`
-        : '';
+    // ── popups ────────────────────────────────────────────────────────────────
+    const openEvent = (e: CompactEvent, at: [number, number]): void => {
       new maplibregl.Popup({ closeButton: false, maxWidth: '260px', anchor: 'bottom', offset: 26 })
-        .setLngLat([e.g[1], e.g[0]])
+        .setLngLat(at)
         .setHTML(
-          `<a class="map-pop" href="${localizedUrl(lang, eventPath(e.id))}">${thumb}` +
-            `<span class="map-pop-title">${escapeHtml(titleOf(lang)(e))}</span>` +
-            `<span class="map-pop-when">${escapeHtml(formatWhen(e))}</span></a>`,
+          `<a class="map-pop" href="${href(e)}"><span class="map-pop-thumb">${thumb(e)}</span>` +
+            `<span class="map-pop-title">${esc(titleOf(lang)(e))}</span>` +
+            `<span class="map-pop-when">${esc(formatWhen(e))}</span></a>`,
         )
         .addTo(map);
     };
+    const openCluster = (leaves: readonly CompactEvent[], at: [number, number]): void => {
+      const rows = leaves
+        .map(
+          (e) =>
+            `<a class="map-clus-row" href="${href(e)}"><span class="map-clus-thumb">${thumb(e)}</span>` +
+            `<span class="map-clus-text"><span class="map-clus-title">${esc(titleOf(lang)(e))}</span>` +
+            `<span class="map-pop-when">${esc(formatWhen(e))}</span></span></a>`,
+        )
+        .join('');
+      new maplibregl.Popup({ closeButton: true, maxWidth: '300px', anchor: 'bottom', offset: 26, className: 'map-clus-popup' })
+        .setLngLat(at)
+        .setHTML(`<div class="map-clus-card"><div class="map-clus-head">${leaves.length}</div><div class="map-clus-list">${rows}</div></div>`)
+        .addTo(map);
+    };
 
-    const markerEl = (e: CompactEvent): HTMLElement => {
+    // ── markers (square photo) + cluster plaques ────────────────────────────────
+    const eventMarkerEl = (e: CompactEvent): HTMLElement => {
       const el = document.createElement('div');
       el.className = 'ev-marker';
       el.style.setProperty('--c', categoryColor(primaryCategory(e.c)));
@@ -163,31 +187,81 @@ const ui = await uiOf(lang);
       el.appendChild(face);
       return el;
     };
-
-    const markers: maplibregl.Marker[] = [];
-    const renderMarkers = (fit: boolean): void => {
-      markers.forEach((m) => m.remove());
-      markers.length = 0;
-      const shown = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(
-        events,
-      );
-      const bounds = new maplibregl.LngLatBounds();
-      shown.forEach((e) => {
-        const point: [number, number] = [e.g![1], e.g![0]];
-        const el = markerEl(e);
-        el.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          openPopup(e as CompactEvent & { g: readonly [number, number] });
-        });
-        markers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(point).addTo(map));
-        bounds.extend(point);
-      });
-      if (fit && shown.length > 0) map.fitBounds(bounds, { padding: 60, maxZoom: 14, duration: 0 });
+    const clusterMarkerEl = (count: number): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'ev-marker ev-cluster';
+      el.innerHTML = `<div class="ev-cluster-face"><span>${count}</span></div>`;
+      return el;
     };
 
-    map.on('load', () => renderMarkers(true));
+    let index: Supercluster<EvProps> | undefined;
+    const rebuildIndex = (): void => {
+      const shown = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events);
+      index = new Supercluster<EvProps>({ radius: 60, maxZoom: 15 });
+      index.load(
+        shown
+          .filter((e) => e.g !== undefined)
+          .map((e) => ({
+            type: 'Feature',
+            properties: { ev: e },
+            geometry: { type: 'Point', coordinates: [e.g![1], e.g![0]] },
+          })),
+      );
+    };
 
-    // ── controls wiring ──────────────────────────────────────────────────────
+    const markers: maplibregl.Marker[] = [];
+    const render = (): void => {
+      if (!index) return;
+      markers.forEach((m) => m.remove());
+      markers.length = 0;
+      const b = map.getBounds();
+      const clusters = index.getClusters(
+        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        Math.round(map.getZoom()),
+      );
+      clusters.forEach((c) => {
+        const at = c.geometry.coordinates as [number, number];
+        const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & EvProps;
+        if (props.cluster) {
+          const el = clusterMarkerEl(props.point_count ?? 0);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const leaves = (index?.getLeaves(props.cluster_id ?? 0, Infinity) ?? []).map((l) => (l.properties as EvProps).ev);
+            openCluster(leaves, at);
+          });
+          markers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(at).addTo(map));
+        } else {
+          const e = props.ev;
+          const el = eventMarkerEl(e);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            openEvent(e, at);
+          });
+          markers.push(new maplibregl.Marker({ element: el, anchor: 'bottom' }).setLngLat(at).addTo(map));
+        }
+      });
+    };
+
+    let fitted = false;
+    const fitAll = (): void => {
+      const located = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events).filter(
+        (e) => e.g !== undefined,
+      );
+      if (fitted || located.length === 0) return;
+      const bounds = new maplibregl.LngLatBounds();
+      located.forEach((e) => bounds.extend([e.g![1], e.g![0]]));
+      map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 0 });
+      fitted = true;
+    };
+
+    map.on('load', () => {
+      rebuildIndex();
+      fitAll();
+      render();
+    });
+    map.on('moveend', render);
+
+    // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
     const freeEl = document.querySelector<HTMLButtonElement>('[data-map-free]');
     const gemsEl = document.querySelector<HTMLButtonElement>('[data-map-gems]');
@@ -207,7 +281,8 @@ const ui = await uiOf(lang);
     const refresh = (): void => {
       writeUrl();
       syncControls();
-      renderMarkers(false);
+      rebuildIndex();
+      render();
     };
 
     catBtns.forEach((btn) => {
@@ -240,7 +315,7 @@ const ui = await uiOf(lang);
       refresh();
     });
 
-    syncControls(); // reflect URL state into the controls on load
+    syncControls();
 
     new MutationObserver(() => map.setStyle(buildStyle(isDark()))).observe(document.documentElement, {
       attributes: true,
