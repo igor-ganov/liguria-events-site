@@ -6,7 +6,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
   lang: 'en',
   ui: {
     nav: { calendar: 'Calendar', feed: 'Feed', bot: 'Telegram bot', ical: 'iCal' },
-    chips: { free: 'Free only', gems: '💎 Hidden gems' },
+    chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' },
     cat: {
       music: 'Music', theatre: 'Theatre', art: 'Art', food: 'Food', sport: 'Sport',
       family: 'Family', market: 'Markets', nightlife: 'Nightlife', culture: 'Culture',
@@ -24,5 +24,6 @@ export const DEFAULT_PAGE_DATA: PageData = {
     footer: '',
     photoBy: 'photo',
     summaryNote: '',
+    mapLink: 'View on map',
   },
 };

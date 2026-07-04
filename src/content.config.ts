@@ -13,7 +13,7 @@ const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
     nav: z.object({ calendar: z.string(), feed: z.string(), bot: z.string(), ical: z.string() }),
-    chips: z.object({ free: z.string(), gems: z.string() }),
+    chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
     cat,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),
@@ -24,6 +24,7 @@ const ui = defineCollection({
     footer: z.string(),
     photoBy: z.string(),
     summaryNote: z.string(),
+    mapLink: z.string(),
   }),
 });
 

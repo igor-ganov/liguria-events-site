@@ -5,6 +5,7 @@ import { isLocale } from '../src/lib/i18n/is-locale.ts';
 import { localizedUrl } from '../src/lib/i18n/localized-url.ts';
 import { descriptionOf } from '../src/lib/events/description-of.ts';
 import { titleOf } from '../src/lib/events/title-of.ts';
+import { mapQuery } from '../src/lib/events/map-query.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 describe('isLocale', () => {
@@ -36,6 +37,15 @@ describe('descriptionOf', () => {
     assert.equal(descriptionOf('ru')(e), 'Русский');
     assert.equal(descriptionOf('en')(event({ en: 'only-en', it: '', ru: '' })), 'only-en');
     assert.equal(descriptionOf('en')(event()), '');
+  });
+});
+
+describe('mapQuery', () => {
+  const base: CompactEvent = { id: 'a', t: 'T', s: '2026-07-04', c: ['music'], u: 'https://x' };
+  test('prefers the enriched address, else scopes venue to Genoa, else undefined', () => {
+    assert.equal(mapQuery({ ...base, a: 'Teatro della Tosse, Genova' }), 'Teatro della Tosse, Genova');
+    assert.equal(mapQuery({ ...base, v: 'Palazzo Ducale' }), 'Palazzo Ducale, Genova, Italy');
+    assert.equal(mapQuery(base), undefined);
   });
 });
 

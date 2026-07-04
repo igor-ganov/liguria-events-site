@@ -4,6 +4,7 @@ import { eventLinks } from '../../lib/events/event-links.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
+import { mapQuery } from '../../lib/events/map-query.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { eventPath } from '../../lib/event-path.ts';
@@ -19,6 +20,10 @@ const desc = descriptionOf(lang)(event);
 const title = titleOf(lang)(event);
 const photoSource = links[0]?.name ?? ui.photoBy;
 const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
+const query = mapQuery(event);
+const mapSearchUrl =
+  query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
 ---
 
 <Layout lang={lang} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
@@ -47,9 +52,36 @@ const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown
     </div>
     <dl class="event-facts">
       <div><dt>📅</dt><dd>{formatWhen(eventNoVenue)}</dd></div>
-      {event.v !== undefined && <div><dt>📍</dt><dd>{event.v}</dd></div>}
+      {
+        event.v !== undefined && (
+          <div>
+            <dt>📍</dt>
+            <dd>
+              {event.v}
+              {mapSearchUrl && (
+                <a class="map-link" href={mapSearchUrl} target="_blank" rel="noopener">
+                  ↗ {ui.mapLink}
+                </a>
+              )}
+            </dd>
+          </div>
+        )
+      }
     </dl>
     {desc !== '' && <p class="event-desc">{desc}</p>}
+    {
+      mapEmbedUrl && (
+        <figure class="event-map">
+          <iframe
+            title={`${ui.mapLink}: ${event.v ?? title}`}
+            src={mapEmbedUrl}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          />
+        </figure>
+      )
+    }
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
     <section class="event-sources">
       <h2>{ui.headings.sources}</h2>

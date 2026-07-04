@@ -13,7 +13,7 @@ export const PageDataSchema = Schema.Struct({
   lang: Schema.Literal(...LOCALES),
   ui: Schema.Struct({
     nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, bot: Schema.String, ical: Schema.String }),
-    chips: Schema.Struct({ free: Schema.String, gems: Schema.String }),
+    chips: Schema.Struct({ free: Schema.String, gems: Schema.String, clear: Schema.String }),
     cat,
     weekdays: Schema.Array(Schema.String),
     months: Schema.Array(Schema.String),
@@ -24,6 +24,7 @@ export const PageDataSchema = Schema.Struct({
     footer: Schema.String,
     photoBy: Schema.String,
     summaryNote: Schema.String,
+    mapLink: Schema.String,
   }),
 });
 

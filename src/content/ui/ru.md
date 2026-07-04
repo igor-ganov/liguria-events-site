@@ -1,6 +1,6 @@
 ---
 nav: { calendar: 'Календарь', feed: 'Лента', bot: 'Telegram-бот', ical: 'iCal' }
-chips: { free: 'Только бесплатные', gems: '💎 Необычное' }
+chips: { free: 'Только бесплатные', gems: '💎 Необычное', clear: 'Сбросить' }
 cat:
   music: Музыка
   theatre: Театр
@@ -22,4 +22,5 @@ empty: 'Ничего не подходит под эти фильтры.'
 footer: 'Собрано автоматически с visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'фото'
 summaryNote: 'Описание сгенерировано автоматически на основе источников ниже.'
+mapLink: 'Открыть на карте'
 ---

@@ -17,5 +17,6 @@ export type FeedHost = {
     toggleCategory: (category: Category) => void;
     toggleFree: () => void;
     toggleGems: () => void;
+    clearFilters: () => void;
   }>;
 };

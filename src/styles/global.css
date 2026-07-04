@@ -283,6 +283,9 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 }
 :root[data-theme='dark'] .badge-gem { background: hsl(280 40% 22%); color: hsl(280 65% 80%); }
 .chip--gems[aria-pressed='true'] { background: hsl(280 60% 48%); border-color: hsl(280 60% 48%); color: #fff; }
+/* Clear-selection chip: only rendered while a filter is active. */
+.chip--clear { border-color: var(--line); color: var(--ink-2); font-weight: 600; }
+.chip--clear:hover { border-color: var(--ink-2); color: var(--ink); }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-empty { color: var(--ink-2); }
@@ -366,6 +369,10 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .event-facts div { display: flex; gap: 0.55rem; align-items: baseline; }
 .event-facts dt { color: var(--ink-2); font-size: 0.8rem; min-width: 4.2rem; }
 .event-facts dd { margin: 0; }
+.map-link { margin-left: 0.5rem; font-size: 0.82rem; color: var(--accent); white-space: nowrap; }
+.map-link:hover { text-decoration: underline; }
+.event-map { margin: 1.1rem 0 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+.event-map iframe { width: 100%; height: 16rem; border: 0; display: block; }
 .event-desc { font-size: 1.02rem; }
 .event-sources { margin-top: 1.3rem; }
 .event-sources h2 { font-size: 0.95rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }

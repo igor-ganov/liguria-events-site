@@ -24,4 +24,9 @@ export const makeFeedController = (host: HostState): FeedHost['ctl'] => ({
   toggleGems: (): void => {
     host.gemsOnly = !host.gemsOnly;
   },
+  clearFilters: (): void => {
+    host.selected = [];
+    host.freeOnly = false;
+    host.gemsOnly = false;
+  },
 });

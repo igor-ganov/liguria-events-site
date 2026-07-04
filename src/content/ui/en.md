@@ -1,6 +1,6 @@
 ---
 nav: { calendar: 'Calendar', feed: 'Feed', bot: 'Telegram bot', ical: 'iCal' }
-chips: { free: 'Free only', gems: '💎 Hidden gems' }
+chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' }
 cat:
   music: Music
   theatre: Theatre
@@ -22,4 +22,5 @@ empty: 'Nothing matches these filters yet.'
 footer: 'Collected automatically from visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'photo'
 summaryNote: 'Summary generated automatically from the sources below.'
+mapLink: 'View on map'
 ---
