@@ -17,6 +17,7 @@ declare namespace App {
 
 interface ImportMetaEnv {
   readonly PUBLIC_FIXED_TODAY?: string;
+  readonly PUBLIC_PMTILES_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;

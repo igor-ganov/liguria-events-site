@@ -6,20 +6,17 @@
   "main": "./dist/_worker.js/index.js",
   "assets": { "directory": "./dist", "binding": "ASSETS" },
   "observability": { "enabled": true },
-  "ai": { "binding": "AI" },
-  // Production (dovego.it) — filled in at the Phase 4 cutover.
-  "vars": { "ENVIRONMENT": "production", "CRAWLER_ENABLED": "1", "FIXED_TODAY": "" },
-  "d1_databases": [
-    { "binding": "DB", "database_name": "dovego", "database_id": "TODO_PROD_D1_ID" }
-  ],
   "env": {
-    // Dev (dev.dovego.it) — isolated data, crawler off, clock pinned.
+    // Dev (dev.dovego.it) — isolated data, crawler off, clock pinned to today.
+    // Production (dovego.it) gets its own env block at the Phase 4 cutover.
     "dev": {
+      "name": "dovego-dev",
       "vars": { "ENVIRONMENT": "dev", "CRAWLER_ENABLED": "0", "FIXED_TODAY": "2026-07-06" },
       "ai": { "binding": "AI" },
       "d1_databases": [
-        { "binding": "DB", "database_name": "dovego-dev", "database_id": "TODO_DEV_D1_ID" }
+        { "binding": "DB", "database_name": "dovego-dev", "database_id": "cf5ff131-46c0-40bc-b97c-b0dff591344c" }
       ],
+      "kv_namespaces": [{ "binding": "SESSION", "id": "71a97b9d5c814596aa2834aed3bf76b6" }],
       "routes": [{ "pattern": "dev.dovego.it", "custom_domain": true }]
     }
   }

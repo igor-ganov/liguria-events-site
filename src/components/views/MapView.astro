@@ -66,11 +66,16 @@ const ui = await uiOf(lang);
   // 'light' = OSM Bright (colourful, high contrast); 'dark' = retuned Dark Matter.
   const STYLES: Record<string, unknown> = { light: brightStyle, dark: darkStyle };
 
+  // The 26 MB basemap can't be a Worker asset (25 MiB cap), so its host is
+  // configurable; defaults to same-origin (GitHub Pages / prod serve it).
+  const PMTILES_URL =
+    import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/liguria.pmtiles`;
+
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
     const style = structuredClone(STYLES[key] ?? brightStyle) as maplibregl.StyleSpecification;
     style.sources = {
-      openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
+      openmaptiles: { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution: ATTR },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     // Light uses OSM Bright's sprite (dark Maki POI icons read on a light map);
