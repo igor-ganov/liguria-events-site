@@ -3,11 +3,13 @@ import type { TemplateResult } from 'lit';
 import { branch } from '../../lib/branch.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import { filterByCategories } from '../../lib/events/filter-by-categories.ts';
+import { filterByDateRange } from '../../lib/events/filter-by-date-range.ts';
 import { filterFreeOnly } from '../../lib/events/filter-free-only.ts';
 import { filterGemsOnly } from '../../lib/events/filter-gems-only.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { renderChips } from './render-chips.ts';
+import { renderDates } from './render-dates.ts';
 import { renderMiniCard } from '../shared/render-mini-card.ts';
 import type { FeedHost } from './host.ts';
 
@@ -25,11 +27,15 @@ const renderGroup =
 
 export const renderFeed = (host: FeedHost): TemplateResult => {
   const filtered = filterGemsOnly(host.gemsOnly)(
-    filterFreeOnly(host.freeOnly)(filterByCategories(new Set(host.selected))(host.events)),
+    filterFreeOnly(host.freeOnly)(
+      filterByCategories(new Set(host.selected))(
+        filterByDateRange(host.from, host.to)(host.events),
+      ),
+    ),
   );
   const groups = [...groupByDay(host.today)(filtered).entries()];
   return html`
-    ${renderChips(host)}
+    ${renderDates(host)} ${renderChips(host)}
     ${branch(groups.length === 0)(
       () => html`<p class="feed-empty">${host.ui.empty}</p>`,
       () => html`${groups.map(renderGroup(host))}`,

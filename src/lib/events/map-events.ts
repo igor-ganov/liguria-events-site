@@ -1,6 +1,7 @@
 import type { Category } from './categories.ts';
 import type { CompactEvent } from './event-schema.ts';
 import { filterByCategories } from './filter-by-categories.ts';
+import { filterByDateRange } from './filter-by-date-range.ts';
 import { filterFreeOnly } from './filter-free-only.ts';
 import { filterGemsOnly } from './filter-gems-only.ts';
 
@@ -18,9 +19,7 @@ export const mapEvents =
     filterGemsOnly(gemsOnly)(
       filterFreeOnly(freeOnly)(
         filterByCategories(new Set(selected))(
-          events.filter(
-            (event) => event.g !== undefined && event.s <= to && (event.e ?? event.s) >= from,
-          ),
+          filterByDateRange(from, to)(events).filter((event) => event.g !== undefined),
         ),
       ),
     );

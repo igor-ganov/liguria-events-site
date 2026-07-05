@@ -310,9 +310,10 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 [hidden] { display: none !important; }
 /* Map page (MapLibre GL + self-hosted PMTiles) */
 .map-filters { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.8rem; }
-.map-dates { display: flex; flex-wrap: wrap; gap: 0.8rem; }
-.map-dates label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--ink-2); }
-.map-dates input {
+.map-dates, .feed-dates { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.feed-dates { margin: 0 0 0.7rem; }
+.map-dates label, .feed-dates label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--ink-2); }
+.map-dates input, .feed-dates input {
   border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.3rem 0.5rem;
   background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem;
 }

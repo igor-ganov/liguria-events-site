@@ -12,11 +12,15 @@ export type FeedHost = {
   selected: readonly Category[];
   freeOnly: boolean;
   gemsOnly: boolean;
+  from: string;
+  to: string;
   readonly ctl: Readonly<{
     init: () => void;
     toggleCategory: (category: Category) => void;
     toggleFree: () => void;
     toggleGems: () => void;
+    setFrom: (value: string) => void;
+    setTo: (value: string) => void;
     clearFilters: () => void;
   }>;
 };

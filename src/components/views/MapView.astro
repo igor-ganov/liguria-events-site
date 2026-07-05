@@ -55,6 +55,7 @@ const ui = await uiOf(lang);
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
+  import { plusDays } from '../../lib/calendar/plus-days.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
@@ -62,11 +63,6 @@ const ui = await uiOf(lang);
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
   const esc = (s: string): string =>
     s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-  const plusDays = (iso: string, n: number): string => {
-    const d = new Date(`${iso}T12:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + n);
-    return d.toISOString().slice(0, 10);
-  };
 
   // 'light' = OSM Bright (colourful, high contrast); 'dark' = retuned Dark Matter.
   const STYLES: Record<string, unknown> = { light: brightStyle, dark: darkStyle };

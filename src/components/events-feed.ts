@@ -17,6 +17,8 @@ export class EventsFeed extends LitElement {
     selected: { state: true },
     freeOnly: { state: true },
     gemsOnly: { state: true },
+    from: { state: true },
+    to: { state: true },
   };
 
   public today = '';
@@ -26,6 +28,8 @@ export class EventsFeed extends LitElement {
   public selected: readonly Category[] = [];
   public freeOnly = false;
   public gemsOnly = false;
+  public from = '';
+  public to = '';
   public readonly ctl = makeFeedController(this);
 
   public override connectedCallback(): void {
