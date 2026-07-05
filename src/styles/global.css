@@ -151,7 +151,8 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
    labelled (mobile-menu) variant. */
 .theme-name { display: none; }
 .theme-btn--labelled {
-  width: auto; height: 38px; gap: 0.5rem; padding: 0 0.8rem; border-radius: 999px;
+  display: flex; flex-direction: row; align-items: center; justify-content: center;
+  width: auto; height: 34px; gap: 0.4rem; padding: 0 0.75rem; border-radius: 999px;
 }
 .theme-btn--labelled .theme-name { display: inline; font-size: 0.85rem; font-weight: 600; }
 /* Toggle icon reflects the user's CHOICE (data-theme-pref): sun=light,
@@ -209,7 +210,7 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .fab-links a:hover, .fab-links a:focus-visible { background: var(--surface-2); text-decoration: none; }
 .fab-tools {
   margin-top: 0.4rem; padding-top: 0.5rem; border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: flex-end;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
 }
 /* Desktop: header nav visible, FAB hidden. Mobile: swap. */
 @media (max-width: 44rem) {
