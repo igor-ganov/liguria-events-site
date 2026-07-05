@@ -6,10 +6,10 @@
   --ink: hsl(220 25% 14%);
   --ink-2: hsl(220 12% 42%);
   --line: hsl(40 15% 87%);
-  --accent: hsl(174 70% 30%);       /* Ligurian sea teal */
-  --accent-2: hsl(16 88% 55%);      /* Riviera sunset coral */
-  --brand: hsl(28 90% 51%);         /* Dove Go orange (logo) */
-  --on-accent: white;
+  --accent: hsl(28 92% 52%);        /* Dove Go orange (primary) */
+  --accent-2: hsl(174 66% 33%);     /* Ligurian sea teal (secondary) */
+  --brand: hsl(28 92% 52%);         /* Dove Go orange (logo) */
+  --on-accent: hsl(28 46% 13%);     /* dark ink reads on orange */
   --free: hsl(140 55% 32%);
   --free-bg: hsl(140 50% 92%);
   --today-ring: var(--accent-2);
@@ -38,10 +38,10 @@
   --ink: hsl(40 25% 92%);
   --ink-2: hsl(220 12% 64%);
   --line: hsl(218 18% 24%);
-  --accent: hsl(174 60% 45%);
-  --accent-2: hsl(16 90% 62%);
+  --accent: hsl(30 95% 57%);        /* Dove Go orange (primary) */
+  --accent-2: hsl(174 58% 48%);     /* Ligurian sea teal (secondary) */
   --brand: hsl(30 95% 60%);         /* Dove Go orange (logo, brighter on dark) */
-  --on-accent: hsl(220 30% 8%);
+  --on-accent: hsl(28 55% 9%);      /* dark ink reads on orange */
   --free: hsl(140 50% 65%);
   --free-bg: hsl(140 35% 18%);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
