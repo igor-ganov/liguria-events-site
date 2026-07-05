@@ -6109,7 +6109,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 13.5,
+      "minzoom": 15.5,
       "filter": [
         "all",
         [
@@ -6156,7 +6156,7 @@
           "rail_light_11",
           "bus_11"
         ],
-        "icon-size": 1,
+        "icon-size": 0.85,
         "icon-optional": false,
         "text-field": [
           "get",
@@ -6165,7 +6165,7 @@
         "text-font": [
           "Noto Sans Regular"
         ],
-        "text-size": 10.5,
+        "text-size": 10,
         "text-offset": [
           0,
           0.9
