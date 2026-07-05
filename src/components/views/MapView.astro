@@ -80,7 +80,7 @@ const ui = await uiOf(lang);
     // dark uses a white-recoloured copy of it (poi-dark) so the same standard
     // icons stay legible on the dark basemap.
     // maplibre-gl 5 requires an ABSOLUTE sprite URL (root-relative fails).
-    style.sprite = `${location.origin}${B}/sprite/${dark ? 'poi-dark' : 'bright'}/sprite`;
+    style.sprite = `${location.origin}${B}/sprite/poi-color/sprite`;
     // Light (OSM Bright) already ships self-hosted Noto Sans; Dark Matter
     // references fonts we don't host, so pin those to our single Regular face.
     if (dark) {
