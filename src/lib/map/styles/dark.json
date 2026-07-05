@@ -854,6 +854,104 @@
       }
     },
     {
+      "id": "railway-transit-dk",
+      "type": "line",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        [
+          "==",
+          "$type",
+          "LineString"
+        ],
+        [
+          "==",
+          "class",
+          "transit"
+        ],
+        [
+          "!in",
+          "brunnel",
+          "tunnel"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "#5a616f",
+        "line-width": {
+          "base": 1.4,
+          "stops": [
+            [
+              14,
+              0.4
+            ],
+            [
+              20,
+              1
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "railway-dk",
+      "type": "line",
+      "metadata": {
+        "mapbox:group": "1444849345966.4436"
+      },
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        [
+          "==",
+          "$type",
+          "LineString"
+        ],
+        [
+          "!has",
+          "service"
+        ],
+        [
+          "!in",
+          "brunnel",
+          "bridge",
+          "tunnel"
+        ],
+        [
+          "==",
+          "class",
+          "rail"
+        ]
+      ],
+      "paint": {
+        "line-color": "#5a616f",
+        "line-width": {
+          "base": 1.4,
+          "stops": [
+            [
+              14,
+              0.4
+            ],
+            [
+              15,
+              0.75
+            ],
+            [
+              20,
+              2
+            ]
+          ]
+        }
+      }
+    },
+    {
       "id": "road_oneway",
       "type": "symbol",
       "source": "openmaptiles",
@@ -1691,6 +1789,114 @@
         "text-halo-blur": 0.5,
         "text-halo-color": "#10131a",
         "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "transit-stop",
+      "type": "circle",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 13.5,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Point"
+        ],
+        [
+          "match",
+          [
+            "get",
+            "subclass"
+          ],
+          [
+            "bus_stop",
+            "bus_station",
+            "tram_stop",
+            "station",
+            "halt",
+            "subway"
+          ],
+          true,
+          false
+        ]
+      ],
+      "paint": {
+        "circle-radius": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          13,
+          1.8,
+          16,
+          4
+        ],
+        "circle-color": "#7aa2e0",
+        "circle-stroke-width": 1.2,
+        "circle-stroke-color": "#12151c"
+      }
+    },
+    {
+      "id": "transit-stop-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 15,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Point"
+        ],
+        [
+          "match",
+          [
+            "get",
+            "subclass"
+          ],
+          [
+            "bus_stop",
+            "bus_station",
+            "tram_stop",
+            "station",
+            "halt",
+            "subway"
+          ],
+          true,
+          false
+        ]
+      ],
+      "layout": {
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-font": [
+          "Noto Sans Regular"
+        ],
+        "text-size": 10,
+        "text-offset": [
+          0,
+          0.9
+        ],
+        "text-anchor": "top",
+        "text-optional": true,
+        "text-max-width": 7
+      },
+      "paint": {
+        "text-color": "#cdd8ea",
+        "text-halo-color": "#12151c",
+        "text-halo-width": 1.1
       }
     },
     {

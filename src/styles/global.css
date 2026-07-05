@@ -401,6 +401,11 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group { background: var(--surface); }
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button { color: var(--ink); }
 :root[data-theme='dark'] .map-canvas .maplibregl-ctrl-group button + button { border-top-color: var(--line); }
+/* MapLibre's built-in zoom/compass icons are fixed dark SVGs — invisible on a
+   dark control. Invert them to light in dark theme (our custom locate button
+   uses currentColor, so it is unaffected). */
+:root[data-theme='dark'] .map-canvas .maplibregl-ctrl-icon { filter: invert(1) brightness(0.92); }
+.map-canvas .maplibregl-ctrl-group button:hover { background: var(--surface-2, rgba(127, 127, 127, 0.15)); }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
 .feed-empty { color: var(--ink-2); }
