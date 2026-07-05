@@ -93,4 +93,18 @@ export default tseslint.config(
     files: ['test/**/*.ts'],
     rules: { 'functional/one-value-export': 'off', 'functional/max-lines-no-imports': 'off' },
   },
+  {
+    // Astro endpoints legitimately export GET/POST + prerender from one file.
+    files: ['src/pages/**/*.ts'],
+    rules: { 'functional/one-value-export': 'off' },
+  },
+  {
+    // Declaration files use ambient idioms (empty extending interfaces, import()).
+    files: ['**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'functional/one-value-export': 'off',
+    },
+  },
 );
