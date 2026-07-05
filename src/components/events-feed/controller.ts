@@ -1,5 +1,4 @@
 import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { plusDays } from '../../lib/calendar/plus-days.ts';
 import type { Category } from '../../lib/events/categories.ts';
 import { readEventsIsland } from '../shared/read-events-island.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
@@ -16,10 +15,10 @@ export const makeFeedController = (host: HostState): FeedHost['ctl'] => ({
     host.events = readEventsIsland();
     const today = isoToday();
     host.today = today;
-    // Default window: today → +1 week, capped at the last event (matches the map).
-    const maxDate = [today, ...host.events.map((event) => event.e ?? event.s)].sort().at(-1) ?? today;
+    // Lower bound defaults to today; the upper bound is left open ("until the
+    // very end") and is clearable — matches the map.
     host.from = today;
-    host.to = [plusDays(today, 7), maxDate].sort()[0] ?? maxDate;
+    host.to = '';
   },
   toggleCategory: (category: Category): void => {
     host.selected = toggleCategory(host.selected, category);

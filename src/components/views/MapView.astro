@@ -55,7 +55,6 @@ const ui = await uiOf(lang);
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
-  import { plusDays } from '../../lib/calendar/plus-days.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
@@ -139,9 +138,8 @@ const ui = await uiOf(lang);
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
     const maxDate = sorted[sorted.length - 1] ?? today;
-    const weekAhead = plusDays(today, 7);
-    const defaultTo = weekAhead < maxDate ? weekAhead : maxDate; // upper filter defaults to +1 week
-    const state = { from: today, to: defaultTo, selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
+    // Upper bound is open by default ("until the very end") and clearable.
+    const state = { from: today, to: '', selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
 
     const readUrl = (): void => {
       const p = new URLSearchParams(location.search);
@@ -149,7 +147,7 @@ const ui = await uiOf(lang);
       state.freeOnly = p.get('free') === '1';
       state.gemsOnly = p.get('gems') === '1';
       state.from = p.get('from') ?? today;
-      state.to = p.get('to') ?? defaultTo;
+      state.to = p.get('to') ?? '';
     };
     const writeUrl = (): void => {
       const p = new URLSearchParams();
@@ -157,7 +155,7 @@ const ui = await uiOf(lang);
       if (state.freeOnly) p.set('free', '1');
       if (state.gemsOnly) p.set('gems', '1');
       if (state.from !== today) p.set('from', state.from);
-      if (state.to !== defaultTo) p.set('to', state.to);
+      if (state.to !== '') p.set('to', state.to);
       const qs = p.toString();
       history.replaceState(null, '', qs ? `${location.pathname}?${qs}` : location.pathname);
     };
