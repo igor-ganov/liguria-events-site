@@ -31,12 +31,7 @@ const ui = await uiOf(lang);
       <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
     </div>
   </div>
-  <div class="map-stage">
-    <div class="map-canvas" data-map-canvas></div>
-    <div class="map-google" data-map-google hidden>
-      <iframe title="Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-  </div>
+  <div class="map-canvas" data-map-canvas></div>
 </Layout>
 
 <script>
@@ -79,15 +74,6 @@ const ui = await uiOf(lang);
     const style = structuredClone(STYLES[key] ?? brightStyle) as maplibregl.StyleSpecification;
     style.sources = {
       openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
-      // Free, no-key elevation tiles (Mapzen/AWS Open Data) for terrain relief.
-      dem: {
-        type: 'raster-dem',
-        tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-        encoding: 'terrarium',
-        tileSize: 256,
-        maxzoom: 14,
-        attribution: '© Mapzen, USGS',
-      },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     style.sprite = `${B}/sprite/${dark ? 'dark' : 'bright'}/sprite`;
@@ -99,22 +85,7 @@ const ui = await uiOf(lang);
         if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
       }
     }
-    // Relief (hillshade) under the roads/labels, for every basemap.
     const layers = style.layers as unknown as Array<Record<string, unknown>>;
-    const hillshade = {
-      id: 'hillshade',
-      type: 'hillshade',
-      source: 'dem',
-      paint: {
-        // On dark, keep relief subtle with a near-background shadow — a black
-        // shadow blackens mountainous Liguria and kills all road/water contrast.
-        'hillshade-exaggeration': dark ? 0.14 : 0.3,
-        'hillshade-shadow-color': dark ? '#1b1e26' : '#6b6155',
-        'hillshade-highlight-color': dark ? '#333b47' : '#ffffff',
-      },
-    };
-    const roadAt = layers.findIndex((l) => l['source-layer'] === 'transportation');
-    layers.splice(roadAt >= 0 ? roadAt : 1, 0, hillshade);
     // Dark Matter's roads stay subtle even after retuning; add a brighter
     // major-road overlay so highways read clearly. (Light/OSM Bright is fine.)
     if (dark) {
@@ -178,15 +149,10 @@ const ui = await uiOf(lang);
     };
     readUrl();
 
-    // Basemap preference: 'auto' (follow site theme) | 'light' | 'dark' | 'google'.
-    const MAP_STYLE_KEY = 'map-style';
+    // The basemap simply follows the site theme (no switcher): light theme →
+    // light map, dark theme → dark map, live.
     const isDark = (): boolean => document.documentElement.dataset['theme'] === 'dark';
-    const pref = (): string => {
-      const s = localStorage.getItem(MAP_STYLE_KEY) ?? 'auto';
-      return s === 'light' || s === 'dark' || s === 'google' ? s : 'auto';
-    };
-    const resolvedKey = (): string =>
-      pref() === 'light' || pref() === 'dark' ? pref() : isDark() ? 'dark' : 'light';
+    const resolvedKey = (): string => (isDark() ? 'dark' : 'light');
     const map = new maplibregl.Map({
       container: canvas,
       style: buildStyle(resolvedKey()),
@@ -283,72 +249,15 @@ const ui = await uiOf(lang);
     };
     map.addControl(locateControl, 'top-left');
 
-    // Basemap switcher: Auto (follow site theme) / Light / Dark / Google. Our
-    // DOM photo markers survive setStyle, so Auto/Light/Dark keep the events on
-    // the map. Google shows Google's own tiles via the keyless embed (reference
-    // only — an <iframe> cannot host our markers). Choice persists.
-    const STYLE_LABELS: Record<string, Record<string, string>> = {
-      auto: { en: 'Auto', it: 'Auto', ru: 'Авто' },
-      light: { en: 'Light', it: 'Chiara', ru: 'Светлая' },
-      dark: { en: 'Dark', it: 'Scura', ru: 'Тёмная' },
-      google: { en: 'Google', it: 'Google', ru: 'Google' },
-    };
-    const googleBox = document.querySelector<HTMLElement>('[data-map-google]');
-    const googleFrame = googleBox?.querySelector('iframe');
+    // Follow the site theme live (data-theme is rewritten by the theme script,
+    // incl. OS changes under 'system'). DOM photo markers survive setStyle.
     let loadedKey = resolvedKey();
-    const applyBasemap = (): void => {
-      if (pref() === 'google') {
-        const c = map.getCenter();
-        if (googleFrame) {
-          googleFrame.src = `https://maps.google.com/maps?q=${c.lat.toFixed(4)},${c.lng.toFixed(4)}&z=${Math.round(map.getZoom())}&output=embed`;
-        }
-        if (googleBox) googleBox.hidden = false;
-        return;
-      }
-      if (googleBox) googleBox.hidden = true;
+    new MutationObserver(() => {
       const key = resolvedKey();
       if (key === loadedKey) return;
       loadedKey = key;
       map.setStyle(buildStyle(key));
-    };
-    const styleSelect = document.createElement('select');
-    const styleControl = {
-      onAdd(): HTMLElement {
-        const wrap = document.createElement('div');
-        wrap.className = 'maplibregl-ctrl maplibregl-ctrl-group map-style-ctrl';
-        styleSelect.className = 'map-style-select';
-        styleSelect.setAttribute('aria-label', 'Basemap style');
-        const label = (k: string): string => STYLE_LABELS[k]?.[lang] ?? STYLE_LABELS[k]?.['en'] ?? k;
-        for (const key of ['auto', 'light', 'dark', 'google']) {
-          const opt = document.createElement('option');
-          opt.value = key;
-          opt.textContent = label(key);
-          styleSelect.appendChild(opt);
-        }
-        styleSelect.value = pref();
-        styleSelect.addEventListener('change', () => {
-          localStorage.setItem(MAP_STYLE_KEY, styleSelect.value);
-          applyBasemap();
-        });
-        wrap.appendChild(styleSelect);
-        return wrap;
-      },
-      onRemove(): void {
-        /* nothing to tear down */
-      },
-    };
-    map.addControl(styleControl, 'top-right');
-    if (pref() === 'google') applyBasemap();
-    // While on Auto, follow the site theme live (data-theme is rewritten by the
-    // theme script, including OS changes under the 'system' preference).
-    new MutationObserver(() => {
-      if (pref() === 'auto') applyBasemap();
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', () => {
-        if (pref() === 'auto') applyBasemap();
-      });
 
     // ── popups ────────────────────────────────────────────────────────────────
     const openEvent = (e: CompactEvent, at: [number, number]): void => {
@@ -464,7 +373,9 @@ const ui = await uiOf(lang);
       fitted = true;
     };
 
+    canvas.dataset['loading'] = 'true';
     map.on('load', () => {
+      canvas.dataset['loading'] = 'false';
       rebuildIndex();
       fitAll();
       render();
