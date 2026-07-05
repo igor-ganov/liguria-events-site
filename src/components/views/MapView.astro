@@ -83,12 +83,19 @@ const ui = await uiOf(lang);
     // icons stay legible on the dark basemap.
     // maplibre-gl 5 requires an ABSOLUTE sprite URL (root-relative fails).
     style.sprite = `${location.origin}${B}/sprite/poi-color/sprite`;
-    // Light (OSM Bright) already ships self-hosted Noto Sans; Dark Matter
-    // references fonts we don't host, so pin those to our single Regular face.
-    if (dark) {
-      for (const layer of style.layers) {
-        const layout = (layer as { layout?: Record<string, unknown> }).layout;
-        if (layout && layout['text-font']) layout['text-font'] = ['Noto Sans Regular'];
+    // Point every label at our self-hosted glyph folders (hyphenated, no spaces
+    // — GitHub Pages 404s spaced paths). Known Noto faces map to their folder;
+    // anything else (Dark Matter's maptiler fonts) falls back to Regular.
+    const glyphFont = (font: string): string =>
+      /^noto sans (regular|bold|italic)$/i.test(font)
+        ? font.toLowerCase().replace(/\s+/g, '-')
+        : 'noto-sans-regular';
+    for (const layer of style.layers) {
+      const layout = (layer as { layout?: { 'text-font'?: readonly string[] } }).layout;
+      if (layout && Array.isArray(layout['text-font'])) {
+        // A self-hosted glyph folder is a SINGLE face — collapse the stack to
+        // one font (comma-joined stacks like "a,b" 404 against a one-face dir).
+        layout['text-font'] = [glyphFont(layout['text-font'][0] ?? 'Noto Sans Regular')];
       }
     }
     const layers = style.layers as unknown as Array<Record<string, unknown>>;
@@ -115,6 +122,11 @@ const ui = await uiOf(lang);
   };
 
   type EvProps = { ev: CompactEvent };
+
+  // The live map, tracked so we can release its WebGL context on SPA nav —
+  // otherwise each visit leaks a context and the browser eventually drops one,
+  // leaving a blank basemap under the (DOM) markers.
+  let activeMap: maplibregl.Map | undefined;
 
   const setup = (): void => {
     const canvas = document.querySelector<HTMLElement>('[data-map-canvas]');
@@ -166,6 +178,7 @@ const ui = await uiOf(lang);
       zoom: 9,
       attributionControl: false,
     });
+    activeMap = map;
     map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
@@ -409,7 +422,7 @@ const ui = await uiOf(lang);
           'icon-size': 0.9,
           'icon-optional': true,
           'text-field': ['get', 'TESTO'],
-          'text-font': ['Noto Sans Bold'],
+          'text-font': ['noto-sans-bold'],
           'text-size': 10,
           'text-offset': [0, 0.9],
           'text-anchor': 'top',
@@ -506,4 +519,9 @@ const ui = await uiOf(lang);
 
   setup();
   document.addEventListener('astro:after-swap', setup);
+  // Release the WebGL context + listeners when leaving the page via SPA nav.
+  document.addEventListener('astro:before-swap', () => {
+    activeMap?.remove();
+    activeMap = undefined;
+  });
 </script>
