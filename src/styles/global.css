@@ -311,7 +311,9 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem;
 }
 .map-canvas {
-  height: min(72vh, 640px); width: 100%; border-radius: var(--radius-lg);
+  height: min(72vh, 640px); /* fallback */
+  height: min(72svh, 640px); /* svh = small viewport: stable when the mobile URL bar shows/hides, so no layout jump */
+  width: 100%; border-radius: var(--radius-lg);
   overflow: hidden; box-shadow: var(--shadow-md); background: var(--surface);
 }
 .map-canvas .maplibregl-canvas { border-radius: var(--radius-lg); }
