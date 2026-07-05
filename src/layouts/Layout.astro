@@ -37,7 +37,7 @@ const alternates = LOCALES.map((loc) => ({
       type="image/svg+xml"
       href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`}
     />
-    <title>{title} · Liguria Events</title>
+    <title>{title} · Dove Go</title>
     {alternates.map(({ loc, href }) => <link rel="alternate" hreflang={loc} href={href} />)}
     <ClientRouter />
     <script is:inline>
@@ -71,7 +71,24 @@ const alternates = LOCALES.map((loc) => ({
   </head>
   <body>
     <header class="site-head">
-      <p class="site-title"><a href={localizedUrl(lang)}>🌊 Liguria Events</a></p>
+      <p class="site-title">
+        <a class="brand" href={localizedUrl(lang)} aria-label="Dove Go — home">
+          <svg class="brand-mark" viewBox="0 0 32 40" width="19" height="24" aria-hidden="true">
+            <path
+              d="M16 1.6C8.6 1.6 2.6 7.5 2.6 14.9 2.6 24.4 16 38.4 16 38.4S29.4 24.4 29.4 14.9C29.4 7.5 23.4 1.6 16 1.6Z"
+              fill="var(--brand)"
+            ></path>
+            <path
+              d="M8.2 16.4C10.7 12.7 13.6 12.7 16 16.4 18.4 20.1 21.3 20.1 23.8 16.4"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2.7"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+          <span class="brand-word">Dove <span class="brand-go">Go</span></span>
+        </a>
+      </p>
       <nav aria-label="Site">
         <a href={localizedUrl(lang)}>{ui.nav.feed}</a>
         <a href={localizedUrl(lang, 'calendar/')}>{ui.nav.calendar}</a>
