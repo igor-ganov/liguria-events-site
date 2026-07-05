@@ -1600,6 +1600,14 @@
         ]
       ],
       "layout": {
+        "icon-image": [
+          "concat",
+          [
+            "get",
+            "class"
+          ],
+          "_11"
+        ],
         "text-anchor": "top",
         "text-field": "{name:latin}\n{name:nonlatin}",
         "text-font": [
@@ -1658,6 +1666,14 @@
         ]
       ],
       "layout": {
+        "icon-image": [
+          "concat",
+          [
+            "get",
+            "class"
+          ],
+          "_11"
+        ],
         "text-anchor": "top",
         "text-field": "{name:latin}\n{name:nonlatin}",
         "text-font": [
@@ -1715,6 +1731,14 @@
         ]
       ],
       "layout": {
+        "icon-image": [
+          "concat",
+          [
+            "get",
+            "class"
+          ],
+          "_11"
+        ],
         "text-anchor": "top",
         "text-field": "{name:latin}\n{name:nonlatin}",
         "text-font": [
@@ -1767,6 +1791,14 @@
       "layout": {
         "icon-allow-overlap": false,
         "icon-ignore-placement": false,
+        "icon-image": [
+          "concat",
+          [
+            "get",
+            "class"
+          ],
+          "_11"
+        ],
         "icon-optional": false,
         "text-allow-overlap": false,
         "text-anchor": "top",
@@ -1793,64 +1825,10 @@
     },
     {
       "id": "transit-stop",
-      "type": "circle",
-      "source": "openmaptiles",
-      "source-layer": "poi",
-      "minzoom": 13,
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "geometry-type"
-          ],
-          "Point"
-        ],
-        [
-          "match",
-          [
-            "get",
-            "subclass"
-          ],
-          [
-            "bus_stop",
-            "bus_station",
-            "tram_stop",
-            "station",
-            "halt",
-            "subway"
-          ],
-          true,
-          false
-        ]
-      ],
-      "paint": {
-        "circle-radius": [
-          "interpolate",
-          [
-            "linear"
-          ],
-          [
-            "zoom"
-          ],
-          13,
-          3,
-          16,
-          6.5,
-          18,
-          9
-        ],
-        "circle-color": "#8ab4f8",
-        "circle-stroke-width": 1.8,
-        "circle-stroke-color": "#0c0f16"
-      }
-    },
-    {
-      "id": "transit-stop-label",
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 14.5,
+      "minzoom": 13.5,
       "filter": [
         "all",
         [
@@ -1879,6 +1857,29 @@
         ]
       ],
       "layout": {
+        "icon-image": [
+          "concat",
+          [
+            "match",
+            [
+              "get",
+              "subclass"
+            ],
+            [
+              "station",
+              "halt",
+              "subway"
+            ],
+            "rail_metro_11",
+            [
+              "tram_stop"
+            ],
+            "rail_light_11",
+            "bus_11"
+          ]
+        ],
+        "icon-size": 1,
+        "icon-optional": false,
         "text-field": [
           "get",
           "name"
@@ -1889,7 +1890,7 @@
         "text-size": 10.5,
         "text-offset": [
           0,
-          1
+          0.9
         ],
         "text-anchor": "top",
         "text-optional": true,

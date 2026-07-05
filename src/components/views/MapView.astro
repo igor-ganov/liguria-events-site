@@ -76,7 +76,11 @@ const ui = await uiOf(lang);
       openmaptiles: { type: 'vector', url: `pmtiles://${location.origin}${B}/tiles/liguria.pmtiles`, attribution: ATTR },
     };
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
-    style.sprite = `${B}/sprite/${dark ? 'dark' : 'bright'}/sprite`;
+    // Light uses OSM Bright's sprite (dark Maki POI icons read on a light map);
+    // dark uses a white-recoloured copy of it (poi-dark) so the same standard
+    // icons stay legible on the dark basemap.
+    // maplibre-gl 5 requires an ABSOLUTE sprite URL (root-relative fails).
+    style.sprite = `${location.origin}${B}/sprite/${dark ? 'poi-dark' : 'bright'}/sprite`;
     // Light (OSM Bright) already ships self-hosted Noto Sans; Dark Matter
     // references fonts we don't host, so pin those to our single Regular face.
     if (dark) {
