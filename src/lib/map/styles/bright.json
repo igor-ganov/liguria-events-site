@@ -5594,7 +5594,7 @@
       "type": "circle",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 13.5,
+      "minzoom": 13,
       "filter": [
         "all",
         [
@@ -5632,12 +5632,14 @@
             "zoom"
           ],
           13,
-          1.8,
+          3,
           16,
-          4
+          6.5,
+          18,
+          9
         ],
-        "circle-color": "#3a6ea5",
-        "circle-stroke-width": 1.2,
+        "circle-color": "#1a73e8",
+        "circle-stroke-width": 1.8,
         "circle-stroke-color": "#ffffff"
       }
     },
@@ -5646,7 +5648,7 @@
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "poi",
-      "minzoom": 15,
+      "minzoom": 14.5,
       "filter": [
         "all",
         [
@@ -5682,10 +5684,10 @@
         "text-font": [
           "Noto Sans Regular"
         ],
-        "text-size": 10,
+        "text-size": 10.5,
         "text-offset": [
           0,
-          0.9
+          1
         ],
         "text-anchor": "top",
         "text-optional": true,
