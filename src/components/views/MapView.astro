@@ -50,6 +50,8 @@ const ui = await uiOf(lang);
   import { eventPath } from '../../lib/event-path.ts';
   import { iconSvg } from '../../lib/icons/icon-svg.ts';
   import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+  import { wfsUrl } from '../../lib/civic/wfs-url.ts';
+  import { tilesInBbox } from '../../lib/civic/tiles-in-bbox.ts';
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
@@ -261,6 +263,7 @@ const ui = await uiOf(lang);
       if (key === loadedKey) return;
       loadedKey = key;
       map.setStyle(buildStyle(key));
+      map.once('styledata', () => restoreCivics());
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // ── popups ────────────────────────────────────────────────────────────────
@@ -385,6 +388,64 @@ const ui = await uiOf(lang);
       render();
     });
     map.on('moveend', render);
+
+    // ── civici: Genoa comune WFS address numbers (cadastre) at street zoom ──
+    // Commercial (COLORE=R) get a shop icon + red number; residential a marker
+    // + neutral number. Streamed per viewport tile with a session cache.
+    const CIVIC_MINZOOM = 16.5;
+    const civicFeatures: GeoJSON.Feature[] = [];
+    const civicSeen = new Set<string>();
+    const civicData = (): GeoJSON.FeatureCollection => ({ type: 'FeatureCollection', features: civicFeatures });
+    const restoreCivics = (): void => {
+      if (map.getSource('civics')) return;
+      map.addSource('civics', { type: 'geojson', data: civicData() });
+      map.addLayer({
+        id: 'civics',
+        type: 'symbol',
+        source: 'civics',
+        minzoom: CIVIC_MINZOOM,
+        layout: {
+          'icon-image': ['case', ['==', ['get', 'COLORE'], 'R'], 'shop_11', 'marker_11'],
+          'icon-size': 0.9,
+          'icon-optional': true,
+          'text-field': ['get', 'TESTO'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': 10,
+          'text-offset': [0, 0.9],
+          'text-anchor': 'top',
+          'text-optional': true,
+        },
+        paint: {
+          'text-color': ['case', ['==', ['get', 'COLORE'], 'R'], '#d1483f', isDark() ? '#c6ccd6' : '#33404f'],
+          'text-halo-color': isDark() ? '#12151c' : '#ffffff',
+          'text-halo-width': 1.1,
+        },
+      } as maplibregl.LayerSpecification);
+    };
+    const loadCivics = async (): Promise<void> => {
+      if (map.getZoom() < CIVIC_MINZOOM) return;
+      restoreCivics();
+      const b = map.getBounds();
+      const fresh = tilesInBbox(b.getWest(), b.getSouth(), b.getEast(), b.getNorth())
+        .filter(([key]) => !civicSeen.has(key))
+        .slice(0, 12);
+      await Promise.all(
+        fresh.map(async ([key, bbox]) => {
+          civicSeen.add(key);
+          try {
+            const res = await fetch(wfsUrl(bbox));
+            const json = (await res.json()) as { features?: readonly GeoJSON.Feature[] };
+            for (const feature of json.features ?? []) civicFeatures.push(feature);
+          } catch {
+            /* skip a failed tile */
+          }
+        }),
+      );
+      const src = map.getSource('civics') as maplibregl.GeoJSONSource | undefined;
+      if (src) src.setData(civicData());
+    };
+    map.on('load', () => void loadCivics());
+    map.on('moveend', () => void loadCivics());
 
     // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
