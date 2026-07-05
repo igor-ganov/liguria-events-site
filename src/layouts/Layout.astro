@@ -73,8 +73,8 @@ const alternates = LOCALES.map((loc) => ({
     <header class="site-head">
       <p class="site-title"><a href={localizedUrl(lang)}>🌊 Liguria Events</a></p>
       <nav aria-label="Site">
-        <a href={localizedUrl(lang)}>{ui.nav.calendar}</a>
-        <a href={localizedUrl(lang, 'feed/')}>{ui.nav.feed}</a>
+        <a href={localizedUrl(lang)}>{ui.nav.feed}</a>
+        <a href={localizedUrl(lang, 'calendar/')}>{ui.nav.calendar}</a>
         <a href={localizedUrl(lang, 'map/')}>{ui.nav.map}</a>
         <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
         <a

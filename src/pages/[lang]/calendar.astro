@@ -1,5 +1,5 @@
 ---
-import FeedView from '../../components/views/FeedView.astro';
+import CalendarView from '../../components/views/CalendarView.astro';
 import { LOCALES } from '../../lib/i18n/locales.ts';
 
 export const getStaticPaths = () =>
@@ -8,4 +8,4 @@ export const getStaticPaths = () =>
 const { lang } = Astro.props;
 ---
 
-<FeedView lang={lang} />
+<CalendarView lang={lang} />

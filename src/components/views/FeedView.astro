@@ -8,7 +8,7 @@ const { lang } = Astro.props;
 const ui = await uiOf(lang);
 ---
 
-<Layout lang={lang} title={ui.nav.feed} path="feed/">
+<Layout lang={lang} title={ui.nav.feed} path="">
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
   <events-feed></events-feed>
 </Layout>

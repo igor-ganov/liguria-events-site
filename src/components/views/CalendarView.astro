@@ -8,7 +8,7 @@ const { lang } = Astro.props;
 const ui = await uiOf(lang);
 ---
 
-<Layout lang={lang} title={ui.nav.calendar} path="">
+<Layout lang={lang} title={ui.nav.calendar} path="calendar/">
   <h1 class="visually-hidden">{ui.nav.calendar}</h1>
   <events-calendar></events-calendar>
 </Layout>
