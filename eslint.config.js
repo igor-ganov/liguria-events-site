@@ -102,7 +102,12 @@ export default tseslint.config(
     // Auth, API endpoints and middleware are guard-clause / validation heavy —
     // early returns and cohesive multi-export modules read safer here than the
     // branch()/one-export style used across the rest of the app.
-    files: ['src/lib/auth/**/*.ts', 'src/pages/api/**/*.ts', 'src/middleware.ts'],
+    files: [
+      'src/lib/auth/**/*.ts',
+      'src/lib/moderation/**/*.ts',
+      'src/pages/api/**/*.ts',
+      'src/middleware.ts',
+    ],
     rules: {
       'no-restricted-syntax': 'off',
       'functional/one-value-export': 'off',

@@ -155,6 +155,80 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   padding: 0.7rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer;
   background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; text-align: center;
 }
+
+/* Header account control */
+.account { display: inline-flex; align-items: center; gap: 0.5rem; }
+.account-signin, .account-signout {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 0.35rem 0.7rem; border-radius: var(--radius-sm); cursor: pointer; font: inherit; font-size: 0.9rem;
+}
+.account-submit {
+  background: var(--accent); color: var(--on-accent); padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm); font-weight: 700; font-size: 0.9rem;
+}
+.account-handle { color: var(--ink-2); font-size: 0.85rem; }
+
+/* Sign-in dialog */
+.signin-dialog {
+  border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 1.5rem;
+  max-width: 24rem; width: calc(100% - 2rem); background: var(--surface); color: var(--ink);
+}
+.signin-dialog::backdrop { background: rgb(10 15 20 / 0.5); }
+.signin-dialog h2 { margin: 0 0 0.3rem; font-size: 1.25rem; }
+.signin-dialog > p { margin: 0 0 0.8rem; color: var(--ink-2); }
+.signin-dialog form { display: flex; flex-direction: column; gap: 0.6rem; }
+.signin-dialog input {
+  padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--ink); font: inherit;
+}
+.signin-dialog button[type='submit'] {
+  padding: 0.7rem 1rem; border: none; border-radius: var(--radius-sm);
+  background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer;
+}
+.signin-x-row { display: flex; justify-content: flex-end; margin: -0.5rem -0.5rem 0 0; }
+.signin-x { background: none; border: none; color: var(--ink-2); font-size: 1.1rem; cursor: pointer; }
+.foot-legal { font-size: 0.85rem; }
+.foot-legal a { color: var(--ink-2); }
+
+/* Legal / policy pages */
+.legal { max-width: 42rem; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.65; }
+.legal h1 { font-size: 1.8rem; margin: 0 0 0.3rem; }
+.legal h2 { font-size: 1.2rem; margin: 1.8rem 0 0.5rem; }
+.legal ul { padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.legal-meta { color: var(--ink-2); font-size: 0.85rem; }
+.legal a { color: var(--accent); }
+
+/* Submit-an-event form */
+.submit-card { max-width: 34rem; }
+.submit-form { display: flex; flex-direction: column; gap: 0.8rem; }
+.submit-form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--ink-2); }
+.submit-form input, .submit-form textarea {
+  padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--ink); font: inherit;
+}
+.submit-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.submit-form .cats {
+  border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem;
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;
+}
+.submit-form .cats legend { font-size: 0.85rem; color: var(--ink-2); }
+.submit-form .cat-check, .submit-form .inline { flex-direction: row; align-items: center; gap: 0.4rem; }
+.submit-form button[type='submit'] {
+  padding: 0.75rem; border: none; border-radius: var(--radius-sm);
+  background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer;
+}
+
+/* Admin moderation table */
+.admin { max-width: 60rem; margin: 2rem auto; padding: 0 1.25rem; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.admin-table th, .admin-table td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.admin-actions button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--radius-sm); padding: 0.3rem 0.55rem; cursor: pointer; font-size: 0.8rem; }
+.admin-actions button.danger { color: #c0392b; border-color: #c0392b55; }
+.badge { padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.badge-published { background: hsl(140 55% 90%); color: hsl(140 60% 25%); }
+.badge-held { background: hsl(40 90% 90%); color: hsl(35 80% 30%); }
+.badge-rejected { background: hsl(2 80% 92%); color: hsl(2 65% 38%); }
 .site-head nav { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; font-size: 0.92rem; }
 .theme-btn {
   width: 38px; height: 38px; display: grid; place-items: center;

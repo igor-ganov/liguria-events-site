@@ -100,6 +100,7 @@ const alternates = LOCALES.map((loc) => ({
         >
         <LanguageSwitcher lang={lang} path={path} />
         <ThemeToggle ui={ui} />
+        <span class="account" data-account></span>
       </nav>
     </header>
     <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />
@@ -113,7 +114,25 @@ const alternates = LOCALES.map((loc) => ({
         {ui.footer} · data as of {payload.generatedAt.slice(0, 16)}Z ·
         <a href="https://github.com/igor-ganov/liguria-events-site" rel="noopener">source</a>
       </p>
+      <p class="foot-legal">
+        <a href="/content-policy">Content policy</a> ·
+        <a href="/terms">Terms</a> ·
+        <a href="/privacy">Privacy</a>
+      </p>
     </footer>
+
+    <dialog id="signin-dialog" class="signin-dialog" aria-label="Sign in">
+      <form method="dialog" class="signin-x-row">
+        <button class="signin-x" value="close" aria-label="Close">✕</button>
+      </form>
+      <h2>Sign in to Dove Go</h2>
+      <p>Enter your email and we'll send you a one-time sign-in link.</p>
+      <form id="signin-form">
+        <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+        <button type="submit">Send me a link</button>
+      </form>
+      <p id="signin-status" role="status" aria-live="polite"></p>
+    </dialog>
     <script>
       // Three-way theme cycle (light → dark → system) with circular reveal;
       // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
@@ -170,6 +189,74 @@ const alternates = LOCALES.map((loc) => ({
       };
       bind();
       document.addEventListener('astro:after-swap', bind);
+    </script>
+
+    <script>
+      // Sign-in dialog + header account state. The header is static, so login
+      // state is resolved client-side; the dialog means no /login URL ever
+      // enters history. Re-run after SPA swaps (DOM is replaced).
+      type Me = { user: { handle: string; role: string } | null };
+
+      const signOut = async (): Promise<void> => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        location.href = '/';
+      };
+
+      const renderAccount = (user: Me['user']): void => {
+        const slot = document.querySelector('[data-account]');
+        if (!slot) return;
+        if (user) {
+          slot.innerHTML =
+            '<a class="account-submit" href="/submit">+ Add event</a>' +
+            `<span class="account-handle">@${user.handle}</span>` +
+            '<button type="button" class="account-signout" data-signout>Sign out</button>';
+          slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
+        } else {
+          slot.innerHTML = '<button type="button" class="account-signin" data-signin>Sign in</button>';
+          slot.querySelector('[data-signin]')?.addEventListener('click', () =>
+            document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal(),
+          );
+        }
+      };
+
+      const refreshAccount = async (): Promise<void> => {
+        try {
+          const res = await fetch('/api/auth/me', { headers: { accept: 'application/json' } });
+          renderAccount(((await res.json()) as Me).user);
+        } catch {
+          renderAccount(null);
+        }
+      };
+
+      const bindSignin = (): void => {
+        const form = document.querySelector<HTMLFormElement>('#signin-form');
+        const status = document.querySelector('#signin-status');
+        if (!form || form.dataset['bound'] === 'true') return;
+        form.dataset['bound'] = 'true';
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const email = new FormData(form).get('email');
+          if (status) status.textContent = 'Sending…';
+          const res = await fetch('/api/auth/request', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          if (status)
+            status.textContent = res.ok
+              ? '✓ Check your inbox for the sign-in link (expires in 5 minutes).'
+              : 'Something went wrong — please try again.';
+        });
+      };
+
+      const initAuthUi = (): void => {
+        bindSignin();
+        void refreshAccount();
+        if (new URLSearchParams(location.search).has('signin'))
+          document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal();
+      };
+      initAuthUi();
+      document.addEventListener('astro:after-swap', initAuthUi);
     </script>
   </body>
 </html>

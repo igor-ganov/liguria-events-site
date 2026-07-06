@@ -17,8 +17,9 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     if (user) ctx.locals.user = user;
   }
 
+  // No login page — bounce to home and let the sign-in dialog open there.
   if (needsAuth(ctx.url.pathname) && !ctx.locals.user) {
-    return ctx.redirect(`/login?next=${encodeURIComponent(ctx.url.pathname)}`);
+    return ctx.redirect(`/?signin=1&next=${encodeURIComponent(ctx.url.pathname)}`);
   }
   return next();
 });

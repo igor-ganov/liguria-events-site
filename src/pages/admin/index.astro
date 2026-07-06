@@ -1,0 +1,59 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { listEventsByStatus } from '../../lib/events/list-events.ts';
+
+const user = Astro.locals.user;
+if (!user || user.role !== 'admin') {
+  return new Response('Forbidden — admins only.', { status: 403 });
+}
+const env = Astro.locals.runtime.env;
+const events = await listEventsByStatus(env.DB, ['held', 'published', 'rejected']);
+---
+
+<Layout lang="en" title="Moderation" path="admin/">
+  <main class="admin">
+    <h1>Moderation</h1>
+    <p>{events.length} event(s). Newest first.</p>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Status</th><th>Title</th><th>Dates</th><th>Origin</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {events.map((ev) => (
+          <tr data-id={ev.id}>
+            <td><span class={`badge badge-${ev.status}`}>{ev.status}</span></td>
+            <td>{ev.title_en}</td>
+            <td>{ev.start_date}{ev.end_date ? `–${ev.end_date}` : ''}</td>
+            <td>{ev.origin}</td>
+            <td class="admin-actions">
+              <button data-action="publish">Publish</button>
+              <button data-action="reject">Reject</button>
+              <button data-action="delete" class="danger">Delete</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </main>
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.admin-actions button').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const row = btn.closest('tr');
+      const id = row?.getAttribute('data-id');
+      const action = btn.dataset['action'];
+      if (!id || !action) return;
+      if (action === 'delete' && !confirm('Delete this event permanently?')) return;
+      btn.disabled = true;
+      const res = await fetch('/api/admin/action', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      });
+      if (res.ok) location.reload();
+      else btn.disabled = false;
+    });
+  });
+</script>

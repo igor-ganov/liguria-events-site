@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { PROHIBITED, POLICY_VERSION } from '../lib/moderation/policy.ts';
+---
+
+<Layout lang="en" title="Content policy" path="content-policy/">
+  <article class="legal">
+    <h1>Content Policy</h1>
+    <p class="legal-meta">Version {POLICY_VERSION}</p>
+
+    <p>
+      Dove Go lists cultural and community events in and around Genoa. This policy applies to
+      <strong>every event on the platform</strong> — whether submitted by a person or collected
+      automatically from public sources.
+    </p>
+
+    <h2>Prohibited content</h2>
+    <p>The following are not allowed on Dove Go:</p>
+    <ul>
+      {PROHIBITED.map((rule) => <li>{rule}</li>)}
+    </ul>
+
+    <h2>How we enforce it</h2>
+    <p>
+      Every event — submitted or collected — is screened automatically before it can appear.
+      Content that clearly violates this policy is withheld or rejected; borderline cases may be
+      held for human review. Administrators may remove any event at any time.
+    </p>
+    <p>
+      When we remove something you submitted, we will tell you which rule it broke, unless we are
+      legally prevented from doing so. If you believe a decision was wrong, contact us to ask for a
+      review.
+    </p>
+
+    <h2>Reporting</h2>
+    <p>
+      To report an event that violates this policy, email
+      <a href="mailto:hello@dovego.it">hello@dovego.it</a> with a link to the event and a short
+      reason. We act on reports promptly.
+    </p>
+
+    <h2>Changes</h2>
+    <p>We may update this policy; the version date above changes when we do.</p>
+  </article>
+</Layout>
