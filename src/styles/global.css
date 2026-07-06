@@ -187,6 +187,12 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 }
 .signin-x-row { display: flex; justify-content: flex-end; margin: -0.5rem -0.5rem 0 0; }
 .signin-x { background: none; border: none; color: var(--ink-2); font-size: 1.1rem; cursor: pointer; }
+.signin-or { display: flex; align-items: center; color: var(--ink-2); font-size: 0.8rem; margin: 0.7rem 0 0.4rem; }
+.signin-or::before, .signin-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.signin-or span { padding: 0 0.6rem; }
+.passkey-btn { width: 100%; }
+.passkey-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.passkey-status { font-size: 0.85rem; color: var(--ink-2); }
 .foot-legal { font-size: 0.85rem; }
 .foot-legal a { color: var(--ink-2); }
 

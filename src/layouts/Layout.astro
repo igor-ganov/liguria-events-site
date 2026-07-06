@@ -131,6 +131,8 @@ const alternates = LOCALES.map((loc) => ({
         <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" autofocus />
         <button type="submit">Send me a link</button>
       </form>
+      <div class="signin-or"><span>or</span></div>
+      <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
       <p id="signin-status" role="status" aria-live="polite"></p>
     </dialog>
     <script>
@@ -192,6 +194,9 @@ const alternates = LOCALES.map((loc) => ({
     </script>
 
     <script>
+      import { startAuthentication } from '@simplewebauthn/browser';
+      import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+
       // Sign-in dialog + header account state. The header is static, so login
       // state is resolved client-side; the dialog means no /login URL ever
       // enters history. Re-run after SPA swaps (DOM is replaced).
@@ -246,6 +251,27 @@ const alternates = LOCALES.map((loc) => ({
             status.textContent = res.ok
               ? '✓ Check your inbox for the sign-in link (expires in 5 minutes).'
               : 'Something went wrong — please try again.';
+        });
+
+        document.querySelector('#passkey-signin')?.addEventListener('click', async () => {
+          if (status) status.textContent = 'Waiting for your passkey…';
+          try {
+            const optRes = await fetch('/api/passkey/auth-options', { method: 'POST' });
+            const { options, sessionId } = (await optRes.json()) as {
+              options: PublicKeyCredentialRequestOptionsJSON;
+              sessionId: string;
+            };
+            const response = await startAuthentication({ optionsJSON: options });
+            const verifyRes = await fetch('/api/passkey/auth-verify', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ sessionId, response }),
+            });
+            if (verifyRes.ok) location.reload();
+            else if (status) status.textContent = 'Passkey sign-in failed — try the email link.';
+          } catch {
+            if (status) status.textContent = 'Passkey sign-in was cancelled.';
+          }
         });
       };
 
