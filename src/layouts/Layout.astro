@@ -208,20 +208,21 @@ const alternates = LOCALES.map((loc) => ({
       };
 
       const renderAccount = (user: Me['user']): void => {
-        const slot = document.querySelector('[data-account]');
-        if (!slot) return;
-        if (user) {
-          slot.innerHTML =
-            '<a class="account-submit" href="/submit">+ Add event</a>' +
-            `<span class="account-handle">@${user.handle}</span>` +
-            '<button type="button" class="account-signout" data-signout>Sign out</button>';
-          slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
-        } else {
-          slot.innerHTML = '<button type="button" class="account-signin" data-signin>Sign in</button>';
-          slot.querySelector('[data-signin]')?.addEventListener('click', () =>
-            document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal(),
-          );
-        }
+        // Populate every account slot — the desktop header and the mobile menu.
+        document.querySelectorAll('[data-account]').forEach((slot) => {
+          if (user) {
+            slot.innerHTML =
+              '<a class="account-submit" href="/submit">+ Add event</a>' +
+              `<span class="account-handle">@${user.handle}</span>` +
+              '<button type="button" class="account-signout" data-signout>Sign out</button>';
+            slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
+          } else {
+            slot.innerHTML = '<button type="button" class="account-signin" data-signin>Sign in</button>';
+            slot.querySelector('[data-signin]')?.addEventListener('click', () =>
+              document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal(),
+            );
+          }
+        });
       };
 
       const refreshAccount = async (): Promise<void> => {
