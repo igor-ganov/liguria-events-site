@@ -131,8 +131,10 @@ const alternates = LOCALES.map((loc) => ({
         <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" autofocus />
         <button type="submit">Send me a link</button>
       </form>
-      <div class="signin-or"><span>or</span></div>
-      <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
+      <div class="passkey-alt" data-passkey-alt hidden>
+        <div class="signin-or"><span>or</span></div>
+        <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
+      </div>
       <p id="signin-status" role="status" aria-live="polite"></p>
     </dialog>
     <script>
@@ -254,26 +256,31 @@ const alternates = LOCALES.map((loc) => ({
               : 'Something went wrong — please try again.';
         });
 
-        document.querySelector('#passkey-signin')?.addEventListener('click', async () => {
-          if (status) status.textContent = 'Waiting for your passkey…';
-          try {
-            const optRes = await fetch('/api/passkey/auth-options', { method: 'POST' });
-            const { options, sessionId } = (await optRes.json()) as {
-              options: PublicKeyCredentialRequestOptionsJSON;
-              sessionId: string;
-            };
-            const response = await startAuthentication({ optionsJSON: options });
-            const verifyRes = await fetch('/api/passkey/auth-verify', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ sessionId, response }),
-            });
-            if (verifyRes.ok) location.reload();
-            else if (status) status.textContent = 'Passkey sign-in failed — try the email link.';
-          } catch {
-            if (status) status.textContent = 'Passkey sign-in was cancelled.';
-          }
-        });
+        // Progressive enhancement: only offer passkeys where WebAuthn exists.
+        const passkeyBtn = document.querySelector<HTMLButtonElement>('#passkey-signin');
+        if (passkeyBtn && globalThis.PublicKeyCredential) {
+          document.querySelector('[data-passkey-alt]')?.removeAttribute('hidden');
+          passkeyBtn.addEventListener('click', async () => {
+            if (status) status.textContent = 'Waiting for your passkey…';
+            try {
+              const optRes = await fetch('/api/passkey/auth-options', { method: 'POST' });
+              const { options, challengeId } = (await optRes.json()) as {
+                options: PublicKeyCredentialRequestOptionsJSON;
+                challengeId: string;
+              };
+              const response = await startAuthentication({ optionsJSON: options });
+              const verifyRes = await fetch('/api/passkey/auth-verify', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ challengeId, response }),
+              });
+              if (verifyRes.ok) location.reload();
+              else if (status) status.textContent = 'Passkey sign-in failed — try the email link.';
+            } catch {
+              if (status) status.textContent = 'Passkey sign-in was cancelled.';
+            }
+          });
+        }
       };
 
       const initAuthUi = (): void => {

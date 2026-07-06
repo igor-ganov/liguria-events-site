@@ -6,19 +6,24 @@ import { takeChallenge } from '../../../lib/auth/challenges.ts';
 
 export const prerender = false;
 
-/** Finish passkey registration and store the credential. */
+/** Finish passkey registration: consume the challenge (bound to this user) and store the credential. */
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   if (!user) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const env = locals.runtime.env;
 
-  const response = (await request.json()) as RegistrationResponseJSON;
-  const challenge = await takeChallenge(env.SESSION, `reg:${user.id}`);
-  if (!challenge || challenge.purpose !== 'register') {
-    return Response.json({ error: 'no_challenge' }, { status: 400 });
+  const body = (await request.json().catch(() => ({}))) as {
+    challengeId?: string;
+    response?: RegistrationResponseJSON;
+  };
+  if (!body.challengeId || !body.response) return Response.json({ error: 'bad_request' }, { status: 400 });
+
+  const challenge = await takeChallenge(env.DB, body.challengeId);
+  if (!challenge || challenge.purpose !== 'register' || challenge.userId !== user.id) {
+    return Response.json({ error: 'invalid_challenge' }, { status: 400 });
   }
 
-  const result = await verifyRegistration(response, challenge.challenge, env.PASSKEY_RP_ID, env.PASSKEY_ORIGIN);
+  const result = await verifyRegistration(body.response, challenge.challenge, env.PASSKEY_RP_ID, env.PASSKEY_ORIGIN);
   if (!result.verified || !result.registrationInfo) {
     return Response.json({ verified: false }, { status: 400 });
   }
@@ -36,5 +41,5 @@ export const POST: APIRoute = async ({ request, locals }) => {
     },
     new Date().toISOString(),
   );
-  return Response.json({ verified: true });
+  return Response.json({ ok: true, verified: true });
 };

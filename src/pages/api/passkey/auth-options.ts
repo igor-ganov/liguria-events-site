@@ -4,11 +4,11 @@ import { putChallenge } from '../../../lib/auth/challenges.ts';
 
 export const prerender = false;
 
-/** Begin passkey sign-in (discoverable credentials — no email needed). */
+/** Begin passkey sign-in (discoverable credentials); returns a challenge id. */
 export const POST: APIRoute = async ({ locals }) => {
   const env = locals.runtime.env;
   const options = await authenticationOptions(env.PASSKEY_RP_ID, []);
-  const sessionId = crypto.randomUUID();
-  await putChallenge(env.SESSION, `auth:${sessionId}`, { challenge: options.challenge, purpose: 'auth' });
-  return Response.json({ options, sessionId });
+  const challengeId = crypto.randomUUID();
+  await putChallenge(env.DB, challengeId, { purpose: 'auth', challenge: options.challenge });
+  return Response.json({ challengeId, options });
 };

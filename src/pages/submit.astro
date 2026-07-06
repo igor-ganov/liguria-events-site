@@ -15,7 +15,7 @@ const ui = await uiOf('en');
       Signed in as <strong>{user?.email}</strong>. Every submission is screened against our
       <a href="/content-policy">Content Policy</a> before it can appear.
     </p>
-    <p class="passkey-row">
+    <p class="passkey-row" data-passkey-row hidden>
       <button type="button" id="passkey-register" class="account-signin passkey-btn">🔑 Add a passkey to this device</button>
       <span id="passkey-status" class="passkey-status" role="status" aria-live="polite"></span>
     </p>
@@ -46,25 +46,32 @@ const ui = await uiOf('en');
 
   const pkBtn = document.getElementById('passkey-register');
   const pkStatus = document.getElementById('passkey-status');
-  pkBtn?.addEventListener('click', async () => {
-    if (pkStatus) pkStatus.textContent = 'Follow your device prompt…';
-    try {
-      const optRes = await fetch('/api/passkey/register-options', { method: 'POST' });
-      const options = (await optRes.json()) as PublicKeyCredentialCreationOptionsJSON;
-      const response = await startRegistration({ optionsJSON: options });
-      const verifyRes = await fetch('/api/passkey/register-verify', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(response),
-      });
-      if (pkStatus)
-        pkStatus.textContent = verifyRes.ok
-          ? '✓ Passkey added — you can sign in with it next time.'
-          : 'Could not add the passkey.';
-    } catch {
-      if (pkStatus) pkStatus.textContent = 'Passkey setup was cancelled.';
-    }
-  });
+  // Progressive enhancement: only offer passkeys where WebAuthn exists.
+  if (pkBtn && globalThis.PublicKeyCredential) {
+    document.querySelector('[data-passkey-row]')?.removeAttribute('hidden');
+    pkBtn.addEventListener('click', async () => {
+      if (pkStatus) pkStatus.textContent = 'Follow your device prompt…';
+      try {
+        const optRes = await fetch('/api/passkey/register-options', { method: 'POST' });
+        const { challengeId, options } = (await optRes.json()) as {
+          challengeId: string;
+          options: PublicKeyCredentialCreationOptionsJSON;
+        };
+        const response = await startRegistration({ optionsJSON: options });
+        const verifyRes = await fetch('/api/passkey/register-verify', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ challengeId, response }),
+        });
+        if (pkStatus)
+          pkStatus.textContent = verifyRes.ok
+            ? '✓ Passkey added — you can sign in with it next time.'
+            : 'Could not add the passkey.';
+      } catch {
+        if (pkStatus) pkStatus.textContent = 'Passkey setup was cancelled.';
+      }
+    });
+  }
 
   const form = document.getElementById('submit-form') as HTMLFormElement;
   const status = document.getElementById('submit-status') as HTMLElement;

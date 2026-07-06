@@ -7,15 +7,18 @@ import { signSession, SESSION_COOKIE } from '../../../lib/auth/session.ts';
 
 export const prerender = false;
 
-/** Finish passkey sign-in and issue a session. */
+/** Finish passkey sign-in: consume the challenge, verify, issue a session. */
 export const POST: APIRoute = async ({ request, locals, cookies }) => {
   const env = locals.runtime.env;
-  const body = (await request.json()) as { sessionId?: string; response?: AuthenticationResponseJSON };
-  if (!body.sessionId || !body.response) return Response.json({ error: 'bad_request' }, { status: 400 });
+  const body = (await request.json().catch(() => ({}))) as {
+    challengeId?: string;
+    response?: AuthenticationResponseJSON;
+  };
+  if (!body.challengeId || !body.response) return Response.json({ error: 'bad_request' }, { status: 400 });
 
-  const challenge = await takeChallenge(env.SESSION, `auth:${body.sessionId}`);
+  const challenge = await takeChallenge(env.DB, body.challengeId);
   if (!challenge || challenge.purpose !== 'auth') {
-    return Response.json({ error: 'no_challenge' }, { status: 400 });
+    return Response.json({ error: 'invalid_challenge' }, { status: 400 });
   }
 
   const credential = await getCredential(env.DB, body.response.id);
@@ -40,5 +43,5 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     path: '/',
     maxAge: 7 * 24 * 3600,
   });
-  return Response.json({ verified: true });
+  return Response.json({ ok: true, verified: true });
 };
