@@ -6,9 +6,27 @@
   "main": "./dist/_worker.js/index.js",
   "assets": { "directory": "./dist", "binding": "ASSETS" },
   "observability": { "enabled": true },
+  // ── Production (dovego.it) — the default env: `wrangler deploy` ──
+  "ai": { "binding": "AI" },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "CRAWLER_ENABLED": "1",
+    "FIXED_TODAY": "",
+    "PASSKEY_RP_ID": "dovego.it",
+    "PASSKEY_ORIGIN": "https://dovego.it",
+    "PUBLIC_ORIGIN": "https://dovego.it",
+    "MAIL_FROM": "Dove Go <login@send.dovego.it>"
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "dovego", "database_id": "2f65133c-071e-4366-8214-e0942845f792" }
+  ],
+  "kv_namespaces": [{ "binding": "SESSION", "id": "8b7c9fc86355423c8c143d7dc8f18506" }],
+  "routes": [
+    { "pattern": "dovego.it", "custom_domain": true },
+    { "pattern": "www.dovego.it", "custom_domain": true }
+  ],
   "env": {
-    // Dev (dev.dovego.it) — isolated data, crawler off, clock pinned to today.
-    // Production (dovego.it) gets its own env block at the Phase 4 cutover.
+    // ── Dev (dev.dovego.it) — `wrangler deploy --env dev` ──
     "dev": {
       "name": "dovego-dev",
       "vars": {
