@@ -22,5 +22,6 @@ export type FeedHost = {
     setFrom: (value: string) => void;
     setTo: (value: string) => void;
     clearFilters: () => void;
+    augment: () => Promise<void>;
   }>;
 };

@@ -35,6 +35,7 @@ export class EventsFeed extends LitElement {
   public override connectedCallback(): void {
     super.connectedCallback();
     this.ctl.init();
+    void this.ctl.augment();
   }
 
   protected override createRenderRoot(): HTMLElement {
