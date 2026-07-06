@@ -33,10 +33,7 @@ const ui = await uiOf('en');
           <label class="cat-check"><input type="checkbox" name="category" value={c} /> {ui.cat[c]}</label>
         ))}
       </fieldset>
-      <div class="row2">
-        <label class="inline"><input type="checkbox" name="free" /> Free entry</label>
-        <label class="inline"><input type="checkbox" name="gem" /> Hidden gem</label>
-      </div>
+      <label class="inline"><input type="checkbox" name="free" /> Free entry</label>
       <button type="submit">Submit for review</button>
     </form>
     <p id="submit-status" role="status" aria-live="polite"></p>
@@ -86,27 +83,19 @@ const ui = await uiOf('en');
       venue: fd.get('venue'),
       categories: fd.getAll('category'),
       free: fd.get('free') === 'on',
-      gem: fd.get('gem') === 'on',
     };
-    status.textContent = 'Checking…';
+    status.textContent = 'Submitting…';
     const res = await fetch('/api/events/submit', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = (await res.json()) as { status?: string; reason?: string; detail?: string };
+    const data = (await res.json()) as { detail?: string };
     if (!res.ok) {
       status.textContent = data.detail ?? 'Please check the form and try again.';
       return;
     }
-    if (data.status === 'published') {
-      status.textContent = '✓ Published — it will appear in the feed.';
-      form.reset();
-    } else if (data.status === 'held') {
-      status.textContent = `⏳ Submitted — held for review${data.reason ? ` (${data.reason})` : ''}.`;
-      form.reset();
-    } else {
-      status.textContent = `✕ Not accepted: ${data.reason ?? 'it conflicts with the content policy'}.`;
-    }
+    status.textContent = '✓ Submitted — it goes through AI review, and we’ll email you the result.';
+    form.reset();
   });
 </script>

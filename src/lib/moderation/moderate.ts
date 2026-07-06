@@ -2,7 +2,7 @@ import { policyRubric } from './policy.ts';
 
 type AiRun = { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
 
-export type Verdict = { verdict: 'allow' | 'hold' | 'reject'; reason: string };
+export type Verdict = { verdict: 'allow' | 'hold' | 'reject'; reason: string; gem: boolean };
 
 const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 
@@ -17,15 +17,15 @@ const extractText = (out: unknown): string => {
 
 const parseVerdict = (text: string): Verdict => {
   const match = text.match(/\{[\s\S]*\}/);
-  if (!match) return { verdict: 'hold', reason: 'could not classify' };
+  if (!match) return { verdict: 'hold', reason: 'could not classify', gem: false };
   try {
-    const parsed = JSON.parse(match[0]) as { verdict?: unknown; reason?: unknown };
+    const parsed = JSON.parse(match[0]) as { verdict?: unknown; reason?: unknown; gem?: unknown };
     const v = parsed.verdict;
     const verdict = v === 'allow' || v === 'reject' ? v : 'hold';
     const reason = typeof parsed.reason === 'string' ? parsed.reason.slice(0, 300) : '';
-    return { verdict, reason };
+    return { verdict, reason, gem: parsed.gem === true };
   } catch {
-    return { verdict: 'hold', reason: 'could not classify' };
+    return { verdict: 'hold', reason: 'could not classify', gem: false };
   }
 };
 
@@ -39,8 +39,10 @@ export const moderateEvent = async (
   const prompt =
     `${policyRubric()}\n\n` +
     'Classify the event below for a public events website in Genoa, Italy.\n' +
-    'Reply with ONLY JSON: {"verdict":"allow"|"hold"|"reject","reason":"<=20 words"}.\n' +
-    'allow = clearly acceptable. reject = clearly breaks a rule above. hold = unsure or borderline.\n\n' +
+    'Reply with ONLY JSON: {"verdict":"allow"|"hold"|"reject","reason":"<=20 words","gem":true|false}.\n' +
+    'allow = clearly acceptable. reject = clearly breaks a rule above. hold = unsure or borderline.\n' +
+    'gem = true ONLY for an offbeat, niche, non-touristy hidden gem (a neighbourhood\n' +
+    'happening, unconventional venue, oddball one-off); false for mainstream fare.\n\n' +
     `Title: ${title}\nDescription: ${description}`;
   try {
     const out = await ai.run(MODEL, {
@@ -52,6 +54,6 @@ export const moderateEvent = async (
     });
     return parseVerdict(extractText(out));
   } catch {
-    return { verdict: 'hold', reason: 'moderation temporarily unavailable' };
+    return { verdict: 'hold', reason: 'moderation temporarily unavailable', gem: false };
   }
 };

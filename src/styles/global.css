@@ -240,6 +240,7 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .badge { padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
 .badge-published { background: hsl(140 55% 90%); color: hsl(140 60% 25%); }
 .badge-held { background: hsl(40 90% 90%); color: hsl(35 80% 30%); }
+.badge-pending { background: hsl(220 40% 92%); color: hsl(220 40% 40%); }
 .badge-rejected { background: hsl(2 80% 92%); color: hsl(2 65% 38%); }
 .site-head nav { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; font-size: 0.92rem; }
 .theme-btn {
