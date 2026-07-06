@@ -11,6 +11,7 @@ const ui = await uiOf(lang);
 ---
 
 <Layout lang={lang} title={ui.nav.map} path="map/">
+  <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
     <div class="map-dates">
@@ -31,7 +32,12 @@ const ui = await uiOf(lang);
       <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
     </div>
   </div>
-  <div class="map-canvas" data-map-canvas></div>
+  <div class="map-canvas" data-map-canvas>
+    <div class="map-retry" data-map-retry hidden>
+      <p>The map couldn't load — check your connection.</p>
+      <button type="button" data-map-reload>Retry</button>
+    </div>
+  </div>
 </Layout>
 
 <script>
@@ -393,12 +399,31 @@ const ui = await uiOf(lang);
     };
 
     canvas.dataset['loading'] = 'true';
+    const retryEl = document.querySelector<HTMLElement>('[data-map-retry]');
+    let loaded = false;
+    // On a slow link, reveal the map after a few seconds (DOM markers show, base
+    // tiles stream in) rather than blocking on full tile load; only surface a
+    // Retry if the map truly never comes up.
+    const softReveal = setTimeout(() => {
+      if (!loaded) canvas.dataset['loading'] = 'false';
+    }, 9000);
+    const hardFail = setTimeout(() => {
+      if (!loaded) {
+        canvas.dataset['loading'] = 'false';
+        retryEl?.removeAttribute('hidden');
+      }
+    }, 30000);
     map.on('load', () => {
+      loaded = true;
+      clearTimeout(softReveal);
+      clearTimeout(hardFail);
       canvas.dataset['loading'] = 'false';
+      retryEl?.setAttribute('hidden', '');
       rebuildIndex();
       fitAll();
       render();
     });
+    document.querySelector('[data-map-reload]')?.addEventListener('click', () => location.reload());
     map.on('moveend', render);
 
     // ── civici: Genoa comune WFS address numbers (cadastre) at street zoom ──
