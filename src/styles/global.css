@@ -137,6 +137,24 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .brand-mark { flex: none; display: block; }
 .brand-word { font-weight: 800; letter-spacing: -0.02em; }
 .brand-go { color: var(--brand); }
+
+/* Auth pages (login / verify / submit) */
+.auth-card {
+  max-width: 26rem; margin: 3rem auto; padding: 1.75rem;
+  display: flex; flex-direction: column; gap: 0.9rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+}
+.auth-card h1 { margin: 0; font-size: 1.4rem; }
+.auth-card p { margin: 0; color: var(--ink-2); }
+.auth-card form { display: flex; flex-direction: column; gap: 0.7rem; }
+.auth-card input {
+  padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--ink); font: inherit;
+}
+.auth-card button, .auth-card .btn {
+  padding: 0.7rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer;
+  background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; text-align: center;
+}
 .site-head nav { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; font-size: 0.92rem; }
 .theme-btn {
   width: 38px; height: 38px; display: grid; place-items: center;

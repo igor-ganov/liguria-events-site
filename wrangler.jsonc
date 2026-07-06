@@ -11,7 +11,15 @@
     // Production (dovego.it) gets its own env block at the Phase 4 cutover.
     "dev": {
       "name": "dovego-dev",
-      "vars": { "ENVIRONMENT": "dev", "CRAWLER_ENABLED": "0", "FIXED_TODAY": "2026-07-06" },
+      "vars": {
+        "ENVIRONMENT": "dev",
+        "CRAWLER_ENABLED": "0",
+        "FIXED_TODAY": "2026-07-06",
+        "PASSKEY_RP_ID": "dev.dovego.it",
+        "PASSKEY_ORIGIN": "https://dev.dovego.it",
+        "PUBLIC_ORIGIN": "https://dev.dovego.it",
+        "MAIL_FROM": "Dove Go <login@send.dovego.it>"
+      },
       "ai": { "binding": "AI" },
       "d1_databases": [
         { "binding": "DB", "database_name": "dovego-dev", "database_id": "cf5ff131-46c0-40bc-b97c-b0dff591344c" }

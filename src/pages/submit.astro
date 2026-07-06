@@ -1,0 +1,18 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+
+// Guarded by middleware — locals.user is guaranteed here.
+const user = Astro.locals.user;
+---
+
+<Layout lang="en" title="Submit an event" path="submit/">
+  <main class="auth-card">
+    <h1>Submit an event</h1>
+    <p>Signed in as <strong>{user?.email}</strong>.</p>
+    <p>The submission form lands here next. <a href="/">Back to the feed</a></p>
+    <form method="POST" action="/api/auth/logout">
+      <button type="submit">Sign out</button>
+    </form>
+  </main>
+</Layout>

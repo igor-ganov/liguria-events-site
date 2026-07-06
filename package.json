@@ -20,6 +20,8 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12",
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.2",
     "astro": "^5.17.1",
     "effect": "^3.19.4",
     "lit": "^3.3.2",
