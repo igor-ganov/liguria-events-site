@@ -1,5 +1,3 @@
-import type { D1Database } from '@cloudflare/workers-types';
-
 const toB64Url = (bytes: Uint8Array): string =>
   btoa(String.fromCharCode(...bytes)).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 

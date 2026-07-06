@@ -1,5 +1,3 @@
-import type { KVNamespace } from '@cloudflare/workers-types';
-
 // Short-lived, single-use WebAuthn challenges in KV.
 const PREFIX = 'chal:';
 const TTL_S = 300;

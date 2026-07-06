@@ -1,5 +1,3 @@
-import type { D1Database } from '@cloudflare/workers-types';
-
 export type EventRow = {
   id: string;
   origin: string;
