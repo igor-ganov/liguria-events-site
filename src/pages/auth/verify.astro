@@ -11,7 +11,7 @@ const email = await consumeMagicToken(env.SESSION, token);
 
 if (email) {
   const nowMs = Date.now();
-  const user = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString());
+  const { user, isNew } = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString());
   const session = await signSession(env.SESSION_SECRET, user.id, nowMs);
   Astro.cookies.set(SESSION_COOKIE, session, {
     httpOnly: true,
@@ -20,7 +20,9 @@ if (email) {
     path: '/',
     maxAge: 7 * 24 * 3600,
   });
-  return Astro.redirect('/submit');
+  // Land on the home page; first-time users get offered a passkey.
+  if (isNew) return Astro.redirect('/?setup=passkey');
+  return Astro.redirect('/');
 }
 ---
 
@@ -28,6 +30,6 @@ if (email) {
   <main class="auth-card">
     <h1>Link expired or already used</h1>
     <p>Sign-in links work only once and for five minutes. Please request a fresh one.</p>
-    <a class="btn" href="/login">Back to sign in</a>
+    <a class="btn" href="/?signin=1">Back to sign in</a>
   </main>
 </Layout>

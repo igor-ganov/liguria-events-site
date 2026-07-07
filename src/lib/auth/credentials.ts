@@ -89,3 +89,26 @@ export const bumpCounter = async (db: D1Database, credentialId: string, counter:
     .bind(counter, nowIso, credentialId)
     .run();
 };
+
+export type PasskeyInfo = { id: string; deviceName: string; createdAt: string; lastUsedAt: string | null };
+
+export const listUserPasskeys = async (db: D1Database, userId: string): Promise<PasskeyInfo[]> => {
+  const r = await db
+    .prepare('SELECT credential_id, device_name, created_at, last_used_at FROM passkey_credentials WHERE user_id = ? ORDER BY created_at')
+    .bind(userId)
+    .all<{ credential_id: string; device_name: string | null; created_at: string; last_used_at: string | null }>();
+  return (r.results ?? []).map((row) => ({
+    id: row.credential_id,
+    deviceName: row.device_name ?? 'Passkey',
+    createdAt: row.created_at,
+    lastUsedAt: row.last_used_at,
+  }));
+};
+
+/** Delete a passkey, scoped to its owner (a user can't delete another's). */
+export const deleteCredential = async (db: D1Database, userId: string, credentialId: string): Promise<void> => {
+  await db
+    .prepare('DELETE FROM passkey_credentials WHERE credential_id = ? AND user_id = ?')
+    .bind(credentialId, userId)
+    .run();
+};

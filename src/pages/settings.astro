@@ -1,0 +1,76 @@
+---
+export const prerender = false;
+import Layout from '../layouts/Layout.astro';
+import { listUserPasskeys } from '../lib/auth/credentials.ts';
+
+const user = Astro.locals.user;
+const passkeys = user ? await listUserPasskeys(Astro.locals.runtime.env.DB, user.id) : [];
+---
+
+<Layout lang="en" title="Settings" path="settings/">
+  <main class="auth-card settings-card">
+    <h1>Settings</h1>
+    <p>Signed in as <strong>{user?.email}</strong> (@{user?.handle}).</p>
+
+    <section class="settings-section">
+      <h2>Passkeys</h2>
+      <p class="muted">Sign in faster and more securely — Face ID, fingerprint, or device PIN.</p>
+      <ul class="passkey-list">
+        {passkeys.map((p) => (
+          <li data-id={p.id}>
+            <span>{p.deviceName} · added {p.createdAt.slice(0, 10)}</span>
+            <button type="button" class="link-btn" data-del>Remove</button>
+          </li>
+        ))}
+      </ul>
+      <button type="button" id="passkey-register" class="account-signin passkey-btn" hidden>🔑 Add a passkey</button>
+      <span id="passkey-status" class="passkey-status" role="status" aria-live="polite"></span>
+    </section>
+
+    <button type="button" class="link-btn" data-signout>Sign out</button>
+  </main>
+</Layout>
+
+<script>
+  import { startRegistration } from '@simplewebauthn/browser';
+  const btn = document.getElementById('passkey-register');
+  const status = document.getElementById('passkey-status');
+  if (btn && globalThis.PublicKeyCredential) {
+    btn.hidden = false;
+    btn.addEventListener('click', async () => {
+      if (status) status.textContent = 'Follow your device prompt…';
+      try {
+        const opt = (await (await fetch('/api/passkey/register-options', { method: 'POST' })).json()) as {
+          challengeId: string;
+          options: import('@simplewebauthn/browser').PublicKeyCredentialCreationOptionsJSON;
+        };
+        const response = await startRegistration({ optionsJSON: opt.options });
+        const res = await fetch('/api/passkey/register-verify', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ challengeId: opt.challengeId, response }),
+        });
+        if (res.ok) location.reload();
+        else if (status) status.textContent = 'Could not add the passkey.';
+      } catch {
+        if (status) status.textContent = 'Passkey setup was cancelled.';
+      }
+    });
+  }
+  document.querySelectorAll('[data-del]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      const id = b.closest('li')?.getAttribute('data-id');
+      if (!id) return;
+      await fetch('/api/passkey/delete', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      location.reload();
+    }),
+  );
+  document.querySelector('[data-signout]')?.addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    location.href = '/';
+  });
+</script>

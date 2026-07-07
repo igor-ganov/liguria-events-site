@@ -199,6 +199,13 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .passkey-btn { width: 100%; }
 .passkey-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 .passkey-status { font-size: 0.85rem; color: var(--ink-2); }
+.link-btn { background: none; border: none; color: var(--accent); cursor: pointer; font: inherit; padding: 0; text-align: left; }
+.muted { color: var(--ink-2); font-size: 0.9rem; }
+.settings-section { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.settings-section h2 { margin: 0; font-size: 1.1rem; }
+.passkey-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.passkey-list li { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-size: 0.9rem; }
+.account-handle { text-decoration: none; }
 .foot-legal { font-size: 0.85rem; }
 .foot-legal a { color: var(--ink-2); }
 

@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { readSession, SESSION_COOKIE } from './lib/auth/session.ts';
 import { getUserById } from './lib/auth/users.ts';
 
-const PROTECTED = ['/submit', '/admin'];
+const PROTECTED = ['/submit', '/admin', '/settings'];
 
 const needsAuth = (path: string): boolean =>
   PROTECTED.some((p) => path === p || path.startsWith(`${p}/`));

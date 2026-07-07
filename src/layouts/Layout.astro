@@ -126,15 +126,29 @@ const alternates = LOCALES.map((loc) => ({
         <button class="signin-x" value="close" aria-label="Close">✕</button>
       </form>
       <h2>Sign in to Dove Go</h2>
-      <p>Enter your email and we'll send you a one-time sign-in link.</p>
-      <form id="signin-form">
-        <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" autofocus />
-        <button type="submit">Send me a link</button>
-      </form>
-      <div class="passkey-alt" data-passkey-alt hidden>
-        <div class="signin-or"><span>or</span></div>
-        <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
+
+      <div data-step="email">
+        <p>Enter your email — we'll send you a sign-in link and a code.</p>
+        <form id="signin-form">
+          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+          <button type="submit">Send me a code</button>
+        </form>
+        <div class="passkey-alt" data-passkey-alt hidden>
+          <div class="signin-or"><span>or</span></div>
+          <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
+        </div>
       </div>
+
+      <div data-step="code" hidden>
+        <p>Enter the 6-digit code we emailed to <strong data-code-email></strong> — or click the link in the email.</p>
+        <form id="code-form">
+          <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+            pattern="[0-9]{6}" maxlength="6" placeholder="123456" />
+          <button type="submit">Verify code</button>
+        </form>
+        <button type="button" class="link-btn" data-code-back>← Use a different email</button>
+      </div>
+
       <p id="signin-status" role="status" aria-live="polite"></p>
     </dialog>
     <script>
@@ -196,89 +210,162 @@ const alternates = LOCALES.map((loc) => ({
     </script>
 
     <script>
-      import { startAuthentication } from '@simplewebauthn/browser';
-      import type { PublicKeyCredentialRequestOptionsJSON } from '@simplewebauthn/browser';
+      import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
 
-      // Sign-in dialog + header account state. The header is static, so login
-      // state is resolved client-side; the dialog means no /login URL ever
-      // enters history. Re-run after SPA swaps (DOM is replaced).
+      // Sign-in dialog + header account state (header is static → resolved
+      // client-side). Re-run after SPA swaps (DOM is replaced).
       type Me = { user: { handle: string; role: string } | null };
+      const hasWebAuthn = (): boolean => Boolean(globalThis.PublicKeyCredential);
+      const dialog = (): HTMLDialogElement | null => document.querySelector('#signin-dialog');
+      const setStatus = (text: string): void => {
+        const el = document.querySelector('#signin-status');
+        if (el) el.textContent = text;
+      };
+      const showStep = (step: 'email' | 'code'): void => {
+        document.querySelector('[data-step="email"]')?.toggleAttribute('hidden', step !== 'email');
+        document.querySelector('[data-step="code"]')?.toggleAttribute('hidden', step !== 'code');
+      };
+      let pendingEmail = '';
 
       const signOut = async (): Promise<void> => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/';
       };
 
+      // Discoverable-credential sign-in ceremony; true on success.
+      const passkeyLogin = async (): Promise<boolean> => {
+        try {
+          const opt = (await (await fetch('/api/passkey/auth-options', { method: 'POST' })).json()) as {
+            challengeId: string;
+            options: import('@simplewebauthn/browser').PublicKeyCredentialRequestOptionsJSON;
+          };
+          const response = await startAuthentication({ optionsJSON: opt.options });
+          const res = await fetch('/api/passkey/auth-verify', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ challengeId: opt.challengeId, response }),
+          });
+          return res.ok;
+        } catch {
+          return false;
+        }
+      };
+
+      // Passkey registration (native browser prompt is the offer); true on success.
+      const passkeyRegister = async (): Promise<boolean> => {
+        try {
+          const opt = (await (await fetch('/api/passkey/register-options', { method: 'POST' })).json()) as {
+            challengeId: string;
+            options: import('@simplewebauthn/browser').PublicKeyCredentialCreationOptionsJSON;
+          };
+          const response = await startRegistration({ optionsJSON: opt.options });
+          const res = await fetch('/api/passkey/register-verify', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ challengeId: opt.challengeId, response }),
+          });
+          return res.ok;
+        } catch {
+          return false;
+        }
+      };
+
+      // Open the dialog and immediately offer the passkey if one is usable.
+      const openSignin = async (): Promise<void> => {
+        showStep('email');
+        setStatus('');
+        dialog()?.showModal();
+        if (!hasWebAuthn()) return;
+        setStatus('Looking for a passkey…');
+        if (await passkeyLogin()) {
+          location.reload();
+          return;
+        }
+        setStatus('');
+        document.querySelector<HTMLInputElement>('#signin-form input[name=email]')?.focus();
+      };
+
       const renderAccount = (user: Me['user']): void => {
-        // Populate every account slot — the desktop header and the mobile menu.
         document.querySelectorAll('[data-account]').forEach((slot) => {
           if (user) {
             slot.innerHTML =
               '<a class="account-submit" href="/submit">+ Add event</a>' +
-              `<span class="account-handle">@${user.handle}</span>` +
+              `<a class="account-handle" href="/settings">@${user.handle}</a>` +
               '<button type="button" class="account-signout" data-signout>Sign out</button>';
             slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
           } else {
             slot.innerHTML = '<button type="button" class="account-signin" data-signin>Sign in</button>';
-            slot.querySelector('[data-signin]')?.addEventListener('click', () =>
-              document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal(),
-            );
+            slot.querySelector('[data-signin]')?.addEventListener('click', () => void openSignin());
           }
         });
       };
 
       const refreshAccount = async (): Promise<void> => {
         try {
-          const res = await fetch('/api/auth/me', { headers: { accept: 'application/json' } });
-          renderAccount(((await res.json()) as Me).user);
+          renderAccount(((await (await fetch('/api/auth/me')).json()) as Me).user);
         } catch {
           renderAccount(null);
         }
       };
 
+      const bind = (sel: string, event: string, handler: (el: Element) => void): void => {
+        const el = document.querySelector(sel);
+        if (el && (el as HTMLElement).dataset['bound'] !== 'true') {
+          (el as HTMLElement).dataset['bound'] = 'true';
+          el.addEventListener(event, () => handler(el));
+        }
+      };
+
       const bindSignin = (): void => {
         const form = document.querySelector<HTMLFormElement>('#signin-form');
-        const status = document.querySelector('#signin-status');
-        if (!form || form.dataset['bound'] === 'true') return;
-        form.dataset['bound'] = 'true';
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          const email = new FormData(form).get('email');
-          if (status) status.textContent = 'Sending…';
-          const res = await fetch('/api/auth/request', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ email }),
+        if (form && form.dataset['emailBound'] !== 'true') {
+          form.dataset['emailBound'] = 'true';
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            pendingEmail = String(new FormData(form).get('email') ?? '');
+            setStatus('Sending…');
+            const res = await fetch('/api/auth/request', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ email: pendingEmail }),
+            });
+            if (!res.ok) return setStatus('Please enter a valid email.');
+            const target = document.querySelector('[data-code-email]');
+            if (target) target.textContent = pendingEmail;
+            showStep('code');
+            setStatus('');
+            document.querySelector<HTMLInputElement>('#code-form input[name=code]')?.focus();
           });
-          if (status)
-            status.textContent = res.ok
-              ? '✓ Check your inbox for the sign-in link (expires in 5 minutes).'
-              : 'Something went wrong — please try again.';
+        }
+        const codeForm = document.querySelector<HTMLFormElement>('#code-form');
+        if (codeForm && codeForm.dataset['bound'] !== 'true') {
+          codeForm.dataset['bound'] = 'true';
+          codeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = String(new FormData(codeForm).get('code') ?? '').trim();
+            setStatus('Verifying…');
+            const res = await fetch('/api/auth/verify-code', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ email: pendingEmail, code }),
+            });
+            const data = (await res.json().catch(() => ({}))) as { ok?: boolean; isNew?: boolean };
+            if (res.ok && data.ok) location.href = data.isNew ? '/?setup=passkey' : '/';
+            else setStatus('That code is wrong or has expired.');
+          });
+        }
+        bind('[data-code-back]', 'click', () => {
+          showStep('email');
+          setStatus('');
         });
-
-        // Progressive enhancement: only offer passkeys where WebAuthn exists.
         const passkeyBtn = document.querySelector<HTMLButtonElement>('#passkey-signin');
-        if (passkeyBtn && globalThis.PublicKeyCredential) {
+        if (passkeyBtn && hasWebAuthn() && passkeyBtn.dataset['bound'] !== 'true') {
+          passkeyBtn.dataset['bound'] = 'true';
           document.querySelector('[data-passkey-alt]')?.removeAttribute('hidden');
           passkeyBtn.addEventListener('click', async () => {
-            if (status) status.textContent = 'Waiting for your passkey…';
-            try {
-              const optRes = await fetch('/api/passkey/auth-options', { method: 'POST' });
-              const { options, challengeId } = (await optRes.json()) as {
-                options: PublicKeyCredentialRequestOptionsJSON;
-                challengeId: string;
-              };
-              const response = await startAuthentication({ optionsJSON: options });
-              const verifyRes = await fetch('/api/passkey/auth-verify', {
-                method: 'POST',
-                headers: { 'content-type': 'application/json' },
-                body: JSON.stringify({ challengeId, response }),
-              });
-              if (verifyRes.ok) location.reload();
-              else if (status) status.textContent = 'Passkey sign-in failed — try the email link.';
-            } catch {
-              if (status) status.textContent = 'Passkey sign-in was cancelled.';
-            }
+            setStatus('Waiting for your passkey…');
+            if (await passkeyLogin()) location.reload();
+            else setStatus('Passkey sign-in failed — use your email instead.');
           });
         }
       };
@@ -286,8 +373,12 @@ const alternates = LOCALES.map((loc) => ({
       const initAuthUi = (): void => {
         bindSignin();
         void refreshAccount();
-        if (new URLSearchParams(location.search).has('signin'))
-          document.querySelector<HTMLDialogElement>('#signin-dialog')?.showModal();
+        const params = new URLSearchParams(location.search);
+        if (params.has('signin')) void openSignin();
+        // Offer a passkey right after first registration (the native prompt).
+        if (params.has('setup') && hasWebAuthn()) {
+          void passkeyRegister().finally(() => history.replaceState(null, '', location.pathname));
+        }
       };
       initAuthUi();
       document.addEventListener('astro:after-swap', initAuthUi);

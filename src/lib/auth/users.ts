@@ -17,11 +17,16 @@ const handleFromEmail = (email: string): string => {
 
 const COLS = 'id, email, handle, role';
 
-/** Find a user by email, creating one on first sign-in (role: member). */
-export const findOrCreateUser = async (db: D1Database, email: string, nowIso: string): Promise<AppUser> => {
+/** Find a user by email, creating one on first sign-in. `isNew` is true when
+ *  the account was just created (used to offer passkey setup). */
+export const findOrCreateUser = async (
+  db: D1Database,
+  email: string,
+  nowIso: string,
+): Promise<{ user: AppUser; isNew: boolean }> => {
   const norm = email.trim().toLowerCase();
   const existing = await db.prepare(`SELECT ${COLS} FROM users WHERE email = ?`).bind(norm).first<Row>();
-  if (existing) return toUser(existing);
+  if (existing) return { user: toUser(existing), isNew: false };
 
   const id = crypto.randomUUID();
   const base = handleFromEmail(norm);
@@ -31,7 +36,7 @@ export const findOrCreateUser = async (db: D1Database, email: string, nowIso: st
     .prepare('INSERT INTO users (id, email, handle, role, created_at) VALUES (?, ?, ?, ?, ?)')
     .bind(id, norm, handle, 'member', nowIso)
     .run();
-  return { id, email: norm, handle, role: 'member' };
+  return { user: { id, email: norm, handle, role: 'member' }, isNew: true };
 };
 
 /** Load a user by id (session subject). */
