@@ -206,6 +206,10 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .passkey-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
 .passkey-list li { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-size: 0.9rem; }
 .account-handle { text-decoration: none; }
+
+/* Feed/calendar hydrate client-side; reserve space so content painting into
+   the list doesn't shove the footer/FAB around (cuts CLS). */
+events-feed, events-calendar { display: block; min-height: 85vh; }
 .foot-legal { font-size: 0.85rem; }
 .foot-legal a { color: var(--ink-2); }
 
