@@ -603,7 +603,7 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 /* ══ event detail page ══════════════════════════════════════════════ */
 .event-page { max-width: 46rem; margin: 0 auto; }
 .event-hero { position: relative; margin: 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
-.event-hero img { width: 100%; max-height: 22rem; object-fit: cover; display: block; }
+.event-hero img { width: 100%; aspect-ratio: 16 / 9; max-height: 22rem; object-fit: cover; display: block; }
 .event-hero figcaption {
   position: absolute; right: 0.6rem; bottom: 0.6rem;
   background: rgb(0 0 0 / 0.55); color: white;

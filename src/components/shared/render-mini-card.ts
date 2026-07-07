@@ -26,6 +26,7 @@ const renderThumb = (event: CompactEvent): TemplateResult =>
         src=${event.img ?? ''}
         alt=""
         loading="lazy"
+        decoding="async"
         referrerpolicy="no-referrer"
       />`,
   );

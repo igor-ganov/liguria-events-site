@@ -32,7 +32,7 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
     {
       event.img !== undefined && (
         <figure class="event-hero">
-          <img src={event.img} alt={title} loading="eager" referrerpolicy="no-referrer" />
+          <img src={event.img} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
           <figcaption>{ui.photoBy}: {photoSource}</figcaption>
         </figure>
       )

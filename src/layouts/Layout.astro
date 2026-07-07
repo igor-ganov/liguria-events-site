@@ -11,12 +11,24 @@ import { LOCALES } from '../lib/i18n/locales.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 import '../styles/global.css';
 
-type Props = Readonly<{ lang: Locale; title: string; description?: string; path?: string }>;
-const { lang, title, description = "What's on in Genoa — auto-collected events", path = '' } =
-  Astro.props;
+type Props = Readonly<{
+  lang: Locale;
+  title: string;
+  description?: string;
+  path?: string;
+  needsEvents?: boolean;
+}>;
+const {
+  lang,
+  title,
+  description = "What's on in Genoa — auto-collected events",
+  path = '',
+  needsEvents = false,
+} = Astro.props;
 
-// Build-time boundary (AC-1.1): a failed fetch fails `astro build`.
-const payload = await cachedEvents(EVENTS_URL);
+// Only feed / calendar / map embed the full event list; every other page skips
+// this ~44 KB (compressed) island and the build-time fetch entirely.
+const payload = needsEvents ? await cachedEvents(EVENTS_URL) : null;
 const ui = await uiOf(lang);
 const uiData = JSON.stringify({ lang, ui });
 const alternates = LOCALES.map((loc) => ({
@@ -103,7 +115,7 @@ const alternates = LOCALES.map((loc) => ({
         <span class="account" data-account></span>
       </nav>
     </header>
-    <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />
+    {payload && <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />}
     <script is:inline type="application/json" id="ui-data" set:html={uiData} />
     <main>
       <slot />
@@ -111,7 +123,7 @@ const alternates = LOCALES.map((loc) => ({
     <MobileMenu lang={lang} path={path} />
     <footer class="site-foot">
       <p>
-        {ui.footer} · data as of {payload.generatedAt.slice(0, 16)}Z ·
+        {ui.footer}{payload ? ` · data as of ${payload.generatedAt.slice(0, 16)}Z` : ''} ·
         <a href="https://github.com/igor-ganov/liguria-events-site" rel="noopener">source</a>
       </p>
       <p class="foot-legal">

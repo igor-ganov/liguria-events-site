@@ -10,7 +10,7 @@ const { lang } = Astro.props;
 const ui = await uiOf(lang);
 ---
 
-<Layout lang={lang} title={ui.nav.map} path="map/">
+<Layout lang={lang} title={ui.nav.map} path="map/" needsEvents>
   <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
