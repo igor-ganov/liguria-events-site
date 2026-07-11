@@ -1,18 +1,109 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { cachedEvents } from '../../data/cached-events.ts';
+import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { CATEGORIES } from '../../lib/events/categories.ts';
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
+import { groupByDay } from '../../lib/events/group-by-day.ts';
+import { dayHeading } from '../../lib/calendar/day-heading.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
+import { descriptionOf } from '../../lib/events/description-of.ts';
+import { formatWhen } from '../../lib/events/format-when.ts';
+import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { eventPath } from '../../lib/event-path.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale }>;
 const { lang } = Astro.props;
 const ui = await uiOf(lang);
+
+// Server-rendered feed: the cards ship in the HTML (fast LCP, crawlable, no
+// layout shift). Filtering is show/hide on the client — no re-render, and no
+// Lit/Effect runtime on this page.
+const payload = await cachedEvents(EVENTS_URL);
+const today = isoToday();
+const groups = [...groupByDay(today)(payload.events).entries()];
+const heading = dayHeading(ui);
+const iconsJson = JSON.stringify(
+  Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])),
+);
 ---
 
-<Layout lang={lang} title={ui.nav.feed} path="" needsEvents>
+<Layout lang={lang} title={ui.nav.feed} path="">
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
-  <events-feed></events-feed>
+
+  <div class="feed-dates">
+    <label>{ui.range.from} <input type="date" data-feed-from value={today} /></label>
+    <label>{ui.range.to} <input type="date" data-feed-to /></label>
+  </div>
+
+  <div class="chips" role="group" aria-label="Filter by category">
+    {CATEGORIES.map((category) => (
+      <button class="chip" data-cat={category} data-feed-cat={category} aria-pressed="false">
+        <Fragment set:html={iconSvg(category, 14)} />
+        {ui.cat[category]}
+      </button>
+    ))}
+    <button class="chip chip--free" data-feed-free aria-pressed="false">{ui.chips.free}</button>
+    <button class="chip chip--gems" data-feed-gems aria-pressed="false">{ui.chips.gems}</button>
+    <button class="chip chip--clear" data-feed-clear hidden>✕ {ui.chips.clear}</button>
+  </div>
+
+  <div data-feed-list>
+    {groups.map(([day, events]) => (
+      <section class="feed-group" data-day={day}>
+        <h3>{heading(day)}</h3>
+        <ul class="feed-list">
+          {events.map((event) => (
+            <li
+              data-id={event.id}
+              data-cats={event.c.join(',')}
+              data-start={event.s}
+              data-end={event.e ?? event.s}
+              data-free={event.f === true ? '1' : '0'}
+              data-gem={event.x === true ? '1' : '0'}
+            >
+              <a class="mini-card" href={localizedUrl(lang, eventPath(event.id))}>
+                {event.img === undefined ? (
+                  <div class="mini-thumb--empty" data-cat={primaryCategory(event.c)}>
+                    <Fragment set:html={iconSvg(primaryCategory(event.c), 26)} />
+                  </div>
+                ) : (
+                  <img class="mini-thumb" src={event.img} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                )}
+                <div class="mini-body">
+                  <h4 class="mini-title">{titleOf(lang)(event)}</h4>
+                  <span class="mini-when">{formatWhen(event)}</span>
+                  {descriptionOf(lang)(event) !== '' && (
+                    <p class="mini-desc">{descriptionOf(lang)(event)}</p>
+                  )}
+                  <div class="mini-tags">
+                    {event.c.map((category) => (
+                      <span class="cat-tag" data-cat={category}>
+                        <Fragment set:html={iconSvg(category, 12)} />
+                        {ui.cat[category]}
+                      </span>
+                    ))}
+                    {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+                    {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+                  </div>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+  <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
 </Layout>
 
+<script is:inline type="application/json" id="icons-data" set:html={iconsJson} />
+
 <script>
-  import '../../components/events-feed.ts';
+  import { initFeed } from '../../components/feed/init-feed.ts';
+  initFeed();
 </script>

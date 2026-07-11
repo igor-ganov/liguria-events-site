@@ -105,6 +105,7 @@ export default tseslint.config(
     files: [
       'src/lib/auth/**/*.ts',
       'src/lib/moderation/**/*.ts',
+      'src/components/feed/**/*.ts',
       'src/pages/api/**/*.ts',
       'src/middleware.ts',
     ],
