@@ -1,0 +1,18 @@
+---
+import MapView from '../../components/views/MapView.astro';
+import { cachedEvents } from '../../data/cached-events.ts';
+import { EVENTS_URL } from '../../data/events-url.ts';
+import { citiesOf } from '../../lib/city/cities-of.ts';
+
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  return citiesOf(payload.events).map(({ slug }) => ({
+    params: { city: slug },
+    props: { city: slug },
+  }));
+};
+
+const { city } = Astro.props;
+---
+
+<MapView lang="en" city={city} />

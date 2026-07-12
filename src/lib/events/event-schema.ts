@@ -27,6 +27,8 @@ export const EventSchema = Schema.Struct({
   a: Schema.optional(Schema.String),
   g: Schema.optional(Schema.Tuple(Schema.Number, Schema.Number)),
   h: Schema.optional(Schema.String),
+  /** City slug the event is filed under (province capital). */
+  ct: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
   d: Schema.optional(LocalizedTextSchema),

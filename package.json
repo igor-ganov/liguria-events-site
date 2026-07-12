@@ -7,8 +7,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "build:dev": "cross-env SITE_URL=https://dev.dovego.it PUBLIC_FIXED_TODAY=2026-07-06 PUBLIC_PMTILES_URL=https://tiles.dovego.it/liguria.pmtiles astro build",
-    "build:prod": "cross-env SITE_URL=https://dovego.it PUBLIC_PMTILES_URL=https://tiles.dovego.it/liguria.pmtiles astro build",
+    "build:dev": "cross-env SITE_URL=https://dev.dovego.it PUBLIC_FIXED_TODAY=2026-07-06 PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles astro build",
+    "build:prod": "cross-env SITE_URL=https://dovego.it PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles astro build",
     "preview": "astro preview",
     "test": "bun test",
     "lint": "eslint src",

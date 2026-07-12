@@ -1,0 +1,56 @@
+---
+import { cachedEvents } from '../data/cached-events.ts';
+import { EVENTS_URL } from '../data/events-url.ts';
+import { citiesOf } from '../lib/city/cities-of.ts';
+import { cityUrl } from '../lib/city/city-url.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; city: string; page?: string }>;
+const { lang, city, page = '' } = Astro.props;
+
+// The picker keeps you on the page you are on — switching city on the calendar
+// lands on the other city's calendar, not back at its feed.
+const payload = await cachedEvents(EVENTS_URL);
+const cities = citiesOf(payload.events);
+---
+
+<label class="city-picker">
+  <span class="visually-hidden">City</span>
+  <select data-city-picker>
+    {cities.map(({ slug, name, count }) => (
+      <option value={cityUrl(lang, slug, page)} selected={slug === city}>
+        {name} ({count})
+      </option>
+    ))}
+  </select>
+</label>
+
+<script>
+  // @cloudflare/workers-types shadows the DOM Element, so the querySelector
+  // generics don't line up — narrow through the concrete node instead.
+  const bind = (): void => {
+    document.querySelectorAll('[data-city-picker]').forEach((node) => {
+      const select = node as unknown as HTMLSelectElement;
+      if (select.dataset['bound'] === 'true') return;
+      select.dataset['bound'] = 'true';
+      select.addEventListener('change', () => {
+        window.location.href = select.value;
+      });
+    });
+  };
+  bind();
+  document.addEventListener('astro:page-load', bind);
+</script>
+
+<style>
+  .city-picker select {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font: inherit;
+    font-size: 0.9rem;
+    max-width: 11rem;
+  }
+</style>

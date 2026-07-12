@@ -1,0 +1,26 @@
+---
+import CalendarView from '../../../components/views/CalendarView.astro';
+import { cachedEvents } from '../../../data/cached-events.ts';
+import { EVENTS_URL } from '../../../data/events-url.ts';
+import { citiesOf } from '../../../lib/city/cities-of.ts';
+import { eventsOfCity } from '../../../lib/city/events-of-city.ts';
+import { isoToday } from '../../../lib/calendar/iso-today.ts';
+import { eventMonths } from '../../../lib/calendar/event-months.ts';
+
+// Only the months a city actually has events in — a city with one August
+// sagra does not need twelve prerendered pages.
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  const today = isoToday();
+  return citiesOf(payload.events).flatMap(({ slug }) =>
+    eventMonths(eventsOfCity(payload.events, slug), today).map((month) => ({
+      params: { city: slug, month },
+      props: { city: slug, month },
+    })),
+  );
+};
+
+const { city, month } = Astro.props;
+---
+
+<CalendarView lang="en" city={city} monthKey={month} />

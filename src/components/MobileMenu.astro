@@ -5,16 +5,17 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
-import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { cityUrl } from '../lib/city/city-url.ts';
+import { DEFAULT_CITY } from '../lib/city/default-city.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; path: string }>;
-const { lang, path } = Astro.props;
+type Props = Readonly<{ lang: Locale; path: string; city?: string }>;
+const { lang, path, city = DEFAULT_CITY } = Astro.props;
 const ui = await uiOf(lang);
 const links = [
-  { href: localizedUrl(lang), label: `📋 ${ui.nav.feed}` },
-  { href: localizedUrl(lang, 'calendar/'), label: `🗓 ${ui.nav.calendar}` },
-  { href: localizedUrl(lang, 'map/'), label: `🗺 ${ui.nav.map}` },
+  { href: cityUrl(lang, city), label: `📋 ${ui.nav.feed}` },
+  { href: cityUrl(lang, city, 'calendar/'), label: `🗓 ${ui.nav.calendar}` },
+  { href: cityUrl(lang, city, 'map/'), label: `🗺 ${ui.nav.map}` },
   { href: 'https://t.me/liguria_events_bot', label: `🤖 ${ui.nav.bot}` },
   { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', label: `📆 ${ui.nav.ical}` },
 ];

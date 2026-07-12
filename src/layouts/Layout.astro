@@ -4,9 +4,12 @@ import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import MobileMenu from '../components/MobileMenu.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import CityPicker from '../components/CityPicker.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { cityUrl } from '../lib/city/city-url.ts';
+import { DEFAULT_CITY } from '../lib/city/default-city.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 import '../styles/global.css';
@@ -14,6 +17,7 @@ import '../styles/global.css';
 type Props = Readonly<{
   lang: Locale;
   title: string;
+  city?: string;
   description?: string;
   path?: string;
   needsEvents?: boolean;
@@ -21,13 +25,20 @@ type Props = Readonly<{
 const {
   lang,
   title,
-  description = "What's on in Genoa — auto-collected events",
+  city = DEFAULT_CITY,
+  description = "What's on in Italy — auto-collected events",
   path = '',
   needsEvents = false,
 } = Astro.props;
 
 // Only feed / calendar / map embed the full event list; every other page skips
 // this ~44 KB (compressed) island and the build-time fetch entirely.
+// `path` is "<city>/", "<city>/calendar/2026-07/" or "<city>/map/" — the part
+// after the city is the page the city picker keeps you on. A specific month is
+// collapsed to the calendar index: the other city may have no events that month
+// and therefore no page for it.
+const rest = path.split('/').slice(1).filter((part) => part !== '');
+const page = rest.length === 0 ? '' : `${rest[0]}/`;
 const payload = needsEvents ? await cachedEvents(EVENTS_URL) : null;
 const ui = await uiOf(lang);
 const uiData = JSON.stringify({ lang, ui });
@@ -84,7 +95,7 @@ const alternates = LOCALES.map((loc) => ({
   <body>
     <header class="site-head">
       <p class="site-title">
-        <a class="brand" href={localizedUrl(lang)} aria-label="Dove Go — home">
+        <a class="brand" href={cityUrl(lang, city)} aria-label="Dove Go — home">
           <svg class="brand-mark" viewBox="0 0 32 40" width="19" height="24" aria-hidden="true">
             <path
               d="M16 1.6C8.6 1.6 2.6 7.5 2.6 14.9 2.6 24.4 16 38.4 16 38.4S29.4 24.4 29.4 14.9C29.4 7.5 23.4 1.6 16 1.6Z"
@@ -102,9 +113,10 @@ const alternates = LOCALES.map((loc) => ({
         </a>
       </p>
       <nav aria-label="Site">
-        <a href={localizedUrl(lang)}>{ui.nav.feed}</a>
-        <a href={localizedUrl(lang, 'calendar/')}>{ui.nav.calendar}</a>
-        <a href={localizedUrl(lang, 'map/')}>{ui.nav.map}</a>
+        <CityPicker lang={lang} city={city} page={page} />
+        <a href={cityUrl(lang, city)}>{ui.nav.feed}</a>
+        <a href={cityUrl(lang, city, 'calendar/')}>{ui.nav.calendar}</a>
+        <a href={cityUrl(lang, city, 'map/')}>{ui.nav.map}</a>
         <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
         <a
           href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
@@ -120,7 +132,7 @@ const alternates = LOCALES.map((loc) => ({
     <main>
       <slot />
     </main>
-    <MobileMenu lang={lang} path={path} />
+    <MobileMenu lang={lang} path={path} city={city} />
     <footer class="site-foot">
       <p>
         {ui.footer}{payload ? ` · data as of ${payload.generatedAt.slice(0, 16)}Z` : ''} ·

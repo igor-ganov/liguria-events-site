@@ -5,12 +5,15 @@ import { CATEGORIES } from '../../lib/events/categories.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale }>;
-const { lang } = Astro.props;
+type Props = Readonly<{ lang: Locale; city: string }>;
+const { lang, city } = Astro.props;
 const ui = await uiOf(lang);
 ---
 
-<Layout lang={lang} title={ui.nav.map} path="map/" needsEvents>
+<Layout lang={lang} city={city} title={ui.nav.map} path={`${city}/map/`} needsEvents>
+  <!-- The map carries every event in the country and merely opens on the city:
+       pan or zoom out and the rest are already there. -->
+  <script is:inline set:html={`window.__CITY__=${JSON.stringify(city)}`} />
   <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
@@ -72,10 +75,11 @@ const ui = await uiOf(lang);
   // 'light' = OSM Bright (colourful, high contrast); 'dark' = retuned Dark Matter.
   const STYLES: Record<string, unknown> = { light: brightStyle, dark: darkStyle };
 
-  // The 26 MB basemap can't be a Worker asset (25 MiB cap), so its host is
-  // configurable; defaults to same-origin (GitHub Pages / prod serve it).
+  // The basemap can't be a Worker asset (25 MiB cap), so its host is
+  // configurable. It covers all of Italy — panning past Liguria used to leave
+  // the canvas blank, because the old extract stopped at the region border.
   const PMTILES_URL =
-    import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/liguria.pmtiles`;
+    import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
 
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
@@ -188,8 +192,8 @@ const ui = await uiOf(lang);
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
     // "Where am I" — a plain button that is ALWAYS clickable and prompts for
-    // geolocation on click. Gives feedback (loading / toast) because the map
-    // only holds Liguria tiles: centring on a user elsewhere would look blank.
+    // geolocation on click. Gives feedback (loading / toast) because the
+    // basemap stops at the Italian border.
     const MSG: Record<string, Record<string, string>> = {
       outside: {
         en: 'You are outside the map area (Genoa / Liguria).',
@@ -386,11 +390,16 @@ const ui = await uiOf(lang);
       });
     };
 
+    // Open on the city named in the URL, but hold the whole country: pan or
+    // zoom out and every other city's pins are already in the layer.
+    const CITY = (globalThis as { __CITY__?: string }).__CITY__;
     let fitted = false;
     const fitAll = (): void => {
-      const located = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events).filter(
+      const visible = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events).filter(
         (e) => e.g !== undefined,
       );
+      const home = visible.filter((e) => (e.ct ?? 'genova') === CITY);
+      const located = home.length > 0 ? home : visible;
       if (fitted || located.length === 0) return;
       const bounds = new maplibregl.LngLatBounds();
       located.forEach((e) => bounds.extend([e.g![1], e.g![0]]));
