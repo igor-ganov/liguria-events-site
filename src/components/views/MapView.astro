@@ -156,6 +156,20 @@ const ui = await uiOf(lang);
     // Upper bound is open by default ("until the very end") and clearable.
     const state = { from: today, to: '', selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
 
+    // The view the visitor left: "?z=11.4&c=44.4123,8.9312". It goes in the
+    // QUERY, not the hash — maplibre's own `hash` option writes one, but Astro's
+    // client router drops it on a back navigation, while the query survives.
+    type View = Readonly<{ zoom: number; lat: number; lng: number }>;
+    let saved: View | undefined;
+
+    const readView = (p: URLSearchParams): View | undefined => {
+      const zoom = Number(p.get('z'));
+      const [lat, lng] = (p.get('c') ?? '').split(',').map(Number);
+      const ok =
+        Number.isFinite(zoom) && Number.isFinite(lat) && Number.isFinite(lng) && p.has('z');
+      return ok ? { zoom, lat: lat as number, lng: lng as number } : undefined;
+    };
+
     const readUrl = (): void => {
       const p = new URLSearchParams(location.search);
       (p.get('cat') ?? '').split(',').filter(Boolean).forEach((c) => state.selected.add(c as Category));
@@ -163,6 +177,7 @@ const ui = await uiOf(lang);
       state.gemsOnly = p.get('gems') === '1';
       state.from = p.get('from') ?? today;
       state.to = p.get('to') ?? '';
+      saved = readView(p);
     };
     const writeUrl = (): void => {
       const p = new URLSearchParams();
@@ -171,21 +186,16 @@ const ui = await uiOf(lang);
       if (state.gemsOnly) p.set('gems', '1');
       if (state.from !== today) p.set('from', state.from);
       if (state.to !== '') p.set('to', state.to);
+      const view = activeMap;
+      if (view !== undefined) {
+        const centre = view.getCenter();
+        p.set('z', view.getZoom().toFixed(2));
+        p.set('c', `${centre.lat.toFixed(4)},${centre.lng.toFixed(4)}`);
+      }
       const qs = p.toString();
-      // Keep the hash: maplibre keeps the map's position there, and dropping it
-      // on a filter change would throw the view away.
-      const url = `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`;
-      history.replaceState(null, '', url);
+      history.replaceState(history.state, '', qs ? `${location.pathname}?${qs}` : location.pathname);
     };
     readUrl();
-
-    // The whole view lives in the URL: the filters in the query, the map's
-    // centre and zoom in the hash, written by maplibre itself on every move.
-    // So going back from an event returns to the exact map you left — restored
-    // by the browser from its own history entry, with nothing for us to store
-    // and nothing to re-fetch.
-    const HASH_VIEW = /^#\d/;
-    const hasSavedView = HASH_VIEW.test(location.hash);
 
     // The basemap simply follows the site theme (no switcher): light theme →
     // light map, dark theme → dark map, live.
@@ -194,12 +204,11 @@ const ui = await uiOf(lang);
     const map = new maplibregl.Map({
       container: canvas,
       style: buildStyle(resolvedKey()),
-      center: [8.93, 44.41],
-      zoom: 9,
+      // The view the visitor left, when they left one — so coming back from an
+      // event opens on the map they were looking at, not on the region again.
+      center: saved === undefined ? [8.93, 44.41] : [saved.lng, saved.lat],
+      zoom: saved?.zoom ?? 9,
       attributionControl: false,
-      // Writes "#zoom/lat/lng" on every move and reads it back on init — the
-      // native way to keep a map's position in the address bar.
-      hash: true,
     });
     activeMap = map;
     map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
@@ -416,7 +425,7 @@ const ui = await uiOf(lang);
       const located = home.length > 0 ? home : visible;
       // A view carried in from the URL is the one the visitor left; fitting the
       // region's events over it would throw it away.
-      if (fitted || hasSavedView || located.length === 0) return;
+      if (fitted || saved !== undefined || located.length === 0) return;
       // One mis-geocoded event used to drag the opening view across half the
       // country. Fit to the body of the region's events, not to their extremes.
       const median = (xs: readonly number[]): number =>
@@ -458,7 +467,12 @@ const ui = await uiOf(lang);
       render();
     });
     document.querySelector('[data-map-reload]')?.addEventListener('click', () => location.reload());
-    map.on('moveend', render);
+    // Every pan and zoom lands in the address bar, so the history entry the
+    // visitor leaves behind already holds the map they were looking at.
+    map.on('moveend', () => {
+      render();
+      writeUrl();
+    });
 
     // ── civici: Genoa comune WFS address numbers (cadastre) at street zoom ──
     // Commercial (COLORE=R) get a shop icon + red number; residential a marker
