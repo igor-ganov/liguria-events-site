@@ -646,3 +646,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .event-sources a:hover { border-color: var(--accent); text-decoration: none; }
 .back-link { display: inline-block; margin-bottom: 0.8rem; font-size: 0.9rem; }
+
+/* City picker inside the flying menu — full width, and its popup opens below
+   rather than floating off the panel. */
+.fab-city { margin-bottom: 0.6rem; }
+.fab-city .city-picker, .fab-city .city-current { width: 100%; justify-content: center; }
+.fab-city .city-pop { position: static; width: 100%; box-shadow: none; margin-top: 0.4rem; max-height: 14rem; }

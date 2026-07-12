@@ -113,7 +113,6 @@ const alternates = LOCALES.map((loc) => ({
         </a>
       </p>
       <nav aria-label="Site">
-        <CityPicker lang={lang} city={city} page={page} />
         <a href={cityUrl(lang, city)}>{ui.nav.feed}</a>
         <a href={cityUrl(lang, city, 'calendar/')}>{ui.nav.calendar}</a>
         <a href={cityUrl(lang, city, 'map/')}>{ui.nav.map}</a>
@@ -124,6 +123,7 @@ const alternates = LOCALES.map((loc) => ({
         >
         <LanguageSwitcher lang={lang} path={path} />
         <ThemeToggle ui={ui} />
+        <CityPicker lang={lang} city={city} page={page} />
         <span class="account" data-account></span>
       </nav>
     </header>

@@ -2,6 +2,7 @@
 // Flying menu — draggable FAB ported from the blog's MobileMenu: a 56px round
 // button fixed in one of four corners, dragged to snap to the nearest one
 // (persisted in localStorage), opening a popup nav anchored to that corner.
+import CityPicker from './CityPicker.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
@@ -11,6 +12,10 @@ import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; path: string; city?: string }>;
 const { lang, path, city = DEFAULT_CITY } = Astro.props;
+// The header (and its city picker) is hidden on a phone — the flying menu is
+// the only way in, so the picker lives here too.
+const rest = path.split('/').slice(1).filter((part) => part !== '');
+const page = rest.length === 0 ? '' : `${rest[0]}/`;
 const ui = await uiOf(lang);
 const links = [
   { href: cityUrl(lang, city), label: `📋 ${ui.nav.feed}` },
@@ -51,6 +56,9 @@ const links = [
   <div class="fab-overlay" data-fab-overlay aria-hidden="true"></div>
 
   <nav id="fab-popup" class="fab-popup" data-fab-panel role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="fab-city">
+      <CityPicker lang={lang} city={city} page={page} />
+    </div>
     <ul class="fab-links">
       {links.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
     </ul>

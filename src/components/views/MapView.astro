@@ -401,8 +401,18 @@ const ui = await uiOf(lang);
       const home = visible.filter((e) => (e.ct ?? 'genova') === CITY);
       const located = home.length > 0 ? home : visible;
       if (fitted || located.length === 0) return;
+      // One mis-geocoded event used to drag the opening view across half the
+      // country. Fit to the body of the city's events, not to their extremes:
+      // anything more than a degree or so from the median is not this city.
+      const median = (xs: readonly number[]): number =>
+        xs.toSorted((a, b) => a - b)[Math.floor(xs.length / 2)] ?? 0;
+      const mLat = median(located.map((e) => e.g![0]));
+      const mLng = median(located.map((e) => e.g![1]));
+      const core = located.filter(
+        (e) => Math.abs(e.g![0] - mLat) < 1.2 && Math.abs(e.g![1] - mLng) < 1.6,
+      );
       const bounds = new maplibregl.LngLatBounds();
-      located.forEach((e) => bounds.extend([e.g![1], e.g![0]]));
+      (core.length > 0 ? core : located).forEach((e) => bounds.extend([e.g![1], e.g![0]]));
       map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 0 });
       fitted = true;
     };
