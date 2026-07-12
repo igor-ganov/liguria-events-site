@@ -167,11 +167,16 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   border-radius: var(--radius-sm); font-weight: 700; font-size: 0.9rem;
 }
 .account-handle { color: var(--ink-2); font-size: 0.85rem; }
+.account-admin {
+  border: 1px solid var(--line); color: var(--ink-2);
+  padding: 0.3rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.85rem;
+}
 
 /* Account controls inside the mobile flying menu — stacked, full width */
 .fab-account { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--line); }
 .fab-account:empty { display: none; }
-.fab-account .account-signin, .fab-account .account-signout, .fab-account .account-submit { width: 100%; text-align: center; }
+.fab-account .account-signin, .fab-account .account-signout, .fab-account .account-submit,
+.fab-account .account-admin { width: 100%; text-align: center; }
 .fab-account .account-handle { text-align: center; }
 
 /* Sign-in dialog */

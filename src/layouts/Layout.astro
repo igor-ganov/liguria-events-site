@@ -300,8 +300,14 @@ const alternates = LOCALES.map((loc) => ({
       const renderAccount = (user: Me['user']): void => {
         document.querySelectorAll('[data-account]').forEach((slot) => {
           if (user) {
+            const admin =
+              user.role === 'admin'
+                ? '<a class="account-admin" href="/admin/">Moderation</a>' +
+                  '<a class="account-admin" href="/admin/users/">Users</a>'
+                : '';
             slot.innerHTML =
               '<a class="account-submit" href="/submit">+ Add event</a>' +
+              admin +
               `<a class="account-handle" href="/settings">@${user.handle}</a>` +
               '<button type="button" class="account-signout" data-signout>Sign out</button>';
             slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
