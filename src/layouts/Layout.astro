@@ -123,9 +123,11 @@ const alternates = LOCALES.map((loc) => ({
         >
         <LanguageSwitcher lang={lang} path={path} />
         <ThemeToggle ui={ui} />
-        <CityPicker lang={lang} city={city} page={page} />
         <span class="account" data-account></span>
       </nav>
+      <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
+           city is the one control that must stay reachable everywhere. -->
+      <CityPicker lang={lang} city={city} page={page} />
     </header>
     {payload && <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />}
     <script is:inline type="application/json" id="ui-data" set:html={uiData} />

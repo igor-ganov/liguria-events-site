@@ -27,7 +27,7 @@ const cities = citiesOf(payload.events);
     <span aria-hidden="true">▾</span>
   </button>
 
-  <div class="city-pop" data-city-pop hidden>
+  <dialog class="city-pop" data-city-pop>
     <label>
       <span class="visually-hidden">Search city</span>
       <input type="search" data-city-search placeholder="Type a city…" autocomplete="off" />
@@ -42,7 +42,7 @@ const cities = citiesOf(payload.events);
       ))}
     </ul>
     <p class="city-none" data-city-none hidden>No city matches.</p>
-  </div>
+  </dialog>
 </div>
 
 <script>
@@ -59,13 +59,20 @@ const cities = citiesOf(payload.events);
     font: inherit; font-size: 0.9rem; cursor: pointer;
   }
   .city-current:hover { border-color: var(--accent); }
+  /* A <dialog>, so the phone's bottom sheet can escape the header's
+     backdrop-filter — which would otherwise become its containing block and
+     pin the sheet inside the header. Desktop opens it non-modal, where it stays
+     an ordinary absolutely-positioned dropdown. */
   .city-pop {
-    position: absolute; top: calc(100% + 0.4rem); right: 0; z-index: 60;
-    width: 15rem; max-height: 22rem; display: flex; flex-direction: column;
-    background: var(--surface); border: 1px solid var(--line);
+    position: absolute; top: calc(100% + 0.4rem); right: 0; left: auto; z-index: 60;
+    width: 15rem; max-height: 22rem; margin: 0;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line);
     border-radius: var(--radius-sm); box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
     padding: 0.5rem;
   }
+  .city-pop[open] { display: flex; flex-direction: column; }
+  .city-pop::backdrop { background: rgb(0 0 0 / 0.45); }
   .city-pop input {
     width: 100%; box-sizing: border-box; font: inherit; font-size: 0.9rem;
     padding: 0.4rem 0.55rem; border: 1px solid var(--line);
@@ -81,4 +88,23 @@ const cities = citiesOf(payload.events);
   .city-pop a[aria-current] { font-weight: 700; color: var(--accent); }
   .city-pop small { color: var(--ink-2); font-variant-numeric: tabular-nums; }
   .city-none { margin: 0.5rem; color: var(--ink-2); font-size: 0.85rem; }
+
+  /* Phone: a bottom sheet. Hanging 54 cities off a corner panel ran the list
+     past the screen edge and pushed the search field out of sight. Anchored to
+     the viewport, the field stays pinned and the list scrolls under it. */
+  @media (max-width: 44rem) {
+    .city-pop[open] {
+      position: fixed;
+      inset: auto 0 0 0;
+      width: auto;
+      max-width: none;
+      max-height: 72vh;
+      padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      border-bottom: 0;
+      box-shadow: 0 -12px 32px rgb(0 0 0 / 0.3);
+    }
+    .city-pop input { padding: 0.6rem 0.7rem; font-size: 1rem; }
+    .city-pop a { padding: 0.65rem 0.5rem; }
+  }
 </style>
