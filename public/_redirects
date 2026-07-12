@@ -1,14 +1,38 @@
-# The city URLs the site shipped with for a few hours. Browsers cached the 301s
-# that pointed at them — "/" permanently redirected to "/genova/" — so those
-# paths have to keep resolving forever. Splats, so that "/genova/",
-# "/genova/calendar/" and "/genova/map/" all land in the region.
-/genova/*        /liguria/     301
-/milano/*        /lombardia/   301
-/torino/*        /piemonte/    301
-/it/genova/*     /it/liguria/  301
-/ru/genova/*     /ru/liguria/  301
-/genova          /liguria/     301
-/milano          /lombardia/   301
-/torino          /piemonte/    301
-/it/genova       /it/liguria/  301
-/ru/genova       /ru/liguria/  301
+# Cloudflare Workers Static Assets redirect rules.
+# https://developers.cloudflare.com/workers/static-assets/redirects/
+#
+# IMPORTANT: CF allows only ONE `*` splat per pattern and silently DROPS a rule
+# that breaks it. `:splat` in the destination is what carries the rest of the
+# path across — without it, /genova/calendar/ lands at the region's feed instead
+# of its calendar. redirect-rules.test.ts fails the build if either regresses.
+#
+# Rules are matched in order, most specific first.
+
+# The city URLs the site shipped with for a few hours, before the slice became
+# the region. A browser that saw "/" 301 to "/genova/" cached that answer
+# forever and never asks again, so these have to keep resolving — permanently,
+# and carrying the page the visitor was on.
+/genova/*        /liguria/:splat            301
+/milano/*        /lombardia/:splat          301
+/torino/*        /piemonte/:splat           301
+/it/genova/*     /it/liguria/:splat         301
+/ru/genova/*     /ru/liguria/:splat         301
+/genova          /liguria/                  301
+/milano          /lombardia/                301
+/torino          /piemonte/                 301
+/it/genova       /it/liguria/               301
+/ru/genova       /ru/liguria/               301
+
+# The bare paths land in the default region. 302, deliberately: the default
+# region may change, and a permanent redirect is one you must be prepared to
+# honour forever — which is precisely how "/" came to point, in every browser
+# that had visited, at a page that no longer existed.
+/                /liguria/                  302
+/calendar        /liguria/calendar/         302
+/map             /liguria/map/              302
+/it              /it/liguria/               302
+/it/calendar     /it/liguria/calendar/      302
+/it/map          /it/liguria/map/           302
+/ru              /ru/liguria/               302
+/ru/calendar     /ru/liguria/calendar/      302
+/ru/map          /ru/liguria/map/           302
