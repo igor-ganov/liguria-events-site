@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { consumeMagicCode } from '../../../lib/auth/magic.ts';
-import { findOrCreateUser } from '../../../lib/auth/users.ts';
+import { findOrCreateUser, rootAdmins } from '../../../lib/auth/users.ts';
 import { signSession, SESSION_COOKIE } from '../../../lib/auth/session.ts';
 
 export const prerender = false;
@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   if (!verified) return Response.json({ ok: false }, { status: 400 });
 
   const nowMs = Date.now();
-  const { user, isNew } = await findOrCreateUser(env.DB, verified, new Date(nowMs).toISOString());
+  const { user, isNew } = await findOrCreateUser(env.DB, verified, new Date(nowMs).toISOString(), rootAdmins(env));
   const session = await signSession(env.SESSION_SECRET, user.id, nowMs);
   cookies.set(SESSION_COOKIE, session, {
     httpOnly: true,

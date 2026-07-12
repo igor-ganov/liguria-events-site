@@ -17,6 +17,12 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     if (user) ctx.locals.user = user;
   }
 
+  // A banned person stays signed in (so they can see why) but may not reach
+  // anything that writes: submitting, settings, moderation.
+  if (needsAuth(ctx.url.pathname) && ctx.locals.user?.banned) {
+    return ctx.redirect('/?banned=1');
+  }
+
   // No login page — bounce to home and let the sign-in dialog open there.
   if (needsAuth(ctx.url.pathname) && !ctx.locals.user) {
     return ctx.redirect(`/?signin=1&next=${encodeURIComponent(ctx.url.pathname)}`);

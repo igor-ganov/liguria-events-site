@@ -14,6 +14,7 @@ interface Env {
   PASSKEY_ORIGIN: string;
   PUBLIC_ORIGIN: string;
   MAIL_FROM: string;
+  ADMIN_EMAILS: string;
 }
 
 type Runtime = import('@astrojs/cloudflare').Runtime<Env>;

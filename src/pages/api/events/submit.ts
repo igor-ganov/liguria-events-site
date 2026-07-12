@@ -38,6 +38,7 @@ const moderateAndNotify = async (
 export const POST: APIRoute = async ({ request, locals }) => {
   const user = locals.user;
   if (!user) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  if (user.banned) return Response.json({ error: 'banned' }, { status: 403 });
   const env = locals.runtime.env;
   const ctx = locals.runtime.ctx;
 

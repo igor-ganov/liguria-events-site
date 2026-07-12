@@ -13,6 +13,10 @@ const events = await listEventsByStatus(env.DB, ['pending', 'held', 'published',
 
 <Layout lang="en" title="Moderation" path="admin/">
   <main class="admin">
+    <nav class="admin-tabs">
+      <a href="/admin/" aria-current="page">Moderation</a>
+      <a href="/admin/users/">Users</a>
+    </nav>
     <h1>Moderation</h1>
     <p>{events.length} event(s). Newest first.</p>
     <table class="admin-table">
@@ -57,3 +61,9 @@ const events = await listEventsByStatus(env.DB, ['pending', 'held', 'published',
     });
   });
 </script>
+
+<style>
+  .admin-tabs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .admin-tabs a { text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 0.375rem; }
+  .admin-tabs a[aria-current] { background: var(--surface-2, #eee); font-weight: 600; }
+</style>

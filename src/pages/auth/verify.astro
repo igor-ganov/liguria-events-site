@@ -2,7 +2,7 @@
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import { consumeMagicToken } from '../../lib/auth/magic.ts';
-import { findOrCreateUser } from '../../lib/auth/users.ts';
+import { findOrCreateUser, rootAdmins } from '../../lib/auth/users.ts';
 import { signSession, SESSION_COOKIE } from '../../lib/auth/session.ts';
 
 const env = Astro.locals.runtime.env;
@@ -11,7 +11,7 @@ const email = await consumeMagicToken(env.SESSION, token);
 
 if (email) {
   const nowMs = Date.now();
-  const { user, isNew } = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString());
+  const { user, isNew } = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString(), rootAdmins(env));
   const session = await signSession(env.SESSION_SECRET, user.id, nowMs);
   Astro.cookies.set(SESSION_COOKIE, session, {
     httpOnly: true,

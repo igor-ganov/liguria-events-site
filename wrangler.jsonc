@@ -15,7 +15,8 @@
     "PASSKEY_RP_ID": "dovego.it",
     "PASSKEY_ORIGIN": "https://dovego.it",
     "PUBLIC_ORIGIN": "https://dovego.it",
-    "MAIL_FROM": "Dove Go <no-reply@send.dovego.it>"
+    "MAIL_FROM": "Dove Go <no-reply@send.dovego.it>",
+    "ADMIN_EMAILS": "igor.ganov@gmail.com,igor_ganov@yahoo.com"
   },
   "d1_databases": [
     { "binding": "DB", "database_name": "dovego", "database_id": "2f65133c-071e-4366-8214-e0942845f792" }
@@ -36,7 +37,8 @@
         "PASSKEY_RP_ID": "dev.dovego.it",
         "PASSKEY_ORIGIN": "https://dev.dovego.it",
         "PUBLIC_ORIGIN": "https://dev.dovego.it",
-        "MAIL_FROM": "Dove Go <no-reply@send.dovego.it>"
+        "MAIL_FROM": "Dove Go <no-reply@send.dovego.it>",
+    "ADMIN_EMAILS": "igor.ganov@gmail.com,igor_ganov@yahoo.com"
       },
       "ai": { "binding": "AI" },
       "d1_databases": [

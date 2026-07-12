@@ -1,0 +1,109 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { listUsers, rootAdmins, isRootAdmin } from '../../lib/auth/users.ts';
+import { eventsBySubmitter } from '../../lib/events/events-by-submitter.ts';
+
+const me = Astro.locals.user;
+if (!me || me.role !== 'admin') {
+  return new Response('Forbidden — admins only.', { status: 403 });
+}
+const env = Astro.locals.runtime.env;
+const [users, submissions] = await Promise.all([listUsers(env.DB), eventsBySubmitter(env.DB)]);
+const admins = rootAdmins(env);
+---
+
+<Layout lang="en" title="Users" path="admin/users/">
+  <main class="admin">
+    <nav class="admin-tabs">
+      <a href="/admin/">Moderation</a>
+      <a href="/admin/users/" aria-current="page">Users</a>
+    </nav>
+    <h1>Users</h1>
+    <p>{users.length} account(s). Newest first.</p>
+
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Person</th><th>Role</th><th>Submitted</th><th>Joined</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((u) => {
+          const root = isRootAdmin(u.email, admins);
+          const mine = u.id === me.id;
+          const events = submissions.get(u.id) ?? [];
+          return (
+            <>
+              <tr data-user={u.id} class={u.banned ? 'row-banned' : ''}>
+                <td>
+                  <strong>{u.handle}</strong>{root ? <span class="badge badge-root">root</span> : null}
+                  <br /><small>{u.email}</small>
+                  {u.banned ? <><br /><span class="badge badge-rejected">banned</span> <small>{u.banned_reason}</small></> : null}
+                </td>
+                <td><span class={`badge badge-${u.role}`}>{u.role}</span></td>
+                <td>
+                  {events.length === 0 ? <small>—</small> : (
+                    <button class="link-btn" data-toggle={u.id} aria-expanded="false">
+                      {u.published} published · {u.pending} pending · {u.rejected} hidden
+                    </button>
+                  )}
+                </td>
+                <td><small>{u.created_at.slice(0, 10)}</small></td>
+                <td class="admin-actions">
+                  {mine || root ? <small>—</small> : (
+                    <>
+                      {u.role === 'admin'
+                        ? <button data-user-action="demote">Revoke admin</button>
+                        : <button data-user-action="promote">Make admin</button>}
+                      {u.banned
+                        ? <button data-user-action="unban">Unban</button>
+                        : <button data-user-action="ban" class="danger">Ban</button>}
+                      <button data-user-action="delete_events" class="danger">Delete events</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+              {events.length === 0 ? null : (
+                <tr class="submissions" data-for={u.id} hidden>
+                  <td colspan="5">
+                    <ul class="submission-list">
+                      {events.map((ev) => (
+                        <li data-id={ev.id}>
+                          <span class={`badge badge-${ev.status}`}>{ev.status}</span>
+                          <a href={`/event/${ev.id}/`}>{ev.title_en}</a>
+                          <small>{ev.start_date}{ev.end_date ? `–${ev.end_date}` : ''}</small>
+                          <span class="admin-actions">
+                            <button data-action="publish">Publish</button>
+                            <button data-action="reject">Reject</button>
+                            <button data-action="delete" class="danger">Delete</button>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              )}
+            </>
+          );
+        })}
+      </tbody>
+    </table>
+  </main>
+</Layout>
+
+<script>
+  import { initAdminUsers } from '../../components/admin/init-admin-users.ts';
+  initAdminUsers();
+</script>
+
+<style>
+  .admin-tabs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .admin-tabs a { text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 0.375rem; }
+  .admin-tabs a[aria-current] { background: var(--surface-2, #eee); font-weight: 600; }
+  .row-banned { opacity: 0.55; }
+  .link-btn { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+  .submission-list { list-style: none; margin: 0; padding: 0.5rem 0; display: grid; gap: 0.375rem; }
+  .submission-list li { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .badge-root { margin-left: 0.375rem; font-size: 0.7em; }
+</style>
