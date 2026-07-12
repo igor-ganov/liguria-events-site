@@ -24,14 +24,13 @@ export default defineConfig({
     '/ru': '/ru/liguria/',
     '/ru/calendar': '/ru/liguria/calendar/',
     '/ru/map': '/ru/liguria/map/',
-    // The city URLs the site briefly shipped with — both slash forms, since a
-    // redirect rule matches the path exactly.
+    // The city URLs the site briefly shipped with. One rule per path: Astro
+    // normalises "/genova/" to "/genova", and two rules for the same path make
+    // Cloudflare reject the whole _redirects file — which silently failed every
+    // deploy until the error was read.
     '/genova': '/liguria/',
-    '/genova/': '/liguria/',
     '/milano': '/lombardia/',
-    '/milano/': '/lombardia/',
     '/torino': '/piemonte/',
-    '/torino/': '/piemonte/',
   },
   i18n: {
     locales: ['en', 'it', 'ru'],
