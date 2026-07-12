@@ -172,9 +172,20 @@ const ui = await uiOf(lang);
       if (state.from !== today) p.set('from', state.from);
       if (state.to !== '') p.set('to', state.to);
       const qs = p.toString();
-      history.replaceState(null, '', qs ? `${location.pathname}?${qs}` : location.pathname);
+      // Keep the hash: maplibre keeps the map's position there, and dropping it
+      // on a filter change would throw the view away.
+      const url = `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`;
+      history.replaceState(null, '', url);
     };
     readUrl();
+
+    // The whole view lives in the URL: the filters in the query, the map's
+    // centre and zoom in the hash, written by maplibre itself on every move.
+    // So going back from an event returns to the exact map you left — restored
+    // by the browser from its own history entry, with nothing for us to store
+    // and nothing to re-fetch.
+    const HASH_VIEW = /^#\d/;
+    const hasSavedView = HASH_VIEW.test(location.hash);
 
     // The basemap simply follows the site theme (no switcher): light theme →
     // light map, dark theme → dark map, live.
@@ -186,6 +197,9 @@ const ui = await uiOf(lang);
       center: [8.93, 44.41],
       zoom: 9,
       attributionControl: false,
+      // Writes "#zoom/lat/lng" on every move and reads it back on init — the
+      // native way to keep a map's position in the address bar.
+      hash: true,
     });
     activeMap = map;
     map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: ATTR }));
@@ -400,7 +414,9 @@ const ui = await uiOf(lang);
       );
       const home = visible.filter((e) => (e.rg ?? 'liguria') === REGION);
       const located = home.length > 0 ? home : visible;
-      if (fitted || located.length === 0) return;
+      // A view carried in from the URL is the one the visitor left; fitting the
+      // region's events over it would throw it away.
+      if (fitted || hasSavedView || located.length === 0) return;
       // One mis-geocoded event used to drag the opening view across half the
       // country. Fit to the body of the region's events, not to their extremes.
       const median = (xs: readonly number[]): number =>
