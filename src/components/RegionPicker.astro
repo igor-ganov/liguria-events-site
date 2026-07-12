@@ -1,0 +1,109 @@
+---
+import { cachedEvents } from '../data/cached-events.ts';
+import { EVENTS_URL } from '../data/events-url.ts';
+import { regionsOf } from '../lib/region/regions-of.ts';
+import { regionName } from '../lib/region/region-name.ts';
+import { regionUrl } from '../lib/region/region-url.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; region: string; page?: string }>;
+const { lang, region, page = '' } = Astro.props;
+
+// Twenty regions — short enough to scan, long enough that typing beats
+// scrolling. The list is server-rendered links, so it works before the script
+// does. Switching region keeps you on the page you are on: the calendar of
+// Toscana, not the feed of Toscana.
+const payload = await cachedEvents(EVENTS_URL);
+const regions = regionsOf(payload.events);
+---
+
+<div class="region-picker" data-region-picker>
+  <button type="button" class="region-current" data-region-toggle aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"></path>
+      <circle cx="12" cy="10" r="2.5"></circle>
+    </svg>
+    <span>{regionName(region)}</span>
+    <span aria-hidden="true">▾</span>
+  </button>
+
+  <dialog class="region-pop" data-region-pop>
+    <label>
+      <span class="visually-hidden">Search region</span>
+      <input type="search" data-region-search placeholder="Type a region…" autocomplete="off" />
+    </label>
+    <ul data-region-list>
+      {regions.map(({ slug, name, count }) => (
+        <li data-name={name.toLowerCase()}>
+          <a href={regionUrl(lang, slug, page)} aria-current={slug === region ? 'true' : undefined}>
+            <span>{name}</span><small>{count}</small>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <p class="region-none" data-region-none hidden>No region matches.</p>
+  </dialog>
+</div>
+
+<script>
+  import { initRegionPicker } from './region/init-region-picker.ts';
+  initRegionPicker();
+</script>
+
+<style>
+  .region-picker { position: relative; }
+  .region-current {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    padding: 0.35rem 0.6rem; border-radius: var(--radius-sm);
+    font: inherit; font-size: 0.9rem; cursor: pointer;
+  }
+  .region-current:hover { border-color: var(--accent); }
+  /* A <dialog>, so the phone's bottom sheet can escape the header's
+     backdrop-filter — which would otherwise become its containing block and pin
+     the sheet inside the header. Desktop opens it non-modal, where it stays an
+     ordinary absolutely-positioned dropdown. */
+  .region-pop {
+    position: absolute; top: calc(100% + 0.4rem); right: 0; left: auto; z-index: 60;
+    width: 16rem; max-height: 24rem; margin: 0;
+    background: var(--surface); color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm); box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
+    padding: 0.5rem;
+  }
+  .region-pop[open] { display: flex; flex-direction: column; }
+  .region-pop::backdrop { background: rgb(0 0 0 / 0.45); }
+  .region-pop input {
+    width: 100%; box-sizing: border-box; font: inherit; font-size: 0.9rem;
+    padding: 0.4rem 0.55rem; border: 1px solid var(--line);
+    border-radius: var(--radius-sm); background: var(--bg); color: var(--ink);
+  }
+  .region-pop ul { list-style: none; margin: 0.4rem 0 0; padding: 0; overflow-y: auto; }
+  .region-pop a {
+    display: flex; justify-content: space-between; gap: 0.5rem;
+    padding: 0.35rem 0.5rem; border-radius: var(--radius-sm);
+    text-decoration: none; color: var(--ink); font-size: 0.9rem;
+  }
+  .region-pop a:hover, .region-pop a:focus-visible { background: rgb(128 128 128 / 0.14); }
+  .region-pop a[aria-current] { font-weight: 700; color: var(--accent); }
+  .region-pop small { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .region-none { margin: 0.5rem; color: var(--ink-2); font-size: 0.85rem; }
+
+  /* Phone: a bottom sheet, anchored to the viewport, so the search field stays
+     pinned and the list scrolls under it. */
+  @media (max-width: 44rem) {
+    .region-pop[open] {
+      position: fixed;
+      inset: auto 0 0 0;
+      width: auto;
+      max-width: none;
+      max-height: 72vh;
+      padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      border-bottom: 0;
+      box-shadow: 0 -12px 32px rgb(0 0 0 / 0.3);
+    }
+    .region-pop input { padding: 0.6rem 0.7rem; font-size: 1rem; }
+    .region-pop a { padding: 0.65rem 0.5rem; }
+  }
+</style>

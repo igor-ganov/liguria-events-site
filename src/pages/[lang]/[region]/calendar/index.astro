@@ -2,20 +2,20 @@
 import CalendarView from '../../../../components/views/CalendarView.astro';
 import { cachedEvents } from '../../../../data/cached-events.ts';
 import { EVENTS_URL } from '../../../../data/events-url.ts';
-import { citiesOf } from '../../../../lib/city/cities-of.ts';
+import { regionsOf } from '../../../../lib/region/regions-of.ts';
 import { LOCALES } from '../../../../lib/i18n/locales.ts';
 import { isoToday } from '../../../../lib/calendar/iso-today.ts';
 import { monthKeyOf } from '../../../../lib/calendar/month-key-of.ts';
 
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
-  const cities = citiesOf(payload.events);
+  const cities = regionsOf(payload.events);
   return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
-    cities.map(({ slug }) => ({ params: { lang, city: slug }, props: { lang, city: slug } })),
+    cities.map(({ slug }) => ({ params: { lang, region: slug }, props: { lang, region: slug } })),
   );
 };
 
-const { lang, city } = Astro.props;
+const { lang, region } = Astro.props;
 ---
 
-<CalendarView lang={lang} city={city} monthKey={monthKeyOf(isoToday())} />
+<CalendarView lang={lang} region={region} monthKey={monthKeyOf(isoToday())} />

@@ -8,15 +8,15 @@ import { mapQuery } from '../../lib/events/map-query.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { eventPath } from '../../lib/event-path.ts';
-import { cityUrl } from '../../lib/city/city-url.ts';
-import { cityOf } from '../../lib/city/city-of.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import { regionOf } from '../../lib/region/region-of.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; event: CompactEvent }>;
 const { lang, event } = Astro.props;
-// An event page belongs to its own city, whichever city you arrived from.
-const city = cityOf(event);
+// An event page belongs to its own region, whichever region you arrived from.
+const region = regionOf(event);
 const ui = await uiOf(lang);
 const links = eventLinks(event);
 const desc = descriptionOf(lang)(event);
@@ -29,9 +29,9 @@ const mapSearchUrl =
 const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
 ---
 
-<Layout lang={lang} city={city} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
+<Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
   <article class="event-page">
-    <a class="back-link" href={cityUrl(lang, city)}>← {ui.headings.allEvents}</a>
+    <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
     {
       event.img !== undefined && (
         <figure class="event-hero">

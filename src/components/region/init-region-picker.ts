@@ -1,7 +1,7 @@
 /**
- * City picker: a button in the header that opens a filter-as-you-type list.
- * The list is server-rendered links — the script only hides the ones that do
- * not match what you typed, so the picker still works without it.
+ * Region picker: a button in the header that opens a filter-as-you-type list.
+ * The list is server-rendered links — the script only hides the ones that do not
+ * match what you typed, so the picker still works without it.
  */
 
 // @cloudflare/workers-types shadows the DOM Element, so querySelector generics
@@ -40,11 +40,11 @@ const close = (pop: HTMLDialogElement, toggle: HTMLElement): void => {
 const wire = (root: HTMLElement): void => {
   if (root.dataset['bound'] === 'true') return;
   root.dataset['bound'] = 'true';
-  const toggle = q<HTMLElement>(root, '[data-city-toggle]');
-  const pop = q<HTMLDialogElement>(root, '[data-city-pop]');
-  const search = q<HTMLInputElement>(root, '[data-city-search]');
-  const list = q<HTMLElement>(root, '[data-city-list]');
-  const empty = q<HTMLElement>(root, '[data-city-none]');
+  const toggle = q<HTMLElement>(root, '[data-region-toggle]');
+  const pop = q<HTMLDialogElement>(root, '[data-region-pop]');
+  const search = q<HTMLInputElement>(root, '[data-region-search]');
+  const list = q<HTMLElement>(root, '[data-region-list]');
+  const empty = q<HTMLElement>(root, '[data-region-none]');
   if (!toggle || !pop || !search || !list || !empty) return;
 
   toggle.addEventListener('click', () => {
@@ -55,7 +55,7 @@ const wire = (root: HTMLElement): void => {
   // state honest when they do.
   pop.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
   search.addEventListener('input', () => filter(list, empty, search.value));
-  // Enter on a single match goes straight there — typing "mil" + Enter is the
+  // Enter on the first match goes straight there — "tos" then Enter is the
   // whole interaction.
   search.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
@@ -77,9 +77,9 @@ const wire = (root: HTMLElement): void => {
   });
 };
 
-export const initCityPicker = (): void => {
+export const initRegionPicker = (): void => {
   const bind = (): void => {
-    document.querySelectorAll('[data-city-picker]').forEach((node) => wire(node as HTMLElement));
+    document.querySelectorAll('[data-region-picker]').forEach((node) => wire(node as HTMLElement));
   };
   bind();
   document.addEventListener('astro:page-load', bind);

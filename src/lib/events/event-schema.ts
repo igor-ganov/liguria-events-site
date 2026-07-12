@@ -27,8 +27,10 @@ export const EventSchema = Schema.Struct({
   a: Schema.optional(Schema.String),
   g: Schema.optional(Schema.Tuple(Schema.Number, Schema.Number)),
   h: Schema.optional(Schema.String),
-  /** City slug the event is filed under (province capital). */
+  /** City slug (province capital) — the crawler's geocoding anchor. */
   ct: Schema.optional(Schema.String),
+  /** Region slug — the slice the site is browsed by. */
+  rg: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
   d: Schema.optional(LocalizedTextSchema),

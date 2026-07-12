@@ -5,15 +5,15 @@ import { CATEGORIES } from '../../lib/events/categories.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; city: string }>;
-const { lang, city } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string }>;
+const { lang, region } = Astro.props;
 const ui = await uiOf(lang);
 ---
 
-<Layout lang={lang} city={city} title={ui.nav.map} path={`${city}/map/`} needsEvents>
-  <!-- The map carries every event in the country and merely opens on the city:
+<Layout lang={lang} region={region} title={ui.nav.map} path={`${region}/map/`} needsEvents>
+  <!-- The map carries every event in the country and merely opens on the region:
        pan or zoom out and the rest are already there. -->
-  <script is:inline set:html={`window.__CITY__=${JSON.stringify(city)}`} />
+  <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
   <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
@@ -390,20 +390,19 @@ const ui = await uiOf(lang);
       });
     };
 
-    // Open on the city named in the URL, but hold the whole country: pan or
-    // zoom out and every other city's pins are already in the layer.
-    const CITY = (globalThis as { __CITY__?: string }).__CITY__;
+    // Open on the region named in the URL, but hold the whole country: pan or
+    // zoom out and every other region's pins are already in the layer.
+    const REGION = (globalThis as { __REGION__?: string }).__REGION__;
     let fitted = false;
     const fitAll = (): void => {
       const visible = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events).filter(
         (e) => e.g !== undefined,
       );
-      const home = visible.filter((e) => (e.ct ?? 'genova') === CITY);
+      const home = visible.filter((e) => (e.rg ?? 'liguria') === REGION);
       const located = home.length > 0 ? home : visible;
       if (fitted || located.length === 0) return;
       // One mis-geocoded event used to drag the opening view across half the
-      // country. Fit to the body of the city's events, not to their extremes:
-      // anything more than a degree or so from the median is not this city.
+      // country. Fit to the body of the region's events, not to their extremes.
       const median = (xs: readonly number[]): number =>
         xs.toSorted((a, b) => a - b)[Math.floor(xs.length / 2)] ?? 0;
       const mLat = median(located.map((e) => e.g![0]));

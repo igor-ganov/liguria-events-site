@@ -107,7 +107,7 @@ export default tseslint.config(
       'src/lib/moderation/**/*.ts',
       'src/components/feed/**/*.ts',
       'src/components/admin/**/*.ts',
-      'src/components/city/**/*.ts',
+      'src/components/region/**/*.ts',
       'src/pages/api/**/*.ts',
       'src/middleware.ts',
     ],

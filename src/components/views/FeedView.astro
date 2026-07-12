@@ -8,12 +8,12 @@ import { CATEGORIES } from '../../lib/events/categories.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
-import { eventsOfCity } from '../../lib/city/events-of-city.ts';
+import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; city: string }>;
-const { lang, city } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string }>;
+const { lang, region } = Astro.props;
 const ui = await uiOf(lang);
 
 // Server-rendered feed: the cards ship in the HTML (fast LCP, crawlable, no
@@ -21,15 +21,15 @@ const ui = await uiOf(lang);
 // Lit/Effect runtime on this page.
 const payload = await cachedEvents(EVENTS_URL);
 const today = isoToday();
-// The feed is the city's feed; the map is the only page that spans the country.
-const groups = [...groupByDay(today)(eventsOfCity(payload.events, city)).entries()];
+// The feed is the region's; the map is the only page that spans the country.
+const groups = [...groupByDay(today)(eventsOfRegion(payload.events, region)).entries()];
 const heading = dayHeading(ui);
 const iconsJson = JSON.stringify(
   Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])),
 );
 ---
 
-<Layout lang={lang} city={city} title={ui.nav.feed} path={`${city}/`}>
+<Layout lang={lang} region={region} title={ui.nav.feed} path={`${region}/`}>
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
 
   <div class="feed-dates">

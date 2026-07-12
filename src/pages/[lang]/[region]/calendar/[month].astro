@@ -2,8 +2,8 @@
 import CalendarView from '../../../../components/views/CalendarView.astro';
 import { cachedEvents } from '../../../../data/cached-events.ts';
 import { EVENTS_URL } from '../../../../data/events-url.ts';
-import { citiesOf } from '../../../../lib/city/cities-of.ts';
-import { eventsOfCity } from '../../../../lib/city/events-of-city.ts';
+import { regionsOf } from '../../../../lib/region/regions-of.ts';
+import { eventsOfRegion } from '../../../../lib/region/events-of-region.ts';
 import { LOCALES } from '../../../../lib/i18n/locales.ts';
 import { isoToday } from '../../../../lib/calendar/iso-today.ts';
 import { eventMonths } from '../../../../lib/calendar/event-months.ts';
@@ -12,16 +12,16 @@ export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   const today = isoToday();
   return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
-    citiesOf(payload.events).flatMap(({ slug }) =>
-      eventMonths(eventsOfCity(payload.events, slug), today).map((month) => ({
-        params: { lang, city: slug, month },
-        props: { lang, city: slug, month },
+    regionsOf(payload.events).flatMap(({ slug }) =>
+      eventMonths(eventsOfRegion(payload.events, slug), today).map((month) => ({
+        params: { lang, region: slug, month },
+        props: { lang, region: slug, month },
       })),
     ),
   );
 };
 
-const { lang, city, month } = Astro.props;
+const { lang, region, month } = Astro.props;
 ---
 
-<CalendarView lang={lang} city={city} monthKey={month} />
+<CalendarView lang={lang} region={region} monthKey={month} />

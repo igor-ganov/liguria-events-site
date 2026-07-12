@@ -4,12 +4,12 @@ import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import MobileMenu from '../components/MobileMenu.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
-import CityPicker from '../components/CityPicker.astro';
+import RegionPicker from '../components/RegionPicker.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
-import { cityUrl } from '../lib/city/city-url.ts';
-import { DEFAULT_CITY } from '../lib/city/default-city.ts';
+import { regionUrl } from '../lib/region/region-url.ts';
+import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 import '../styles/global.css';
@@ -17,7 +17,7 @@ import '../styles/global.css';
 type Props = Readonly<{
   lang: Locale;
   title: string;
-  city?: string;
+  region?: string;
   description?: string;
   path?: string;
   needsEvents?: boolean;
@@ -25,7 +25,7 @@ type Props = Readonly<{
 const {
   lang,
   title,
-  city = DEFAULT_CITY,
+  region = DEFAULT_REGION,
   description = "What's on in Italy — auto-collected events",
   path = '',
   needsEvents = false,
@@ -33,9 +33,9 @@ const {
 
 // Only feed / calendar / map embed the full event list; every other page skips
 // this ~44 KB (compressed) island and the build-time fetch entirely.
-// `path` is "<city>/", "<city>/calendar/2026-07/" or "<city>/map/" — the part
-// after the city is the page the city picker keeps you on. A specific month is
-// collapsed to the calendar index: the other city may have no events that month
+// `path` is "<region>/", "<region>/calendar/2026-07/" or "<region>/map/" — the
+// part after the region is the page the picker keeps you on. A specific month
+// collapses to the calendar index: another region may have no events that month
 // and therefore no page for it.
 const rest = path.split('/').slice(1).filter((part) => part !== '');
 const page = rest.length === 0 ? '' : `${rest[0]}/`;
@@ -95,7 +95,7 @@ const alternates = LOCALES.map((loc) => ({
   <body>
     <header class="site-head">
       <p class="site-title">
-        <a class="brand" href={cityUrl(lang, city)} aria-label="Dove Go — home">
+        <a class="brand" href={regionUrl(lang, region)} aria-label="Dove Go — home">
           <svg class="brand-mark" viewBox="0 0 32 40" width="19" height="24" aria-hidden="true">
             <path
               d="M16 1.6C8.6 1.6 2.6 7.5 2.6 14.9 2.6 24.4 16 38.4 16 38.4S29.4 24.4 29.4 14.9C29.4 7.5 23.4 1.6 16 1.6Z"
@@ -113,9 +113,9 @@ const alternates = LOCALES.map((loc) => ({
         </a>
       </p>
       <nav aria-label="Site">
-        <a href={cityUrl(lang, city)}>{ui.nav.feed}</a>
-        <a href={cityUrl(lang, city, 'calendar/')}>{ui.nav.calendar}</a>
-        <a href={cityUrl(lang, city, 'map/')}>{ui.nav.map}</a>
+        <a href={regionUrl(lang, region)}>{ui.nav.feed}</a>
+        <a href={regionUrl(lang, region, 'calendar/')}>{ui.nav.calendar}</a>
+        <a href={regionUrl(lang, region, 'map/')}>{ui.nav.map}</a>
         <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
         <a
           href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
@@ -126,15 +126,15 @@ const alternates = LOCALES.map((loc) => ({
         <span class="account" data-account></span>
       </nav>
       <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
-           city is the one control that must stay reachable everywhere. -->
-      <CityPicker lang={lang} city={city} page={page} />
+           region is the one control that must stay reachable everywhere. -->
+      <RegionPicker lang={lang} region={region} page={page} />
     </header>
     {payload && <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />}
     <script is:inline type="application/json" id="ui-data" set:html={uiData} />
     <main>
       <slot />
     </main>
-    <MobileMenu lang={lang} path={path} city={city} />
+    <MobileMenu lang={lang} path={path} region={region} />
     <footer class="site-foot">
       <p>
         {ui.footer}{payload ? ` · data as of ${payload.generatedAt.slice(0, 16)}Z` : ''} ·
