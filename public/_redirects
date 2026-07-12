@@ -1,0 +1,14 @@
+# The city URLs the site shipped with for a few hours. Browsers cached the 301s
+# that pointed at them — "/" permanently redirected to "/genova/" — so those
+# paths have to keep resolving forever. Splats, so that "/genova/",
+# "/genova/calendar/" and "/genova/map/" all land in the region.
+/genova/*        /liguria/     301
+/milano/*        /lombardia/   301
+/torino/*        /piemonte/    301
+/it/genova/*     /it/liguria/  301
+/ru/genova/*     /ru/liguria/  301
+/genova          /liguria/     301
+/milano          /lombardia/   301
+/torino          /piemonte/    301
+/it/genova       /it/liguria/  301
+/ru/genova       /ru/liguria/  301
