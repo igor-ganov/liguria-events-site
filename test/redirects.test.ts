@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { parseRedirectRules } from './redirect-rules.ts';
-import { splatCount } from './splat-count.ts';
-import { REGION_NAMES } from '../region/regions.ts';
+import { parseRedirectRules } from '../src/lib/redirects/redirect-rules.ts';
+import { splatCount } from '../src/lib/redirects/splat-count.ts';
+import { REGION_NAMES } from '../src/lib/region/regions.ts';
 
 const RULES = parseRedirectRules(readFileSync(resolve('public/_redirects'), 'utf8'));
 const sourceOf = (source: string) => RULES.find((rule) => rule.source === source);
