@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import MiniCard from '../shared/MiniCard.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
@@ -8,12 +9,6 @@ import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
-import { titleOf } from '../../lib/events/title-of.ts';
-import { descriptionOf } from '../../lib/events/description-of.ts';
-import { formatWhen } from '../../lib/events/format-when.ts';
-import { primaryCategory } from '../../lib/events/primary-category.ts';
-import { eventPath } from '../../lib/event-path.ts';
-import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale }>;
@@ -66,32 +61,7 @@ const iconsJson = JSON.stringify(
               data-free={event.f === true ? '1' : '0'}
               data-gem={event.x === true ? '1' : '0'}
             >
-              <a class="mini-card" href={localizedUrl(lang, eventPath(event.id))}>
-                {event.img === undefined ? (
-                  <div class="mini-thumb--empty" data-cat={primaryCategory(event.c)}>
-                    <Fragment set:html={iconSvg(primaryCategory(event.c), 26)} />
-                  </div>
-                ) : (
-                  <img class="mini-thumb" src={event.img} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-                )}
-                <div class="mini-body">
-                  <h4 class="mini-title">{titleOf(lang)(event)}</h4>
-                  <span class="mini-when">{formatWhen(event)}</span>
-                  {descriptionOf(lang)(event) !== '' && (
-                    <p class="mini-desc">{descriptionOf(lang)(event)}</p>
-                  )}
-                  <div class="mini-tags">
-                    {event.c.map((category) => (
-                      <span class="cat-tag" data-cat={category}>
-                        <Fragment set:html={iconSvg(category, 12)} />
-                        {ui.cat[category]}
-                      </span>
-                    ))}
-                    {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
-                    {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
-                  </div>
-                </div>
-              </a>
+              <MiniCard event={event} ui={ui} lang={lang} />
             </li>
           ))}
         </ul>

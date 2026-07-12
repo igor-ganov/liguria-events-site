@@ -1,0 +1,41 @@
+---
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { eventPath } from '../../lib/event-path.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
+import { descriptionOf } from '../../lib/events/description-of.ts';
+import { formatWhen } from '../../lib/events/format-when.ts';
+import { primaryCategory } from '../../lib/events/primary-category.ts';
+import type { CompactEvent } from '../../lib/events/event-schema.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ event: CompactEvent; ui: Ui; lang: Locale }>;
+const { event, ui, lang } = Astro.props;
+const desc = descriptionOf(lang)(event);
+---
+
+<a class="mini-card" href={localizedUrl(lang, eventPath(event.id))}>
+  {event.img === undefined ? (
+    <div class="mini-thumb--empty" data-cat={primaryCategory(event.c)}>
+      <Fragment set:html={iconSvg(primaryCategory(event.c), 26)} />
+    </div>
+  ) : (
+    <img class="mini-thumb" src={event.img} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+  )}
+  <div class="mini-body">
+    <h4 class="mini-title">{titleOf(lang)(event)}</h4>
+    <span class="mini-when">{formatWhen(event)}</span>
+    {desc !== '' && <p class="mini-desc">{desc}</p>}
+    <div class="mini-tags">
+      {event.c.map((category) => (
+        <span class="cat-tag" data-cat={category}>
+          <Fragment set:html={iconSvg(category, 12)} />
+          {ui.cat[category]}
+        </span>
+      ))}
+      {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+      {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+    </div>
+  </div>
+</a>

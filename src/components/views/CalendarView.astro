@@ -1,18 +1,90 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import MiniCard from '../shared/MiniCard.astro';
+import { cachedEvents } from '../../data/cached-events.ts';
+import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
+import { monthGrid } from '../../lib/calendar/month-grid.ts';
+import { monthTitle } from '../../lib/calendar/month-title.ts';
+import { addMonths } from '../../lib/calendar/add-months.ts';
+import { dayKindOf } from '../../lib/calendar/day-kind.ts';
+import { dayHeading } from '../../lib/calendar/day-heading.ts';
+import { dayCellEvents } from '../../lib/events/day-cell-events.ts';
+import { ongoingInMonth } from '../../lib/events/ongoing-in-month.ts';
+import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
+import { eventPath } from '../../lib/event-path.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale }>;
-const { lang } = Astro.props;
+type Props = Readonly<{ lang: Locale; monthKey: string }>;
+const { lang, monthKey } = Astro.props;
 const ui = await uiOf(lang);
+
+// Server-rendered month: no client JS, no events island. Month navigation is
+// plain links to the neighbouring (also prerendered) month pages — the SPA
+// router makes the swap instant.
+const payload = await cachedEvents(EVENTS_URL);
+const events = payload.events;
+const today = isoToday();
+const title = monthTitle(ui)(monthKey);
+const days = monthGrid(monthKey).flat();
+const kindOf = dayKindOf(monthKey, today);
+const heading = dayHeading(ui);
+const ongoing = ongoingInMonth(monthKey)(events);
+const monthUrl = (m: string): string => localizedUrl(lang, `calendar/${m}/`);
+
+const DAY_CLASS: Record<string, string> = {
+  out: 'cal-day cal-day--out',
+  today: 'cal-day cal-day--today',
+  in: 'cal-day',
+};
 ---
 
-<Layout lang={lang} title={ui.nav.calendar} path="calendar/" needsEvents>
+<Layout lang={lang} title={ui.nav.calendar} path={`calendar/${monthKey}/`}>
   <h1 class="visually-hidden">{ui.nav.calendar}</h1>
-  <events-calendar></events-calendar>
-</Layout>
 
-<script>
-  import '../../components/events-calendar.ts';
-</script>
+  <header class="cal-head">
+    <a class="nav-btn" href={monthUrl(addMonths(monthKey, -1))} aria-label={ui.calNav.prev}>‹</a>
+    <h2>{title}</h2>
+    <a class="nav-btn" href={monthUrl(addMonths(monthKey, 1))} aria-label={ui.calNav.next}>›</a>
+  </header>
+
+  <div class="cal-grid" role="grid" aria-label={title}>
+    {ui.weekdays.map((name) => <div class="cal-weekday" role="columnheader">{name}</div>)}
+    {days.map((day) => (
+      <div class={DAY_CLASS[kindOf(day)] ?? 'cal-day'} role="gridcell">
+        <span class="cal-num">{Number(day.slice(8, 10))}</span>
+        <span class="cal-day-label">{heading(day)}</span>
+        <ul class="cal-events">
+          {dayCellEvents(day)(events).map((event) => (
+            <li>
+              <a
+                class="cal-pill"
+                data-cat={primaryCategory(event.c)}
+                href={localizedUrl(lang, eventPath(event.id))}
+                title={titleOf(lang)(event)}
+              >
+                <Fragment set:html={iconSvg(primaryCategory(event.c), 12)} />
+                <span>{titleOf(lang)(event)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  {ongoing.length > 0 && (
+    <section class="ongoing">
+      <h3>{ui.headings.ongoing}</h3>
+      <ul class="ongoing-list">
+        {ongoing.map((event) => (
+          <li><MiniCard event={event} ui={ui} lang={lang} /></li>
+        ))}
+      </ul>
+    </section>
+  )}
+</Layout>
