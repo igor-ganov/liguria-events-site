@@ -499,12 +499,14 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .ev-cluster::after { border-top-color: var(--accent); }
 .ev-cluster:hover .ev-cluster-face { filter: brightness(1.08); }
-/* Single-event popup */
-.map-pop { display: block; text-decoration: none; color: inherit; }
-.map-pop-thumb img {
-  display: block; width: 100%; height: 110px; object-fit: cover;
-  border-radius: 0.4rem; margin-bottom: 0.45rem;
+/* Single-event popup. Fixed width + a fixed-size thumb CONTAINER so the popup
+   never reflows while the image streams in (the box is reserved before load). */
+.map-pop { display: block; text-decoration: none; color: inherit; width: 216px; }
+.map-pop-thumb {
+  display: block; width: 100%; height: 118px; margin-bottom: 0.45rem;
+  border-radius: 0.4rem; overflow: hidden; background: var(--surface-2);
 }
+.map-pop-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .map-pop-title { display: block; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); line-height: 1.25; }
 .map-pop-when { display: block; color: var(--ink-2); font-size: 0.82rem; }
 /* Cluster combined card: scrollable list of the events it holds. */

@@ -21,3 +21,23 @@ const LABEL: Readonly<Record<Locale, string>> = { en: 'EN', it: 'IT', ru: 'RU' }
     ))
   }
 </div>
+
+<script>
+  // Detail pages carry their id in the query (client-rendered, no per-record
+  // static route); the map carries its view. Switching locale must keep it, so
+  // navigate to the target-locale path + the CURRENT query, read at click time.
+  const bindLangQuery = (): void => {
+    document.querySelectorAll<HTMLAnchorElement>('.lang-switch a').forEach((a) => {
+      if (a.dataset['q'] === '1') return;
+      a.dataset['q'] = '1';
+      a.addEventListener('click', (e) => {
+        if (location.search === '') return;
+        e.preventDefault();
+        const base = new URL(a.href, location.origin).pathname;
+        location.href = base + location.search + location.hash;
+      });
+    });
+  };
+  bindLangQuery();
+  document.addEventListener('astro:after-swap', bindLangQuery);
+</script>

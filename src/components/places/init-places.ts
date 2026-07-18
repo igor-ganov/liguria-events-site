@@ -37,7 +37,7 @@ const thumb = (p: Place): string =>
     : `<span class="lm-thumb-icon" aria-hidden="true">${placeIcon(p.cat, 30)}</span>`;
 
 const card = (lang: Locale, ui: Ui) => (p: Place): string => {
-  const href = localizedUrl(lang, placePath(p.id));
+  const href = localizedUrl(lang, placePath(p.name, p.id));
   const catLabel = ui.places.categories[p.cat] ?? p.cat;
   const desc = p.desc ? `<p class="lm-desc">${esc(p.desc)}</p>` : '';
   return (

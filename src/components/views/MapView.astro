@@ -579,7 +579,7 @@ const ui = await uiOf(lang);
     let landmarkData: readonly Landmark[] | undefined;
     let lmIndex: Supercluster<LmProps> | undefined;
     const lmMarkers: maplibregl.Marker[] = [];
-    const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.id));
+    const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.name, l.id));
     // Commons/Wikipedia thumbs default to ~800px; ask for a marker-sized one.
     const thumbUrl = (url: string, px: number): string =>
       url.replace(/([?&]width=)\d+/, `$1${px}`).replace(/\/\d+px-/, `/${px}px-`);
@@ -688,7 +688,7 @@ const ui = await uiOf(lang);
     let placeData: readonly Place[] | undefined;
     let plIndex: Supercluster<PlProps> | undefined;
     const plMarkers: maplibregl.Marker[] = [];
-    const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.id));
+    const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.name, p.id));
 
     const placeMarkerEl = (p: Place): HTMLElement => {
       const el = document.createElement('div');

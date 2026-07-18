@@ -39,7 +39,7 @@ const thumb = (l: Landmark): string =>
 // The card links to the landmark's own detail page (not straight to Wikipedia —
 // that lives under Sources there), same as an event mini-card links to its page.
 const card = (lang: Locale, ui: Ui) => (l: Landmark): string => {
-  const href = localizedUrl(lang, landmarkPath(l.id));
+  const href = localizedUrl(lang, landmarkPath(l.name, l.id));
   const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
   const desc = l.desc ? `<p class="lm-desc">${esc(l.desc)}</p>` : '';
   return (

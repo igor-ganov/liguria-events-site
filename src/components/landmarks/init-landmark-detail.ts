@@ -4,6 +4,7 @@ import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
 import { landmarkSources } from '../../lib/landmarks/landmark-sources.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { slug } from '../../lib/slug.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -70,12 +71,15 @@ export const initLandmarkDetail = (): void => {
   const id = new URLSearchParams(location.search).get('id') ?? '';
 
   void loadLandmarks(lang).then((all) => {
-    const found = all.find((l) => l.id === id);
+    const found = all.find((l) => slug.matches(l.id, id));
     if (!found) {
       root.innerHTML = backLink(lang, 'liguria', ui.landmarks.title) + `<p class="feed-empty">${esc(NOT_FOUND[lang])}</p>`;
       return;
     }
     root.innerHTML = render(found, lang, ui);
     document.title = `${found.name} · Dove Go`;
+    // Normalise the URL to this locale's readable slug (the incoming one may
+    // carry another language's name) without adding a history entry.
+    history.replaceState(history.state, '', localizedUrl(lang, `landmark/?id=${slug.of(found.name, found.id)}`));
   });
 };

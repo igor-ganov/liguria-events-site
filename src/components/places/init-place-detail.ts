@@ -4,6 +4,7 @@ import { placeIcon } from '../../lib/places/place-icon.ts';
 import { placeColor } from '../../lib/places/place-color.ts';
 import { placeSources } from '../../lib/places/place-sources.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { slug } from '../../lib/slug.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Place } from '../../lib/places/place-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -73,12 +74,13 @@ export const initPlaceDetail = (): void => {
   const id = new URLSearchParams(location.search).get('id') ?? '';
 
   void loadPlaces(lang).then((all) => {
-    const found = all.find((p) => p.id === id);
+    const found = all.find((p) => slug.matches(p.id, id));
     if (!found) {
       root.innerHTML = backLink(lang, 'liguria', ui.places.title) + `<p class="feed-empty">${esc(NOT_FOUND[lang])}</p>`;
       return;
     }
     root.innerHTML = render(found, lang, ui);
     document.title = `${found.name} · Dove Go`;
+    history.replaceState(history.state, '', localizedUrl(lang, `place/?id=${slug.of(found.name, found.id)}`));
   });
 };
