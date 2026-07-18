@@ -1,5 +1,14 @@
 ---
-nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', bot: 'Telegram-бот', ical: 'iCal' }
+nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', bot: 'Telegram-бот', ical: 'iCal' }
+search: { placeholder: 'Поиск событий…', none: 'Ничего не найдено по запросу.' }
+mapLayers: { events: 'События', landmarks: 'Места' }
+landmarks:
+  title: Достопримечательности
+  intro: Места, которые стоит увидеть в Лигурии — собрано из Wikipedia и OpenStreetMap.
+  more: Читать в Wikipedia
+  empty: Ничего не найдено.
+  search: Поиск мест…
+  kinds: { castle: Замки, church: Храмы, museum: Музеи, palace: Дворцы, monument: Памятники, tower: Башни, lighthouse: Маяки, square: Площади, park: Парки, heritage: Историческое наследие, beach: Пляжи, attraction: Достопримечательности }
 chips: { free: 'Только бесплатные', gems: '💎 Необычное', clear: 'Сбросить' }
 theme: { toggle: 'Переключить тему', light: 'Светлая', dark: 'Тёмная', system: 'Системная' }
 range: { from: 'С', to: 'По' }

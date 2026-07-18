@@ -32,6 +32,10 @@ const iconsJson = JSON.stringify(
 <Layout lang={lang} region={region} title={ui.nav.feed} path={`${region}/`}>
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
 
+  <div class="feed-search">
+    <input type="search" data-feed-search placeholder={ui.search.placeholder} aria-label={ui.search.placeholder} />
+  </div>
+
   <div class="feed-dates">
     <label>{ui.range.from} <input type="date" data-feed-from value={today} /></label>
     <label>{ui.range.to} <input type="date" data-feed-to /></label>

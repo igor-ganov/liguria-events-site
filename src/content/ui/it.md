@@ -1,5 +1,14 @@
 ---
-nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', bot: 'Bot Telegram', ical: 'iCal' }
+nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', bot: 'Bot Telegram', ical: 'iCal' }
+search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla ricerca.' }
+mapLayers: { events: 'Eventi', landmarks: 'Luoghi' }
+landmarks:
+  title: Luoghi d'interesse
+  intro: Luoghi da vedere in Liguria, raccolti da Wikipedia e OpenStreetMap.
+  more: Leggi su Wikipedia
+  empty: Nessun luogo corrisponde.
+  search: Cerca luoghi…
+  kinds: { castle: Castelli, church: Chiese, museum: Musei, palace: Palazzi, monument: Monumenti, tower: Torri, lighthouse: Fari, square: Piazze, park: Parchi, heritage: Siti storici, beach: Spiagge, attraction: Attrazioni }
 chips: { free: 'Solo gratuiti', gems: '💎 Chicche', clear: 'Azzera' }
 theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 range: { from: 'Da', to: 'A' }

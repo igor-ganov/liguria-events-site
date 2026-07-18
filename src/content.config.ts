@@ -7,12 +7,24 @@ const cat = z.object({
   culture: z.string(), workshop: z.string(), other: z.string(),
 });
 
+const landmarkKinds = z.object({
+  castle: z.string(), church: z.string(), museum: z.string(), palace: z.string(),
+  monument: z.string(), tower: z.string(), lighthouse: z.string(), square: z.string(),
+  park: z.string(), heritage: z.string(), beach: z.string(), attraction: z.string(),
+});
+
 // UI chrome copy per locale (i18n design §3). Every field is required, so a
 // missing key in any language file fails the build (AC-2.2).
 const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
-    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), bot: z.string(), ical: z.string() }),
+    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), bot: z.string(), ical: z.string() }),
+    search: z.object({ placeholder: z.string(), none: z.string() }),
+    mapLayers: z.object({ events: z.string(), landmarks: z.string() }),
+    landmarks: z.object({
+      title: z.string(), intro: z.string(), more: z.string(), empty: z.string(),
+      search: z.string(), kinds: landmarkKinds,
+    }),
     chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
     theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
     range: z.object({ from: z.string(), to: z.string() }),

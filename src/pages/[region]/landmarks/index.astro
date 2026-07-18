@@ -1,0 +1,18 @@
+---
+import LandmarksView from '../../../components/views/LandmarksView.astro';
+import { cachedEvents } from '../../../data/cached-events.ts';
+import { EVENTS_URL } from '../../../data/events-url.ts';
+import { regionsOf } from '../../../lib/region/regions-of.ts';
+
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  return regionsOf(payload.events).map(({ slug }) => ({
+    params: { region: slug },
+    props: { region: slug },
+  }));
+};
+
+const { region } = Astro.props;
+---
+
+<LandmarksView lang="en" region={region} />

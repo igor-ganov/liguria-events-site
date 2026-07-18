@@ -7,12 +7,24 @@ const cat = Schema.Struct({
   culture: Schema.String, workshop: Schema.String, other: Schema.String,
 });
 
+const landmarkKinds = Schema.Struct({
+  castle: Schema.String, church: Schema.String, museum: Schema.String, palace: Schema.String,
+  monument: Schema.String, tower: Schema.String, lighthouse: Schema.String, square: Schema.String,
+  park: Schema.String, heritage: Schema.String, beach: Schema.String, attraction: Schema.String,
+});
+
 /** UI dict as embedded in the page's #ui-data island; mirrors the content
  *  collection schema. Decoded on the client with English fallback. */
 export const PageDataSchema = Schema.Struct({
   lang: Schema.Literal(...LOCALES),
   ui: Schema.Struct({
-    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, bot: Schema.String, ical: Schema.String }),
+    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, bot: Schema.String, ical: Schema.String }),
+    search: Schema.Struct({ placeholder: Schema.String, none: Schema.String }),
+    mapLayers: Schema.Struct({ events: Schema.String, landmarks: Schema.String }),
+    landmarks: Schema.Struct({
+      title: Schema.String, intro: Schema.String, more: Schema.String, empty: Schema.String,
+      search: Schema.String, kinds: landmarkKinds,
+    }),
     chips: Schema.Struct({ free: Schema.String, gems: Schema.String, clear: Schema.String }),
     theme: Schema.Struct({ toggle: Schema.String, light: Schema.String, dark: Schema.String, system: Schema.String }),
     range: Schema.Struct({ from: Schema.String, to: Schema.String }),

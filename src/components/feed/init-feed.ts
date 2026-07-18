@@ -7,6 +7,8 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { prepare, search } from '../../lib/search/index.ts';
+import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import type { Ui } from '../../lib/i18n/ui-schema.ts';
@@ -22,17 +24,47 @@ const readJson = <T>(id: string, fallback: T): T => {
   }
 };
 
-const state = { from: '', to: '', cats: new Set<string>(), free: false, gems: false };
+const state = {
+  from: '', to: '', cats: new Set<string>(), free: false, gems: false,
+  query: '', hits: undefined as ReadonlySet<string> | undefined,
+};
 
 const matches = (li: HTMLElement): boolean => {
   const start = li.dataset['start'] ?? '';
   const end = li.dataset['end'] ?? start;
+  if (state.hits && !state.hits.has(li.dataset['id'] ?? '')) return false;
   if (state.to !== '' && start > state.to) return false;
   if (state.from !== '' && end < state.from) return false;
   if (state.free && li.dataset['free'] !== '1') return false;
   if (state.gems && li.dataset['gem'] !== '1') return false;
   if (state.cats.size === 0) return true;
   return (li.dataset['cats'] ?? '').split(',').some((c) => state.cats.has(c));
+};
+
+// The fuzzy index is built from the RENDERED cards — title + description + tag
+// text are already in the DOM, so search costs zero extra payload and covers
+// late-published (D1) cards the moment they are inserted.
+const text = (li: HTMLElement, sel: string): string =>
+  [...li.querySelectorAll(sel)].map((n) => n.textContent ?? '').join(' ');
+
+const liDoc = (lang: Locale) => (li: HTMLElement): SearchDoc => ({
+  id: li.dataset['id'] ?? '',
+  lang,
+  section: 'event',
+  url: '',
+  title: text(li, '.mini-title'),
+  description: '',
+  body: `${text(li, '.mini-desc')} ${text(li, '.cat-tag')}`,
+});
+
+let index: PreparedIndex | undefined;
+const buildIndex = (lang: Locale): void => {
+  const docs = [...document.querySelectorAll<HTMLElement>('[data-feed-list] li')].map(liDoc(lang));
+  index = prepare({ lang, docs });
+};
+const runSearch = (): void => {
+  const query = state.query.trim();
+  state.hits = query === '' || !index ? undefined : new Set(search(index, query, 500).map((h) => h.doc.id));
 };
 
 const apply = (): void => {
@@ -116,6 +148,8 @@ const augment = async (ui: Ui, lang: Locale, icons: Record<string, string>, toda
       [...document.querySelectorAll<HTMLElement>('[data-feed-list] li')].map((li) => li.dataset['id']),
     );
     extra.filter((e) => !seen.has(e.id)).forEach((e) => insertEvent(e, ui, lang, icons, today));
+    buildIndex(lang);
+    runSearch();
     apply();
   } catch {
     /* keep the server-rendered set */
@@ -127,6 +161,16 @@ export const initFeed = (): void => {
   const page = readJson<{ lang: Locale; ui: Ui }>('ui-data', { lang: 'en' as Locale, ui: {} as Ui });
   const icons = readJson<Record<string, string>>('icons-data', {});
   const today = isoToday();
+
+  buildIndex(page.lang);
+  const searchEl = document.querySelector<HTMLInputElement>('[data-feed-search]');
+  if (searchEl) {
+    searchEl.addEventListener('input', () => {
+      state.query = searchEl.value;
+      runSearch();
+      apply();
+    });
+  }
 
   const fromEl = document.querySelector<HTMLInputElement>('[data-feed-from]');
   const toEl = document.querySelector<HTMLInputElement>('[data-feed-to]');

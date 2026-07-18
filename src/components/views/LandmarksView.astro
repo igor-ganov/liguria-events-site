@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { LANDMARK_KINDS } from '../../lib/landmarks/landmark-kinds.ts';
+import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; region: string }>;
+const { lang, region } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} region={region} title={ui.landmarks.title} path={`${region}/landmarks/`}>
+  <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
+  <section class="lm-head">
+    <h1>{ui.landmarks.title}</h1>
+    <p class="lm-intro">{ui.landmarks.intro}</p>
+  </section>
+
+  <div class="lm-search">
+    <input type="search" data-lm-search placeholder={ui.landmarks.search} aria-label={ui.landmarks.search} />
+  </div>
+
+  <div class="chips" role="group" aria-label={ui.landmarks.title}>
+    {LANDMARK_KINDS.map((kind) => (
+      <button class="chip" data-lm-kind={kind} aria-pressed="false">
+        <span aria-hidden="true">{landmarkIcon(kind)}</span> {ui.landmarks.kinds[kind]}
+      </button>
+    ))}
+    <button class="chip chip--clear" data-lm-clear hidden>✕ {ui.chips.clear}</button>
+  </div>
+
+  <p class="lm-count" data-lm-count aria-live="polite"></p>
+  <div class="lm-grid" data-lm-grid></div>
+  <p class="feed-empty" data-lm-empty hidden>{ui.landmarks.empty}</p>
+</Layout>
+
+<script>
+  import { initLandmarks } from '../../components/landmarks/init-landmarks.ts';
+  initLandmarks();
+</script>

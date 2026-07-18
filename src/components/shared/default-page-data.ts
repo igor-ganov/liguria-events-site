@@ -5,7 +5,21 @@ import type { PageData } from '../../lib/i18n/ui-schema.ts';
 export const DEFAULT_PAGE_DATA: PageData = {
   lang: 'en',
   ui: {
-    nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', bot: 'Telegram bot', ical: 'iCal' },
+    nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', bot: 'Telegram bot', ical: 'iCal' },
+    search: { placeholder: 'Search events…', none: 'No events match your search.' },
+    mapLayers: { events: 'Events', landmarks: 'Landmarks' },
+    landmarks: {
+      title: 'Landmarks',
+      intro: 'Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.',
+      more: 'Read on Wikipedia',
+      empty: 'No landmarks match.',
+      search: 'Search landmarks…',
+      kinds: {
+        castle: 'Castles', church: 'Churches', museum: 'Museums', palace: 'Palaces',
+        monument: 'Monuments', tower: 'Towers', lighthouse: 'Lighthouses', square: 'Squares',
+        park: 'Parks', heritage: 'Heritage sites', beach: 'Beaches', attraction: 'Attractions',
+      },
+    },
     chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' },
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
     range: { from: 'From', to: 'To' },

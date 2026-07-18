@@ -17,11 +17,15 @@ const ui = await uiOf(lang);
   <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
-    <div class="map-dates">
+    <div class="map-layers" role="group" aria-label="Map layers">
+      <button class="chip chip--layer" data-map-events aria-pressed="true">🎫 {ui.mapLayers.events}</button>
+      <button class="chip chip--layer" data-map-landmarks aria-pressed="false">📍 {ui.mapLayers.landmarks}</button>
+    </div>
+    <div class="map-dates" data-map-event-filters>
       <label>{ui.range.from} <input type="date" data-map-from /></label>
       <label>{ui.range.to} <input type="date" data-map-to /></label>
     </div>
-    <div class="chips" role="group" aria-label="Filter by category">
+    <div class="chips" role="group" aria-label="Filter by category" data-map-event-chips>
       {
         CATEGORIES.map((category) => (
           <button class="chip" data-cat={category} data-map-cat={category} aria-pressed="false">
@@ -64,8 +68,13 @@ const ui = await uiOf(lang);
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
+  import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
+  import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
+  import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
+  import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
+  import type { LandmarkKind } from '../../lib/landmarks/landmark-kinds.ts';
 
   const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -145,7 +154,7 @@ const ui = await uiOf(lang);
 
     maplibregl.addProtocol('pmtiles', new Protocol().tile);
     const events = readEventsIsland();
-    const { lang } = readUiIsland();
+    const { lang, ui } = readUiIsland();
     const href = (e: CompactEvent): string => localizedUrl(lang, eventPath(e.id));
     const thumb = (e: CompactEvent): string =>
       e.img ? `<img src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : '';
@@ -154,7 +163,17 @@ const ui = await uiOf(lang);
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
     const maxDate = sorted[sorted.length - 1] ?? today;
     // Upper bound is open by default ("until the very end") and clearable.
-    const state = { from: today, to: '', selected: new Set<Category>(), freeOnly: false, gemsOnly: false };
+    // Two opt-in layers: events show by default; landmarks are off until asked
+    // for. Both, either or neither can be on — the toggles are independent.
+    const lsBool = (key: string, fallback: boolean): boolean => {
+      const v = localStorage.getItem(key);
+      return v === null ? fallback : v === '1';
+    };
+    const state = {
+      from: today, to: '', selected: new Set<Category>(), freeOnly: false, gemsOnly: false,
+      showEvents: lsBool('map-layer-events', true),
+      showLandmarks: lsBool('map-layer-landmarks', false),
+    };
 
     // The view the visitor left: "?z=11.4&c=44.4123,8.9312". It goes in the
     // QUERY, not the hash — maplibre's own `hash` option writes one, but Astro's
@@ -177,6 +196,8 @@ const ui = await uiOf(lang);
       state.gemsOnly = p.get('gems') === '1';
       state.from = p.get('from') ?? today;
       state.to = p.get('to') ?? '';
+      if (p.has('ev')) state.showEvents = p.get('ev') !== '0';
+      if (p.has('le')) state.showLandmarks = p.get('le') === '1';
       saved = readView(p);
     };
     const writeUrl = (): void => {
@@ -186,6 +207,10 @@ const ui = await uiOf(lang);
       if (state.gemsOnly) p.set('gems', '1');
       if (state.from !== today) p.set('from', state.from);
       if (state.to !== '') p.set('to', state.to);
+      if (!state.showEvents) p.set('ev', '0');
+      if (state.showLandmarks) p.set('le', '1');
+      localStorage.setItem('map-layer-events', state.showEvents ? '1' : '0');
+      localStorage.setItem('map-layer-landmarks', state.showLandmarks ? '1' : '0');
       const view = activeMap;
       if (view !== undefined) {
         const centre = view.getCenter();
@@ -308,7 +333,11 @@ const ui = await uiOf(lang);
       if (key === loadedKey) return;
       loadedKey = key;
       map.setStyle(buildStyle(key));
-      map.once('styledata', () => restoreCivics());
+      map.once('styledata', () => {
+        restoreCivics();
+        restoreLandmarks();
+        setLandmarkVisibility(state.showLandmarks);
+      });
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // ── popups ────────────────────────────────────────────────────────────────
@@ -382,9 +411,9 @@ const ui = await uiOf(lang);
 
     const markers: maplibregl.Marker[] = [];
     const render = (): void => {
-      if (!index) return;
       markers.forEach((m) => m.remove());
       markers.length = 0;
+      if (!index || !state.showEvents) return;
       const b = map.getBounds();
       const clusters = index.getClusters(
         [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
@@ -532,6 +561,99 @@ const ui = await uiOf(lang);
     map.on('load', () => void loadCivics());
     map.on('moveend', () => void loadCivics());
 
+    // ── landmarks: an opt-in layer, fetched once from the locale asset ──────────
+    // Native maplibre clustering (GPU, thousands of points) rather than DOM
+    // markers; colour by kind so the heritage layer never reads as the events.
+    const LM_SRC = 'landmarks';
+    const LM_LAYERS = ['lm-clusters', 'lm-count', 'lm-points'] as const;
+    let landmarkData: readonly Landmark[] | undefined;
+    const emptyFc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+    const toFeature = (l: Landmark): GeoJSON.Feature => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [l.lng, l.lat] },
+      properties: {
+        name: l.name, kind: l.kind, color: landmarkColor(l.kind), icon: landmarkIcon(l.kind),
+        desc: l.desc ?? '', img: l.img ?? '', link: l.wiki ?? l.wd ?? '',
+      },
+    });
+    const landmarkFc = (): GeoJSON.FeatureCollection =>
+      landmarkData ? { type: 'FeatureCollection', features: landmarkData.map(toFeature) } : emptyFc;
+
+    const openLandmark = (props: Record<string, string>, at: [number, number]): void => {
+      const kindLabel = ui.landmarks.kinds[props['kind'] as LandmarkKind] ?? props['kind'] ?? '';
+      const img = props['img'] ? `<span class="lm-pop-thumb"><img src="${esc(props['img'])}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>` : '';
+      const link = props['link']
+        ? `<a class="lm-pop-more" href="${esc(props['link'])}" target="_blank" rel="noopener">${esc(ui.landmarks.more)} ↗</a>`
+        : '';
+      new maplibregl.Popup({ closeButton: true, maxWidth: '260px', anchor: 'bottom', offset: 16, className: 'lm-popup' })
+        .setLngLat(at)
+        .setHTML(
+          `<div class="lm-pop">${img}<span class="lm-pop-kind">${esc(props['icon'] ?? '')} ${esc(kindLabel)}</span>` +
+            `<span class="lm-pop-name">${esc(props['name'] ?? '')}</span>${link}</div>`,
+        )
+        .addTo(map);
+    };
+
+    const restoreLandmarks = (): void => {
+      if (!state.showLandmarks || map.getSource(LM_SRC)) return;
+      map.addSource(LM_SRC, { type: 'geojson', data: landmarkFc(), cluster: true, clusterRadius: 50, clusterMaxZoom: 13 });
+      map.addLayer({
+        id: 'lm-clusters', type: 'circle', source: LM_SRC, filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': '#3949ab',
+          'circle-opacity': 0.85,
+          'circle-radius': ['step', ['get', 'point_count'], 15, 25, 20, 100, 26],
+          'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff',
+        },
+      } as maplibregl.LayerSpecification);
+      map.addLayer({
+        id: 'lm-count', type: 'symbol', source: LM_SRC, filter: ['has', 'point_count'],
+        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['noto-sans-bold'], 'text-size': 12 },
+        paint: { 'text-color': '#ffffff' },
+      } as maplibregl.LayerSpecification);
+      map.addLayer({
+        id: 'lm-points', type: 'circle', source: LM_SRC, filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': ['get', 'color'],
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7, 17, 10],
+          'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff',
+        },
+      } as maplibregl.LayerSpecification);
+      map.on('click', 'lm-points', (e) => {
+        const f = e.features?.[0];
+        if (f) openLandmark(f.properties as Record<string, string>, (f.geometry as GeoJSON.Point).coordinates as [number, number]);
+      });
+      map.on('click', 'lm-clusters', (e) => {
+        const f = e.features?.[0];
+        const id = f?.properties?.['cluster_id'];
+        const src = map.getSource(LM_SRC) as maplibregl.GeoJSONSource | undefined;
+        if (!f || id === undefined || !src) return;
+        void src.getClusterExpansionZoom(id as number).then((z) =>
+          map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom: z }),
+        );
+      });
+      const cursor = (v: string) => () => { map.getCanvas().style.cursor = v; };
+      for (const id of ['lm-points', 'lm-clusters']) {
+        map.on('mouseenter', id, cursor('pointer'));
+        map.on('mouseleave', id, cursor(''));
+      }
+    };
+    const setLandmarkVisibility = (on: boolean): void => {
+      for (const id of LM_LAYERS) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+      }
+    };
+    const showLandmarkLayer = async (): Promise<void> => {
+      restoreLandmarks();
+      if (!landmarkData) {
+        landmarkData = await loadLandmarks(lang);
+        const src = map.getSource(LM_SRC) as maplibregl.GeoJSONSource | undefined;
+        if (src) src.setData(landmarkFc());
+      }
+      setLandmarkVisibility(true);
+    };
+    map.on('load', () => { if (state.showLandmarks) void showLandmarkLayer(); });
+
     // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
     const freeEl = document.querySelector<HTMLButtonElement>('[data-map-free]');
@@ -539,7 +661,21 @@ const ui = await uiOf(lang);
     const catBtns = [...document.querySelectorAll<HTMLButtonElement>('[data-map-cat]')];
     const fromEl = document.querySelector<HTMLInputElement>('[data-map-from]');
     const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
+    const eventsEl = document.querySelector<HTMLButtonElement>('[data-map-events]');
+    const landmarksEl = document.querySelector<HTMLButtonElement>('[data-map-landmarks]');
+    const eventFilterEls = [
+      document.querySelector<HTMLElement>('[data-map-event-filters]'),
+      document.querySelector<HTMLElement>('[data-map-event-chips]'),
+    ];
     const anyFilter = (): boolean => state.selected.size > 0 || state.freeOnly || state.gemsOnly;
+
+    // Event filters only make sense while the events layer is on; fold them away
+    // when it is off so the toolbar reflects what the map is actually showing.
+    const syncLayers = (): void => {
+      eventsEl?.setAttribute('aria-pressed', String(state.showEvents));
+      landmarksEl?.setAttribute('aria-pressed', String(state.showLandmarks));
+      eventFilterEls.forEach((el) => el?.toggleAttribute('hidden', !state.showEvents));
+    };
 
     const syncControls = (): void => {
       catBtns.forEach((b) => b.setAttribute('aria-pressed', String(state.selected.has(b.dataset['mapCat'] as Category))));
@@ -586,7 +722,21 @@ const ui = await uiOf(lang);
       refresh();
     });
 
+    eventsEl?.addEventListener('click', () => {
+      state.showEvents = !state.showEvents;
+      writeUrl();
+      syncLayers();
+      render();
+    });
+    landmarksEl?.addEventListener('click', () => {
+      state.showLandmarks = !state.showLandmarks;
+      writeUrl();
+      syncLayers();
+      state.showLandmarks ? void showLandmarkLayer() : setLandmarkVisibility(false);
+    });
+
     syncControls();
+    syncLayers();
   };
 
   setup();
