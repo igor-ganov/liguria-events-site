@@ -1,7 +1,13 @@
 ---
-nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', bot: 'Telegram bot', ical: 'iCal' }
+nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', places: 'Places', bot: 'Telegram bot', ical: 'iCal' }
 search: { placeholder: 'Search events…', none: 'No events match your search.' }
-mapLayers: { events: 'Events', landmarks: 'Landmarks' }
+mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' }
+places:
+  title: Places
+  intro: Where to go in Liguria — restaurants, bars, museums, gyms, entertainment and more, for visitors and locals alike.
+  empty: No places match.
+  search: Search places…
+  categories: { restaurant: Restaurants, cafe: Cafés, bar: Bars, fastfood: Fast food, icecream: Ice cream, nightlife: Nightlife, fitness: Fitness, climbing: Climbing, sport: Sport, cinema: Cinemas, entertainment: Entertainment, museum: Museums, gallery: Galleries, wellness: Wellness & spa, kids: Kids, shopping: Shopping }
 landmarks:
   title: Landmarks
   intro: Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.

@@ -1,7 +1,13 @@
 ---
-nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', bot: 'Telegram-бот', ical: 'iCal' }
+nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', places: 'Заведения', bot: 'Telegram-бот', ical: 'iCal' }
 search: { placeholder: 'Поиск событий…', none: 'Ничего не найдено по запросу.' }
-mapLayers: { events: 'События', landmarks: 'Места' }
+mapLayers: { events: 'События', landmarks: 'Места', places: 'Заведения' }
+places:
+  title: Заведения
+  intro: Куда сходить в Лигурии — рестораны, бары, музеи, спортзалы, развлечения и не только, для туристов и местных.
+  empty: Ничего не найдено.
+  search: Поиск заведений…
+  categories: { restaurant: Рестораны, cafe: Кафе, bar: Бары, fastfood: Фастфуд, icecream: Мороженое, nightlife: Ночная жизнь, fitness: Фитнес, climbing: Скалолазание, sport: Спорт, cinema: Кино, entertainment: Развлечения, museum: Музеи, gallery: Галереи, wellness: Спа и велнес, kids: Детям, shopping: Шопинг }
 landmarks:
   title: Достопримечательности
   intro: Места, которые стоит увидеть в Лигурии — собрано из Wikipedia и OpenStreetMap.

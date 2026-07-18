@@ -5,9 +5,9 @@ import type { PageData } from '../../lib/i18n/ui-schema.ts';
 export const DEFAULT_PAGE_DATA: PageData = {
   lang: 'en',
   ui: {
-    nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', bot: 'Telegram bot', ical: 'iCal' },
+    nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', places: 'Places', bot: 'Telegram bot', ical: 'iCal' },
     search: { placeholder: 'Search events…', none: 'No events match your search.' },
-    mapLayers: { events: 'Events', landmarks: 'Landmarks' },
+    mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' },
     landmarks: {
       title: 'Landmarks',
       intro: 'Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.',
@@ -18,6 +18,18 @@ export const DEFAULT_PAGE_DATA: PageData = {
         castle: 'Castles', church: 'Churches', museum: 'Museums', palace: 'Palaces',
         monument: 'Monuments', tower: 'Towers', lighthouse: 'Lighthouses', square: 'Squares',
         park: 'Parks', heritage: 'Heritage sites', beach: 'Beaches', attraction: 'Attractions',
+      },
+    },
+    places: {
+      title: 'Places',
+      intro: 'Where to go in Liguria — restaurants, bars, museums, gyms, entertainment and more.',
+      empty: 'No places match.',
+      search: 'Search places…',
+      categories: {
+        restaurant: 'Restaurants', cafe: 'Cafés', bar: 'Bars', fastfood: 'Fast food',
+        icecream: 'Ice cream', nightlife: 'Nightlife', fitness: 'Fitness', climbing: 'Climbing',
+        sport: 'Sport', cinema: 'Cinemas', entertainment: 'Entertainment', museum: 'Museums',
+        gallery: 'Galleries', wellness: 'Wellness & spa', kids: 'Kids', shopping: 'Shopping',
       },
     },
     chips: { free: 'Free only', gems: 'Hidden gems', clear: 'Clear' },

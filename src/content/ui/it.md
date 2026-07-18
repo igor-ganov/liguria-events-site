@@ -1,7 +1,13 @@
 ---
-nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', bot: 'Bot Telegram', ical: 'iCal' }
+nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', places: 'Locali', bot: 'Bot Telegram', ical: 'iCal' }
 search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla ricerca.' }
-mapLayers: { events: 'Eventi', landmarks: 'Luoghi' }
+mapLayers: { events: 'Eventi', landmarks: 'Luoghi', places: 'Locali' }
+places:
+  title: Locali e attività
+  intro: Dove andare in Liguria — ristoranti, bar, musei, palestre, divertimento e altro, per turisti e residenti.
+  empty: Nessun risultato.
+  search: Cerca locali…
+  categories: { restaurant: Ristoranti, cafe: Caffè, bar: Bar, fastfood: Fast food, icecream: Gelaterie, nightlife: Vita notturna, fitness: Palestre, climbing: Arrampicata, sport: Sport, cinema: Cinema, entertainment: Divertimento, museum: Musei, gallery: Gallerie, wellness: Benessere e spa, kids: Bambini, shopping: Shopping }
 landmarks:
   title: Luoghi d'interesse
   intro: Luoghi da vedere in Liguria, raccolti da Wikipedia e OpenStreetMap.

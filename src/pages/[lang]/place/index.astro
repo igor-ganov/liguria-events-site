@@ -1,0 +1,12 @@
+---
+import PlaceDetail from '../../../components/views/PlaceDetail.astro';
+import { LOCALES } from '../../../lib/i18n/locales.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+export const getStaticPaths = () =>
+  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+
+const { lang } = Astro.props as { lang: Locale };
+---
+
+<PlaceDetail lang={lang} />

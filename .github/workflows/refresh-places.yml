@@ -1,0 +1,42 @@
+# Rebuild the places dataset from Overture Maps + OpenStreetMap (+ Wikidata) and
+# commit it when it changed. Like the landmark refresh, this is kept OFF the
+# deploy path: the Overture S3 reads + Overpass are slow and flaky enough that
+# gating a prod deploy on them would break releases. Runs weekly / on demand;
+# a change lands as a commit to main, which then triggers Deploy.
+name: Refresh places
+
+on:
+  schedule:
+    - cron: '41 4 * * 2'
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-places
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install duckdb
+      - run: bun install --frozen-lockfile
+      # build-places.ts spawns overture-places.py to (re)build the Overture cache.
+      - run: bun run scripts/build-places.ts
+      - name: Commit if changed
+        run: |
+          if [ -n "$(git status --porcelain public/data)" ]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email 'github-actions[bot]@users.noreply.github.com'
+            git add public/data/places.*.json
+            git commit -m 'Refresh places from Overture + OpenStreetMap'
+            git push
+          else
+            echo 'No place changes.'
+          fi

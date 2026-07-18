@@ -13,17 +13,28 @@ const landmarkKinds = z.object({
   park: z.string(), heritage: z.string(), beach: z.string(), attraction: z.string(),
 });
 
+const placeCats = z.object({
+  restaurant: z.string(), cafe: z.string(), bar: z.string(), fastfood: z.string(),
+  icecream: z.string(), nightlife: z.string(), fitness: z.string(), climbing: z.string(),
+  sport: z.string(), cinema: z.string(), entertainment: z.string(), museum: z.string(),
+  gallery: z.string(), wellness: z.string(), kids: z.string(), shopping: z.string(),
+});
+
 // UI chrome copy per locale (i18n design §3). Every field is required, so a
 // missing key in any language file fails the build (AC-2.2).
 const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
-    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), bot: z.string(), ical: z.string() }),
+    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), places: z.string(), bot: z.string(), ical: z.string() }),
     search: z.object({ placeholder: z.string(), none: z.string() }),
-    mapLayers: z.object({ events: z.string(), landmarks: z.string() }),
+    mapLayers: z.object({ events: z.string(), landmarks: z.string(), places: z.string() }),
     landmarks: z.object({
       title: z.string(), intro: z.string(), more: z.string(), empty: z.string(),
       search: z.string(), kinds: landmarkKinds,
+    }),
+    places: z.object({
+      title: z.string(), intro: z.string(), empty: z.string(),
+      search: z.string(), categories: placeCats,
     }),
     chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
     theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),

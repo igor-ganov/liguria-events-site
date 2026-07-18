@@ -739,3 +739,23 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.1rem;
   font-size: 0.72rem; font-weight: 700; color: var(--lm, #3949ab);
 }
+
+/* ══ place map markers (rounded-square, mostly icon) ════════════════ */
+.pl-marker { cursor: pointer; }
+.pl-marker-face {
+  width: 34px; height: 34px; border-radius: 10px; border: 2.5px solid var(--pl);
+  background: var(--pl); overflow: hidden; display: grid; place-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform var(--speed), filter var(--speed);
+}
+.pl-marker-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-marker-face--icon { color: #fff; }
+.pl-marker-face--icon > svg { width: 18px; height: 18px; }
+.pl-marker:hover .pl-marker-face { filter: brightness(1.06); transform: scale(1.08); }
+.pl-cluster-face {
+  width: 34px; height: 34px; border-radius: 10px;
+  border: 2.5px solid #e0563b; background: #e0563b; color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 0.85rem;
+  box-shadow: 0 0 0 3px rgba(224, 86, 59, 0.22), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+.pl-cluster:hover .pl-cluster-face { filter: brightness(1.1); }

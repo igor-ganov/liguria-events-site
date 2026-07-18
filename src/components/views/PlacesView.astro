@@ -1,0 +1,41 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { PLACE_CATEGORIES } from '../../lib/places/place-categories.ts';
+import { placeIcon } from '../../lib/places/place-icon.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; region: string }>;
+const { lang, region } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} region={region} title={ui.places.title} path={`${region}/places/`}>
+  <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
+  <section class="lm-head">
+    <h1>{ui.places.title}</h1>
+    <p class="lm-intro">{ui.places.intro}</p>
+  </section>
+
+  <div class="lm-search">
+    <input type="search" data-pl-search placeholder={ui.places.search} aria-label={ui.places.search} />
+  </div>
+
+  <div class="chips" role="group" aria-label={ui.places.title}>
+    {PLACE_CATEGORIES.map((cat) => (
+      <button class="chip chip--lm" data-pl-cat={cat} aria-pressed="false">
+        <Fragment set:html={placeIcon(cat, 15)} /> {ui.places.categories[cat]}
+      </button>
+    ))}
+    <button class="chip chip--clear" data-pl-clear hidden>✕ {ui.chips.clear}</button>
+  </div>
+
+  <p class="lm-count" data-pl-count aria-live="polite"></p>
+  <div class="lm-grid" data-pl-grid></div>
+  <p class="feed-empty" data-pl-empty hidden>{ui.places.empty}</p>
+</Layout>
+
+<script>
+  import { initPlaces } from '../../components/places/init-places.ts';
+  initPlaces();
+</script>

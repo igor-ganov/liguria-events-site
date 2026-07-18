@@ -21,6 +21,7 @@ const ui = await uiOf(lang);
     <div class="map-layers" role="group" aria-label="Map layers">
       <button class="chip chip--layer" data-map-events aria-pressed="true"><Fragment set:html={uiIcon('ticket', 15)} /> {ui.mapLayers.events}</button>
       <button class="chip chip--layer" data-map-landmarks aria-pressed="false"><Fragment set:html={uiIcon('pin', 15)} /> {ui.mapLayers.landmarks}</button>
+      <button class="chip chip--layer" data-map-places aria-pressed="false"><Fragment set:html={uiIcon('places', 15)} /> {ui.mapLayers.places}</button>
     </div>
     <div class="map-dates" data-map-event-filters>
       <label>{ui.range.from} <input type="date" data-map-from /></label>
@@ -73,9 +74,14 @@ const ui = await uiOf(lang);
   import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
   import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
   import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
+  import { loadPlaces } from '../../lib/places/load-places.ts';
+  import { placeColor } from '../../lib/places/place-color.ts';
+  import { placeIcon } from '../../lib/places/place-icon.ts';
+  import { placePath } from '../../lib/places/place-path.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
   import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
+  import type { Place } from '../../lib/places/place-schema.ts';
 
   const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -174,6 +180,7 @@ const ui = await uiOf(lang);
       from: today, to: '', selected: new Set<Category>(), freeOnly: false, gemsOnly: false,
       showEvents: lsBool('map-layer-events', true),
       showLandmarks: lsBool('map-layer-landmarks', false),
+      showPlaces: lsBool('map-layer-places', false),
     };
 
     // The view the visitor left: "?z=11.4&c=44.4123,8.9312". It goes in the
@@ -199,6 +206,7 @@ const ui = await uiOf(lang);
       state.to = p.get('to') ?? '';
       if (p.has('ev')) state.showEvents = p.get('ev') !== '0';
       if (p.has('le')) state.showLandmarks = p.get('le') === '1';
+      if (p.has('pl')) state.showPlaces = p.get('pl') === '1';
       saved = readView(p);
     };
     const writeUrl = (): void => {
@@ -210,8 +218,10 @@ const ui = await uiOf(lang);
       if (state.to !== '') p.set('to', state.to);
       if (!state.showEvents) p.set('ev', '0');
       if (state.showLandmarks) p.set('le', '1');
+      if (state.showPlaces) p.set('pl', '1');
       localStorage.setItem('map-layer-events', state.showEvents ? '1' : '0');
       localStorage.setItem('map-layer-landmarks', state.showLandmarks ? '1' : '0');
+      localStorage.setItem('map-layer-places', state.showPlaces ? '1' : '0');
       const view = activeMap;
       if (view !== undefined) {
         const centre = view.getCenter();
@@ -671,6 +681,104 @@ const ui = await uiOf(lang);
     map.on('load', () => { if (state.showLandmarks) void showLandmarkLayer(); });
     map.on('moveend', () => { if (state.showLandmarks) renderLandmarks(); });
 
+    // ── places: a third opt-in layer — squircle markers (distinct from the
+    // square events and round landmarks). Most places have no photo, so the
+    // category icon is the norm; a marker's card links to the place page.
+    type PlProps = { p: Place };
+    let placeData: readonly Place[] | undefined;
+    let plIndex: Supercluster<PlProps> | undefined;
+    const plMarkers: maplibregl.Marker[] = [];
+    const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.id));
+
+    const placeMarkerEl = (p: Place): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'pl-marker';
+      el.style.setProperty('--pl', placeColor(p.cat));
+      const face = document.createElement('div');
+      face.className = 'pl-marker-face';
+      if (p.img) {
+        const img = document.createElement('img');
+        img.src = thumbUrl(p.img, 96);
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.alt = '';
+        face.appendChild(img);
+      } else {
+        face.classList.add('pl-marker-face--icon');
+        face.innerHTML = placeIcon(p.cat, 18);
+      }
+      el.appendChild(face);
+      return el;
+    };
+    const plClusterEl = (count: number): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'pl-marker pl-cluster';
+      el.innerHTML = `<div class="pl-cluster-face"><span>${count}</span></div>`;
+      return el;
+    };
+    const openPlacePopup = (p: Place, at: [number, number]): void => {
+      const catLabel = ui.places.categories[p.cat] ?? p.cat;
+      const img = p.img
+        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(p.img, 240))}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>`
+        : '';
+      new maplibregl.Popup({ closeButton: false, maxWidth: '250px', anchor: 'bottom', offset: 22, className: 'lm-popup' })
+        .setLngLat(at)
+        .setHTML(
+          `<a class="map-pop" href="${esc(placeHref(p))}">${img}` +
+            `<span class="lm-pop-kind" style="--lm:${placeColor(p.cat)}">${placeIcon(p.cat, 13)} ${esc(catLabel)}</span>` +
+            `<span class="map-pop-title">${esc(p.name)}</span></a>`,
+        )
+        .addTo(map);
+    };
+    const rebuildPlIndex = (): void => {
+      if (!placeData) return;
+      plIndex = new Supercluster<PlProps>({ radius: 58, maxZoom: 17 });
+      plIndex.load(
+        placeData.map((p) => ({ type: 'Feature', properties: { p }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } })),
+      );
+    };
+    const renderPlaces = (): void => {
+      plMarkers.forEach((m) => m.remove());
+      plMarkers.length = 0;
+      if (!plIndex || !state.showPlaces) return;
+      const b = map.getBounds();
+      const clusters = plIndex.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], Math.round(map.getZoom()));
+      clusters.forEach((c) => {
+        const at = c.geometry.coordinates as [number, number];
+        const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & Partial<PlProps>;
+        if (props.cluster) {
+          const el = plClusterEl(props.point_count ?? 0);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const zoom = plIndex?.getClusterExpansionZoom(props.cluster_id ?? 0) ?? map.getZoom() + 2;
+            map.easeTo({ center: at, zoom });
+          });
+          plMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
+        } else {
+          const p = (props as PlProps).p;
+          const el = placeMarkerEl(p);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            openPlacePopup(p, at);
+          });
+          plMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
+        }
+      });
+    };
+    const hidePlaces = (): void => {
+      plMarkers.forEach((m) => m.remove());
+      plMarkers.length = 0;
+    };
+    const showPlaceLayer = async (): Promise<void> => {
+      if (!placeData) {
+        placeData = await loadPlaces(lang);
+        rebuildPlIndex();
+      }
+      renderPlaces();
+    };
+    map.on('load', () => { if (state.showPlaces) void showPlaceLayer(); });
+    map.on('moveend', () => { if (state.showPlaces) renderPlaces(); });
+
     // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
     const freeEl = document.querySelector<HTMLButtonElement>('[data-map-free]');
@@ -680,6 +788,7 @@ const ui = await uiOf(lang);
     const toEl = document.querySelector<HTMLInputElement>('[data-map-to]');
     const eventsEl = document.querySelector<HTMLButtonElement>('[data-map-events]');
     const landmarksEl = document.querySelector<HTMLButtonElement>('[data-map-landmarks]');
+    const placesEl = document.querySelector<HTMLButtonElement>('[data-map-places]');
     const eventFilterEls = [
       document.querySelector<HTMLElement>('[data-map-event-filters]'),
       document.querySelector<HTMLElement>('[data-map-event-chips]'),
@@ -691,6 +800,7 @@ const ui = await uiOf(lang);
     const syncLayers = (): void => {
       eventsEl?.setAttribute('aria-pressed', String(state.showEvents));
       landmarksEl?.setAttribute('aria-pressed', String(state.showLandmarks));
+      placesEl?.setAttribute('aria-pressed', String(state.showPlaces));
       eventFilterEls.forEach((el) => el?.toggleAttribute('hidden', !state.showEvents));
     };
 
@@ -750,6 +860,12 @@ const ui = await uiOf(lang);
       writeUrl();
       syncLayers();
       state.showLandmarks ? void showLandmarkLayer() : hideLandmarks();
+    });
+    placesEl?.addEventListener('click', () => {
+      state.showPlaces = !state.showPlaces;
+      writeUrl();
+      syncLayers();
+      state.showPlaces ? void showPlaceLayer() : hidePlaces();
     });
 
     syncControls();

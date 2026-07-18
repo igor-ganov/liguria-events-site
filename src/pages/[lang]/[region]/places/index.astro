@@ -1,0 +1,19 @@
+---
+import PlacesView from '../../../../components/views/PlacesView.astro';
+import { cachedEvents } from '../../../../data/cached-events.ts';
+import { EVENTS_URL } from '../../../../data/events-url.ts';
+import { regionsOf } from '../../../../lib/region/regions-of.ts';
+import { LOCALES } from '../../../../lib/i18n/locales.ts';
+
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  const regions = regionsOf(payload.events);
+  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+    regions.map(({ slug }) => ({ params: { lang, region: slug }, props: { lang, region: slug } })),
+  );
+};
+
+const { lang, region } = Astro.props;
+---
+
+<PlacesView lang={lang} region={region} />

@@ -13,17 +13,28 @@ const landmarkKinds = Schema.Struct({
   park: Schema.String, heritage: Schema.String, beach: Schema.String, attraction: Schema.String,
 });
 
+const placeCats = Schema.Struct({
+  restaurant: Schema.String, cafe: Schema.String, bar: Schema.String, fastfood: Schema.String,
+  icecream: Schema.String, nightlife: Schema.String, fitness: Schema.String, climbing: Schema.String,
+  sport: Schema.String, cinema: Schema.String, entertainment: Schema.String, museum: Schema.String,
+  gallery: Schema.String, wellness: Schema.String, kids: Schema.String, shopping: Schema.String,
+});
+
 /** UI dict as embedded in the page's #ui-data island; mirrors the content
  *  collection schema. Decoded on the client with English fallback. */
 export const PageDataSchema = Schema.Struct({
   lang: Schema.Literal(...LOCALES),
   ui: Schema.Struct({
-    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, bot: Schema.String, ical: Schema.String }),
+    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, places: Schema.String, bot: Schema.String, ical: Schema.String }),
     search: Schema.Struct({ placeholder: Schema.String, none: Schema.String }),
-    mapLayers: Schema.Struct({ events: Schema.String, landmarks: Schema.String }),
+    mapLayers: Schema.Struct({ events: Schema.String, landmarks: Schema.String, places: Schema.String }),
     landmarks: Schema.Struct({
       title: Schema.String, intro: Schema.String, more: Schema.String, empty: Schema.String,
       search: Schema.String, kinds: landmarkKinds,
+    }),
+    places: Schema.Struct({
+      title: Schema.String, intro: Schema.String, empty: Schema.String,
+      search: Schema.String, categories: placeCats,
     }),
     chips: Schema.Struct({ free: Schema.String, gems: Schema.String, clear: Schema.String }),
     theme: Schema.Struct({ toggle: Schema.String, light: Schema.String, dark: Schema.String, system: Schema.String }),

@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// One client-rendered route for every place: the record is read from the
+// (cached) locale asset by ?id, so there are no ~29 000 static detail pages.
+type Props = Readonly<{ lang: Locale }>;
+const { lang } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.places.title} path="place/">
+  <article class="event-page lm-detail" data-pl-detail>
+    <p class="lm-loading" data-pl-detail-loading>…</p>
+  </article>
+</Layout>
+
+<script>
+  import { initPlaceDetail } from '../../components/places/init-place-detail.ts';
+  initPlaceDetail();
+</script>
