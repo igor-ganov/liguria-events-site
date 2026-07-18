@@ -565,7 +565,7 @@ const ui = await uiOf(lang);
     // Native maplibre clustering (GPU, thousands of points) rather than DOM
     // markers; colour by kind so the heritage layer never reads as the events.
     const LM_SRC = 'landmarks';
-    const LM_LAYERS = ['lm-clusters', 'lm-count', 'lm-points'] as const;
+    const LM_LAYERS = ['lm-clusters', 'lm-count', 'lm-points', 'lm-label'] as const;
     let landmarkData: readonly Landmark[] | undefined;
     const emptyFc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
     const toFeature = (l: Landmark): GeoJSON.Feature => ({
@@ -615,8 +615,23 @@ const ui = await uiOf(lang);
         id: 'lm-points', type: 'circle', source: LM_SRC, filter: ['!', ['has', 'point_count']],
         paint: {
           'circle-color': ['get', 'color'],
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7, 17, 10],
-          'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff',
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 14, 8, 17, 12],
+          'circle-stroke-width': 2.5, 'circle-stroke-color': '#ffffff',
+        },
+      } as maplibregl.LayerSpecification);
+      // Named points, not anonymous dots: the name rides beneath each marker from
+      // zoom 13 up. MapLibre hides colliding labels, so a dense area stays legible.
+      map.addLayer({
+        id: 'lm-label', type: 'symbol', source: LM_SRC, filter: ['!', ['has', 'point_count']],
+        minzoom: 13,
+        layout: {
+          'text-field': ['get', 'name'], 'text-font': ['noto-sans-regular'],
+          'text-size': 11.5, 'text-offset': [0, 1], 'text-anchor': 'top',
+          'text-optional': true, 'text-max-width': 8,
+        },
+        paint: {
+          'text-color': isDark() ? '#e7eaf0' : '#2a3340',
+          'text-halo-color': isDark() ? '#12151c' : '#ffffff', 'text-halo-width': 1.4,
         },
       } as maplibregl.LayerSpecification);
       map.on('click', 'lm-points', (e) => {
