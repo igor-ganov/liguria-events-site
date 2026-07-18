@@ -23,8 +23,8 @@ const ui = await uiOf(lang);
 
   <div class="chips" role="group" aria-label={ui.landmarks.title}>
     {LANDMARK_KINDS.map((kind) => (
-      <button class="chip" data-lm-kind={kind} aria-pressed="false">
-        <span aria-hidden="true">{landmarkIcon(kind)}</span> {ui.landmarks.kinds[kind]}
+      <button class="chip chip--lm" data-lm-kind={kind} aria-pressed="false">
+        <Fragment set:html={landmarkIcon(kind, 15)} /> {ui.landmarks.kinds[kind]}
       </button>
     ))}
     <button class="chip chip--clear" data-lm-clear hidden>✕ {ui.chips.clear}</button>

@@ -20,7 +20,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
         park: 'Parks', heritage: 'Heritage sites', beach: 'Beaches', attraction: 'Attractions',
       },
     },
-    chips: { free: 'Free only', gems: '💎 Hidden gems', clear: 'Clear' },
+    chips: { free: 'Free only', gems: 'Hidden gems', clear: 'Clear' },
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
     range: { from: 'From', to: 'To' },
     cat: {
@@ -35,7 +35,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
     ],
     headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events' },
     calNav: { prev: 'Previous month', next: 'Next month' },
-    badges: { free: 'free', gem: '💎 gem' },
+    badges: { free: 'free', gem: 'gem' },
     empty: 'Nothing matches these filters yet.',
     footer: '',
     photoBy: 'photo',

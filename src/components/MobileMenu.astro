@@ -5,6 +5,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
+import { uiIcon } from '../lib/icons/ui-icon.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
@@ -13,12 +14,12 @@ type Props = Readonly<{ lang: Locale; path: string; region?: string }>;
 const { lang, path, region = DEFAULT_REGION } = Astro.props;
 const ui = await uiOf(lang);
 const links = [
-  { href: regionUrl(lang, region), label: `📋 ${ui.nav.feed}` },
-  { href: regionUrl(lang, region, 'calendar/'), label: `🗓 ${ui.nav.calendar}` },
-  { href: regionUrl(lang, region, 'map/'), label: `🗺 ${ui.nav.map}` },
-  { href: regionUrl(lang, region, 'landmarks/'), label: `📍 ${ui.nav.landmarks}` },
-  { href: 'https://t.me/liguria_events_bot', label: `🤖 ${ui.nav.bot}` },
-  { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', label: `📆 ${ui.nav.ical}` },
+  { href: regionUrl(lang, region), icon: 'feed' as const, label: ui.nav.feed },
+  { href: regionUrl(lang, region, 'calendar/'), icon: 'calendar' as const, label: ui.nav.calendar },
+  { href: regionUrl(lang, region, 'map/'), icon: 'map' as const, label: ui.nav.map },
+  { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin' as const, label: ui.nav.landmarks },
+  { href: 'https://t.me/liguria_events_bot', icon: 'bot' as const, label: ui.nav.bot },
+  { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', icon: 'ical' as const, label: ui.nav.ical },
 ];
 ---
 
@@ -53,7 +54,11 @@ const links = [
 
   <nav id="fab-popup" class="fab-popup" data-fab-panel role="dialog" aria-modal="true" aria-label="Menu">
     <ul class="fab-links">
-      {links.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
+      {links.map(({ href, icon, label }) => (
+        <li>
+          <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
+        </li>
+      ))}
     </ul>
     <div class="fab-tools">
       <LanguageSwitcher lang={lang} path={path} />

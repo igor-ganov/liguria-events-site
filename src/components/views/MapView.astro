@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { CATEGORIES } from '../../lib/events/categories.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string }>;
@@ -18,8 +19,8 @@ const ui = await uiOf(lang);
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
     <div class="map-layers" role="group" aria-label="Map layers">
-      <button class="chip chip--layer" data-map-events aria-pressed="true">🎫 {ui.mapLayers.events}</button>
-      <button class="chip chip--layer" data-map-landmarks aria-pressed="false">📍 {ui.mapLayers.landmarks}</button>
+      <button class="chip chip--layer" data-map-events aria-pressed="true"><Fragment set:html={uiIcon('ticket', 15)} /> {ui.mapLayers.events}</button>
+      <button class="chip chip--layer" data-map-landmarks aria-pressed="false"><Fragment set:html={uiIcon('pin', 15)} /> {ui.mapLayers.landmarks}</button>
     </div>
     <div class="map-dates" data-map-event-filters>
       <label>{ui.range.from} <input type="date" data-map-from /></label>
@@ -71,10 +72,10 @@ const ui = await uiOf(lang);
   import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
   import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
   import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
+  import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
   import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
-  import type { LandmarkKind } from '../../lib/landmarks/landmark-kinds.ts';
 
   const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -333,11 +334,9 @@ const ui = await uiOf(lang);
       if (key === loadedKey) return;
       loadedKey = key;
       map.setStyle(buildStyle(key));
-      map.once('styledata', () => {
-        restoreCivics();
-        restoreLandmarks();
-        setLandmarkVisibility(state.showLandmarks);
-      });
+      // DOM markers (events + landmarks) survive setStyle; only the civici
+      // GeoJSON layer has to be re-added.
+      map.once('styledata', () => restoreCivics());
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // ── popups ────────────────────────────────────────────────────────────────
@@ -561,113 +560,116 @@ const ui = await uiOf(lang);
     map.on('load', () => void loadCivics());
     map.on('moveend', () => void loadCivics());
 
-    // ── landmarks: an opt-in layer, fetched once from the locale asset ──────────
-    // Native maplibre clustering (GPU, thousands of points) rather than DOM
-    // markers; colour by kind so the heritage layer never reads as the events.
-    const LM_SRC = 'landmarks';
-    const LM_LAYERS = ['lm-clusters', 'lm-count', 'lm-points', 'lm-label'] as const;
+    // ── landmarks: an opt-in layer of photo markers, like the events ────────────
+    // Same supercluster + DOM-marker approach as events (only the in-view,
+    // unclustered points become photo tiles), but ROUND — so the heritage layer
+    // reads distinctly from the square event markers. A marker's card links to
+    // the landmark's own page, where Wikipedia sits under Sources.
+    type LmProps = { l: Landmark };
     let landmarkData: readonly Landmark[] | undefined;
-    const emptyFc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
-    const toFeature = (l: Landmark): GeoJSON.Feature => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [l.lng, l.lat] },
-      properties: {
-        name: l.name, kind: l.kind, color: landmarkColor(l.kind), icon: landmarkIcon(l.kind),
-        desc: l.desc ?? '', img: l.img ?? '', link: l.wiki ?? l.wd ?? '',
-      },
-    });
-    const landmarkFc = (): GeoJSON.FeatureCollection =>
-      landmarkData ? { type: 'FeatureCollection', features: landmarkData.map(toFeature) } : emptyFc;
+    let lmIndex: Supercluster<LmProps> | undefined;
+    const lmMarkers: maplibregl.Marker[] = [];
+    const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.id));
+    // Commons/Wikipedia thumbs default to ~800px; ask for a marker-sized one.
+    const thumbUrl = (url: string, px: number): string =>
+      url.replace(/([?&]width=)\d+/, `$1${px}`).replace(/\/\d+px-/, `/${px}px-`);
 
-    const openLandmark = (props: Record<string, string>, at: [number, number]): void => {
-      const kindLabel = ui.landmarks.kinds[props['kind'] as LandmarkKind] ?? props['kind'] ?? '';
-      const img = props['img'] ? `<span class="lm-pop-thumb"><img src="${esc(props['img'])}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>` : '';
-      const link = props['link']
-        ? `<a class="lm-pop-more" href="${esc(props['link'])}" target="_blank" rel="noopener">${esc(ui.landmarks.more)} ↗</a>`
+    const landmarkMarkerEl = (l: Landmark): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'lm-marker';
+      el.style.setProperty('--lm', landmarkColor(l.kind));
+      const face = document.createElement('div');
+      face.className = 'lm-marker-face';
+      if (l.img) {
+        const img = document.createElement('img');
+        img.src = thumbUrl(l.img, 96);
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.alt = '';
+        face.appendChild(img);
+      } else {
+        face.classList.add('lm-marker-face--icon');
+        face.innerHTML = landmarkIcon(l.kind, 20);
+      }
+      el.appendChild(face);
+      return el;
+    };
+    const lmClusterEl = (count: number): HTMLElement => {
+      const el = document.createElement('div');
+      el.className = 'lm-marker lm-cluster';
+      el.innerHTML = `<div class="lm-cluster-face"><span>${count}</span></div>`;
+      return el;
+    };
+    const openLandmarkPopup = (l: Landmark, at: [number, number]): void => {
+      const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
+      const img = l.img
+        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(l.img, 240))}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>`
         : '';
-      new maplibregl.Popup({ closeButton: true, maxWidth: '260px', anchor: 'bottom', offset: 16, className: 'lm-popup' })
+      new maplibregl.Popup({ closeButton: false, maxWidth: '250px', anchor: 'bottom', offset: 24, className: 'lm-popup' })
         .setLngLat(at)
         .setHTML(
-          `<div class="lm-pop">${img}<span class="lm-pop-kind">${esc(props['icon'] ?? '')} ${esc(kindLabel)}</span>` +
-            `<span class="lm-pop-name">${esc(props['name'] ?? '')}</span>${link}</div>`,
+          `<a class="map-pop" href="${esc(landmarkHref(l))}">${img}` +
+            `<span class="lm-pop-kind" style="--lm:${landmarkColor(l.kind)}">${landmarkIcon(l.kind, 13)} ${esc(kindLabel)}</span>` +
+            `<span class="map-pop-title">${esc(l.name)}</span></a>`,
         )
         .addTo(map);
     };
 
-    const restoreLandmarks = (): void => {
-      if (!state.showLandmarks || map.getSource(LM_SRC)) return;
-      map.addSource(LM_SRC, { type: 'geojson', data: landmarkFc(), cluster: true, clusterRadius: 50, clusterMaxZoom: 13 });
-      map.addLayer({
-        id: 'lm-clusters', type: 'circle', source: LM_SRC, filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': '#3949ab',
-          'circle-opacity': 0.85,
-          'circle-radius': ['step', ['get', 'point_count'], 15, 25, 20, 100, 26],
-          'circle-stroke-width': 2, 'circle-stroke-color': '#ffffff',
-        },
-      } as maplibregl.LayerSpecification);
-      map.addLayer({
-        id: 'lm-count', type: 'symbol', source: LM_SRC, filter: ['has', 'point_count'],
-        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['noto-sans-bold'], 'text-size': 12 },
-        paint: { 'text-color': '#ffffff' },
-      } as maplibregl.LayerSpecification);
-      map.addLayer({
-        id: 'lm-points', type: 'circle', source: LM_SRC, filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-color': ['get', 'color'],
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 14, 8, 17, 12],
-          'circle-stroke-width': 2.5, 'circle-stroke-color': '#ffffff',
-        },
-      } as maplibregl.LayerSpecification);
-      // Named points, not anonymous dots: the name rides beneath each marker from
-      // zoom 13 up. MapLibre hides colliding labels, so a dense area stays legible.
-      map.addLayer({
-        id: 'lm-label', type: 'symbol', source: LM_SRC, filter: ['!', ['has', 'point_count']],
-        minzoom: 13,
-        layout: {
-          'text-field': ['get', 'name'], 'text-font': ['noto-sans-regular'],
-          'text-size': 11.5, 'text-offset': [0, 1], 'text-anchor': 'top',
-          'text-optional': true, 'text-max-width': 8,
-        },
-        paint: {
-          'text-color': isDark() ? '#e7eaf0' : '#2a3340',
-          'text-halo-color': isDark() ? '#12151c' : '#ffffff', 'text-halo-width': 1.4,
-        },
-      } as maplibregl.LayerSpecification);
-      map.on('click', 'lm-points', (e) => {
-        const f = e.features?.[0];
-        if (f) openLandmark(f.properties as Record<string, string>, (f.geometry as GeoJSON.Point).coordinates as [number, number]);
-      });
-      map.on('click', 'lm-clusters', (e) => {
-        const f = e.features?.[0];
-        const id = f?.properties?.['cluster_id'];
-        const src = map.getSource(LM_SRC) as maplibregl.GeoJSONSource | undefined;
-        if (!f || id === undefined || !src) return;
-        void src.getClusterExpansionZoom(id as number).then((z) =>
-          map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom: z }),
-        );
-      });
-      const cursor = (v: string) => () => { map.getCanvas().style.cursor = v; };
-      for (const id of ['lm-points', 'lm-clusters']) {
-        map.on('mouseenter', id, cursor('pointer'));
-        map.on('mouseleave', id, cursor(''));
-      }
+    const rebuildLmIndex = (): void => {
+      if (!landmarkData) return;
+      lmIndex = new Supercluster<LmProps>({ radius: 60, maxZoom: 16 });
+      lmIndex.load(
+        landmarkData.map((l) => ({
+          type: 'Feature',
+          properties: { l },
+          geometry: { type: 'Point', coordinates: [l.lng, l.lat] },
+        })),
+      );
     };
-    const setLandmarkVisibility = (on: boolean): void => {
-      for (const id of LM_LAYERS) {
-        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
-      }
+    const renderLandmarks = (): void => {
+      lmMarkers.forEach((m) => m.remove());
+      lmMarkers.length = 0;
+      if (!lmIndex || !state.showLandmarks) return;
+      const b = map.getBounds();
+      const clusters = lmIndex.getClusters(
+        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        Math.round(map.getZoom()),
+      );
+      clusters.forEach((c) => {
+        const at = c.geometry.coordinates as [number, number];
+        const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & Partial<LmProps>;
+        if (props.cluster) {
+          const el = lmClusterEl(props.point_count ?? 0);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const zoom = lmIndex?.getClusterExpansionZoom(props.cluster_id ?? 0) ?? map.getZoom() + 2;
+            map.easeTo({ center: at, zoom });
+          });
+          lmMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
+        } else {
+          const l = (props as LmProps).l;
+          const el = landmarkMarkerEl(l);
+          el.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            openLandmarkPopup(l, at);
+          });
+          lmMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
+        }
+      });
+    };
+    const hideLandmarks = (): void => {
+      lmMarkers.forEach((m) => m.remove());
+      lmMarkers.length = 0;
     };
     const showLandmarkLayer = async (): Promise<void> => {
-      restoreLandmarks();
       if (!landmarkData) {
         landmarkData = await loadLandmarks(lang);
-        const src = map.getSource(LM_SRC) as maplibregl.GeoJSONSource | undefined;
-        if (src) src.setData(landmarkFc());
+        rebuildLmIndex();
       }
-      setLandmarkVisibility(true);
+      renderLandmarks();
     };
     map.on('load', () => { if (state.showLandmarks) void showLandmarkLayer(); });
+    map.on('moveend', () => { if (state.showLandmarks) renderLandmarks(); });
 
     // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
@@ -747,7 +749,7 @@ const ui = await uiOf(lang);
       state.showLandmarks = !state.showLandmarks;
       writeUrl();
       syncLayers();
-      state.showLandmarks ? void showLandmarkLayer() : setLandmarkVisibility(false);
+      state.showLandmarks ? void showLandmarkLayer() : hideLandmarks();
     });
 
     syncControls();

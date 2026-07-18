@@ -423,6 +423,17 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 :root[data-theme='dark'] .badge-gem { background: hsl(280 40% 22%); color: hsl(280 65% 80%); }
 .chip--gems[aria-pressed='true'] { background: hsl(280 60% 48%); border-color: hsl(280 60% 48%); color: #fff; }
+/* The gem glyph is a masked line-icon in currentColour — one rule covers every
+   chip and badge, so the string stays plain text (no emoji). */
+.chip--gems::before, .badge-gem::before {
+  content: ''; display: inline-block; width: 1em; height: 1em; flex: none;
+  margin-right: 0.32em; vertical-align: -0.14em; background: currentColor;
+  -webkit-mask: var(--icon-gem) center / contain no-repeat;
+  mask: var(--icon-gem) center / contain no-repeat;
+}
+:root {
+  --icon-gem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8h14l-7 13z'/%3E%3Cpath d='M5 8 8 3.5h8L19 8'/%3E%3Cpath d='M9 8l3 13 3-13M9 8l3-4.5L15 8'/%3E%3C/svg%3E");
+}
 /* Clear-selection chip: only rendered while a filter is active. */
 .chip--clear { border-color: var(--line); color: var(--ink-2); font-weight: 600; }
 .chip--clear:hover { border-color: var(--ink-2); color: var(--ink); }
@@ -678,16 +689,25 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   display: flex; flex-direction: column; overflow: hidden;
   background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--lm, #5c6bc0);
   border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
-  transition: transform var(--speed), box-shadow var(--speed);
+  color: inherit; text-decoration: none;
+  transition: transform var(--speed), box-shadow var(--speed), border-color var(--speed);
 }
-.lm-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.lm-main { display: flex; flex-direction: column; flex: 1; color: inherit; text-decoration: none; }
+.lm-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); text-decoration: none; }
+.lm-card:hover .lm-name { color: var(--accent); }
 .lm-thumb { display: block; aspect-ratio: 16 / 10; background: var(--surface-2); overflow: hidden; }
 .lm-thumb-img { width: 100%; height: 100%; object-fit: cover; }
-.lm-thumb-icon { display: grid; place-items: center; height: 100%; font-size: 2.6rem; }
+.lm-thumb-icon { display: grid; place-items: center; height: 100%; color: var(--lm, #5c6bc0); }
+.lm-name { transition: color var(--speed); }
+.lm-icon, .ui-icon { flex: none; vertical-align: -0.16em; }
 .lm-info { padding: 0.65rem 0.8rem; display: flex; flex-direction: column; gap: 0.28rem; }
 .lm-name { font-weight: 700; line-height: 1.25; color: var(--ink); }
 .lm-kind { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.74rem; font-weight: 700; color: var(--lm, #5c6bc0); }
+.lm-tag {
+  color: var(--lm, #5c6bc0);
+  background: color-mix(in srgb, var(--lm, #5c6bc0) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lm, #5c6bc0) 35%, transparent);
+}
+.lm-detail .event-hero img { max-height: 26rem; }
 .lm-desc {
   margin: 0; font-size: 0.83rem; color: var(--ink-2);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
@@ -696,11 +716,26 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .lm-map-link, .lm-more { font-size: 0.78rem; font-weight: 600; color: var(--accent); text-decoration: none; }
 .lm-map-link:hover, .lm-more:hover { text-decoration: underline; }
 
-/* ══ landmark map popup ═════════════════════════════════════════════ */
-.lm-pop { display: flex; flex-direction: column; gap: 0.22rem; max-width: 230px; }
-.lm-pop-thumb img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: var(--radius-sm); display: block; margin-bottom: 0.2rem; }
-.lm-pop-kind { font-size: 0.72rem; font-weight: 700; color: var(--ink-2); }
-.lm-pop-name { font-weight: 700; color: var(--ink); font-size: 0.95rem; line-height: 1.25; }
-.lm-pop-more { margin-top: 0.2rem; color: var(--accent); font-weight: 600; font-size: 0.8rem; text-decoration: none; }
-.lm-pop-more:hover { text-decoration: underline; }
+/* ══ landmark map markers (round photo) + popup ═════════════════════ */
+.lm-marker { cursor: pointer; }
+.lm-marker-face {
+  width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--lm);
+  background: var(--lm); overflow: hidden; display: grid; place-items: center;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.4);
+  transition: transform var(--speed), filter var(--speed);
+}
+.lm-marker-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lm-marker-face--icon { background: var(--surface); color: var(--lm); }
+.lm-marker-face--icon > svg { width: 20px; height: 20px; }
+.lm-marker:hover .lm-marker-face { filter: brightness(1.05); transform: scale(1.06); }
+.lm-cluster-face {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid #3949ab; background: #3949ab; color: #fff;
+  display: grid; place-items: center; font-weight: 800; font-size: 0.9rem;
+  box-shadow: 0 0 0 3px rgba(57, 73, 171, 0.25), 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+.lm-cluster:hover .lm-cluster-face { filter: brightness(1.1); }
+.lm-pop-kind {
+  display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.1rem;
+  font-size: 0.72rem; font-weight: 700; color: var(--lm, #3949ab);
 }

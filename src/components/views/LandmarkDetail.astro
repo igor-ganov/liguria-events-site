@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// One client-rendered route for every landmark: the record is read from the
+// (cached) locale asset by ?id, so there are no ~2 800 static detail pages.
+type Props = Readonly<{ lang: Locale }>;
+const { lang } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.landmarks.title} path="landmark/">
+  <article class="event-page lm-detail" data-lm-detail>
+    <p class="lm-loading" data-lm-detail-loading>…</p>
+  </article>
+</Layout>
+
+<script>
+  import { initLandmarkDetail } from '../../components/landmarks/init-landmark-detail.ts';
+  initLandmarkDetail();
+</script>

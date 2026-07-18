@@ -7,6 +7,7 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { mapQuery } from '../../lib/events/map-query.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
@@ -54,11 +55,11 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
       {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
     </div>
     <dl class="event-facts">
-      <div><dt>📅</dt><dd>{formatWhen(eventNoVenue)}</dd></div>
+      <div><dt><Fragment set:html={uiIcon('clock', 17)} /></dt><dd>{formatWhen(eventNoVenue)}</dd></div>
       {
         event.v !== undefined && (
           <div>
-            <dt>📍</dt>
+            <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
             <dd>
               {event.v}
               {mapSearchUrl && (

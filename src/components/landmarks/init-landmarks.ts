@@ -2,6 +2,7 @@ import { readUiIsland } from '../shared/read-ui-island.ts';
 import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
 import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
+import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
@@ -30,29 +31,23 @@ const toDoc = (lang: Locale, ui: Ui) => (l: Landmark): SearchDoc => ({
   body: l.desc ?? '',
 });
 
-const mapUrl = (lang: Locale, region: string, l: Landmark): string =>
-  localizedUrl(lang, `${region}/map/?le=1&z=16&c=${l.lat.toFixed(4)},${l.lng.toFixed(4)}`);
-
 const thumb = (l: Landmark): string =>
   l.img
     ? `<img class="lm-thumb-img" src="${esc(l.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
-    : `<span class="lm-thumb-icon" aria-hidden="true">${landmarkIcon(l.kind)}</span>`;
+    : `<span class="lm-thumb-icon" aria-hidden="true">${landmarkIcon(l.kind, 30)}</span>`;
 
-const card = (lang: Locale, region: string, ui: Ui) => (l: Landmark): string => {
-  const outbound = l.wiki ?? l.wd;
-  const href = outbound ?? mapUrl(lang, region, l);
-  const attrs = outbound ? ' target="_blank" rel="noopener"' : '';
+// The card links to the landmark's own detail page (not straight to Wikipedia —
+// that lives under Sources there), same as an event mini-card links to its page.
+const card = (lang: Locale, ui: Ui) => (l: Landmark): string => {
+  const href = localizedUrl(lang, landmarkPath(l.id));
   const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
   const desc = l.desc ? `<p class="lm-desc">${esc(l.desc)}</p>` : '';
-  const more = outbound ? `<a class="lm-more" href="${esc(outbound)}" target="_blank" rel="noopener">${esc(ui.landmarks.more)} ↗</a>` : '';
   return (
-    `<article class="lm-card" style="--lm:${landmarkColor(l.kind)}">` +
-    `<a class="lm-main" href="${esc(href)}"${attrs}><span class="lm-thumb">${thumb(l)}</span>` +
+    `<a class="lm-card" href="${esc(href)}" style="--lm:${landmarkColor(l.kind)}">` +
+    `<span class="lm-thumb">${thumb(l)}</span>` +
     `<span class="lm-info"><span class="lm-name">${esc(l.name)}</span>` +
-    `<span class="lm-kind"><i aria-hidden="true">${landmarkIcon(l.kind)}</i> ${esc(kindLabel)}</span>` +
-    `${desc}</span></a>` +
-    `<span class="lm-links"><a class="lm-map-link" href="${esc(mapUrl(lang, region, l))}">📍 ${esc(ui.mapLink)}</a>${more}</span>` +
-    `</article>`
+    `<span class="lm-kind">${landmarkIcon(l.kind, 15)} ${esc(kindLabel)}</span>` +
+    `${desc}</span></a>`
   );
 };
 
@@ -69,7 +64,6 @@ const render = (
   index: PreparedIndex,
   byId: Map<string, Landmark>,
   lang: Locale,
-  region: string,
   ui: Ui,
 ): void => {
   const base = state.query.trim() === '' ? all : ranked(all, index, byId);
@@ -80,7 +74,7 @@ const render = (
   const clear = document.querySelector<HTMLElement>('[data-lm-clear]');
   if (!grid) return;
   const shown = matched.slice(0, RENDER_CAP);
-  grid.innerHTML = shown.map(card(lang, region, ui)).join('');
+  grid.innerHTML = shown.map(card(lang, ui)).join('');
   if (empty) empty.hidden = matched.length > 0;
   if (count) count.textContent = matched.length > RENDER_CAP ? `${matched.length} · showing ${RENDER_CAP}` : `${matched.length}`;
   if (clear) clear.hidden = state.kinds.size === 0 && state.query === '';
@@ -94,14 +88,13 @@ export const initLandmarks = (): void => {
   grid.dataset['ready'] = 'true';
 
   const { lang, ui } = readUiIsland();
-  const region = (globalThis as { __REGION__?: string }).__REGION__ ?? 'liguria';
   grid.innerHTML = '<p class="lm-loading">…</p>';
 
   void loadLandmarks(lang).then((all) => {
     const sorted = [...all].sort((a, b) => a.name.localeCompare(b.name));
     const byId = new Map(sorted.map((l) => [l.id, l]));
     const index = prepare({ lang, docs: sorted.map(toDoc(lang, ui)) });
-    const draw = (): void => render(sorted, index, byId, lang, region, ui);
+    const draw = (): void => render(sorted, index, byId, lang, ui);
 
     document.querySelectorAll<HTMLButtonElement>('[data-lm-kind]').forEach((chip) => {
       chip.addEventListener('click', () => {
