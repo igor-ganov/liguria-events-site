@@ -76,7 +76,7 @@ const render = (
   const shown = matched.slice(0, RENDER_CAP);
   grid.innerHTML = shown.map(card(lang, ui)).join('');
   if (empty) empty.hidden = matched.length > 0;
-  if (count) count.textContent = matched.length > RENDER_CAP ? `${matched.length} · showing ${RENDER_CAP}` : `${matched.length}`;
+  if (count) count.textContent = matched.length > RENDER_CAP ? `${RENDER_CAP} / ${matched.length}` : `${matched.length}`;
   if (clear) clear.hidden = state.kinds.size === 0 && state.query === '';
 };
 

@@ -7,6 +7,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import RegionPicker from '../components/RegionPicker.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
+import { uiIcon } from '../lib/icons/ui-icon.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
@@ -149,32 +150,32 @@ const alternates = LOCALES.map((loc) => ({
       </p>
     </footer>
 
-    <dialog id="signin-dialog" class="signin-dialog" aria-label="Sign in">
+    <dialog id="signin-dialog" class="signin-dialog" aria-label={ui.auth.signIn}>
       <form method="dialog" class="signin-x-row">
         <button class="signin-x" value="close" aria-label="Close">✕</button>
       </form>
-      <h2>Sign in to Dove Go</h2>
+      <h2>{ui.auth.title}</h2>
 
       <div data-step="email">
-        <p>Enter your email — we'll send you a sign-in link and a code.</p>
+        <p>{ui.auth.emailPrompt}</p>
         <form id="signin-form">
           <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
-          <button type="submit">Send me a code</button>
+          <button type="submit">{ui.auth.sendCode}</button>
         </form>
         <div class="passkey-alt" data-passkey-alt hidden>
-          <div class="signin-or"><span>or</span></div>
-          <button type="button" id="passkey-signin" class="account-signin passkey-btn">🔑 Sign in with a passkey</button>
+          <div class="signin-or"><span>{ui.auth.or}</span></div>
+          <button type="button" id="passkey-signin" class="account-signin passkey-btn"><Fragment set:html={uiIcon('key', 16)} /> {ui.auth.passkey}</button>
         </div>
       </div>
 
       <div data-step="code" hidden>
-        <p>Enter the 6-digit code we emailed to <strong data-code-email></strong> — or click the link in the email.</p>
+        <p>{ui.auth.codePre} <strong data-code-email></strong> {ui.auth.codePost}</p>
         <form id="code-form">
           <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
             pattern="[0-9]{6}" maxlength="6" placeholder="123456" />
-          <button type="submit">Verify code</button>
+          <button type="submit">{ui.auth.verify}</button>
         </form>
-        <button type="button" class="link-btn" data-code-back>← Use a different email</button>
+        <button type="button" class="link-btn" data-code-back>← {ui.auth.back}</button>
       </div>
 
       <p id="signin-status" role="status" aria-live="polite"></p>
@@ -239,9 +240,11 @@ const alternates = LOCALES.map((loc) => ({
 
     <script>
       import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
+      import { readUiIsland } from '../components/shared/read-ui-island.ts';
 
       // Sign-in dialog + header account state (header is static → resolved
       // client-side). Re-run after SPA swaps (DOM is replaced).
+      const auth = readUiIsland().ui.auth;
       type Me = { user: { handle: string; role: string } | null };
       const hasWebAuthn = (): boolean => Boolean(globalThis.PublicKeyCredential);
       const dialog = (): HTMLDialogElement | null => document.querySelector('#signin-dialog');
@@ -304,7 +307,7 @@ const alternates = LOCALES.map((loc) => ({
         setStatus('');
         dialog()?.showModal();
         if (!hasWebAuthn()) return;
-        setStatus('Looking for a passkey…');
+        setStatus(auth.lookingPasskey);
         if (await passkeyLogin()) {
           location.reload();
           return;
@@ -318,17 +321,17 @@ const alternates = LOCALES.map((loc) => ({
           if (user) {
             const admin =
               user.role === 'admin'
-                ? '<a class="account-admin" href="/admin/">Moderation</a>' +
-                  '<a class="account-admin" href="/admin/users/">Users</a>'
+                ? `<a class="account-admin" href="/admin/">${auth.moderation}</a>` +
+                  `<a class="account-admin" href="/admin/users/">${auth.users}</a>`
                 : '';
             slot.innerHTML =
-              '<a class="account-submit" href="/submit">+ Add event</a>' +
+              `<a class="account-submit" href="/submit">+ ${auth.addEvent}</a>` +
               admin +
               `<a class="account-handle" href="/settings">@${user.handle}</a>` +
-              '<button type="button" class="account-signout" data-signout>Sign out</button>';
+              `<button type="button" class="account-signout" data-signout>${auth.signOut}</button>`;
             slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
           } else {
-            slot.innerHTML = '<button type="button" class="account-signin" data-signin>Sign in</button>';
+            slot.innerHTML = `<button type="button" class="account-signin" data-signin>${auth.signIn}</button>`;
             slot.querySelector('[data-signin]')?.addEventListener('click', () => void openSignin());
           }
         });
@@ -357,13 +360,13 @@ const alternates = LOCALES.map((loc) => ({
           form.addEventListener('submit', async (e) => {
             e.preventDefault();
             pendingEmail = String(new FormData(form).get('email') ?? '');
-            setStatus('Sending…');
+            setStatus(auth.sending);
             const res = await fetch('/api/auth/request', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
               body: JSON.stringify({ email: pendingEmail }),
             });
-            if (!res.ok) return setStatus('Please enter a valid email.');
+            if (!res.ok) return setStatus(auth.invalidEmail);
             const target = document.querySelector('[data-code-email]');
             if (target) target.textContent = pendingEmail;
             showStep('code');
@@ -377,7 +380,7 @@ const alternates = LOCALES.map((loc) => ({
           codeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const code = String(new FormData(codeForm).get('code') ?? '').trim();
-            setStatus('Verifying…');
+            setStatus(auth.verifying);
             const res = await fetch('/api/auth/verify-code', {
               method: 'POST',
               headers: { 'content-type': 'application/json' },
@@ -385,7 +388,7 @@ const alternates = LOCALES.map((loc) => ({
             });
             const data = (await res.json().catch(() => ({}))) as { ok?: boolean; isNew?: boolean };
             if (res.ok && data.ok) location.href = data.isNew ? '/?setup=passkey' : '/';
-            else setStatus('That code is wrong or has expired.');
+            else setStatus(auth.badCode);
           });
         }
         bind('[data-code-back]', 'click', () => {
@@ -397,9 +400,9 @@ const alternates = LOCALES.map((loc) => ({
           passkeyBtn.dataset['bound'] = 'true';
           document.querySelector('[data-passkey-alt]')?.removeAttribute('hidden');
           passkeyBtn.addEventListener('click', async () => {
-            setStatus('Waiting for your passkey…');
+            setStatus(auth.waitingPasskey);
             if (await passkeyLogin()) location.reload();
-            else setStatus('Passkey sign-in failed — use your email instead.');
+            else setStatus(auth.passkeyFailed);
           });
         }
       };

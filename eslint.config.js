@@ -114,6 +114,8 @@ export default tseslint.config(
       'src/components/admin/**/*.ts',
       'src/components/region/**/*.ts',
       'src/components/shared/default-page-data.ts',
+      'src/lib/i18n/ui-schema.ts',
+      'src/content.config.ts',
       'src/pages/api/**/*.ts',
       'src/middleware.ts',
     ],

@@ -8,6 +8,30 @@ places:
   empty: No places match.
   search: Search places…
   categories: { restaurant: Restaurants, cafe: Cafés, bar: Bars, fastfood: Fast food, icecream: Ice cream, nightlife: Nightlife, fitness: Fitness, climbing: Climbing, sport: Sport, cinema: Cinemas, entertainment: Entertainment, museum: Museums, gallery: Galleries, wellness: Wellness & spa, kids: Kids, shopping: Shopping }
+map: { retry: 'Retry', failed: "The map couldn't load — check your connection.", locate: 'Find my location' }
+auth:
+  signIn: Sign in
+  title: Sign in to Dove Go
+  emailPrompt: "Enter your email — we'll send you a sign-in link and a code."
+  sendCode: Send me a code
+  or: or
+  passkey: Sign in with a passkey
+  codePre: Enter the 6-digit code we sent to
+  codePost: — or click the link in the email.
+  verify: Verify code
+  back: Use a different email
+  signOut: Sign out
+  addEvent: Add event
+  moderation: Moderation
+  users: Users
+  addPasskey: Add a passkey
+  sending: Sending…
+  invalidEmail: Please enter a valid email.
+  verifying: Verifying…
+  badCode: That code is wrong or has expired.
+  lookingPasskey: Looking for a passkey…
+  waitingPasskey: Waiting for your passkey…
+  passkeyFailed: Passkey sign-in failed — use your email instead.
 landmarks:
   title: Landmarks
   intro: Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.

@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
+import { uiIcon } from '../lib/icons/ui-icon.ts';
 import { listUserPasskeys } from '../lib/auth/credentials.ts';
 
 const user = Astro.locals.user;
@@ -23,7 +24,7 @@ const passkeys = user ? await listUserPasskeys(Astro.locals.runtime.env.DB, user
           </li>
         ))}
       </ul>
-      <button type="button" id="passkey-register" class="account-signin passkey-btn" hidden>🔑 Add a passkey</button>
+      <button type="button" id="passkey-register" class="account-signin passkey-btn" hidden><Fragment set:html={uiIcon('key', 16)} /> Add a passkey</button>
       <span id="passkey-status" class="passkey-status" role="status" aria-live="polite"></span>
     </section>
 

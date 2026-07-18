@@ -8,6 +8,30 @@ places:
   empty: Ничего не найдено.
   search: Поиск заведений…
   categories: { restaurant: Рестораны, cafe: Кафе, bar: Бары, fastfood: Фастфуд, icecream: Мороженое, nightlife: Ночная жизнь, fitness: Фитнес, climbing: Скалолазание, sport: Спорт, cinema: Кино, entertainment: Развлечения, museum: Музеи, gallery: Галереи, wellness: Спа и велнес, kids: Детям, shopping: Шопинг }
+map: { retry: 'Повторить', failed: 'Не удалось загрузить карту — проверьте соединение.', locate: 'Найти моё местоположение' }
+auth:
+  signIn: Войти
+  title: Вход в Dove Go
+  emailPrompt: "Введите email — пришлём ссылку и код для входа."
+  sendCode: Прислать код
+  or: или
+  passkey: Войти по паскей
+  codePre: Введите 6-значный код, отправленный на
+  codePost: — или перейдите по ссылке из письма.
+  verify: Проверить код
+  back: Другой email
+  signOut: Выйти
+  addEvent: Добавить событие
+  moderation: Модерация
+  users: Пользователи
+  addPasskey: Добавить паскей
+  sending: Отправка…
+  invalidEmail: Введите корректный email.
+  verifying: Проверка…
+  badCode: Код неверный или устарел.
+  lookingPasskey: Ищем паскей…
+  waitingPasskey: Ожидание паскей…
+  passkeyFailed: Не удалось войти по паскей — используйте email.
 landmarks:
   title: Достопримечательности
   intro: Места, которые стоит увидеть в Лигурии — собрано из Wikipedia и OpenStreetMap.

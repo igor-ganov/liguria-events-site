@@ -8,6 +8,30 @@ places:
   empty: Nessun risultato.
   search: Cerca locali…
   categories: { restaurant: Ristoranti, cafe: Caffè, bar: Bar, fastfood: Fast food, icecream: Gelaterie, nightlife: Vita notturna, fitness: Palestre, climbing: Arrampicata, sport: Sport, cinema: Cinema, entertainment: Divertimento, museum: Musei, gallery: Gallerie, wellness: Benessere e spa, kids: Bambini, shopping: Shopping }
+map: { retry: 'Riprova', failed: 'Impossibile caricare la mappa — controlla la connessione.', locate: 'Trova la mia posizione' }
+auth:
+  signIn: Accedi
+  title: Accedi a Dove Go
+  emailPrompt: "Inserisci la tua email — ti invieremo un link e un codice di accesso."
+  sendCode: Inviami un codice
+  or: oppure
+  passkey: Accedi con una passkey
+  codePre: Inserisci il codice a 6 cifre inviato a
+  codePost: — oppure clicca il link nell'email.
+  verify: Verifica codice
+  back: Usa un'altra email
+  signOut: Esci
+  addEvent: Aggiungi evento
+  moderation: Moderazione
+  users: Utenti
+  addPasskey: Aggiungi una passkey
+  sending: Invio…
+  invalidEmail: Inserisci un'email valida.
+  verifying: Verifica…
+  badCode: Codice errato o scaduto.
+  lookingPasskey: Ricerca della passkey…
+  waitingPasskey: In attesa della passkey…
+  passkeyFailed: Accesso con passkey non riuscito — usa la tua email.
 landmarks:
   title: Luoghi d'interesse
   intro: Luoghi da vedere in Liguria, raccolti da Wikipedia e OpenStreetMap.
