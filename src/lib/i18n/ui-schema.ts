@@ -34,7 +34,7 @@ export const PageDataSchema = Schema.Struct({
     }),
     places: Schema.Struct({
       title: Schema.String, intro: Schema.String, empty: Schema.String,
-      search: Schema.String, categories: placeCats,
+      search: Schema.String, hours: Schema.String, rating: Schema.String, categories: placeCats,
     }),
     map: Schema.Struct({ retry: Schema.String, failed: Schema.String, locate: Schema.String }),
     auth: Schema.Struct({

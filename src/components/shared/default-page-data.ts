@@ -25,6 +25,8 @@ export const DEFAULT_PAGE_DATA: PageData = {
       intro: 'Where to go in Liguria — restaurants, bars, museums, gyms, entertainment and more.',
       empty: 'No places match.',
       search: 'Search places…',
+      hours: 'Opening hours',
+      rating: 'Rating',
       categories: {
         restaurant: 'Restaurants', cafe: 'Cafés', bar: 'Bars', fastfood: 'Fast food',
         icecream: 'Ice cream', nightlife: 'Nightlife', fitness: 'Fitness', climbing: 'Climbing',

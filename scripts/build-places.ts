@@ -34,6 +34,8 @@ type Place = {
   region: string;
   website?: string;
   img?: string;
+  hours?: string;
+  rating?: number;
   desc?: Record<Lang, string | undefined>;
   wiki?: Record<Lang, string | undefined>;
   wd?: string;
@@ -155,6 +157,13 @@ const readOsm = async (): Promise<Place[]> => {
     const lng = el.lon ?? el.center?.lon;
     if (!cat || !name || lat === undefined || lng === undefined) continue;
     const wd = /^Q\d+$/.test(t['wikidata'] ?? '') ? t['wikidata'] : undefined;
+    // OSM `description[:lang]` is a genuine short blurb where present — a base the
+    // Wikipedia extract later overrides per-language when a page exists.
+    const clean = (s: string | undefined): string | undefined => (s?.trim() ? s.trim() : undefined);
+    const osmDesc = (lang: Lang): string | undefined => clean(t[`description:${lang}`]);
+    const generic = clean(t['description']);
+    const desc = { en: osmDesc('en') ?? generic, it: osmDesc('it') ?? generic, ru: osmDesc('ru') };
+    const stars = Number.parseFloat(t['stars'] ?? '');
     out.push({
       id: `osm:${el.type}/${el.id}`,
       name,
@@ -164,6 +173,9 @@ const readOsm = async (): Promise<Place[]> => {
       region: REGION,
       website: t['website'] ?? t['contact:website'] ?? undefined,
       img: t['image'] ?? undefined,
+      ...(t['opening_hours'] ? { hours: t['opening_hours'] } : {}),
+      ...(Number.isFinite(stars) && stars > 0 ? { rating: stars } : {}),
+      ...(desc.en || desc.it || desc.ru ? { desc } : {}),
       wd: wd ? `https://www.wikidata.org/wiki/${wd}` : undefined,
       ...(t['wikipedia'] ? { wpTag: t['wikipedia'] } : {}),
       ...(wd ? { qid: wd } : {}),
@@ -288,15 +300,16 @@ const enrich = async (places: Place[]): Promise<void> => {
     ru: await fetchExtracts('ru', titles.ru),
   };
   for (const p of places) {
-    const desc: Record<Lang, string | undefined> = { en: undefined, it: undefined, ru: undefined };
-    let any = false;
+    // Wikipedia extract wins per-language, but keep the OSM `description` base
+    // for languages Wikipedia doesn't cover.
+    const desc: Record<Lang, string | undefined> = { ...(p.desc ?? { en: undefined, it: undefined, ru: undefined }) };
     for (const lang of LANGS) {
       const title = titleOf[lang].get(p.id);
       const ex = title ? extracts[lang].get(title) : undefined;
-      if (ex?.extract) { desc[lang] = ex.extract; any = true; }
+      if (ex?.extract) desc[lang] = ex.extract;
       if (!p.img && ex?.thumb) p.img = ex.thumb;
     }
-    if (any) p.desc = desc;
+    if (desc.en || desc.it || desc.ru) p.desc = desc;
   }
 };
 
@@ -316,6 +329,8 @@ const localize = (p: Place, lang: Lang) => ({
   o: p.lng,
   ...(p.website ? { w: p.website } : {}),
   ...(pick(p.desc, lang) ? { d: pick(p.desc, lang) } : {}),
+  ...(p.hours ? { h: p.hours } : {}),
+  ...(p.rating ? { r: p.rating } : {}),
   ...(pick(p.wiki, lang) ? { k: pick(p.wiki, lang) } : {}),
   ...(p.wd ? { q: p.wd } : {}),
   ...(p.img ? { m: p.img } : {}),
@@ -344,7 +359,7 @@ const main = async (): Promise<void> => {
   }
   const byCat = merged.reduce<Record<string, number>>((a, p) => ((a[p.cat] = (a[p.cat] ?? 0) + 1), a), {});
   console.log(`\n✓ ${merged.length} places → ${LANGS.length} locale assets`);
-  console.log(`  ${merged.filter((p) => p.img).length} with image, ${merged.filter((p) => p.desc).length} with description`);
+  console.log(`  ${merged.filter((p) => p.img).length} with image, ${merged.filter((p) => p.desc).length} with description, ${merged.filter((p) => p.hours).length} with hours, ${merged.filter((p) => p.rating).length} with rating`);
   console.log('  by category:', byCat);
 };
 

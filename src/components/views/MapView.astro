@@ -74,10 +74,13 @@ const ui = await uiOf(lang);
   import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
   import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
   import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
+  import { landmarkSources } from '../../lib/landmarks/landmark-sources.ts';
   import { loadPlaces } from '../../lib/places/load-places.ts';
   import { placeColor } from '../../lib/places/place-color.ts';
   import { placeIcon } from '../../lib/places/place-icon.ts';
   import { placePath } from '../../lib/places/place-path.ts';
+  import { placeSources } from '../../lib/places/place-sources.ts';
+  import { uiIcon } from '../../lib/icons/ui-icon.ts';
   import type { Category } from '../../lib/events/categories.ts';
   import type { CompactEvent } from '../../lib/events/event-schema.ts';
   import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
@@ -96,13 +99,28 @@ const ui = await uiOf(lang);
   // the canvas blank, because the old extract stopped at the region border.
   const PMTILES_URL =
     import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
+  // A second, high-zoom (z14) extract of Liguria: the country-wide basemap tops
+  // out at z12, where OpenMapTiles carries no building footprints or dense POIs.
+  // Building + POI layers read from THIS source, so silhouettes and venues come
+  // back where people actually browse; the rest of Italy stays pannable (context
+  // only) off the z12 base.
+  const DETAIL_URL =
+    import.meta.env.PUBLIC_PMTILES_DETAIL_URL ?? `${location.origin}${B}/tiles/liguria.pmtiles`;
+  // Layers whose geometry only exists at z13+ (absent from the z12 country base).
+  const DETAIL_LAYERS = new Set(['building', 'poi']);
 
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
     const style = structuredClone(STYLES[key] ?? brightStyle) as maplibregl.StyleSpecification;
     style.sources = {
       openmaptiles: { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution: ATTR },
+      detail: { type: 'vector', url: `pmtiles://${DETAIL_URL}` },
     };
+    // Repoint the high-zoom layers (buildings, POIs) at the Liguria detail source.
+    for (const layer of style.layers) {
+      const sl = (layer as { 'source-layer'?: string })['source-layer'];
+      if (sl && DETAIL_LAYERS.has(sl)) (layer as { source?: string }).source = 'detail';
+    }
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     // Light uses OSM Bright's sprite (dark Maki POI icons read on a light map);
     // dark uses a white-recoloured copy of it (poi-dark) so the same standard
@@ -165,6 +183,29 @@ const ui = await uiOf(lang);
     const href = (e: CompactEvent): string => localizedUrl(lang, eventPath(e.id));
     const thumb = (e: CompactEvent): string =>
       e.img ? `<img src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : '';
+
+    // Eagerly warm the popup-sized image of any marker CURRENTLY in the viewport,
+    // so its card shows the photo the instant it opens — no fetch-on-click, no
+    // layout shift. Bounded to on-screen icons: the render loops call this only
+    // for the unclustered markers they actually draw.
+    const warmed = new Set<string>();
+    const warm = (url: string | undefined): void => {
+      if (!url || warmed.has(url)) return;
+      warmed.add(url);
+      const img = new Image();
+      img.referrerPolicy = 'no-referrer';
+      img.src = url;
+    };
+    // Trim a blurb to a whole-word boundary for the compact popup card.
+    const clip = (s: string, n: number): string =>
+      s.length > n ? `${s.slice(0, n - 1).replace(/\s+\S*$/, '')}…` : s;
+    type Src = Readonly<{ name: string; url: string }>;
+    const srcChips = (sources: readonly Src[]): string =>
+      sources.length === 0
+        ? ''
+        : `<span class="map-pop-src">${sources
+            .map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`)
+            .join('')}</span>`;
 
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
@@ -613,14 +654,21 @@ const ui = await uiOf(lang);
     const openLandmarkPopup = (l: Landmark, at: [number, number]): void => {
       const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
       const img = l.img
-        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(l.img, 240))}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>`
+        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(l.img, 240))}" alt="" referrerpolicy="no-referrer" /></span>`
         : '';
-      new maplibregl.Popup({ closeButton: false, maxWidth: '250px', anchor: 'bottom', offset: 24, className: 'lm-popup' })
+      const desc = l.desc ? `<p class="map-pop-desc">${esc(clip(l.desc, 150))}</p>` : '';
+      new maplibregl.Popup({ closeButton: false, maxWidth: '264px', anchor: 'bottom', offset: 24, className: 'lm-popup' })
         .setLngLat(at)
         .setHTML(
-          `<a class="map-pop" href="${esc(landmarkHref(l))}">${img}` +
-            `<span class="lm-pop-kind" style="--lm:${landmarkColor(l.kind)}">${landmarkIcon(l.kind, 13)} ${esc(kindLabel)}</span>` +
-            `<span class="map-pop-title">${esc(l.name)}</span></a>`,
+          `<div class="map-pop map-pop--rich">` +
+            `<a class="map-pop-main" href="${esc(landmarkHref(l))}">${img}` +
+              `<span class="map-pop-body">` +
+                `<span class="lm-pop-kind" style="--lm:${landmarkColor(l.kind)}">${landmarkIcon(l.kind, 13)} ${esc(kindLabel)}</span>` +
+                `<span class="map-pop-title">${esc(l.name)}</span>` +
+              `</span></a>` +
+            desc +
+            srcChips(landmarkSources(l)) +
+          `</div>`,
         )
         .addTo(map);
     };
@@ -658,6 +706,7 @@ const ui = await uiOf(lang);
           lmMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
         } else {
           const l = (props as LmProps).l;
+          if (l.img) warm(thumbUrl(l.img, 240));
           const el = landmarkMarkerEl(l);
           el.addEventListener('click', (ev) => {
             ev.stopPropagation();
@@ -716,17 +765,38 @@ const ui = await uiOf(lang);
       el.innerHTML = `<div class="pl-cluster-face"><span>${count}</span></div>`;
       return el;
     };
+    // Compact facts under a place card: rating (where a source carries one — rare
+    // in open data) and opening hours (OSM). Empty string when the place has none.
+    const placeFacts = (p: Place): string => {
+      const rows = [
+        p.rating
+          ? `<span class="map-pop-fact map-pop-rating" title="${esc(ui.places.rating)}">${uiIcon('star', 13)}${p.rating.toFixed(1)}</span>`
+          : '',
+        p.hours
+          ? `<span class="map-pop-fact map-pop-hours" title="${esc(ui.places.hours)}">${uiIcon('clock', 13)}<span>${esc(clip(p.hours, 64))}</span></span>`
+          : '',
+      ].filter(Boolean).join('');
+      return rows ? `<div class="map-pop-facts">${rows}</div>` : '';
+    };
     const openPlacePopup = (p: Place, at: [number, number]): void => {
       const catLabel = ui.places.categories[p.cat] ?? p.cat;
       const img = p.img
-        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(p.img, 240))}" alt="" loading="lazy" referrerpolicy="no-referrer" /></span>`
+        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(p.img, 240))}" alt="" referrerpolicy="no-referrer" /></span>`
         : '';
-      new maplibregl.Popup({ closeButton: false, maxWidth: '250px', anchor: 'bottom', offset: 22, className: 'lm-popup' })
+      const desc = p.desc ? `<p class="map-pop-desc">${esc(clip(p.desc, 150))}</p>` : '';
+      new maplibregl.Popup({ closeButton: false, maxWidth: '264px', anchor: 'bottom', offset: 22, className: 'lm-popup' })
         .setLngLat(at)
         .setHTML(
-          `<a class="map-pop" href="${esc(placeHref(p))}">${img}` +
-            `<span class="lm-pop-kind" style="--lm:${placeColor(p.cat)}">${placeIcon(p.cat, 13)} ${esc(catLabel)}</span>` +
-            `<span class="map-pop-title">${esc(p.name)}</span></a>`,
+          `<div class="map-pop map-pop--rich">` +
+            `<a class="map-pop-main" href="${esc(placeHref(p))}">${img}` +
+              `<span class="map-pop-body">` +
+                `<span class="lm-pop-kind" style="--lm:${placeColor(p.cat)}">${placeIcon(p.cat, 13)} ${esc(catLabel)}</span>` +
+                `<span class="map-pop-title">${esc(p.name)}</span>` +
+              `</span></a>` +
+            desc +
+            placeFacts(p) +
+            srcChips(placeSources(p)) +
+          `</div>`,
         )
         .addTo(map);
     };
@@ -756,6 +826,7 @@ const ui = await uiOf(lang);
           plMarkers.push(new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(at).addTo(map));
         } else {
           const p = (props as PlProps).p;
+          if (p.img) warm(thumbUrl(p.img, 240));
           const el = placeMarkerEl(p);
           el.addEventListener('click', (ev) => {
             ev.stopPropagation();

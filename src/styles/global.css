@@ -509,6 +509,24 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .map-pop-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .map-pop-title { display: block; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); line-height: 1.25; }
 .map-pop-when { display: block; color: var(--ink-2); font-size: 0.82rem; }
+/* Rich object cards (landmarks / places): a linked photo+title header, then a
+   short description, compact facts (hours / rating) and primary-source chips.
+   Only the header is a link; source chips are their own links (no nesting). */
+.map-pop--rich { width: 232px; display: flex; flex-direction: column; gap: 0.4rem; }
+.map-pop-main { display: block; text-decoration: none; color: inherit; }
+.map-pop-desc { margin: 0; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
+.map-pop-facts { display: flex; flex-wrap: wrap; gap: 0.28rem 0.6rem; }
+.map-pop-fact { display: inline-flex; align-items: center; gap: 0.25rem; min-width: 0; font-size: 0.76rem; color: var(--ink-2); }
+.map-pop-fact .ui-icon { flex: none; opacity: 0.8; }
+.map-pop-hours span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-pop-rating { font-weight: 700; color: var(--ink); }
+.map-pop-src { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.map-pop-src a {
+  font-size: 0.72rem; font-weight: 600; text-decoration: none; color: var(--accent);
+  padding: 0.08rem 0.45rem; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+}
+.map-pop-src a:hover { text-decoration: underline; }
+.place-hours { line-height: 1.4; }
 /* Cluster combined card: scrollable list of the events it holds. */
 .map-clus-head { font-weight: 700; font-size: 0.85rem; color: var(--ink-2); margin-bottom: 0.35rem; }
 .map-clus-list { display: flex; flex-direction: column; gap: 0.15rem; max-height: 15rem; overflow-y: auto; }

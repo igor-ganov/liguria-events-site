@@ -62,6 +62,18 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
                 <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
               </div>
             )}
+            {place?.rating !== undefined && (
+              <div>
+                <dt title={ui.places.rating}><Fragment set:html={uiIcon('star', 17)} /></dt>
+                <dd>{place.rating.toFixed(1)}</dd>
+              </div>
+            )}
+            {place?.hours && (
+              <div>
+                <dt title={ui.places.hours}><Fragment set:html={uiIcon('clock', 17)} /></dt>
+                <dd class="place-hours">{place.hours}</dd>
+              </div>
+            )}
           </dl>
           {place.desc && <p class="event-desc">{place.desc}</p>}
           <figure class="event-map">

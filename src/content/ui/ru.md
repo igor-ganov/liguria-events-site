@@ -7,6 +7,8 @@ places:
   intro: Куда сходить в Лигурии — рестораны, бары, музеи, спортзалы, развлечения и не только, для туристов и местных.
   empty: Ничего не найдено.
   search: Поиск заведений…
+  hours: Часы работы
+  rating: Оценка
   categories: { restaurant: Рестораны, cafe: Кафе, bar: Бары, fastfood: Фастфуд, icecream: Мороженое, nightlife: Ночная жизнь, fitness: Фитнес, climbing: Скалолазание, sport: Спорт, cinema: Кино, entertainment: Развлечения, museum: Музеи, gallery: Галереи, wellness: Спа и велнес, kids: Детям, shopping: Шопинг }
 map: { retry: 'Повторить', failed: 'Не удалось загрузить карту — проверьте соединение.', locate: 'Найти моё местоположение' }
 auth:
