@@ -14,6 +14,7 @@
     "lint": "eslint src",
     "typecheck": "astro check && tsc --noEmit -p tsconfig.test.json",
     "check": "bun run lint && bun run typecheck && bun test",
+    "smoke": "bun run scripts/smoke.ts",
     "deploy:dev": "wrangler deploy --env dev",
     "deploy": "wrangler deploy",
     "d1:migrate:dev": "wrangler d1 migrations apply dovego-dev --env dev --remote",

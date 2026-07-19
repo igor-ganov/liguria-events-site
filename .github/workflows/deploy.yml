@@ -31,3 +31,14 @@ jobs:
       - run: bun run build:prod
       - run: bun x wrangler d1 migrations apply dovego --remote
       - run: bun x wrangler deploy
+
+  # Post-deploy smoke check against the live site — fails the run if a shipped
+  # deploy has a broken shard, detail page or image URL (things unit tests and
+  # the build can't see). Retries a few times for edge propagation.
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun run scripts/smoke.ts
