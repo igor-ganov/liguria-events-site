@@ -1,20 +1,23 @@
 """
-Extract Liguria places from Overture Maps (which itself aggregates Meta,
-Microsoft, TomTom and others) into scripts/.cache/overture-liguria.ndjson.
+Extract one Italian region's places from Overture Maps (which itself aggregates
+Meta, Microsoft, TomTom and others) into scripts/.cache/overture-<region>.ndjson.
 
 Overture's public S3 forbids anonymous LIST, so the part files are enumerated
 via the bucket's HTTP listing, then read directly (GET works anonymously) with
 DuckDB doing bbox + row-group pushdown. Run standalone or from build-places.ts.
 
-  python scripts/overture-places.py
+  python scripts/overture-places.py <region> <xmin> <ymin> <xmax> <ymax>
+  python scripts/overture-places.py            # defaults to Liguria
 """
 import json, os, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 
 BUCKET = "https://overturemaps-us-west-2.s3.amazonaws.com/"
 NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
-# Liguria bounding box (lon/lat), slightly generous.
-BOX = (7.49, 43.75, 10.07, 44.68)
-OUT = os.path.join(os.path.dirname(__file__), ".cache", "overture-liguria.ndjson")
+# Region + bbox come from argv (build-places.ts passes them per region); the
+# Liguria default keeps the script runnable standalone.
+REGION = sys.argv[1] if len(sys.argv) > 1 else "liguria"
+BOX = tuple(float(a) for a in sys.argv[2:6]) if len(sys.argv) >= 6 else (7.49, 43.75, 10.07, 44.68)
+OUT = os.path.join(os.path.dirname(__file__), ".cache", f"overture-{REGION}.ndjson")
 
 
 def latest_release():

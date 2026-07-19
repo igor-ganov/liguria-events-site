@@ -13,16 +13,15 @@ import type { Locale } from '../../lib/i18n/locales.ts';
 
 // Worker-SSR'd (prerender = false) — one route for all ~2.8k landmarks, looked
 // up server-side by the slug's token; a real built page (SEO, no client flash).
-type Props = Readonly<{ lang: Locale; slug: string }>;
-const { lang, slug: raw } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string; slug: string }>;
+const { lang, region, slug: raw } = Astro.props;
 const ui = await uiOf(lang);
 const assets = Astro.locals.runtime.env.ASSETS;
-const all = await landmarksFor(assets, lang);
+const all = await landmarksFor(assets, region, lang);
 const item = all.find((l) => slug.matches(l.id, raw));
 if (item === undefined) Astro.response.status = 404;
 
-const region = item?.region ?? 'liguria';
-const path = item ? landmarkPath(item.name, item.id) : 'landmarks/';
+const path = item ? landmarkPath(item.region, item.name, item.id) : `${region}/landmarks/`;
 const mapUrl = item
   ? localizedUrl(lang, `${region}/map/?le=1&z=16&c=${item.lat.toFixed(4)},${item.lng.toFixed(4)}`)
   : '';

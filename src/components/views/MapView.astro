@@ -69,6 +69,7 @@ const ui = await uiOf(lang);
   import { tilesInBbox } from '../../lib/civic/tiles-in-bbox.ts';
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
+  import { regionsInView } from '../../lib/region/region-bounds.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
   import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
   import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
@@ -617,10 +618,13 @@ const ui = await uiOf(lang);
     // reads distinctly from the square event markers. A marker's card links to
     // the landmark's own page, where Wikipedia sits under Sources.
     type LmProps = { l: Landmark };
-    let landmarkData: readonly Landmark[] | undefined;
+    // Accumulated across region shards — a region's shard is loaded once, the
+    // first time its bbox enters the viewport (nationwide, no single huge file).
+    let landmarkData: Landmark[] = [];
+    const lmLoaded = new Set<string>();
     let lmIndex: Supercluster<LmProps> | undefined;
     const lmMarkers: maplibregl.Marker[] = [];
-    const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.name, l.id));
+    const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.region, l.name, l.id));
     // Commons/Wikipedia thumbs default to ~800px; ask for a marker-sized one.
     const thumbUrl = (url: string, px: number): string =>
       url.replace(/([?&]width=)\d+/, `$1${px}`).replace(/\/\d+px-/, `/${px}px-`);
@@ -674,7 +678,7 @@ const ui = await uiOf(lang);
     };
 
     const rebuildLmIndex = (): void => {
-      if (!landmarkData) return;
+      if (landmarkData.length === 0) { lmIndex = undefined; return; }
       lmIndex = new Supercluster<LmProps>({ radius: 60, maxZoom: 16 });
       lmIndex.load(
         landmarkData.map((l) => ({
@@ -720,24 +724,32 @@ const ui = await uiOf(lang);
       lmMarkers.forEach((m) => m.remove());
       lmMarkers.length = 0;
     };
-    const showLandmarkLayer = async (): Promise<void> => {
-      if (!landmarkData) {
-        landmarkData = await loadLandmarks(lang);
-        rebuildLmIndex();
-      }
+    // Load the shard of every region whose bbox now intersects the viewport
+    // (once each), merge it in, re-index and re-render.
+    const ensureLandmarkShards = async (): Promise<void> => {
+      if (!state.showLandmarks) return;
+      const b = map.getBounds();
+      const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !lmLoaded.has(r));
+      if (need.length === 0) return;
+      need.forEach((r) => lmLoaded.add(r));
+      const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat();
+      if (added.length === 0) return;
+      landmarkData = landmarkData.concat(added);
+      rebuildLmIndex();
       renderLandmarks();
     };
-    map.on('load', () => { if (state.showLandmarks) void showLandmarkLayer(); });
-    map.on('moveend', () => { if (state.showLandmarks) renderLandmarks(); });
+    map.on('load', () => { if (state.showLandmarks) void ensureLandmarkShards(); });
+    map.on('moveend', () => { if (state.showLandmarks) { renderLandmarks(); void ensureLandmarkShards(); } });
 
     // ── places: a third opt-in layer — squircle markers (distinct from the
     // square events and round landmarks). Most places have no photo, so the
     // category icon is the norm; a marker's card links to the place page.
     type PlProps = { p: Place };
-    let placeData: readonly Place[] | undefined;
+    let placeData: Place[] = [];
+    const plLoaded = new Set<string>();
     let plIndex: Supercluster<PlProps> | undefined;
     const plMarkers: maplibregl.Marker[] = [];
-    const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.name, p.id));
+    const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.region, p.name, p.id));
 
     const placeMarkerEl = (p: Place): HTMLElement => {
       const el = document.createElement('div');
@@ -801,7 +813,7 @@ const ui = await uiOf(lang);
         .addTo(map);
     };
     const rebuildPlIndex = (): void => {
-      if (!placeData) return;
+      if (placeData.length === 0) { plIndex = undefined; return; }
       plIndex = new Supercluster<PlProps>({ radius: 58, maxZoom: 17 });
       plIndex.load(
         placeData.map((p) => ({ type: 'Feature', properties: { p }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } })),
@@ -840,15 +852,22 @@ const ui = await uiOf(lang);
       plMarkers.forEach((m) => m.remove());
       plMarkers.length = 0;
     };
-    const showPlaceLayer = async (): Promise<void> => {
-      if (!placeData) {
-        placeData = await loadPlaces(lang);
-        rebuildPlIndex();
-      }
+    // Same viewport-sharded loading as landmarks: pull a region's place shard
+    // once, when its bbox first enters view.
+    const ensurePlaceShards = async (): Promise<void> => {
+      if (!state.showPlaces) return;
+      const b = map.getBounds();
+      const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !plLoaded.has(r));
+      if (need.length === 0) return;
+      need.forEach((r) => plLoaded.add(r));
+      const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat();
+      if (added.length === 0) return;
+      placeData = placeData.concat(added);
+      rebuildPlIndex();
       renderPlaces();
     };
-    map.on('load', () => { if (state.showPlaces) void showPlaceLayer(); });
-    map.on('moveend', () => { if (state.showPlaces) renderPlaces(); });
+    map.on('load', () => { if (state.showPlaces) void ensurePlaceShards(); });
+    map.on('moveend', () => { if (state.showPlaces) { renderPlaces(); void ensurePlaceShards(); } });
 
     // ── controls ────────────────────────────────────────────────────────────────
     const clearEl = document.querySelector<HTMLElement>('[data-map-clear]');
@@ -930,13 +949,13 @@ const ui = await uiOf(lang);
       state.showLandmarks = !state.showLandmarks;
       writeUrl();
       syncLayers();
-      state.showLandmarks ? void showLandmarkLayer() : hideLandmarks();
+      state.showLandmarks ? void ensureLandmarkShards() : hideLandmarks();
     });
     placesEl?.addEventListener('click', () => {
       state.showPlaces = !state.showPlaces;
       writeUrl();
       syncLayers();
-      state.showPlaces ? void showPlaceLayer() : hidePlaces();
+      state.showPlaces ? void ensurePlaceShards() : hidePlaces();
     });
 
     syncControls();

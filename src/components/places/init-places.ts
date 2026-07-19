@@ -37,7 +37,7 @@ const thumb = (p: Place): string =>
     : `<span class="lm-thumb-icon" aria-hidden="true">${placeIcon(p.cat, 30)}</span>`;
 
 const card = (lang: Locale, ui: Ui) => (p: Place): string => {
-  const href = localizedUrl(lang, placePath(p.name, p.id));
+  const href = localizedUrl(lang, placePath(p.region, p.name, p.id));
   const catLabel = ui.places.categories[p.cat] ?? p.cat;
   const desc = p.desc ? `<p class="lm-desc">${esc(p.desc)}</p>` : '';
   return (
@@ -79,9 +79,10 @@ export const initPlaces = (): void => {
   grid.dataset['ready'] = 'true';
 
   const { lang, ui } = readUiIsland();
+  const region = (globalThis as { __REGION__?: string }).__REGION__ ?? 'liguria';
   grid.innerHTML = '<p class="lm-loading">…</p>';
 
-  void loadPlaces(lang).then((all) => {
+  void loadPlaces(region, lang).then((all) => {
     const sorted = [...all].sort((a, b) => a.name.localeCompare(b.name));
     const byId = new Map(sorted.map((p) => [p.id, p]));
     const index = prepare({ lang, docs: sorted.map(toDoc(lang, ui)) });

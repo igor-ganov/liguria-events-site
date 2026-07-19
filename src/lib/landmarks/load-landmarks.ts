@@ -4,11 +4,12 @@ import type { Locale } from '../i18n/locales.ts';
 
 const base = (import.meta.env?.BASE_URL ?? '').replace(/\/$/, '');
 
-/** Fetch the current locale's landmark asset (built by scripts/build-landmarks).
- *  On demand only — nothing loads until the page opens or the map layer is on. */
-export const loadLandmarks = async (lang: Locale): Promise<readonly Landmark[]> => {
-  const res = await fetch(`${base}/data/landmarks.${lang}.json`, {
+/** Fetch one region's landmark shard for a locale (scripts/build-landmarks).
+ *  On demand only — the map loads a region's shard when its bbox enters view.
+ *  A missing shard (region not built yet) resolves to empty, never throws. */
+export const loadLandmarks = async (region: string, lang: Locale): Promise<readonly Landmark[]> => {
+  const res = await fetch(`${base}/data/landmarks/${region}.${lang}.json`, {
     headers: { accept: 'application/json' },
   });
-  return decodeLandmarks(await res.json());
+  return res.ok ? decodeLandmarks(await res.json(), region) : [];
 };

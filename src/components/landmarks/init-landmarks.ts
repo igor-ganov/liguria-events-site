@@ -39,7 +39,7 @@ const thumb = (l: Landmark): string =>
 // The card links to the landmark's own detail page (not straight to Wikipedia —
 // that lives under Sources there), same as an event mini-card links to its page.
 const card = (lang: Locale, ui: Ui) => (l: Landmark): string => {
-  const href = localizedUrl(lang, landmarkPath(l.name, l.id));
+  const href = localizedUrl(lang, landmarkPath(l.region, l.name, l.id));
   const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
   const desc = l.desc ? `<p class="lm-desc">${esc(l.desc)}</p>` : '';
   return (
@@ -88,9 +88,10 @@ export const initLandmarks = (): void => {
   grid.dataset['ready'] = 'true';
 
   const { lang, ui } = readUiIsland();
+  const region = (globalThis as { __REGION__?: string }).__REGION__ ?? 'liguria';
   grid.innerHTML = '<p class="lm-loading">…</p>';
 
-  void loadLandmarks(lang).then((all) => {
+  void loadLandmarks(region, lang).then((all) => {
     const sorted = [...all].sort((a, b) => a.name.localeCompare(b.name));
     const byId = new Map(sorted.map((l) => [l.id, l]));
     const index = prepare({ lang, docs: sorted.map(toDoc(lang, ui)) });

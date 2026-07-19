@@ -1,8 +1,8 @@
-# Rebuild the landmark dataset from Wikidata + OpenStreetMap and commit it when
-# it changed. Kept OFF the deploy path on purpose: those external APIs time out
-# often enough that coupling a prod deploy to them would break releases. This
-# runs weekly (and on demand); a change lands as a normal commit to main, which
-# then triggers Deploy.
+# Rebuild the landmark dataset (Wikidata + OpenStreetMap), one per-region shard
+# per matrix job, then commit them all in a single follow-up job. Kept OFF the
+# deploy path on purpose: those external APIs time out often enough that coupling
+# a prod deploy to them would break releases. A change lands as one commit to
+# main, which then triggers Deploy.
 name: Refresh landmarks
 
 on:
@@ -15,22 +15,65 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  refresh:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Gentle on WDQS + Overpass — a few regions at a time.
+      max-parallel: 4
+      matrix:
+        region:
+          - abruzzo
+          - basilicata
+          - calabria
+          - campania
+          - emilia-romagna
+          - friuli-venezia-giulia
+          - lazio
+          - liguria
+          - lombardia
+          - marche
+          - molise
+          - piemonte
+          - puglia
+          - sardegna
+          - sicilia
+          - toscana
+          - trentino-alto-adige
+          - umbria
+          - valle-d-aosta
+          - veneto
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run scripts/build-landmarks.ts ${{ matrix.region }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: landmarks-${{ matrix.region }}
+          path: public/data/landmarks/${{ matrix.region }}.*.json
+          if-no-files-found: warn
+
+  collect:
+    needs: build
+    if: always()
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
-      - run: bun run scripts/build-landmarks.ts
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: landmarks-*
+          merge-multiple: true
+          path: public/data/landmarks
       - name: Commit if changed
         run: |
           if [ -n "$(git status --porcelain public/data)" ]; then
             git config user.name 'github-actions[bot]'
             git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git add public/data/landmarks.*.json
-            git commit -m 'Refresh landmarks from Wikidata + OpenStreetMap'
+            git add public/data/landmarks
+            git commit -m 'Refresh landmarks from Wikidata + OpenStreetMap (all regions)'
             git push
           else
             echo 'No landmark changes.'

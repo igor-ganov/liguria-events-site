@@ -12,11 +12,15 @@
  * spawns it), then: bun run scripts/build-places.ts
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 
 const UA = 'DoveGo-places/1.0 (https://dovego.it; igor.ganov@gmail.com)';
-const REGION = 'liguria';
-const OVERTURE_NDJSON = new URL('./.cache/overture-liguria.ndjson', import.meta.url);
+// One region per invocation (CI matrixes over all 20); no arg → every region.
+const ARG_REGIONS = process.argv.slice(2).filter((a) => a in REGION_GEO);
+const REGIONS = ARG_REGIONS.length > 0 ? ARG_REGIONS : Object.keys(REGION_GEO);
+const overtureCache = (region: string): URL =>
+  new URL(`./.cache/overture-${region}.ndjson`, import.meta.url);
 
 type Lang = 'en' | 'it' | 'ru';
 const LANGS: readonly Lang[] = ['en', 'it', 'ru'];
@@ -88,32 +92,34 @@ const osmCat = (t: Record<string, string>): Cat | undefined => {
 
 /* ── sources ────────────────────────────────────────────────────────────────── */
 
-const readOverture = (): Place[] => {
-  if (!existsSync(OVERTURE_NDJSON)) {
-    console.log('· overture cache missing — running overture-places.py…');
-    const r = spawnSync('python', ['scripts/overture-places.py'], { stdio: 'inherit' });
+const readOverture = (region: string): Place[] => {
+  const cache = overtureCache(region);
+  if (!existsSync(cache)) {
+    console.log(`· overture cache missing for ${region} — running overture-places.py…`);
+    const [w, s, e, n] = REGION_GEO[region]!.bbox;
+    const r = spawnSync('python', ['scripts/overture-places.py', region, `${w}`, `${s}`, `${e}`, `${n}`], { stdio: 'inherit' });
     if (r.status !== 0) console.error('  overture extract failed; continuing without it');
   }
-  if (!existsSync(OVERTURE_NDJSON)) return [];
+  if (!existsSync(cache)) return [];
   const out: Place[] = [];
-  for (const line of readFileSync(OVERTURE_NDJSON, 'utf8').split('\n')) {
+  for (const line of readFileSync(cache, 'utf8').split('\n')) {
     if (line.trim() === '') continue;
     const r = JSON.parse(line) as { id: string; name: string; category: string; lat: number; lng: number; website?: string; confidence?: number };
     const cat = overtureCat(r.category);
     if (!cat || (r.confidence ?? 1) < 0.5) continue;
-    out.push({ id: `ovt:${r.id}`, name: r.name, lat: r.lat, lng: r.lng, cat, region: REGION, website: r.website ?? undefined });
+    out.push({ id: `ovt:${r.id}`, name: r.name, lat: r.lat, lng: r.lng, cat, region, website: r.website ?? undefined });
   }
   return out;
 };
 
-const OVERPASS = `[out:json][timeout:180];
-area["ISO3166-2"="IT-42"]->.lig;
+const overpassQuery = (iso: string): string => `[out:json][timeout:240];
+area["ISO3166-2"="${iso}"]->.rg;
 (
-  nwr["amenity"~"^(restaurant|cafe|bar|pub|fast_food|ice_cream|nightclub|cinema|theatre|biergarten|food_court|marketplace|spa|public_bath|arts_centre)$"]["name"](area.lig);
-  nwr["leisure"~"^(fitness_centre|sports_centre|swimming_pool|climbing|bowling_alley|amusement_arcade|escape_game|water_park|trampoline_park|ice_rink|sports_hall|stadium|playground)$"]["name"](area.lig);
-  nwr["tourism"~"^(museum|gallery|zoo|aquarium|theme_park)$"]["name"](area.lig);
-  nwr["sport"="climbing"]["name"](area.lig);
-  nwr["shop"~"^(mall|department_store|bakery)$"]["name"](area.lig);
+  nwr["amenity"~"^(restaurant|cafe|bar|pub|fast_food|ice_cream|nightclub|cinema|theatre|biergarten|food_court|marketplace|spa|public_bath|arts_centre)$"]["name"](area.rg);
+  nwr["leisure"~"^(fitness_centre|sports_centre|swimming_pool|climbing|bowling_alley|amusement_arcade|escape_game|water_park|trampoline_park|ice_rink|sports_hall|stadium|playground)$"]["name"](area.rg);
+  nwr["tourism"~"^(museum|gallery|zoo|aquarium|theme_park)$"]["name"](area.rg);
+  nwr["sport"="climbing"]["name"](area.rg);
+  nwr["shop"~"^(mall|department_store|bakery)$"]["name"](area.rg);
 );
 out center tags;`;
 
@@ -125,7 +131,7 @@ const OVERPASS_HOSTS = [
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 
-const fetchOverpass = async (): Promise<{ elements: OsmEl[] }> => {
+const fetchOverpass = async (iso: string): Promise<{ elements: OsmEl[] }> => {
   let lastErr: unknown;
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const host = OVERPASS_HOSTS[attempt % OVERPASS_HOSTS.length]!;
@@ -133,7 +139,7 @@ const fetchOverpass = async (): Promise<{ elements: OsmEl[] }> => {
       const res = await fetch(host, {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': UA },
-        body: new URLSearchParams({ data: OVERPASS }),
+        body: new URLSearchParams({ data: overpassQuery(iso) }),
       });
       if (res.ok) return (await res.json()) as { elements: OsmEl[] };
       lastErr = new Error(`Overpass ${res.status} @ ${host}`);
@@ -146,8 +152,8 @@ const fetchOverpass = async (): Promise<{ elements: OsmEl[] }> => {
   throw lastErr;
 };
 
-const readOsm = async (): Promise<Place[]> => {
-  const json = await fetchOverpass();
+const readOsm = async (region: string): Promise<Place[]> => {
+  const json = await fetchOverpass(REGION_GEO[region]!.iso);
   const out: Place[] = [];
   for (const el of json.elements) {
     const t = el.tags ?? {};
@@ -170,7 +176,7 @@ const readOsm = async (): Promise<Place[]> => {
       lat: Number(lat.toFixed(6)),
       lng: Number(lng.toFixed(6)),
       cat,
-      region: REGION,
+      region,
       website: t['website'] ?? t['contact:website'] ?? undefined,
       img: t['image'] ?? undefined,
       ...(t['opening_hours'] ? { hours: t['opening_hours'] } : {}),
@@ -318,9 +324,9 @@ const enrich = async (places: Place[]): Promise<void> => {
 const pick = (m: Record<Lang, string | undefined> | undefined, lang: Lang): string | undefined =>
   m ? (m[lang] ?? m.en) : undefined;
 
-// Compact rows (short keys, absent fields omitted) — 29k places, so the wire
-// format follows CompactEvent's philosophy. decode-places.ts expands them.
-// region is dropped (always liguria); Overture UUIDs shortened in main().
+// Compact rows (short keys, absent fields omitted) — the wire format follows
+// CompactEvent's philosophy. decode-places.ts expands them. region is dropped
+// (it IS the shard filename); Overture UUIDs shortened per region below.
 const localize = (p: Place, lang: Lang) => ({
   i: p.id,
   n: p.name,
@@ -336,31 +342,44 @@ const localize = (p: Place, lang: Lang) => ({
   ...(p.img ? { m: p.img } : {}),
 });
 
-const main = async (): Promise<void> => {
-  const overture = readOverture();
+// Build ONE region → per-locale shards `public/data/places/<region>.<lang>.json`.
+const buildRegion = async (region: string): Promise<void> => {
+  console.log(`\n═══ ${region} (${REGION_GEO[region]!.iso}) ═══`);
+  const overture = readOverture(region);
   console.log(`· Overture: ${overture.length} venue places (filtered)`);
   console.log('· querying Overpass…');
-  const osm = await readOsm();
+  const osm = await readOsm(region);
   console.log(`  OSM: ${osm.length} venue places`);
-  // Refuse to write a degraded (Overture-only) asset over a good one.
-  if (osm.length === 0) throw new Error('OSM returned 0 places — aborting to avoid overwriting good data');
+  // Refuse to write a degraded (Overture-only) shard over a good one.
+  if (osm.length === 0) throw new Error(`${region}: OSM returned 0 places — aborting`);
   const merged = merge(osm, overture);
   console.log(`· merged: ${merged.length} places`);
   await enrich(merged);
 
   merged.sort((a, b) => a.id.localeCompare(b.id));
   // Shorten Overture UUIDs to `ovt:<base36>` (kept prefix for source detection);
-  // OSM ids stay (they reconstruct the osm.org link).
+  // OSM ids stay (they reconstruct the osm.org link). Counter is per region — a
+  // token collision across regions is fine (the region is in the detail path).
   let oi = 0;
   for (const p of merged) if (p.id.startsWith('ovt:')) p.id = `ovt:${(oi++).toString(36)}`;
+  mkdirSync(new URL('../public/data/places/', import.meta.url), { recursive: true });
   for (const lang of LANGS) {
     const view = merged.map((p) => localize(p, lang));
-    writeFileSync(new URL(`../public/data/places.${lang}.json`, import.meta.url), `${JSON.stringify(view, undefined, 0)}\n`);
+    writeFileSync(new URL(`../public/data/places/${region}.${lang}.json`, import.meta.url), `${JSON.stringify(view, undefined, 0)}\n`);
   }
-  const byCat = merged.reduce<Record<string, number>>((a, p) => ((a[p.cat] = (a[p.cat] ?? 0) + 1), a), {});
-  console.log(`\n✓ ${merged.length} places → ${LANGS.length} locale assets`);
-  console.log(`  ${merged.filter((p) => p.img).length} with image, ${merged.filter((p) => p.desc).length} with description, ${merged.filter((p) => p.hours).length} with hours, ${merged.filter((p) => p.rating).length} with rating`);
-  console.log('  by category:', byCat);
+  console.log(`✓ ${region}: ${merged.length} places → shards (${merged.filter((p) => p.img).length} img, ${merged.filter((p) => p.desc).length} desc, ${merged.filter((p) => p.hours).length} hours, ${merged.filter((p) => p.rating).length} rating)`);
+};
+
+const main = async (): Promise<void> => {
+  console.log(`Building places for: ${REGIONS.join(', ')}`);
+  for (const region of REGIONS) {
+    try {
+      await buildRegion(region);
+    } catch (e) {
+      console.error(`✗ ${region} failed:`, e instanceof Error ? e.message : e);
+      process.exitCode = 1;
+    }
+  }
 };
 
 await main();

@@ -12,12 +12,18 @@
  * Run:  bun run scripts/build-landmarks.ts   (writes the JSON, prints a summary)
  * External APIs are hit at BUILD time only — the site imports the committed JSON.
  */
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 
 const UA = 'DoveGo-landmarks/1.0 (https://dovego.it; igor.ganov@gmail.com)';
-const REGION = 'liguria';
-// Liguria bounding box (lon/lat), a touch generous; entries are tagged `liguria`.
-const BOX = { swLon: 7.49, swLat: 43.75, neLon: 10.07, neLat: 44.68 };
+// One region per invocation (CI matrixes over all 20); no arg → every region.
+const ARG_REGIONS = process.argv.slice(2).filter((a) => a in REGION_GEO);
+const REGIONS = ARG_REGIONS.length > 0 ? ARG_REGIONS : Object.keys(REGION_GEO);
+type Box = { swLon: number; swLat: number; neLon: number; neLat: number };
+const boxOf = (region: string): Box => {
+  const [swLon, swLat, neLon, neLat] = REGION_GEO[region]!.bbox;
+  return { swLon, swLat, neLon, neLat };
+};
 
 type Lang = 'en' | 'it' | 'ru';
 const LANGS: readonly Lang[] = ['en', 'it', 'ru'];
@@ -57,11 +63,11 @@ const WD_KIND: Record<string, Kind> = {
 };
 const WD_VALUES = Object.keys(WD_KIND).map((q) => `wd:${q}`).join(' ');
 
-const SPARQL = `SELECT ?item ?kind ?lat ?lon ?nameEn ?nameIt ?nameRu ?image ?enTitle ?itTitle ?ruTitle WHERE {
+const sparql = (box: Box): string => `SELECT ?item ?kind ?lat ?lon ?nameEn ?nameIt ?nameRu ?image ?enTitle ?itTitle ?ruTitle WHERE {
   SERVICE wikibase:box {
     ?item wdt:P625 ?coord .
-    bd:serviceParam wikibase:cornerSouthWest "Point(${BOX.swLon} ${BOX.swLat})"^^geo:wktLiteral .
-    bd:serviceParam wikibase:cornerNorthEast "Point(${BOX.neLon} ${BOX.neLat})"^^geo:wktLiteral .
+    bd:serviceParam wikibase:cornerSouthWest "Point(${box.swLon} ${box.swLat})"^^geo:wktLiteral .
+    bd:serviceParam wikibase:cornerNorthEast "Point(${box.neLon} ${box.neLat})"^^geo:wktLiteral .
   }
   ?item wdt:P31 ?kind . VALUES ?kind { ${WD_VALUES} }
   ?item p:P625/psv:P625 ?node .
@@ -85,7 +91,7 @@ const commons = (url: string): string =>
 
 type WdEntry = Landmark & { enTitle?: string; itTitle?: string; ruTitle?: string };
 
-const fetchWikidata = async (): Promise<Map<string, WdEntry>> => {
+const fetchWikidata = async (region: string): Promise<Map<string, WdEntry>> => {
   const res = await fetch('https://query.wikidata.org/sparql', {
     method: 'POST',
     headers: {
@@ -93,7 +99,7 @@ const fetchWikidata = async (): Promise<Map<string, WdEntry>> => {
       accept: 'application/sparql-results+json',
       'user-agent': UA,
     },
-    body: new URLSearchParams({ query: SPARQL }),
+    body: new URLSearchParams({ query: sparql(boxOf(region)) }),
   });
   if (!res.ok) throw new Error(`Wikidata ${res.status}`);
   const json = (await res.json()) as { results: { bindings: Row[] } };
@@ -116,7 +122,7 @@ const fetchWikidata = async (): Promise<Map<string, WdEntry>> => {
       lat: Number(cell(row, 'lat')),
       lng: Number(cell(row, 'lon')),
       kind,
-      region: REGION,
+      region,
       img: cell(row, 'image') ? commons(cell(row, 'image') ?? '') : undefined,
       wd: `https://www.wikidata.org/wiki/${id}`,
       src: ['wikidata'],
@@ -130,16 +136,16 @@ const fetchWikidata = async (): Promise<Map<string, WdEntry>> => {
 
 /* ── OpenStreetMap (Overpass) ─────────────────────────────────────────────── */
 
-const OVERPASS = `[out:json][timeout:120];
-area["ISO3166-2"="IT-42"]->.lig;
+const overpassQuery = (iso: string): string => `[out:json][timeout:180];
+area["ISO3166-2"="${iso}"]->.rg;
 (
-  nwr["tourism"~"^(attraction|museum|viewpoint|artwork|gallery|aquarium|zoo|theme_park)$"](area.lig);
-  nwr["historic"]["name"](area.lig);
-  nwr["man_made"~"^(lighthouse|tower)$"]["name"](area.lig);
-  nwr["heritage"]["name"](area.lig);
-  nwr["amenity"="theatre"]["name"](area.lig);
-  nwr["leisure"~"^(park|garden)$"]["name"]["wikidata"](area.lig);
-  nwr["natural"="beach"]["name"]["wikidata"](area.lig);
+  nwr["tourism"~"^(attraction|museum|viewpoint|artwork|gallery|aquarium|zoo|theme_park)$"](area.rg);
+  nwr["historic"]["name"](area.rg);
+  nwr["man_made"~"^(lighthouse|tower)$"]["name"](area.rg);
+  nwr["heritage"]["name"](area.rg);
+  nwr["amenity"="theatre"]["name"](area.rg);
+  nwr["leisure"~"^(park|garden)$"]["name"]["wikidata"](area.rg);
+  nwr["natural"="beach"]["name"]["wikidata"](area.rg);
 );
 out center tags;`;
 
@@ -175,14 +181,31 @@ const osmName = (t: Record<string, string>): Text | undefined => {
 
 type OsmParsed = { el: OsmEl; lat: number; lng: number; tags: Record<string, string>; name: Text };
 
-const fetchOverpass = async (): Promise<OsmParsed[]> => {
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': UA },
-    body: new URLSearchParams({ data: OVERPASS }),
-  });
-  if (!res.ok) throw new Error(`Overpass ${res.status}`);
-  const json = (await res.json()) as { elements: OsmEl[] };
+const OVERPASS_HOSTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
+const fetchOverpass = async (iso: string): Promise<OsmParsed[]> => {
+  let lastErr: unknown;
+  let json: { elements: OsmEl[] } | undefined;
+  for (let attempt = 0; attempt < 6 && !json; attempt += 1) {
+    const host = OVERPASS_HOSTS[attempt % OVERPASS_HOSTS.length]!;
+    try {
+      const res = await fetch(host, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', 'user-agent': UA },
+        body: new URLSearchParams({ data: overpassQuery(iso) }),
+      });
+      if (res.ok) json = (await res.json()) as { elements: OsmEl[] };
+      else lastErr = new Error(`Overpass ${res.status} @ ${host}`);
+    } catch (e) {
+      lastErr = e;
+    }
+    if (!json) await new Promise((r) => setTimeout(r, 4000 * (attempt + 1)));
+  }
+  if (!json) throw lastErr;
   const out: OsmParsed[] = [];
   for (const el of json.elements) {
     const tags = el.tags ?? {};
@@ -257,16 +280,16 @@ const wikiTag = (tags: Record<string, string>): { lang: Lang; title: string } | 
   return { lang: lang as Lang, title: rest.join(':') };
 };
 
-const build = async (): Promise<Landmark[]> => {
+const build = async (region: string): Promise<Landmark[]> => {
   console.log('· querying Wikidata…');
-  const wd = await fetchWikidata().catch((e: unknown) => {
+  const wd = await fetchWikidata(region).catch((e: unknown) => {
     console.error('  Wikidata failed:', e);
     return new Map<string, WdEntry>();
   });
   console.log(`  ${wd.size} Wikidata landmarks`);
 
   console.log('· querying Overpass…');
-  const osm = await fetchOverpass().catch((e: unknown) => {
+  const osm = await fetchOverpass(REGION_GEO[region]!.iso).catch((e: unknown) => {
     console.error('  Overpass failed:', e);
     return [] as OsmParsed[];
   });
@@ -310,7 +333,7 @@ const build = async (): Promise<Landmark[]> => {
       lat: Number(o.lat.toFixed(6)),
       lng: Number(o.lng.toFixed(6)),
       kind,
-      region: REGION,
+      region,
       wd: tagQid ? `https://www.wikidata.org/wiki/${tagQid}` : undefined,
       src: ['osm'],
     };
@@ -365,41 +388,46 @@ const pick = (t: Text | undefined, lang: Lang): string | undefined =>
   t ? (t[lang] ?? t.en) : undefined;
 
 // The site is browsed one locale at a time, so each locale ships only its own
-// resolved strings — a third of the payload, and the only file the client fetches.
+// resolved strings. region is dropped — it IS the shard filename.
 const localize = (l: Landmark, lang: Lang) => ({
   id: l.id,
   name: pick(l.name, lang) ?? l.name.en,
   lat: l.lat,
   lng: l.lng,
   kind: l.kind,
-  region: l.region,
   ...(l.img ? { img: l.img } : {}),
   ...(pick(l.desc, lang) ? { desc: pick(l.desc, lang) } : {}),
   ...(pick(l.wiki, lang) ? { wiki: pick(l.wiki, lang) } : {}),
   ...(l.wd ? { wd: l.wd } : {}),
 });
 
-const main = async (): Promise<void> => {
-  const landmarks = await build();
-  // Per-locale compact assets are the committed runtime data, fetched on demand
-  // by the map layer + page. Regenerated by re-running this script (see the
-  // weekly refresh workflow); the prod deploy never hits these external APIs.
+// Build ONE region → per-locale shards `public/data/landmarks/<region>.<lang>.json`.
+const buildRegion = async (region: string): Promise<void> => {
+  console.log(`\n═══ ${region} (${REGION_GEO[region]!.iso}) ═══`);
+  const landmarks = await build(region);
+  if (landmarks.length === 0) throw new Error(`${region}: 0 landmarks — aborting`);
+  await mkdir(new URL('../public/data/landmarks/', import.meta.url), { recursive: true });
   for (const lang of LANGS) {
     const view = landmarks.map((l) => localize(l, lang));
     await writeFile(
-      new URL(`../public/data/landmarks.${lang}.json`, import.meta.url),
+      new URL(`../public/data/landmarks/${region}.${lang}.json`, import.meta.url),
       `${JSON.stringify(view, undefined, 0)}\n`,
     );
   }
-  const withDesc = landmarks.filter((l) => l.desc).length;
   const withImg = landmarks.filter((l) => l.img).length;
-  const byKind = landmarks.reduce<Record<string, number>>((acc, l) => {
-    acc[l.kind] = (acc[l.kind] ?? 0) + 1;
-    return acc;
-  }, {});
-  console.log(`\n✓ ${landmarks.length} landmarks → master + ${LANGS.length} locale assets`);
-  console.log(`  ${withImg} with image, ${withDesc} with description`);
-  console.log(`  by kind:`, byKind);
+  console.log(`✓ ${region}: ${landmarks.length} landmarks → shards (${withImg} img, ${landmarks.filter((l) => l.desc).length} desc)`);
+};
+
+const main = async (): Promise<void> => {
+  console.log(`Building landmarks for: ${REGIONS.join(', ')}`);
+  for (const region of REGIONS) {
+    try {
+      await buildRegion(region);
+    } catch (e) {
+      console.error(`✗ ${region} failed:`, e instanceof Error ? e.message : e);
+      process.exitCode = 1;
+    }
+  }
 };
 
 await main();

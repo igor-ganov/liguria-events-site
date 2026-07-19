@@ -1,0 +1,7 @@
+---
+export const prerender = false;
+import LandmarkDetail from '../../../components/views/LandmarkDetail.astro';
+const { region, slug } = Astro.params;
+---
+
+<LandmarkDetail lang="en" region={region ?? ''} slug={slug ?? ''} />

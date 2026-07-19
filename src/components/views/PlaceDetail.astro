@@ -14,16 +14,15 @@ import type { Locale } from '../../lib/i18n/locales.ts';
 // Worker-SSR'd (prerender = false): the record is looked up server-side from the
 // cached asset by the slug's token, so this is one route for all ~29k places —
 // no static-page explosion — but a real built page (SEO, no client flash).
-type Props = Readonly<{ lang: Locale; slug: string }>;
-const { lang, slug: raw } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string; slug: string }>;
+const { lang, region, slug: raw } = Astro.props;
 const ui = await uiOf(lang);
 const assets = Astro.locals.runtime.env.ASSETS;
-const all = await placesFor(assets, lang);
+const all = await placesFor(assets, region, lang);
 const place = all.find((p) => slug.matches(p.id, raw));
 if (place === undefined) Astro.response.status = 404;
 
-const region = place?.region ?? 'liguria';
-const path = place ? placePath(place.name, place.id) : 'places/';
+const path = place ? placePath(place.region, place.name, place.id) : `${region}/places/`;
 const site = place?.website;
 const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const mapUrl = place

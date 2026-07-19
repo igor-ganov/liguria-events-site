@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+import PlaceDetail from '../../../../components/views/PlaceDetail.astro';
+import { isLocale } from '../../../../lib/i18n/is-locale.ts';
+
+const { lang, region, slug } = Astro.params;
+if (!isLocale(lang) || lang === 'en') return new Response('Not found', { status: 404 });
+---
+
+<PlaceDetail lang={lang} region={region ?? ''} slug={slug ?? ''} />

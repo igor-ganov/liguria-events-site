@@ -1,8 +1,8 @@
-# Rebuild the places dataset from Overture Maps + OpenStreetMap (+ Wikidata) and
-# commit it when it changed. Like the landmark refresh, this is kept OFF the
-# deploy path: the Overture S3 reads + Overpass are slow and flaky enough that
-# gating a prod deploy on them would break releases. Runs weekly / on demand;
-# a change lands as a commit to main, which then triggers Deploy.
+# Rebuild the places dataset (Overture Maps + OpenStreetMap + Wikidata), one
+# per-region shard per matrix job, then commit them all in a single follow-up
+# job. Kept OFF the deploy path: the Overture S3 reads + Overpass are slow and
+# flaky enough that gating a prod deploy on them would break releases. A change
+# lands as one commit to main, which then triggers Deploy.
 name: Refresh places
 
 on:
@@ -15,10 +15,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  refresh:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    strategy:
+      fail-fast: false
+      # Gentle on Overpass — a few regions at a time, not all twenty at once.
+      max-parallel: 4
+      matrix:
+        region:
+          - abruzzo
+          - basilicata
+          - calabria
+          - campania
+          - emilia-romagna
+          - friuli-venezia-giulia
+          - lazio
+          - liguria
+          - lombardia
+          - marche
+          - molise
+          - piemonte
+          - puglia
+          - sardegna
+          - sicilia
+          - toscana
+          - trentino-alto-adige
+          - umbria
+          - valle-d-aosta
+          - veneto
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -27,15 +51,34 @@ jobs:
           python-version: '3.11'
       - run: pip install duckdb
       - run: bun install --frozen-lockfile
-      # build-places.ts spawns overture-places.py to (re)build the Overture cache.
-      - run: bun run scripts/build-places.ts
+      # build-places.ts spawns overture-places.py to build the region's Overture cache.
+      - run: bun run scripts/build-places.ts ${{ matrix.region }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: places-${{ matrix.region }}
+          path: public/data/places/${{ matrix.region }}.*.json
+          if-no-files-found: warn
+
+  collect:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: places-*
+          merge-multiple: true
+          path: public/data/places
       - name: Commit if changed
         run: |
           if [ -n "$(git status --porcelain public/data)" ]; then
             git config user.name 'github-actions[bot]'
             git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git add public/data/places.*.json
-            git commit -m 'Refresh places from Overture + OpenStreetMap'
+            git add public/data/places
+            git commit -m 'Refresh places from Overture + OpenStreetMap (all regions)'
             git push
           else
             echo 'No place changes.'

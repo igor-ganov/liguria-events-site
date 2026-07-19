@@ -8,10 +8,10 @@ import type { Place } from './place-schema.ts';
 type Row = { i: string; n: string; c: string; a: number; o: number; w?: string; d?: string; h?: string; r?: number; k?: string; q?: string; m?: string };
 const CATS = new Set<string>(PLACE_CATEGORIES);
 
-const toPlace = (r: Row): Place[] =>
+const toPlace = (region: string) => (r: Row): Place[] =>
   typeof r?.i === 'string' && typeof r.n === 'string' && CATS.has(r.c) && typeof r.a === 'number' && typeof r.o === 'number'
     ? [{
-        id: r.i, name: r.n, cat: r.c as PlaceCategory, lat: r.a, lng: r.o, region: 'liguria',
+        id: r.i, name: r.n, cat: r.c as PlaceCategory, lat: r.a, lng: r.o, region,
         ...(r.w ? { website: r.w } : {}),
         ...(r.d ? { desc: r.d } : {}),
         ...(r.h ? { hours: r.h } : {}),
@@ -22,6 +22,7 @@ const toPlace = (r: Row): Place[] =>
       }]
     : [];
 
-/** Decode the compact places asset into Place objects; malformed → dropped. */
-export const decodePlaces = (value: unknown): readonly Place[] =>
-  Array.isArray(value) ? (value as Row[]).flatMap(toPlace) : [];
+/** Decode a region's compact shard into Place objects; malformed → dropped.
+ *  Rows omit `region` (it IS the shard filename), so it is supplied here. */
+export const decodePlaces = (value: unknown, region: string): readonly Place[] =>
+  Array.isArray(value) ? (value as Row[]).flatMap(toPlace(region)) : [];
