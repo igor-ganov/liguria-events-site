@@ -3,6 +3,7 @@ import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
 import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
 import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
+import { commonsImg } from '../../lib/img/commons-img.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
@@ -33,7 +34,7 @@ const toDoc = (lang: Locale, ui: Ui) => (l: Landmark): SearchDoc => ({
 
 const thumb = (l: Landmark): string =>
   l.img
-    ? `<img class="lm-thumb-img" src="${esc(l.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+    ? `<img class="lm-thumb-img" src="${esc(commonsImg(l.img, 400))}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : `<span class="lm-thumb-icon" aria-hidden="true">${landmarkIcon(l.kind, 30)}</span>`;
 
 // The card links to the landmark's own detail page (not straight to Wikipedia —

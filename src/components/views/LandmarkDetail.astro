@@ -6,6 +6,7 @@ import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
 import { landmarkSources } from '../../lib/landmarks/landmark-sources.ts';
 import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
+import { commonsImg } from '../../lib/img/commons-img.ts';
 import { slug } from '../../lib/slug.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
@@ -38,7 +39,7 @@ const notFound = { en: 'This landmark could not be found.', it: 'Luogo non trova
         <Fragment>
           {item.img && (
             <figure class="event-hero">
-              <img src={item.img} alt={item.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+              <img src={commonsImg(item.img, 1024)} alt={item.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
             </figure>
           )}
           <h1>{item.name}</h1>

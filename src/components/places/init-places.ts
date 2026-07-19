@@ -3,6 +3,7 @@ import { loadPlaces } from '../../lib/places/load-places.ts';
 import { placeIcon } from '../../lib/places/place-icon.ts';
 import { placeColor } from '../../lib/places/place-color.ts';
 import { placePath } from '../../lib/places/place-path.ts';
+import { commonsImg } from '../../lib/img/commons-img.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
@@ -33,7 +34,7 @@ const toDoc = (lang: Locale, ui: Ui) => (p: Place): SearchDoc => ({
 
 const thumb = (p: Place): string =>
   p.img
-    ? `<img class="lm-thumb-img" src="${esc(p.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
+    ? `<img class="lm-thumb-img" src="${esc(commonsImg(p.img, 400))}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : `<span class="lm-thumb-icon" aria-hidden="true">${placeIcon(p.cat, 30)}</span>`;
 
 const card = (lang: Locale, ui: Ui) => (p: Place): string => {

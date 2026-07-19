@@ -6,6 +6,7 @@ import { placeIcon } from '../../lib/places/place-icon.ts';
 import { placeColor } from '../../lib/places/place-color.ts';
 import { placeSources } from '../../lib/places/place-sources.ts';
 import { placePath } from '../../lib/places/place-path.ts';
+import { commonsImg } from '../../lib/img/commons-img.ts';
 import { slug } from '../../lib/slug.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
@@ -41,7 +42,7 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
         <Fragment>
           {place.img && (
             <figure class="event-hero">
-              <img src={place.img} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+              <img src={commonsImg(place.img, 1024)} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
             </figure>
           )}
           <h1>{place.name}</h1>

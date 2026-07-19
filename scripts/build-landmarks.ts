@@ -14,6 +14,7 @@
  */
 import { mkdir, writeFile } from 'node:fs/promises';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
+import { commonsImg } from '../src/lib/img/commons-img.ts';
 
 const UA = 'DoveGo-landmarks/1.0 (https://dovego.it; igor.ganov@gmail.com)';
 // One region per invocation (CI matrixes over all 20); no arg → every region.
@@ -395,7 +396,7 @@ const localize = (l: Landmark, lang: Lang) => ({
   lat: l.lat,
   lng: l.lng,
   kind: l.kind,
-  ...(l.img ? { img: l.img } : {}),
+  ...(l.img ? { img: commonsImg(l.img, 800) } : {}),
   ...(pick(l.desc, lang) ? { desc: pick(l.desc, lang) } : {}),
   ...(pick(l.wiki, lang) ? { wiki: pick(l.wiki, lang) } : {}),
   ...(l.wd ? { wd: l.wd } : {}),

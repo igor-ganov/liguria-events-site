@@ -70,6 +70,7 @@ const ui = await uiOf(lang);
   import { readEventsIsland } from '../../components/shared/read-events-island.ts';
   import { readUiIsland } from '../../components/shared/read-ui-island.ts';
   import { regionsInView } from '../../lib/region/region-bounds.ts';
+  import { commonsImg } from '../../lib/img/commons-img.ts';
   import { isoToday } from '../../lib/calendar/iso-today.ts';
   import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
   import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
@@ -310,6 +311,11 @@ const ui = await uiOf(lang);
         en: 'Could not determine your location.',
         it: 'Impossibile determinare la posizione.',
         ru: 'Не удалось определить местоположение.',
+      },
+      zoomIn: {
+        en: 'Zoom in to load places and landmarks.',
+        it: 'Ingrandisci per caricare locali e luoghi.',
+        ru: 'Приблизьте карту, чтобы загрузить места и достопримечательности.',
       },
     };
     const say = (key: string): void => {
@@ -625,9 +631,9 @@ const ui = await uiOf(lang);
     let lmIndex: Supercluster<LmProps> | undefined;
     const lmMarkers: maplibregl.Marker[] = [];
     const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.region, l.name, l.id));
-    // Commons/Wikipedia thumbs default to ~800px; ask for a marker-sized one.
-    const thumbUrl = (url: string, px: number): string =>
-      url.replace(/([?&]width=)\d+/, `$1${px}`).replace(/\/\d+px-/, `/${px}px-`);
+    // Route Commons/Wikipedia photos through Special:FilePath at the wanted width
+    // (https, any size on demand) — see lib/img/commons-img.
+    const thumbUrl = (url: string, px: number): string => commonsImg(url, px);
 
     const landmarkMarkerEl = (l: Landmark): HTMLElement => {
       const el = document.createElement('div');
@@ -724,10 +730,16 @@ const ui = await uiOf(lang);
       lmMarkers.forEach((m) => m.remove());
       lmMarkers.length = 0;
     };
+    // Below these zooms a region's whole shard is an unreadable blob and, over
+    // all-Italy, fetching every visible region at once is tens of MB — so shard
+    // loading waits until you're zoomed in enough for it to mean something.
+    // Already-loaded shards keep rendering (clustered) when you zoom back out.
+    const LANDMARK_MINZOOM = 8;
+    const PLACE_MINZOOM = 9;
     // Load the shard of every region whose bbox now intersects the viewport
     // (once each), merge it in, re-index and re-render.
     const ensureLandmarkShards = async (): Promise<void> => {
-      if (!state.showLandmarks) return;
+      if (!state.showLandmarks || map.getZoom() < LANDMARK_MINZOOM) return;
       const b = map.getBounds();
       const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !lmLoaded.has(r));
       if (need.length === 0) return;
@@ -855,7 +867,7 @@ const ui = await uiOf(lang);
     // Same viewport-sharded loading as landmarks: pull a region's place shard
     // once, when its bbox first enters view.
     const ensurePlaceShards = async (): Promise<void> => {
-      if (!state.showPlaces) return;
+      if (!state.showPlaces || map.getZoom() < PLACE_MINZOOM) return;
       const b = map.getBounds();
       const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !plLoaded.has(r));
       if (need.length === 0) return;
@@ -949,13 +961,19 @@ const ui = await uiOf(lang);
       state.showLandmarks = !state.showLandmarks;
       writeUrl();
       syncLayers();
-      state.showLandmarks ? void ensureLandmarkShards() : hideLandmarks();
+      if (state.showLandmarks) {
+        if (map.getZoom() < LANDMARK_MINZOOM) say('zoomIn');
+        void ensureLandmarkShards();
+      } else hideLandmarks();
     });
     placesEl?.addEventListener('click', () => {
       state.showPlaces = !state.showPlaces;
       writeUrl();
       syncLayers();
-      state.showPlaces ? void ensurePlaceShards() : hidePlaces();
+      if (state.showPlaces) {
+        if (map.getZoom() < PLACE_MINZOOM) say('zoomIn');
+        void ensurePlaceShards();
+      } else hidePlaces();
     });
 
     syncControls();

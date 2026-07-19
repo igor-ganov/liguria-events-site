@@ -14,6 +14,7 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
+import { commonsImg } from '../src/lib/img/commons-img.ts';
 
 const UA = 'DoveGo-places/1.0 (https://dovego.it; igor.ganov@gmail.com)';
 // One region per invocation (CI matrixes over all 20); no arg → every region.
@@ -339,7 +340,7 @@ const localize = (p: Place, lang: Lang) => ({
   ...(p.rating ? { r: p.rating } : {}),
   ...(pick(p.wiki, lang) ? { k: pick(p.wiki, lang) } : {}),
   ...(p.wd ? { q: p.wd } : {}),
-  ...(p.img ? { m: p.img } : {}),
+  ...(p.img ? { m: commonsImg(p.img, 800) } : {}),
 });
 
 // Build ONE region → per-locale shards `public/data/places/<region>.<lang>.json`.
