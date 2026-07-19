@@ -102,14 +102,13 @@ const ui = await uiOf(lang);
   const PMTILES_URL =
     import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
   // A second, high-zoom (z14) extract of Liguria: the country-wide basemap tops
-  // out at z12, where OpenMapTiles carries no building footprints or dense POIs.
-  // Building + POI layers read from THIS source, so silhouettes and venues come
-  // back where people actually browse; the rest of Italy stays pannable (context
-  // only) off the z12 base.
+  // out at z12, where OpenMapTiles carries no building footprints. The building
+  // layer reads from THIS source, so silhouettes come back where people browse;
+  // the rest of Italy stays pannable (context only) off the z12 base.
   const DETAIL_URL =
     import.meta.env.PUBLIC_PMTILES_DETAIL_URL ?? `${location.origin}${B}/tiles/liguria.pmtiles`;
-  // Layers whose geometry only exists at z13+ (absent from the z12 country base).
-  const DETAIL_LAYERS = new Set(['building', 'poi']);
+  // Geometry that only exists at z13+ (absent from the z12 country base).
+  const DETAIL_LAYERS = new Set(['building']);
 
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
@@ -118,7 +117,11 @@ const ui = await uiOf(lang);
       openmaptiles: { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution: ATTR },
       detail: { type: 'vector', url: `pmtiles://${DETAIL_URL}` },
     };
-    // Repoint the high-zoom layers (buildings, POIs) at the Liguria detail source.
+    // Drop the basemap's own POI symbols entirely: our curated events / landmarks
+    // / places markers ARE the POI layer, and the raw OSM icons duplicated and
+    // cluttered them (a church showing as both our photo pin and a basemap icon).
+    style.layers = style.layers.filter((l) => (l as { 'source-layer'?: string })['source-layer'] !== 'poi');
+    // Repoint the high-zoom building layer at the Liguria detail source.
     for (const layer of style.layers) {
       const sl = (layer as { 'source-layer'?: string })['source-layer'];
       if (sl && DETAIL_LAYERS.has(sl)) (layer as { source?: string }).source = 'detail';
@@ -730,11 +733,11 @@ const ui = await uiOf(lang);
       lmMarkers.forEach((m) => m.remove());
       lmMarkers.length = 0;
     };
-    // Below these zooms a region's whole shard is an unreadable blob and, over
-    // all-Italy, fetching every visible region at once is tens of MB — so shard
-    // loading waits until you're zoomed in enough for it to mean something.
-    // Already-loaded shards keep rendering (clustered) when you zoom back out.
-    const LANDMARK_MINZOOM = 8;
+    // Places are dense venues — over all-Italy, fetching every visible region's
+    // shard at once is tens of MB and an unreadable blob, so they wait until you
+    // are zoomed in. Landmarks are notable and far fewer, so they load country-
+    // wide (z6+) — that's the zoomed-out heritage view people expect.
+    const LANDMARK_MINZOOM = 6;
     const PLACE_MINZOOM = 9;
     // Load the shard of every region whose bbox now intersects the viewport
     // (once each), merge it in, re-index and re-render.
@@ -834,7 +837,9 @@ const ui = await uiOf(lang);
     const renderPlaces = (): void => {
       plMarkers.forEach((m) => m.remove());
       plMarkers.length = 0;
-      if (!plIndex || !state.showPlaces) return;
+      // Below the place zoom gate, show nothing rather than a stale, half-loaded
+      // scatter (the shards for this viewport were never fetched).
+      if (!plIndex || !state.showPlaces || map.getZoom() < PLACE_MINZOOM) return;
       const b = map.getBounds();
       const clusters = plIndex.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], Math.round(map.getZoom()));
       clusters.forEach((c) => {
