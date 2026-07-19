@@ -1,22 +1,73 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { landmarksFor } from '../../lib/landmarks/landmarks-source.ts';
+import { landmarkIcon } from '../../lib/landmarks/landmark-icon.ts';
+import { landmarkColor } from '../../lib/landmarks/landmark-color.ts';
+import { landmarkSources } from '../../lib/landmarks/landmark-sources.ts';
+import { landmarkPath } from '../../lib/landmarks/landmark-path.ts';
+import { slug } from '../../lib/slug.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-// One client-rendered route for every landmark: the record is read from the
-// (cached) locale asset by ?id, so there are no ~2 800 static detail pages.
-type Props = Readonly<{ lang: Locale }>;
-const { lang } = Astro.props;
+// Worker-SSR'd (prerender = false) — one route for all ~2.8k landmarks, looked
+// up server-side by the slug's token; a real built page (SEO, no client flash).
+type Props = Readonly<{ lang: Locale; slug: string }>;
+const { lang, slug: raw } = Astro.props;
 const ui = await uiOf(lang);
+const assets = Astro.locals.runtime.env.ASSETS;
+const all = await landmarksFor(assets, lang);
+const item = all.find((l) => slug.matches(l.id, raw));
+if (item === undefined) Astro.response.status = 404;
+
+const region = item?.region ?? 'liguria';
+const path = item ? landmarkPath(item.name, item.id) : 'landmarks/';
+const mapUrl = item
+  ? localizedUrl(lang, `${region}/map/?le=1&z=16&c=${item.lat.toFixed(4)},${item.lng.toFixed(4)}`)
+  : '';
+const embedSrc = item ? `https://maps.google.com/maps?q=${item.lat},${item.lng}&z=15&output=embed` : '';
+const sources = item ? landmarkSources(item) : [];
+const notFound = { en: 'This landmark could not be found.', it: 'Luogo non trovato.', ru: 'Место не найдено.' }[lang];
 ---
 
-<Layout lang={lang} title={ui.landmarks.title} path="landmark/">
-  <article class="event-page lm-detail" data-lm-detail>
-    <p class="lm-loading" data-lm-detail-loading>…</p>
+<Layout lang={lang} region={region} title={item?.name ?? ui.landmarks.title} description={item?.desc ?? item?.name ?? ui.landmarks.intro} path={path}>
+  <article class="event-page lm-detail">
+    <a class="back-link" href={localizedUrl(lang, `${region}/landmarks/`)}>← {ui.landmarks.title}</a>
+    {
+      item ? (
+        <Fragment>
+          {item.img && (
+            <figure class="event-hero">
+              <img src={item.img} alt={item.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+            </figure>
+          )}
+          <h1>{item.name}</h1>
+          <div class="event-tags">
+            <span class="cat-tag lm-tag" style={`--lm:${landmarkColor(item.kind)}`}>
+              <Fragment set:html={landmarkIcon(item.kind, 13)} /> {ui.landmarks.kinds[item.kind]}
+            </span>
+          </div>
+          <dl class="event-facts">
+            <div>
+              <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
+              <dd>{item.lat.toFixed(5)}, {item.lng.toFixed(5)} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+            </div>
+          </dl>
+          {item.desc && <p class="event-desc">{item.desc}</p>}
+          <figure class="event-map">
+            <iframe title={`${ui.mapLink}: ${item.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
+          </figure>
+          {sources.length > 0 && (
+            <section class="event-sources">
+              <h2>{ui.headings.sources}</h2>
+              <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+            </section>
+          )}
+        </Fragment>
+      ) : (
+        <p class="feed-empty">{notFound}</p>
+      )
+    }
   </article>
 </Layout>
-
-<script>
-  import { initLandmarkDetail } from '../../components/landmarks/init-landmark-detail.ts';
-  initLandmarkDetail();
-</script>

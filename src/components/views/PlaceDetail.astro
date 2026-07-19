@@ -1,22 +1,82 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { placesFor } from '../../lib/places/places-source.ts';
+import { placeIcon } from '../../lib/places/place-icon.ts';
+import { placeColor } from '../../lib/places/place-color.ts';
+import { placeSources } from '../../lib/places/place-sources.ts';
+import { placePath } from '../../lib/places/place-path.ts';
+import { slug } from '../../lib/slug.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-// One client-rendered route for every place: the record is read from the
-// (cached) locale asset by ?id, so there are no ~29 000 static detail pages.
-type Props = Readonly<{ lang: Locale }>;
-const { lang } = Astro.props;
+// Worker-SSR'd (prerender = false): the record is looked up server-side from the
+// cached asset by the slug's token, so this is one route for all ~29k places —
+// no static-page explosion — but a real built page (SEO, no client flash).
+type Props = Readonly<{ lang: Locale; slug: string }>;
+const { lang, slug: raw } = Astro.props;
 const ui = await uiOf(lang);
+const assets = Astro.locals.runtime.env.ASSETS;
+const all = await placesFor(assets, lang);
+const place = all.find((p) => slug.matches(p.id, raw));
+if (place === undefined) Astro.response.status = 404;
+
+const region = place?.region ?? 'liguria';
+const path = place ? placePath(place.name, place.id) : 'places/';
+const site = place?.website;
+const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const mapUrl = place
+  ? localizedUrl(lang, `${region}/map/?pl=1&z=16&c=${place.lat.toFixed(4)},${place.lng.toFixed(4)}`)
+  : '';
+const embedSrc = place ? `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=15&output=embed` : '';
+const sources = place ? placeSources(place) : [];
+const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.', ru: 'Место не найдено.' }[lang];
 ---
 
-<Layout lang={lang} title={ui.places.title} path="place/">
-  <article class="event-page lm-detail" data-pl-detail>
-    <p class="lm-loading" data-pl-detail-loading>…</p>
+<Layout lang={lang} region={region} title={place?.name ?? ui.places.title} description={place?.desc ?? place?.name ?? ui.places.intro} path={path}>
+  <article class="event-page lm-detail">
+    <a class="back-link" href={localizedUrl(lang, `${region}/places/`)}>← {ui.places.title}</a>
+    {
+      place ? (
+        <Fragment>
+          {place.img && (
+            <figure class="event-hero">
+              <img src={place.img} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+            </figure>
+          )}
+          <h1>{place.name}</h1>
+          <div class="event-tags">
+            <span class="cat-tag lm-tag" style={`--lm:${placeColor(place.cat)}`}>
+              <Fragment set:html={placeIcon(place.cat, 13)} /> {ui.places.categories[place.cat]}
+            </span>
+          </div>
+          <dl class="event-facts">
+            <div>
+              <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
+              <dd>{place.lat.toFixed(5)}, {place.lng.toFixed(5)} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+            </div>
+            {site && (
+              <div>
+                <dt><Fragment set:html={uiIcon('external', 17)} /></dt>
+                <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
+              </div>
+            )}
+          </dl>
+          {place.desc && <p class="event-desc">{place.desc}</p>}
+          <figure class="event-map">
+            <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
+          </figure>
+          {sources.length > 0 && (
+            <section class="event-sources">
+              <h2>{ui.headings.sources}</h2>
+              <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+            </section>
+          )}
+        </Fragment>
+      ) : (
+        <p class="feed-empty">{notFound}</p>
+      )
+    }
   </article>
 </Layout>
-
-<script>
-  import { initPlaceDetail } from '../../components/places/init-place-detail.ts';
-  initPlaceDetail();
-</script>

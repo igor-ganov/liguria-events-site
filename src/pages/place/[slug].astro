@@ -1,0 +1,7 @@
+---
+export const prerender = false;
+import PlaceDetail from '../../components/views/PlaceDetail.astro';
+const { slug } = Astro.params;
+---
+
+<PlaceDetail lang="en" slug={slug ?? ''} />

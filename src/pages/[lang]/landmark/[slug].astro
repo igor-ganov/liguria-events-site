@@ -1,0 +1,10 @@
+---
+export const prerender = false;
+import LandmarkDetail from '../../../components/views/LandmarkDetail.astro';
+import { isLocale } from '../../../lib/i18n/is-locale.ts';
+
+const { lang, slug } = Astro.params;
+if (!isLocale(lang) || lang === 'en') return new Response('Not found', { status: 404 });
+---
+
+<LandmarkDetail lang={lang} slug={slug ?? ''} />
