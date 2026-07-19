@@ -11,7 +11,7 @@ import { decodeLandmarks } from '../src/lib/landmarks/decode-landmarks.ts';
 // half-added region (the "only Liguria" gap), or an image URL the render path
 // can't fix. Reads the committed shards like redirects.test.ts reads _redirects.
 const LANGS = ['en', 'it', 'ru'] as const;
-const dir = (kind: string) => resolve(import.meta.dir, '..', 'public', 'data', kind);
+const dir = (kind: string) => resolve('public', 'data', kind);
 const read = (kind: string, region: string, lang: string): unknown[] =>
   JSON.parse(readFileSync(resolve(dir(kind), `${region}.${lang}.json`), 'utf8')) as unknown[];
 
