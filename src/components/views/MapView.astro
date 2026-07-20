@@ -748,7 +748,11 @@ const ui = await uiOf(lang);
     // and re-render.
     const ensureLandmarkShards = async (): Promise<void> => {
       if (!state.showLandmarks) return;
-      const need = inViewRegions().filter((r) => !lmLoaded.has(r));
+      // Always include the page's own region, so /<region>/map shows it even if
+      // the opening view didn't land on it; plus every other in-view region.
+      const want = new Set(inViewRegions());
+      if (REGION) want.add(REGION);
+      const need = [...want].filter((r) => !lmLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => lmLoaded.add(r));
       const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat();
@@ -841,9 +845,9 @@ const ui = await uiOf(lang);
     const renderPlaces = (): void => {
       plMarkers.forEach((m) => m.remove());
       plMarkers.length = 0;
-      // Zoomed out across many regions, show nothing rather than a half-loaded
-      // scatter (those shards were never fetched); focused in, show them.
-      if (!plIndex || !state.showPlaces || inViewRegions().length > PLACE_MAX_REGIONS) return;
+      // Render whatever places are loaded — supercluster clusters them at low
+      // zoom, so a home-region-only view is a tidy cluster, not a scatter.
+      if (!plIndex || !state.showPlaces) return;
       const b = map.getBounds();
       const clusters = plIndex.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], Math.round(map.getZoom()));
       clusters.forEach((c) => {
@@ -877,9 +881,12 @@ const ui = await uiOf(lang);
     // viewport is focused on a handful of regions (else all-Italy = ~100 MB).
     const ensurePlaceShards = async (): Promise<void> => {
       if (!state.showPlaces) return;
+      // The page's own region always loads (one shard); additional in-view
+      // regions load only while the viewport is focused (else all-Italy is huge).
       const view = inViewRegions();
-      if (view.length === 0 || view.length > PLACE_MAX_REGIONS) return;
-      const need = view.filter((r) => !plLoaded.has(r));
+      const want = new Set(view.length <= PLACE_MAX_REGIONS ? view : []);
+      if (REGION) want.add(REGION);
+      const need = [...want].filter((r) => !plLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => plLoaded.add(r));
       const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat();
