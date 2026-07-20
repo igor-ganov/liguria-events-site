@@ -800,15 +800,15 @@ const ui = await uiOf(lang);
       el.innerHTML = `<div class="pl-cluster-face"><span>${count}</span></div>`;
       return el;
     };
-    // Compact facts under a place card: rating (where a source carries one — rare
-    // in open data) and opening hours (OSM). Empty string when the place has none.
+    // Compact facts under a place card: opening hours (OSM) + phone (Overture/OSM,
+    // far better covered). Empty string when the place has neither.
     const placeFacts = (p: Place): string => {
       const rows = [
-        p.rating
-          ? `<span class="map-pop-fact map-pop-rating" title="${esc(ui.places.rating)}">${uiIcon('star', 13)}${p.rating.toFixed(1)}</span>`
-          : '',
         p.hours
           ? `<span class="map-pop-fact map-pop-hours" title="${esc(ui.places.hours)}">${uiIcon('clock', 13)}<span>${esc(clip(p.hours, 64))}</span></span>`
+          : '',
+        p.phone
+          ? `<span class="map-pop-fact" title="${esc(ui.places.phone)}">${uiIcon('phone', 13)}${esc(p.phone)}</span>`
           : '',
       ].filter(Boolean).join('');
       return rows ? `<div class="map-pop-facts">${rows}</div>` : '';
@@ -830,7 +830,8 @@ const ui = await uiOf(lang);
               `</span></a>` +
             desc +
             placeFacts(p) +
-            srcChips(placeSources(p)) +
+            // Compact teaser — a few key chips; the detail page has the full set.
+            srcChips(placeSources(p).slice(0, 3)) +
           `</div>`,
         )
         .addTo(map);

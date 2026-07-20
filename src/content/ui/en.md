@@ -9,6 +9,8 @@ places:
   search: Search places…
   hours: Opening hours
   rating: Rating
+  phone: Phone
+  address: Address
   categories: { restaurant: Restaurants, cafe: Cafés, bar: Bars, fastfood: Fast food, icecream: Ice cream, nightlife: Nightlife, fitness: Fitness, climbing: Climbing, sport: Sport, cinema: Cinemas, entertainment: Entertainment, museum: Museums, gallery: Galleries, wellness: Wellness & spa, kids: Kids, shopping: Shopping }
 map: { retry: 'Retry', failed: "The map couldn't load — check your connection.", locate: 'Find my location' }
 auth:

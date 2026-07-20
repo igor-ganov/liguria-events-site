@@ -27,6 +27,8 @@ export const DEFAULT_PAGE_DATA: PageData = {
       search: 'Search places…',
       hours: 'Opening hours',
       rating: 'Rating',
+      phone: 'Phone',
+      address: 'Address',
       categories: {
         restaurant: 'Restaurants', cafe: 'Cafés', bar: 'Bars', fastfood: 'Fast food',
         icecream: 'Ice cream', nightlife: 'Nightlife', fitness: 'Fitness', climbing: 'Climbing',

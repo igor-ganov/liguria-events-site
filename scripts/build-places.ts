@@ -41,6 +41,9 @@ type Place = {
   img?: string;
   hours?: string;
   rating?: number;
+  phone?: string;
+  socials?: string[];
+  address?: string;
   desc?: Record<Lang, string | undefined>;
   wiki?: Record<Lang, string | undefined>;
   wd?: string;
@@ -105,10 +108,16 @@ const readOverture = (region: string): Place[] => {
   const out: Place[] = [];
   for (const line of readFileSync(cache, 'utf8').split('\n')) {
     if (line.trim() === '') continue;
-    const r = JSON.parse(line) as { id: string; name: string; category: string; lat: number; lng: number; website?: string; confidence?: number };
+    const r = JSON.parse(line) as { id: string; name: string; category: string; lat: number; lng: number; website?: string; phone?: string; socials?: string[] | null; address?: string | null; confidence?: number };
     const cat = overtureCat(r.category);
     if (!cat || (r.confidence ?? 1) < 0.5) continue;
-    out.push({ id: `ovt:${r.id}`, name: r.name, lat: r.lat, lng: r.lng, cat, region, website: r.website ?? undefined });
+    out.push({
+      id: `ovt:${r.id}`, name: r.name, lat: r.lat, lng: r.lng, cat, region,
+      website: r.website ?? undefined,
+      phone: r.phone ?? undefined,
+      ...(r.socials && r.socials.length > 0 ? { socials: r.socials } : {}),
+      ...(r.address ? { address: r.address } : {}),
+    });
   }
   return out;
 };
@@ -171,6 +180,16 @@ const readOsm = async (region: string): Promise<Place[]> => {
     const generic = clean(t['description']);
     const desc = { en: osmDesc('en') ?? generic, it: osmDesc('it') ?? generic, ru: osmDesc('ru') };
     const stars = Number.parseFloat(t['stars'] ?? '');
+    // OSM contact tags: a full URL is kept as-is; a bare Instagram/Facebook handle
+    // becomes its profile URL.
+    const social = (key: string, base: string): string | undefined => {
+      const v = clean(t[`contact:${key}`]) ?? clean(t[key]);
+      return v ? (/^https?:\/\//.test(v) ? v : `${base}${v.replace(/^@/, '')}`) : undefined;
+    };
+    const socials = [social('instagram', 'https://instagram.com/'), social('facebook', 'https://facebook.com/')]
+      .filter((s): s is string => s !== undefined);
+    const street = [clean(t['addr:street']), clean(t['addr:housenumber'])].filter(Boolean).join(' ');
+    const address = [street, clean(t['addr:city'])].filter(Boolean).join(', ') || undefined;
     out.push({
       id: `osm:${el.type}/${el.id}`,
       name,
@@ -180,6 +199,9 @@ const readOsm = async (region: string): Promise<Place[]> => {
       region,
       website: t['website'] ?? t['contact:website'] ?? undefined,
       img: t['image'] ?? undefined,
+      ...(clean(t['phone']) ?? clean(t['contact:phone']) ? { phone: clean(t['phone']) ?? clean(t['contact:phone']) } : {}),
+      ...(socials.length > 0 ? { socials } : {}),
+      ...(address ? { address } : {}),
       ...(t['opening_hours'] ? { hours: t['opening_hours'] } : {}),
       ...(Number.isFinite(stars) && stars > 0 ? { rating: stars } : {}),
       ...(desc.en || desc.it || desc.ru ? { desc } : {}),
@@ -337,7 +359,10 @@ const localize = (p: Place, lang: Lang) => ({
   ...(p.website ? { w: p.website } : {}),
   ...(pick(p.desc, lang) ? { d: pick(p.desc, lang) } : {}),
   ...(p.hours ? { h: p.hours } : {}),
-  ...(p.rating ? { r: p.rating } : {}),
+  ...(p.phone ? { p: p.phone } : {}),
+  // One social link is enough for a card chip — keeps the viewport shard lean.
+  ...(p.socials && p.socials.length > 0 ? { so: p.socials.slice(0, 1) } : {}),
+  ...(p.address ? { ad: p.address } : {}),
   ...(pick(p.wiki, lang) ? { k: pick(p.wiki, lang) } : {}),
   ...(p.wd ? { q: p.wd } : {}),
   ...(p.img ? { m: commonsImg(p.img, 800) } : {}),
@@ -351,8 +376,11 @@ const buildRegion = async (region: string): Promise<void> => {
   console.log('· querying Overpass…');
   const osm = await readOsm(region);
   console.log(`  OSM: ${osm.length} venue places`);
-  // Refuse to write a degraded (Overture-only) shard over a good one.
+  // Refuse to write a degraded shard: every region has both sources, so a zero
+  // from either means the fetch/extract failed — fail loud, don't overwrite good
+  // data with a partial set.
   if (osm.length === 0) throw new Error(`${region}: OSM returned 0 places — aborting`);
+  if (overture.length === 0) throw new Error(`${region}: Overture returned 0 places — aborting`);
   const merged = merge(osm, overture);
   console.log(`· merged: ${merged.length} places`);
   await enrich(merged);

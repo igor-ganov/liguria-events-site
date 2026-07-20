@@ -9,6 +9,8 @@ places:
   search: Cerca locali…
   hours: Orari di apertura
   rating: Valutazione
+  phone: Telefono
+  address: Indirizzo
   categories: { restaurant: Ristoranti, cafe: Caffè, bar: Bar, fastfood: Fast food, icecream: Gelaterie, nightlife: Vita notturna, fitness: Palestre, climbing: Arrampicata, sport: Sport, cinema: Cinema, entertainment: Divertimento, museum: Musei, gallery: Gallerie, wellness: Benessere e spa, kids: Bambini, shopping: Shopping }
 map: { retry: 'Riprova', failed: 'Impossibile caricare la mappa — controlla la connessione.', locate: 'Trova la mia posizione' }
 auth:

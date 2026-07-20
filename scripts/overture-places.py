@@ -62,7 +62,10 @@ def main():
                ST_Y(geometry) AS lat,
                confidence,
                websites[1] AS website,
-               phones[1] AS phone
+               phones[1] AS phone,
+               socials AS socials,
+               addresses[1].freeform AS street,
+               addresses[1].locality AS locality
         FROM read_parquet({lst})
         WHERE bbox.xmin BETWEEN {xmin} AND {xmax}
           AND bbox.ymin BETWEEN {ymin} AND {ymax}
@@ -72,10 +75,14 @@ def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         for r in rows:
+            street, locality = r[9], r[10]
+            address = ", ".join(x for x in (street, locality) if x) or None
+            socials = [s for s in (r[8] or []) if s][:2] or None
             f.write(json.dumps({
                 "id": r[0], "name": r[1], "category": r[2],
                 "lat": round(r[4], 6), "lng": round(r[3], 6),
                 "confidence": r[5], "website": r[6], "phone": r[7],
+                "socials": socials, "address": address,
             }, ensure_ascii=False) + "\n")
     print(f"wrote {len(rows)} Overture places -> {OUT}", file=sys.stderr)
 

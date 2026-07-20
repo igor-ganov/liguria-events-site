@@ -5,7 +5,7 @@ import type { Place } from './place-schema.ts';
 // The asset is compact rows (short keys, absent fields omitted) — see
 // scripts/build-places.ts. Expand into readable Place objects; region is always
 // liguria, so it is not carried per-row.
-type Row = { i: string; n: string; c: string; a: number; o: number; w?: string; d?: string; h?: string; r?: number; k?: string; q?: string; m?: string };
+type Row = { i: string; n: string; c: string; a: number; o: number; w?: string; d?: string; h?: string; p?: string; so?: readonly string[]; ad?: string; k?: string; q?: string; m?: string };
 const CATS = new Set<string>(PLACE_CATEGORIES);
 
 const toPlace = (region: string) => (r: Row): Place[] =>
@@ -15,7 +15,9 @@ const toPlace = (region: string) => (r: Row): Place[] =>
         ...(r.w ? { website: r.w } : {}),
         ...(r.d ? { desc: r.d } : {}),
         ...(r.h ? { hours: r.h } : {}),
-        ...(typeof r.r === 'number' ? { rating: r.r } : {}),
+        ...(r.p ? { phone: r.p } : {}),
+        ...(Array.isArray(r.so) && r.so.length > 0 ? { socials: r.so } : {}),
+        ...(r.ad ? { address: r.ad } : {}),
         ...(r.k ? { wiki: r.k } : {}),
         ...(r.q ? { wd: r.q } : {}),
         ...(r.m ? { img: r.m } : {}),

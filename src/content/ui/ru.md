@@ -9,6 +9,8 @@ places:
   search: Поиск заведений…
   hours: Часы работы
   rating: Оценка
+  phone: Телефон
+  address: Адрес
   categories: { restaurant: Рестораны, cafe: Кафе, bar: Бары, fastfood: Фастфуд, icecream: Мороженое, nightlife: Ночная жизнь, fitness: Фитнес, climbing: Скалолазание, sport: Спорт, cinema: Кино, entertainment: Развлечения, museum: Музеи, gallery: Галереи, wellness: Спа и велнес, kids: Детям, shopping: Шопинг }
 map: { retry: 'Повторить', failed: 'Не удалось загрузить карту — проверьте соединение.', locate: 'Найти моё местоположение' }
 auth:

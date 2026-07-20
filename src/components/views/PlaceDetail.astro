@@ -53,25 +53,25 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
           </div>
           <dl class="event-facts">
             <div>
-              <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
-              <dd>{place.lat.toFixed(5)}, {place.lng.toFixed(5)} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+              <dt title={ui.places.address}><Fragment set:html={uiIcon('pin', 17)} /></dt>
+              <dd>{place.address ?? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
             </div>
-            {site && (
+            {place?.phone && (
               <div>
-                <dt><Fragment set:html={uiIcon('external', 17)} /></dt>
-                <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
-              </div>
-            )}
-            {place?.rating !== undefined && (
-              <div>
-                <dt title={ui.places.rating}><Fragment set:html={uiIcon('star', 17)} /></dt>
-                <dd>{place.rating.toFixed(1)}</dd>
+                <dt title={ui.places.phone}><Fragment set:html={uiIcon('phone', 17)} /></dt>
+                <dd><a href={`tel:${place.phone.replace(/\s+/g, '')}`}>{place.phone}</a></dd>
               </div>
             )}
             {place?.hours && (
               <div>
                 <dt title={ui.places.hours}><Fragment set:html={uiIcon('clock', 17)} /></dt>
                 <dd class="place-hours">{place.hours}</dd>
+              </div>
+            )}
+            {site && (
+              <div>
+                <dt><Fragment set:html={uiIcon('external', 17)} /></dt>
+                <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
               </div>
             )}
           </dl>

@@ -31,12 +31,17 @@ describe('slug', () => {
 });
 
 describe('decode shards (region injected from the filename)', () => {
-  test('decodePlaces expands short keys and stamps the region', () => {
-    const [p] = decodePlaces([{ i: 'osm:node/1', n: 'Bar', c: 'bar', a: 44.4, o: 8.9, h: 'Mo 09:00-18:00', r: 4 }], 'liguria');
+  test('decodePlaces expands short keys (incl. contacts) and stamps the region', () => {
+    const [p] = decodePlaces(
+      [{ i: 'osm:node/1', n: 'Bar', c: 'bar', a: 44.4, o: 8.9, h: 'Mo 09:00-18:00', p: '+39 010 123', so: ['https://instagram.com/bar'], ad: 'Via Roma 1, Genova' }],
+      'liguria',
+    );
     assert.equal(p?.id, 'osm:node/1');
     assert.equal(p?.region, 'liguria');
     assert.equal(p?.hours, 'Mo 09:00-18:00');
-    assert.equal(p?.rating, 4);
+    assert.equal(p?.phone, '+39 010 123');
+    assert.deepEqual(p?.socials, ['https://instagram.com/bar']);
+    assert.equal(p?.address, 'Via Roma 1, Genova');
   });
 
   test('decodePlaces drops a malformed row', () => {
@@ -59,13 +64,14 @@ describe('detail paths carry the region', () => {
 });
 
 describe('sources', () => {
-  test('placeSources: own site first, Overture flagged, OSM id → osm.org', () => {
+  test('placeSources: site + socials + reviews + provenance; OSM id → osm.org', () => {
     const s = placeSources({
       id: 'osm:way/55', name: 'X', cat: 'cafe', lat: 0, lng: 0, region: 'liguria',
-      website: 'https://x.it', wiki: 'https://w', wd: 'https://d',
+      website: 'https://x.it', socials: ['https://instagram.com/x'], wiki: 'https://w', wd: 'https://d',
     });
-    assert.deepEqual(s.map((x) => x.name), ['Website', 'Wikipedia', 'Wikidata', 'OpenStreetMap']);
+    assert.deepEqual(s.map((x) => x.name), ['Website', 'Instagram', 'Reviews · Maps', 'Tripadvisor', 'Wikipedia', 'Wikidata', 'OpenStreetMap']);
     assert.equal(s.find((x) => x.name === 'OpenStreetMap')?.url, 'https://www.openstreetmap.org/way/55');
+    assert.ok(s.find((x) => x.name === 'Reviews · Maps')?.url.startsWith('https://www.google.com/maps/search/'));
     assert.ok(placeSources({ id: 'ovt:3', name: 'Y', cat: 'bar', lat: 0, lng: 0, region: 'lazio' })
       .some((x) => x.name === 'Overture Maps'));
   });

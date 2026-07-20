@@ -34,7 +34,8 @@ const ui = defineCollection({
     }),
     places: z.object({
       title: z.string(), intro: z.string(), empty: z.string(),
-      search: z.string(), hours: z.string(), rating: z.string(), categories: placeCats,
+      search: z.string(), hours: z.string(), rating: z.string(),
+      phone: z.string(), address: z.string(), categories: placeCats,
     }),
     map: z.object({ retry: z.string(), failed: z.string(), locate: z.string() }),
     auth: z.object({

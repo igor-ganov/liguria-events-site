@@ -15,8 +15,10 @@ export const PlaceSchema = Schema.Struct({
   website: Schema.optional(Schema.String),
   /** OSM `opening_hours` string (raw spec, e.g. "Mo-Fr 09:00-18:00"). */
   hours: Schema.optional(Schema.String),
-  /** 0..5 rating where a source carries one (rare in open data). */
-  rating: Schema.optional(Schema.Number),
+  /** Contact info from Overture/OSM (far better covered than hours/desc). */
+  phone: Schema.optional(Schema.String),
+  socials: Schema.optional(Schema.Array(Schema.String)),
+  address: Schema.optional(Schema.String),
   wiki: Schema.optional(Schema.String),
   wd: Schema.optional(Schema.String),
 });
