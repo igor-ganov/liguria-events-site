@@ -316,9 +316,9 @@ const ui = await uiOf(lang);
         ru: 'Не удалось определить местоположение.',
       },
       zoomIn: {
-        en: 'Zoom in to load places and landmarks.',
-        it: 'Ingrandisci per caricare locali e luoghi.',
-        ru: 'Приблизьте карту, чтобы загрузить места и достопримечательности.',
+        en: 'Zoom in to a region to see places.',
+        it: 'Ingrandisci su una zona per vedere i locali.',
+        ru: 'Приблизьтесь к области, чтобы увидеть места.',
       },
     };
     const say = (key: string): void => {
@@ -733,18 +733,22 @@ const ui = await uiOf(lang);
       lmMarkers.forEach((m) => m.remove());
       lmMarkers.length = 0;
     };
-    // Places are dense venues — over all-Italy, fetching every visible region's
-    // shard at once is tens of MB and an unreadable blob, so they wait until you
-    // are zoomed in. Landmarks are notable and far fewer, so they load country-
-    // wide (z6+) — that's the zoomed-out heritage view people expect.
-    const LANDMARK_MINZOOM = 6;
-    const PLACE_MINZOOM = 9;
-    // Load the shard of every region whose bbox now intersects the viewport
-    // (once each), merge it in, re-index and re-render.
-    const ensureLandmarkShards = async (): Promise<void> => {
-      if (!state.showLandmarks || map.getZoom() < LANDMARK_MINZOOM) return;
+    // Landmarks are notable and few, so EVERY in-view region loads at any zoom —
+    // heritage shows across the whole country, south included, whatever the zoom.
+    // Places are dense venues (all-Italy is ~100 MB and an unreadable blob), so
+    // they load only when the viewport is focused on a few regions, not the whole
+    // map; the ceiling is a region COUNT, not a raw zoom (so a single southern
+    // region loads its places exactly like a northern one does).
+    const PLACE_MAX_REGIONS = 5;
+    const inViewRegions = (): readonly string[] => {
       const b = map.getBounds();
-      const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !lmLoaded.has(r));
+      return regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth());
+    };
+    // Load the shard of every in-view region (once each), merge it in, re-index
+    // and re-render.
+    const ensureLandmarkShards = async (): Promise<void> => {
+      if (!state.showLandmarks) return;
+      const need = inViewRegions().filter((r) => !lmLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => lmLoaded.add(r));
       const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat();
@@ -837,9 +841,9 @@ const ui = await uiOf(lang);
     const renderPlaces = (): void => {
       plMarkers.forEach((m) => m.remove());
       plMarkers.length = 0;
-      // Below the place zoom gate, show nothing rather than a stale, half-loaded
-      // scatter (the shards for this viewport were never fetched).
-      if (!plIndex || !state.showPlaces || map.getZoom() < PLACE_MINZOOM) return;
+      // Zoomed out across many regions, show nothing rather than a half-loaded
+      // scatter (those shards were never fetched); focused in, show them.
+      if (!plIndex || !state.showPlaces || inViewRegions().length > PLACE_MAX_REGIONS) return;
       const b = map.getBounds();
       const clusters = plIndex.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], Math.round(map.getZoom()));
       clusters.forEach((c) => {
@@ -869,12 +873,13 @@ const ui = await uiOf(lang);
       plMarkers.forEach((m) => m.remove());
       plMarkers.length = 0;
     };
-    // Same viewport-sharded loading as landmarks: pull a region's place shard
-    // once, when its bbox first enters view.
+    // Pull a region's place shard once its bbox enters view — but only while the
+    // viewport is focused on a handful of regions (else all-Italy = ~100 MB).
     const ensurePlaceShards = async (): Promise<void> => {
-      if (!state.showPlaces || map.getZoom() < PLACE_MINZOOM) return;
-      const b = map.getBounds();
-      const need = regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth()).filter((r) => !plLoaded.has(r));
+      if (!state.showPlaces) return;
+      const view = inViewRegions();
+      if (view.length === 0 || view.length > PLACE_MAX_REGIONS) return;
+      const need = view.filter((r) => !plLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => plLoaded.add(r));
       const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat();
@@ -966,17 +971,15 @@ const ui = await uiOf(lang);
       state.showLandmarks = !state.showLandmarks;
       writeUrl();
       syncLayers();
-      if (state.showLandmarks) {
-        if (map.getZoom() < LANDMARK_MINZOOM) say('zoomIn');
-        void ensureLandmarkShards();
-      } else hideLandmarks();
+      if (state.showLandmarks) void ensureLandmarkShards();
+      else hideLandmarks();
     });
     placesEl?.addEventListener('click', () => {
       state.showPlaces = !state.showPlaces;
       writeUrl();
       syncLayers();
       if (state.showPlaces) {
-        if (map.getZoom() < PLACE_MINZOOM) say('zoomIn');
+        if (inViewRegions().length > PLACE_MAX_REGIONS) say('zoomIn');
         void ensurePlaceShards();
       } else hidePlaces();
     });

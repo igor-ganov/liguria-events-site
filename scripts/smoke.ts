@@ -65,11 +65,16 @@ const tilesCheck: Check = {
   },
 };
 
+// Cover the north AND the south — a north-only smoke is why a south-wide outage
+// once slipped through green.
 const CHECKS: readonly Check[] = [
   pageCheck('/liguria/map/'),
-  shardCheck('places', 'lazio'),
-  shardCheck('landmarks', 'lombardia'),
+  shardCheck('places', 'lombardia'),
+  shardCheck('places', 'sicilia'),
+  shardCheck('landmarks', 'lazio'),
+  shardCheck('landmarks', 'campania'),
   detailCheck('lazio'),
+  detailCheck('sicilia'),
   tilesCheck,
 ];
 
