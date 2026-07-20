@@ -37,6 +37,10 @@ const ui = defineCollection({
       search: z.string(), hours: z.string(), rating: z.string(),
       phone: z.string(), address: z.string(), categories: placeCats,
     }),
+    reviews: z.object({
+      title: z.string(), none: z.string(), rating: z.string(), comment: z.string(),
+      submit: z.string(), signIn: z.string(), remove: z.string(), yours: z.string(),
+    }),
     map: z.object({ retry: z.string(), failed: z.string(), locate: z.string() }),
     auth: z.object({
       signIn: z.string(), title: z.string(), emailPrompt: z.string(), sendCode: z.string(),

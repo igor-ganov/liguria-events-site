@@ -36,6 +36,11 @@ export const DEFAULT_PAGE_DATA: PageData = {
         gallery: 'Galleries', wellness: 'Wellness & spa', kids: 'Kids', shopping: 'Shopping',
       },
     },
+    reviews: {
+      title: 'Reviews', none: 'No reviews yet — be the first.', rating: 'Your rating',
+      comment: 'Add a comment (optional)', submit: 'Post review',
+      signIn: 'Sign in to leave a review', remove: 'Remove', yours: 'Your review',
+    },
     map: { retry: 'Retry', failed: "The map couldn't load — check your connection.", locate: 'Find my location' },
     auth: {
       signIn: 'Sign in', title: 'Sign in to Dove Go',

@@ -12,6 +12,15 @@ places:
   phone: Telefono
   address: Indirizzo
   categories: { restaurant: Ristoranti, cafe: Caffè, bar: Bar, fastfood: Fast food, icecream: Gelaterie, nightlife: Vita notturna, fitness: Palestre, climbing: Arrampicata, sport: Sport, cinema: Cinema, entertainment: Divertimento, museum: Musei, gallery: Gallerie, wellness: Benessere e spa, kids: Bambini, shopping: Shopping }
+reviews:
+  title: Recensioni
+  none: Ancora nessuna recensione — scrivi la prima.
+  rating: Il tuo voto
+  comment: Aggiungi un commento (facoltativo)
+  submit: Pubblica
+  signIn: Accedi per lasciare una recensione
+  remove: Rimuovi
+  yours: La tua recensione
 map: { retry: 'Riprova', failed: 'Impossibile caricare la mappa — controlla la connessione.', locate: 'Trova la mia posizione' }
 auth:
   signIn: Accedi

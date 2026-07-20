@@ -6,6 +6,7 @@ import { placeIcon } from '../../lib/places/place-icon.ts';
 import { placeColor } from '../../lib/places/place-color.ts';
 import { placeSources } from '../../lib/places/place-sources.ts';
 import { placePath } from '../../lib/places/place-path.ts';
+import { placeReviewSummary, placeReviewList, myPlaceReview } from '../../lib/places/reviews.ts';
 import { commonsImg } from '../../lib/img/commons-img.ts';
 import { slug } from '../../lib/slug.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
@@ -32,6 +33,16 @@ const mapUrl = place
 const embedSrc = place ? `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=15&output=embed` : '';
 const sources = place ? placeSources(place) : [];
 const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.', ru: 'Место не найдено.' }[lang];
+
+// Our own reviews (D1): summary + recent list, and the caller's own review if
+// signed in. A row of five star icons, the first `n` lit — rendered server-side.
+const db = Astro.locals.runtime.env.DB;
+const user = Astro.locals.user;
+const [summary, reviews, mine] = place
+  ? await Promise.all([placeReviewSummary(db, place.id), placeReviewList(db, place.id), user ? myPlaceReview(db, user.id, place.id) : Promise.resolve(null)])
+  : [{ avg: 0, count: 0 }, [], null];
+const stars = (r: number): string =>
+  Array.from({ length: 5 }, (_, i) => `<span class="rv-star${i < Math.round(r) ? ' on' : ''}">${uiIcon('star', 15)}</span>`).join('');
 ---
 
 <Layout lang={lang} region={region} title={place?.name ?? ui.places.title} description={place?.desc ?? place?.name ?? ui.places.intro} path={path}>
@@ -76,6 +87,46 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
             )}
           </dl>
           {place.desc && <p class="event-desc">{place.desc}</p>}
+
+          <section class="place-reviews" data-rv data-place={place.id} data-region={place.region}>
+            <h2>
+              {ui.reviews.title}
+              {summary.count > 0 && (
+                <span class="rv-summary"><Fragment set:html={stars(summary.avg)} /> {summary.avg} · {summary.count}</span>
+              )}
+            </h2>
+
+            {user ? (
+              <form class="rv-form" data-rv-form>
+                <div class="rv-stars-input" data-rv-stars data-current={mine?.rating ?? 0} aria-label={ui.reviews.rating}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button type="button" class="rv-star-btn" data-rv-star={n} aria-label={`${n}`}><Fragment set:html={uiIcon('star', 22)} /></button>
+                  ))}
+                </div>
+                <textarea data-rv-comment maxlength="2000" rows="3" placeholder={ui.reviews.comment}>{mine?.comment ?? ''}</textarea>
+                <div class="rv-actions">
+                  <button type="submit" class="chip chip--layer" data-rv-submit>{ui.reviews.submit}</button>
+                  {mine && <button type="button" class="chip" data-rv-delete>{ui.reviews.remove}</button>}
+                </div>
+              </form>
+            ) : (
+              <a class="rv-signin chip chip--layer" href="?signin">{ui.reviews.signIn}</a>
+            )}
+
+            {reviews.length > 0 ? (
+              <ul class="rv-list">
+                {reviews.map((r) => (
+                  <li class="rv-item">
+                    <div class="rv-item-head"><Fragment set:html={stars(r.rating)} /> <span class="rv-author">{r.handle}</span> <time>{r.createdAt.slice(0, 10)}</time></div>
+                    {r.comment && <p class="rv-comment">{r.comment}</p>}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="rv-none">{ui.reviews.none}</p>
+            )}
+          </section>
+
           <figure class="event-map">
             <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
           </figure>
@@ -92,3 +143,8 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
     }
   </article>
 </Layout>
+
+<script>
+  import { initPlaceReviews } from '../../components/places/init-place-reviews.ts';
+  initPlaceReviews();
+</script>

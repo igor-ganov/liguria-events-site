@@ -67,8 +67,21 @@ const tilesCheck: Check = {
 
 // Cover the north AND the south — a north-only smoke is why a south-wide outage
 // once slipped through green.
+// The place-reviews endpoint is public for GET — hitting it confirms the D1
+// table exists (migration applied) and the route is wired.
+const reviewsApiCheck: Check = {
+  name: 'reviews API',
+  run: async () => {
+    const res = await get(`${BASE}/api/places/reviews?place=${encodeURIComponent('osm:node/1')}`);
+    ok(res.ok, `reviews API → ${res.status}`);
+    const j = (await res.json()) as { summary?: unknown };
+    ok(j.summary !== undefined, 'reviews API: no summary in response');
+  },
+};
+
 const CHECKS: readonly Check[] = [
   pageCheck('/liguria/map/'),
+  reviewsApiCheck,
   shardCheck('places', 'lombardia'),
   shardCheck('places', 'sicilia'),
   shardCheck('landmarks', 'lazio'),

@@ -37,6 +37,10 @@ export const PageDataSchema = Schema.Struct({
       search: Schema.String, hours: Schema.String, rating: Schema.String,
       phone: Schema.String, address: Schema.String, categories: placeCats,
     }),
+    reviews: Schema.Struct({
+      title: Schema.String, none: Schema.String, rating: Schema.String, comment: Schema.String,
+      submit: Schema.String, signIn: Schema.String, remove: Schema.String, yours: Schema.String,
+    }),
     map: Schema.Struct({ retry: Schema.String, failed: Schema.String, locate: Schema.String }),
     auth: Schema.Struct({
       signIn: Schema.String, title: Schema.String, emailPrompt: Schema.String, sendCode: Schema.String,

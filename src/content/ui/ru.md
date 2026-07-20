@@ -12,6 +12,15 @@ places:
   phone: Телефон
   address: Адрес
   categories: { restaurant: Рестораны, cafe: Кафе, bar: Бары, fastfood: Фастфуд, icecream: Мороженое, nightlife: Ночная жизнь, fitness: Фитнес, climbing: Скалолазание, sport: Спорт, cinema: Кино, entertainment: Развлечения, museum: Музеи, gallery: Галереи, wellness: Спа и велнес, kids: Детям, shopping: Шопинг }
+reviews:
+  title: Отзывы
+  none: Пока нет отзывов — будьте первым.
+  rating: Ваша оценка
+  comment: Добавьте комментарий (необязательно)
+  submit: Опубликовать
+  signIn: Войдите, чтобы оставить отзыв
+  remove: Удалить
+  yours: Ваш отзыв
 map: { retry: 'Повторить', failed: 'Не удалось загрузить карту — проверьте соединение.', locate: 'Найти моё местоположение' }
 auth:
   signIn: Войти

@@ -12,6 +12,15 @@ places:
   phone: Phone
   address: Address
   categories: { restaurant: Restaurants, cafe: Cafés, bar: Bars, fastfood: Fast food, icecream: Ice cream, nightlife: Nightlife, fitness: Fitness, climbing: Climbing, sport: Sport, cinema: Cinemas, entertainment: Entertainment, museum: Museums, gallery: Galleries, wellness: Wellness & spa, kids: Kids, shopping: Shopping }
+reviews:
+  title: Reviews
+  none: No reviews yet — be the first.
+  rating: Your rating
+  comment: Add a comment (optional)
+  submit: Post review
+  signIn: Sign in to leave a review
+  remove: Remove
+  yours: Your review
 map: { retry: 'Retry', failed: "The map couldn't load — check your connection.", locate: 'Find my location' }
 auth:
   signIn: Sign in
