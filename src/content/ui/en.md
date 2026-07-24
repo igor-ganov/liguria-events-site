@@ -38,6 +38,8 @@ auth:
   moderation: Moderation
   users: Users
   addPasskey: Add a passkey
+  settings: Settings
+  account: Account
   sending: Sending…
   invalidEmail: Please enter a valid email.
   verifying: Verifying…

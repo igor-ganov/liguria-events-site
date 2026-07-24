@@ -7,7 +7,6 @@ import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import RegionPicker from '../components/RegionPicker.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
-import { uiIcon } from '../lib/icons/ui-icon.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
@@ -126,7 +125,7 @@ const alternates = LOCALES.map((loc) => ({
         >
         <LanguageSwitcher lang={lang} path={path} />
         <ThemeToggle ui={ui} />
-        <span class="account" data-account></span>
+        <span class="account" data-account><span class="acct-skeleton" aria-hidden="true"></span></span>
       </nav>
       <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
            region is the one control that must stay reachable everywhere. -->
@@ -159,13 +158,12 @@ const alternates = LOCALES.map((loc) => ({
       <div data-step="email">
         <p>{ui.auth.emailPrompt}</p>
         <form id="signin-form">
-          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+          <!-- `webauthn` autofill token: if a passkey exists (this device or a
+               nearby phone over QR), the browser offers it inline here — no
+               blocking modal that hangs when there is none. -->
+          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email webauthn" />
           <button type="submit">{ui.auth.sendCode}</button>
         </form>
-        <div class="passkey-alt" data-passkey-alt hidden>
-          <div class="signin-or"><span>{ui.auth.or}</span></div>
-          <button type="button" id="passkey-signin" class="account-signin passkey-btn"><Fragment set:html={uiIcon('key', 16)} /> {ui.auth.passkey}</button>
-        </div>
       </div>
 
       <div data-step="code" hidden>
@@ -242,8 +240,9 @@ const alternates = LOCALES.map((loc) => ({
       import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
       import { readUiIsland } from '../components/shared/read-ui-island.ts';
 
-      // Sign-in dialog + header account state (header is static → resolved
-      // client-side). Re-run after SPA swaps (DOM is replaced).
+      // Sign-in dialog + header account state. Most pages are prerendered, so the
+      // header cannot know the viewer server-side — the account slot is resolved
+      // client-side from /api/auth/me. Re-run after SPA swaps (DOM is replaced).
       const auth = readUiIsland().ui.auth;
       type Me = { user: { handle: string; role: string } | null };
       const hasWebAuthn = (): boolean => Boolean(globalThis.PublicKeyCredential);
@@ -256,36 +255,54 @@ const alternates = LOCALES.map((loc) => ({
         document.querySelector('[data-step="email"]')?.toggleAttribute('hidden', step !== 'email');
         document.querySelector('[data-step="code"]')?.toggleAttribute('hidden', step !== 'code');
       };
+      const esc = (s: string): string =>
+        s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] ?? c);
       let pendingEmail = '';
+      let conditionalStarted = false;
 
       const signOut = async (): Promise<void> => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/';
       };
 
-      // Discoverable-credential sign-in ceremony; true on success.
-      const passkeyLogin = async (): Promise<boolean> => {
+      // Passkey sign-in via conditional UI (autofill mediation): the browser
+      // surfaces a discoverable credential inline on the email field — including
+      // a nearby phone over QR — with NO blocking modal, so there is nothing to
+      // hang when the device has no passkey. Started silently on dialog open.
+      const startConditionalPasskey = async (): Promise<void> => {
+        if (conditionalStarted || !hasWebAuthn()) return;
+        const mediation = globalThis.PublicKeyCredential.isConditionalMediationAvailable;
+        if (!mediation || !(await mediation.call(globalThis.PublicKeyCredential).catch(() => false))) return;
+        conditionalStarted = true;
         try {
           const opt = (await (await fetch('/api/passkey/auth-options', { method: 'POST' })).json()) as {
             challengeId: string;
             options: import('@simplewebauthn/browser').PublicKeyCredentialRequestOptionsJSON;
           };
-          const response = await startAuthentication({ optionsJSON: opt.options });
+          const response = await startAuthentication({ optionsJSON: opt.options, useBrowserAutofill: true });
           const res = await fetch('/api/passkey/auth-verify', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ challengeId: opt.challengeId, response }),
           });
-          return res.ok;
+          if (res.ok) location.reload();
         } catch {
-          return false;
+          // The viewer ignored the autofill offer, or none was available — the
+          // email path stays fully usable. Never surfaced as an error.
         }
       };
 
-      // Passkey registration (native browser prompt is the offer); true on success.
+      // First-time passkey registration: ask for the PLATFORM authenticator so it
+      // lands on Windows Hello / Touch ID on this device rather than a phone.
       const passkeyRegister = async (): Promise<boolean> => {
         try {
-          const opt = (await (await fetch('/api/passkey/register-options', { method: 'POST' })).json()) as {
+          const opt = (await (
+            await fetch('/api/passkey/register-options', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ attachment: 'platform' }),
+            })
+          ).json()) as {
             challengeId: string;
             options: import('@simplewebauthn/browser').PublicKeyCredentialCreationOptionsJSON;
           };
@@ -301,56 +318,96 @@ const alternates = LOCALES.map((loc) => ({
         }
       };
 
-      // Open the dialog and immediately offer the passkey if one is usable.
-      const openSignin = async (): Promise<void> => {
+      const openSignin = (): void => {
         showStep('email');
         setStatus('');
         dialog()?.showModal();
-        if (!hasWebAuthn()) return;
-        setStatus(auth.lookingPasskey);
-        if (await passkeyLogin()) {
-          location.reload();
-          return;
-        }
-        setStatus('');
         document.querySelector<HTMLInputElement>('#signin-form input[name=email]')?.focus();
+        void startConditionalPasskey();
+      };
+
+      const stripAuthParams = (): void => {
+        const url = new URL(location.href);
+        ['signin', 'setup', 'next'].forEach((p) => url.searchParams.delete(p));
+        history.replaceState(null, '', url.pathname + url.search + url.hash);
+      };
+
+      // The logged-in header collapses to ONE profile button (same footprint as
+      // "Sign in"), so the reserved slot never shifts. Its menu holds the
+      // profile-specific actions. The mobile FAB is already an open popup, so it
+      // gets the flat list instead of a nested dropdown.
+      const menuItems = (user: NonNullable<Me['user']>): string => {
+        const admin =
+          user.role === 'admin'
+            ? `<a role="menuitem" href="/admin/">${auth.moderation}</a>` +
+              `<a role="menuitem" href="/admin/users/">${auth.users}</a>`
+            : '';
+        return (
+          `<a role="menuitem" class="account-submit" href="/submit">+ ${auth.addEvent}</a>` +
+          admin +
+          `<a role="menuitem" href="/settings">${auth.settings}</a>` +
+          `<button type="button" role="menuitem" class="account-signout" data-signout>${auth.signOut}</button>`
+        );
       };
 
       const renderAccount = (user: Me['user']): void => {
         document.querySelectorAll('[data-account]').forEach((slot) => {
-          if (user) {
-            const admin =
-              user.role === 'admin'
-                ? `<a class="account-admin" href="/admin/">${auth.moderation}</a>` +
-                  `<a class="account-admin" href="/admin/users/">${auth.users}</a>`
-                : '';
-            slot.innerHTML =
-              `<a class="account-submit" href="/submit">+ ${auth.addEvent}</a>` +
-              admin +
-              `<a class="account-handle" href="/settings">@${user.handle}</a>` +
-              `<button type="button" class="account-signout" data-signout>${auth.signOut}</button>`;
-            slot.querySelector('[data-signout]')?.addEventListener('click', signOut);
-          } else {
+          if (!user) {
             slot.innerHTML = `<button type="button" class="account-signin" data-signin>${auth.signIn}</button>`;
-            slot.querySelector('[data-signin]')?.addEventListener('click', () => void openSignin());
+            return;
           }
+          const handle = esc(user.handle);
+          slot.innerHTML = slot.classList.contains('fab-account')
+            ? menuItems(user)
+            : `<div class="acct-menu" data-acct-menu>` +
+              `<button type="button" class="account-trigger" data-acct-toggle aria-haspopup="menu" aria-expanded="false" aria-label="${auth.account}">` +
+              `<span class="acct-avatar" aria-hidden="true">${handle.slice(0, 1).toUpperCase()}</span>` +
+              `<span class="acct-name">@${handle}</span>` +
+              `</button>` +
+              `<div class="acct-dropdown" data-acct-dropdown role="menu" hidden>${menuItems(user)}</div>` +
+              `</div>`;
         });
       };
 
-      const refreshAccount = async (): Promise<void> => {
+      const refreshAccount = async (): Promise<Me['user']> => {
         try {
-          renderAccount(((await (await fetch('/api/auth/me')).json()) as Me).user);
+          const me = ((await (await fetch('/api/auth/me')).json()) as Me).user;
+          renderAccount(me);
+          return me;
         } catch {
           renderAccount(null);
+          return null;
         }
       };
 
-      const bind = (sel: string, event: string, handler: (el: Element) => void): void => {
-        const el = document.querySelector(sel);
-        if (el && (el as HTMLElement).dataset['bound'] !== 'true') {
-          (el as HTMLElement).dataset['bound'] = 'true';
-          el.addEventListener(event, () => handler(el));
-        }
+      // One delegated document handler for every account/menu interaction, so it
+      // survives SPA swaps without accumulating listeners.
+      let delegated = false;
+      const bindDelegates = (): void => {
+        if (delegated) return;
+        delegated = true;
+        document.addEventListener('click', (e) => {
+          const el = e.target instanceof Element ? e.target : null;
+          if (!el) return;
+          if (el.closest('[data-signin]')) return openSignin();
+          if (el.closest('[data-signout]')) return void signOut();
+          const toggle = el.closest('[data-acct-toggle]');
+          document.querySelectorAll<HTMLElement>('[data-acct-menu]').forEach((menu) => {
+            const drop = menu.querySelector<HTMLElement>('[data-acct-dropdown]');
+            const t = menu.querySelector<HTMLElement>('[data-acct-toggle]');
+            if (!drop || !t) return;
+            const open = toggle !== null && menu.contains(toggle) ? drop.hasAttribute('hidden') : false;
+            drop.toggleAttribute('hidden', !open);
+            t.setAttribute('aria-expanded', String(open));
+          });
+        });
+        document.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape') return;
+          document.querySelectorAll<HTMLElement>('[data-acct-dropdown]').forEach((d) => d.setAttribute('hidden', ''));
+          document
+            .querySelectorAll<HTMLElement>('[data-acct-toggle]')
+            .forEach((t) => t.setAttribute('aria-expanded', 'false'));
+        });
       };
 
       const bindSignin = (): void => {
@@ -391,34 +448,36 @@ const alternates = LOCALES.map((loc) => ({
             else setStatus(auth.badCode);
           });
         }
-        bind('[data-code-back]', 'click', () => {
-          showStep('email');
-          setStatus('');
-        });
-        const passkeyBtn = document.querySelector<HTMLButtonElement>('#passkey-signin');
-        if (passkeyBtn && hasWebAuthn() && passkeyBtn.dataset['bound'] !== 'true') {
-          passkeyBtn.dataset['bound'] = 'true';
-          document.querySelector('[data-passkey-alt]')?.removeAttribute('hidden');
-          passkeyBtn.addEventListener('click', async () => {
-            setStatus(auth.waitingPasskey);
-            if (await passkeyLogin()) location.reload();
-            else setStatus(auth.passkeyFailed);
+        const back = document.querySelector<HTMLElement>('[data-code-back]');
+        if (back && back.dataset['bound'] !== 'true') {
+          back.dataset['bound'] = 'true';
+          back.addEventListener('click', () => {
+            showStep('email');
+            setStatus('');
           });
         }
       };
 
-      const initAuthUi = (): void => {
+      const initAuthUi = async (): Promise<void> => {
+        bindDelegates();
         bindSignin();
-        void refreshAccount();
+        const user = await refreshAccount();
         const params = new URLSearchParams(location.search);
-        if (params.has('signin')) void openSignin();
-        // Offer a passkey right after first registration (the native prompt).
-        if (params.has('setup') && hasWebAuthn()) {
-          void passkeyRegister().finally(() => history.replaceState(null, '', location.pathname));
+        // A signed-in viewer must never reach the sign-in form — strip the param
+        // (from links, history, bookmarks) and never open the dialog.
+        if (user) {
+          if (params.has('signin') || params.has('setup') || params.has('next')) {
+            const wantsSetup = params.has('setup') && hasWebAuthn();
+            stripAuthParams();
+            if (wantsSetup) void passkeyRegister();
+          }
+          return;
         }
+        if (params.has('signin')) openSignin();
+        if (params.has('setup')) stripAuthParams(); // stale link, not signed in
       };
-      initAuthUi();
-      document.addEventListener('astro:after-swap', initAuthUi);
+      void initAuthUi();
+      document.addEventListener('astro:after-swap', () => void initAuthUi());
     </script>
   </body>
 </html>

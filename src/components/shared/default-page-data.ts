@@ -49,6 +49,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
       codePre: 'Enter the 6-digit code we sent to', codePost: '— or click the link in the email.',
       verify: 'Verify code', back: 'Use a different email', signOut: 'Sign out', addEvent: 'Add event',
       moderation: 'Moderation', users: 'Users', addPasskey: 'Add a passkey',
+      settings: 'Settings', account: 'Account',
       sending: 'Sending…', invalidEmail: 'Please enter a valid email.', verifying: 'Verifying…',
       badCode: 'That code is wrong or has expired.', lookingPasskey: 'Looking for a passkey…',
       waitingPasskey: 'Waiting for your passkey…', passkeyFailed: 'Passkey sign-in failed — use your email instead.',

@@ -17,7 +17,15 @@ type CredRef = { id: string; transports: string[] };
 const toDescriptors = (creds: CredRef[]) =>
   creds.map((c) => ({ id: c.id, transports: c.transports as AuthenticatorTransportFuture[] }));
 
-export const registrationOptions = (rpID: string, userId: string, userName: string, exclude: CredRef[]) =>
+type Attachment = 'platform' | 'cross-platform';
+
+export const registrationOptions = (
+  rpID: string,
+  userId: string,
+  userName: string,
+  exclude: CredRef[],
+  attachment?: Attachment,
+) =>
   generateRegistrationOptions({
     rpName: RP_NAME,
     rpID,
@@ -25,7 +33,15 @@ export const registrationOptions = (rpID: string, userId: string, userName: stri
     userID: new TextEncoder().encode(userId),
     attestationType: 'none',
     excludeCredentials: toDescriptors(exclude),
-    authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
+    // `residentKey: required` makes every passkey discoverable, so sign-in can
+    // offer it without the user typing an email (conditional UI). When the
+    // caller names an attachment we steer the ceremony — first-time setup asks
+    // for `platform` so it lands on Windows Hello / Touch ID, not a phone.
+    authenticatorSelection: {
+      residentKey: 'required',
+      userVerification: 'preferred',
+      ...(attachment ? { authenticatorAttachment: attachment } : {}),
+    },
   });
 
 export const verifyRegistration = (

@@ -38,6 +38,8 @@ auth:
   moderation: Модерация
   users: Пользователи
   addPasskey: Добавить паскей
+  settings: Настройки
+  account: Аккаунт
   sending: Отправка…
   invalidEmail: Введите корректный email.
   verifying: Проверка…
