@@ -29,6 +29,37 @@ const state = {
   query: '', hits: undefined as ReadonlySet<string> | undefined,
 };
 
+// Filters live in the URL so a filtered view is shareable, bookmarkable and
+// survives a reload. `from` is omitted while it equals today (the default), so a
+// pristine feed keeps a clean URL.
+const syncUrl = (today: string): void => {
+  const p = new URLSearchParams();
+  if (state.query.trim() !== '') p.set('q', state.query.trim());
+  if (state.cats.size > 0) p.set('cats', [...state.cats].join(','));
+  if (state.from !== '' && state.from !== today) p.set('from', state.from);
+  if (state.to !== '') p.set('to', state.to);
+  if (state.free) p.set('free', '1');
+  if (state.gems) p.set('gems', '1');
+  const qs = p.toString();
+  history.replaceState(null, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
+};
+
+// Restore filters from the URL. State is module-level and persists across SPA
+// swaps, so reset it first to avoid a previous view leaking in.
+const readParams = (today: string): void => {
+  state.cats.clear();
+  state.query = '';
+  state.free = false;
+  state.gems = false;
+  const p = new URLSearchParams(location.search);
+  state.query = p.get('q') ?? '';
+  (p.get('cats') ?? '').split(',').filter((c) => c !== '').forEach((c) => state.cats.add(c));
+  state.from = p.get('from') ?? today;
+  state.to = p.get('to') ?? '';
+  state.free = p.get('free') === '1';
+  state.gems = p.get('gems') === '1';
+};
+
 const matches = (li: HTMLElement): boolean => {
   const start = li.dataset['start'] ?? '';
   const end = li.dataset['end'] ?? start;
@@ -161,50 +192,62 @@ export const initFeed = (): void => {
   const page = readJson<{ lang: Locale; ui: Ui }>('ui-data', { lang: 'en' as Locale, ui: {} as Ui });
   const icons = readJson<Record<string, string>>('icons-data', {});
   const today = isoToday();
+  readParams(today);
 
   buildIndex(page.lang);
+  runSearch();
+
   const searchEl = document.querySelector<HTMLInputElement>('[data-feed-search]');
   if (searchEl) {
+    searchEl.value = state.query;
     searchEl.addEventListener('input', () => {
       state.query = searchEl.value;
       runSearch();
       apply();
+      syncUrl(today);
     });
   }
 
   const fromEl = document.querySelector<HTMLInputElement>('[data-feed-from]');
   const toEl = document.querySelector<HTMLInputElement>('[data-feed-to]');
   if (fromEl) {
-    fromEl.value = today;
-    state.from = today;
+    fromEl.value = state.from;
     fromEl.addEventListener('change', () => {
       state.from = fromEl.value;
       apply();
+      syncUrl(today);
     });
   }
   if (toEl) {
+    toEl.value = state.to;
     toEl.addEventListener('change', () => {
       state.to = toEl.value;
       apply();
+      syncUrl(today);
     });
   }
 
   document.querySelectorAll<HTMLButtonElement>('[data-feed-cat]').forEach((chip) => {
+    const cat = chip.dataset['feedCat'] ?? '';
+    chip.setAttribute('aria-pressed', String(state.cats.has(cat)));
     chip.addEventListener('click', () => {
-      const cat = chip.dataset['feedCat'] ?? '';
       const on = !state.cats.has(cat);
       if (on) state.cats.add(cat);
       else state.cats.delete(cat);
       chip.setAttribute('aria-pressed', String(on));
       apply();
+      syncUrl(today);
     });
   });
   const toggle = (sel: string, key: 'free' | 'gems'): void => {
     const btn = document.querySelector<HTMLButtonElement>(sel);
-    btn?.addEventListener('click', () => {
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', String(state[key]));
+    btn.addEventListener('click', () => {
       state[key] = !state[key];
       btn.setAttribute('aria-pressed', String(state[key]));
       apply();
+      syncUrl(today);
     });
   };
   toggle('[data-feed-free]', 'free');
@@ -218,6 +261,7 @@ export const initFeed = (): void => {
       .querySelectorAll('[data-feed-cat], [data-feed-free], [data-feed-gems]')
       .forEach((b) => b.setAttribute('aria-pressed', 'false'));
     apply();
+    syncUrl(today);
   });
 
   apply();
