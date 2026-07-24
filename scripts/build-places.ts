@@ -368,6 +368,45 @@ const localize = (p: Place, lang: Lang) => ({
   ...(p.img ? { m: commonsImg(p.img, 800) } : {}),
 });
 
+// Cloudflare Workers reject any single asset over 25 MiB, and a 25 MB shard is
+// a brutal client download anyway. Keep each locale file under a safe budget by
+// dropping the LEAST-rich rows (bare name+coords POIs) first — a place with a
+// photo, description, wiki link or contacts is always kept over an anonymous
+// café. The same id set is dropped from every locale so detail pages never 404.
+const PLACE_SHARD_BUDGET = 22 * 1024 * 1024;
+
+const richness = (p: Place): number =>
+  (p.img ? 4 : 0) +
+  (p.desc && (p.desc.en || p.desc.it || p.desc.ru) ? 3 : 0) +
+  (p.wiki ? 3 : 0) +
+  (p.wd ? 2 : 0) +
+  (p.website ? 1 : 0) +
+  (p.phone ? 1 : 0) +
+  (p.socials && p.socials.length > 0 ? 1 : 0) +
+  (p.address ? 1 : 0) +
+  (p.hours ? 1 : 0);
+
+const localeBytes = (places: readonly Place[], lang: Lang): number =>
+  places.reduce((n, p) => n + JSON.stringify(localize(p, lang)).length + 1, 2);
+
+const capToBudget = (places: Place[], budget: number): Place[] => {
+  if (Math.max(...LANGS.map((l) => localeBytes(places, l))) <= budget) return places;
+  const ordered = [...places].sort((a, b) => richness(b) - richness(a) || a.id.localeCompare(b.id));
+  let keep = ordered.length;
+  for (const lang of LANGS) {
+    let bytes = 2;
+    let k = 0;
+    for (; k < ordered.length; k += 1) {
+      const rowBytes = JSON.stringify(localize(ordered[k]!, lang)).length + 1;
+      if (bytes + rowBytes > budget) break;
+      bytes += rowBytes;
+    }
+    keep = Math.min(keep, k);
+  }
+  const keptIds = new Set(ordered.slice(0, keep).map((p) => p.id));
+  return places.filter((p) => keptIds.has(p.id));
+};
+
 // Build ONE region → per-locale shards `public/data/places/<region>.<lang>.json`.
 const buildRegion = async (region: string): Promise<void> => {
   console.log(`\n═══ ${region} (${REGION_GEO[region]!.iso}) ═══`);
@@ -392,11 +431,15 @@ const buildRegion = async (region: string): Promise<void> => {
   let oi = 0;
   for (const p of merged) if (p.id.startsWith('ovt:')) p.id = `ovt:${(oi++).toString(36)}`;
   mkdirSync(new URL('../public/data/places/', import.meta.url), { recursive: true });
+  const kept = capToBudget(merged, PLACE_SHARD_BUDGET);
+  if (kept.length < merged.length) {
+    console.log(`· capped ${merged.length}→${kept.length} places to fit ${(PLACE_SHARD_BUDGET / 1048576) | 0} MiB/locale`);
+  }
   for (const lang of LANGS) {
-    const view = merged.map((p) => localize(p, lang));
+    const view = kept.map((p) => localize(p, lang));
     writeFileSync(new URL(`../public/data/places/${region}.${lang}.json`, import.meta.url), `${JSON.stringify(view, undefined, 0)}\n`);
   }
-  console.log(`✓ ${region}: ${merged.length} places → shards (${merged.filter((p) => p.img).length} img, ${merged.filter((p) => p.desc).length} desc, ${merged.filter((p) => p.hours).length} hours, ${merged.filter((p) => p.rating).length} rating)`);
+  console.log(`✓ ${region}: ${kept.length} places → shards (${kept.filter((p) => p.img).length} img, ${kept.filter((p) => p.desc).length} desc, ${kept.filter((p) => p.hours).length} hours, ${kept.filter((p) => p.phone).length} phone)`);
 };
 
 const main = async (): Promise<void> => {
