@@ -50,9 +50,9 @@ const admins = rootAdmins(env);
                   )}
                 </td>
                 <td><small>{u.created_at.slice(0, 10)}</small></td>
-                <td class="admin-actions">
+                <td>
                   {mine || root ? <small>—</small> : (
-                    <>
+                    <div class="admin-actions">
                       {u.role === 'admin'
                         ? <button data-user-action="demote">Revoke admin</button>
                         : <button data-user-action="promote">Make admin</button>}
@@ -60,7 +60,7 @@ const admins = rootAdmins(env);
                         ? <button data-user-action="unban">Unban</button>
                         : <button data-user-action="ban" class="danger">Ban</button>}
                       <button data-user-action="delete_events" class="danger">Delete events</button>
-                    </>
+                    </div>
                   )}
                 </td>
               </tr>

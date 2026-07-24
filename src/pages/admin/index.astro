@@ -30,10 +30,12 @@ const events = await listEventsByStatus(env.DB, ['pending', 'held', 'published',
             <td>{ev.title_en}</td>
             <td>{ev.start_date}{ev.end_date ? `–${ev.end_date}` : ''}</td>
             <td>{ev.origin}</td>
-            <td class="admin-actions">
-              <button data-action="publish">Publish</button>
-              <button data-action="reject">Reject</button>
-              <button data-action="delete" class="danger">Delete</button>
+            <td>
+              <div class="admin-actions">
+                <button data-action="publish">Publish</button>
+                <button data-action="reject">Reject</button>
+                <button data-action="delete" class="danger">Delete</button>
+              </div>
             </td>
           </tr>
         ))}
