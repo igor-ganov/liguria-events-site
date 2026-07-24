@@ -1,0 +1,46 @@
+---
+import { CATEGORIES } from '../lib/events/categories.ts';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+// Shared create/edit form. `mode` switches the submit target (POST /submit vs
+// PATCH /event/<id>) and the button label; `event` prefills it on edit.
+type Prefill = Readonly<{
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  venue: string;
+  categories: readonly string[];
+  free: boolean;
+}>;
+type Props = Readonly<{ mode: 'create' | 'edit'; eventId?: string | undefined; event?: Prefill | undefined }>;
+const { mode, eventId, event } = Astro.props;
+const ui = await uiOf('en');
+const v: Prefill = event ?? { title: '', description: '', startDate: '', endDate: '', venue: '', categories: [], free: false };
+---
+
+<form id="event-form" class="submit-form" data-mode={mode} data-id={eventId}>
+  <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
+  <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
+  <div class="row2">
+    <label>Starts<input type="date" name="startDate" required value={v.startDate} /></label>
+    <label>Ends (optional)<input type="date" name="endDate" value={v.endDate} /></label>
+  </div>
+  <label>Venue<input name="venue" maxlength="200" value={v.venue} /></label>
+  <fieldset class="cats">
+    <legend>Categories</legend>
+    {CATEGORIES.map((c) => (
+      <label class="cat-check">
+        <input type="checkbox" name="category" value={c} checked={v.categories.includes(c)} /> {ui.cat[c]}
+      </label>
+    ))}
+  </fieldset>
+  <label class="inline"><input type="checkbox" name="free" checked={v.free} /> Free entry</label>
+  <button type="submit">{mode === 'edit' ? 'Save changes' : 'Submit for review'}</button>
+</form>
+<p id="submit-status" role="status" aria-live="polite"></p>
+
+<script>
+  import { initEventForm } from './events/init-event-form.ts';
+  initEventForm();
+</script>

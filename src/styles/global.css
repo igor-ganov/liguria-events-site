@@ -247,6 +247,21 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .passkey-list li { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; font-size: 0.9rem; }
 .account-handle { text-decoration: none; }
 
+/* Author bar on an event page (owner preview): status + edit. */
+.event-owner-bar {
+  display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+  margin: 0.6rem 0 0.2rem; padding: 0.5rem 0.7rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface);
+}
+.event-status {
+  font-size: 0.85rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px;
+  background: var(--bg); color: var(--ink-2);
+}
+.event-status[data-status='published'] { color: #15803d; }
+.event-status[data-status='rejected'] { color: #b91c1c; }
+.event-status[data-status='pending'], .event-status[data-status='held'] { color: hsl(28 92% 42%); }
+.event-owner-bar .account-submit { margin-left: auto; text-decoration: none; }
+
 /* Feed/calendar hydrate client-side; reserve space so content painting into
    the list doesn't shove the footer/FAB around (cuts CLS). */
 events-feed, events-calendar { display: block; min-height: 85vh; }

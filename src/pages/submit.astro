@@ -1,11 +1,9 @@
 ---
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
-import { uiOf } from '../lib/i18n/ui-of.ts';
-import { CATEGORIES } from '../lib/events/categories.ts';
+import EventForm from '../components/EventForm.astro';
 
 const user = Astro.locals.user;
-const ui = await uiOf('en');
 ---
 
 <Layout lang="en" title="Add an event" path="submit/">
@@ -15,58 +13,6 @@ const ui = await uiOf('en');
       Signed in as <strong>{user?.email}</strong>. Every submission is screened against our
       <a href="/content-policy">Content Policy</a> before it can appear.
     </p>
-    <form id="submit-form" class="submit-form">
-      <label>Title<input name="title" required maxlength="200" /></label>
-      <label>Description<textarea name="description" rows="4"></textarea></label>
-      <div class="row2">
-        <label>Starts<input type="date" name="startDate" required /></label>
-        <label>Ends (optional)<input type="date" name="endDate" /></label>
-      </div>
-      <label>Venue<input name="venue" maxlength="200" /></label>
-      <fieldset class="cats">
-        <legend>Categories</legend>
-        {CATEGORIES.map((c) => (
-          <label class="cat-check"><input type="checkbox" name="category" value={c} /> {ui.cat[c]}</label>
-        ))}
-      </fieldset>
-      <label class="inline"><input type="checkbox" name="free" /> Free entry</label>
-      <button type="submit">Submit for review</button>
-    </form>
-    <p id="submit-status" role="status" aria-live="polite"></p>
+    <EventForm mode="create" />
   </main>
 </Layout>
-
-<script>
-  const form = document.getElementById('submit-form') as HTMLFormElement;
-  const status = document.getElementById('submit-status') as HTMLElement;
-  const start = form.querySelector<HTMLInputElement>('input[name=startDate]');
-  const pinned = import.meta.env.PUBLIC_FIXED_TODAY;
-  if (start && !start.value) start.value = pinned ?? new Date().toISOString().slice(0, 10);
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const fd = new FormData(form);
-    const payload = {
-      title: fd.get('title'),
-      description: fd.get('description'),
-      startDate: fd.get('startDate'),
-      endDate: fd.get('endDate'),
-      venue: fd.get('venue'),
-      categories: fd.getAll('category'),
-      free: fd.get('free') === 'on',
-    };
-    status.textContent = 'Submitting…';
-    const res = await fetch('/api/events/submit', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = (await res.json()) as { detail?: string };
-    if (!res.ok) {
-      status.textContent = data.detail ?? 'Please check the form and try again.';
-      return;
-    }
-    status.textContent = '✓ Submitted — it goes through AI review, and we’ll email you the result.';
-    form.reset();
-  });
-</script>

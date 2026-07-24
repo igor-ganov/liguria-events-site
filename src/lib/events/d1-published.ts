@@ -73,3 +73,52 @@ export const publishedEventById = async (db: D1Database, id: string): Promise<Re
   const row = await db.prepare(`SELECT ${COLUMNS} FROM events WHERE id = ? AND status = 'published'`).bind(id).first<Row>();
   return row ? toCompact(row) : undefined;
 };
+
+// Author-preview: a published event is visible to everyone; a not-yet-published
+// one (pending/held/rejected) only to its author, so the post-submit redirect
+// lands on a real page instead of a 404 while moderation runs.
+export const eventForDetail = async (
+  db: D1Database,
+  id: string,
+  viewerId?: string,
+): Promise<{ compact: Record<string, unknown>; status: string; owned: boolean } | undefined> => {
+  const row = await db
+    .prepare(`SELECT ${COLUMNS}, status, submitter_id FROM events WHERE id = ?`)
+    .bind(id)
+    .first<Row & { status: string; submitter_id: string | null }>();
+  if (!row) return undefined;
+  const owned = viewerId !== undefined && row.submitter_id === viewerId;
+  if (row.status !== 'published' && !owned) return undefined;
+  return { compact: toCompact(row), status: row.status, owned };
+};
+
+/** The author's own event as editable form values, or undefined if not theirs. */
+export const editableEventById = async (
+  db: D1Database,
+  id: string,
+  userId: string,
+): Promise<{ title: string; description: string; startDate: string; endDate: string; venue: string; categories: string[]; free: boolean } | undefined> => {
+  const row = await db
+    .prepare('SELECT title_en, desc_en, start_date, end_date, venue, categories, free, submitter_id FROM events WHERE id = ?')
+    .bind(id)
+    .first<{
+      title_en: string | null;
+      desc_en: string | null;
+      start_date: string;
+      end_date: string | null;
+      venue: string | null;
+      categories: string | null;
+      free: number;
+      submitter_id: string | null;
+    }>();
+  if (!row || row.submitter_id !== userId) return undefined;
+  return {
+    title: row.title_en ?? '',
+    description: row.desc_en ?? '',
+    startDate: row.start_date,
+    endDate: row.end_date ?? '',
+    venue: row.venue ?? '',
+    categories: parseCats(row.categories),
+    free: row.free === 1,
+  };
+};

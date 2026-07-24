@@ -14,8 +14,14 @@ import { regionOf } from '../../lib/region/region-of.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; event: CompactEvent }>;
-const { lang, event } = Astro.props;
+type Props = Readonly<{ lang: Locale; event: CompactEvent; editable?: boolean | undefined; status?: string | undefined }>;
+const { lang, event, editable = false, status } = Astro.props;
+const statusLabel: Record<string, string> = {
+  pending: 'Pending review',
+  held: 'Under review',
+  rejected: 'Rejected',
+  published: 'Published',
+};
 // An event page belongs to its own region, whichever region you arrived from.
 const region = regionOf(event);
 const ui = await uiOf(lang);
@@ -33,6 +39,14 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
 <Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
   <article class="event-page">
     <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
+    {
+      editable && (
+        <div class="event-owner-bar">
+          <span class="event-status" data-status={status}>{status ? statusLabel[status] ?? status : ''}</span>
+          <a class="account-submit" href={`/event/${event.id}/edit`}>Edit</a>
+        </div>
+      )
+    }
     {
       event.img !== undefined && (
         <figure class="event-hero">
