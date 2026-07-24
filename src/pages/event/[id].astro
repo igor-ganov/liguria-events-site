@@ -1,14 +1,33 @@
 ---
+// SSR (not prerendered): an event page must resolve BOTH crawler events (the
+// build corpus) and user-submitted events, which live only in D1 and therefore
+// never had a static page — the cause of "published event, link 404s". Mirrors
+// the place/landmark detail routes, which already SSR from a cached source.
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
 import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
+import { publishedEventById } from '../../lib/events/d1-published.ts';
+import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 
-export const getStaticPaths = async () => {
-  const payload = await cachedEvents(EVENTS_URL);
-  return payload.events.map((event) => ({ params: { id: event.id }, props: { event } }));
-};
-
-const { event } = Astro.props;
+const { id } = Astro.params;
+const corpus = await cachedEvents(EVENTS_URL);
+let event = corpus.events.find((e) => e.id === id);
+if (event === undefined && id) {
+  const row = await publishedEventById(Astro.locals.runtime.env.DB, id);
+  event = row ? decodeEventList([row])[0] : undefined;
+}
+if (event === undefined) Astro.response.status = 404;
+const notFound = 'This event could not be found.';
 ---
 
-<EventDetail lang="en" event={event} />
+{
+  event ? (
+    <EventDetail lang="en" event={event} />
+  ) : (
+    <Layout lang="en" title="Event not found">
+      <p class="feed-empty">{notFound}</p>
+    </Layout>
+  )
+}

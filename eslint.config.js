@@ -110,6 +110,7 @@ export default tseslint.config(
       'src/lib/places/**/*.ts',
       'src/lib/region/region-bounds.ts',
       'src/lib/img/commons-img.ts',
+      'src/lib/events/d1-published.ts',
       'src/components/feed/**/*.ts',
       'src/components/landmarks/**/*.ts',
       'src/components/places/**/*.ts',
