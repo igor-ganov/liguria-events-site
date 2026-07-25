@@ -65,6 +65,11 @@ const v: Prefill = event ?? {
   </fieldset>
   <label class="inline"><input type="checkbox" name="free" checked={v.free} /> Free entry</label>
 
+  <div class="form-loc">
+    <span class="form-image-label">Location on the map</span>
+    <div class="form-loc-map" data-loc-map></div>
+    <span class="form-loc-hint">Click the map to drop a pin — drag it to fine-tune.</span>
+  </div>
   <input type="hidden" name="lat" value={v.lat} data-lat />
   <input type="hidden" name="lng" value={v.lng} data-lng />
 
@@ -74,5 +79,7 @@ const v: Prefill = event ?? {
 
 <script>
   import { initEventForm } from './events/init-event-form.ts';
+  import { initLocationPicker } from './events/init-location-picker.ts';
   initEventForm();
+  initLocationPicker();
 </script>
