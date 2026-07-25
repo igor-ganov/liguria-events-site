@@ -345,7 +345,8 @@ const alternates = LOCALES.map((loc) => ({
       const stripAuthParams = (): void => {
         const url = new URL(location.href);
         ['signin', 'setup', 'next'].forEach((p) => url.searchParams.delete(p));
-        history.replaceState(null, '', url.pathname + url.search + url.hash);
+        // Keep history.state — the ClientRouter's navigation index lives there.
+        history.replaceState(history.state, '', url.pathname + url.search + url.hash);
       };
 
       // The logged-in header collapses to ONE profile button (same footprint as

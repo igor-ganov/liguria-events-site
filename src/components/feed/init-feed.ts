@@ -41,7 +41,10 @@ const syncUrl = (today: string): void => {
   if (state.free) p.set('free', '1');
   if (state.gems) p.set('gems', '1');
   const qs = p.toString();
-  history.replaceState(null, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
+  // Preserve history.state — the ClientRouter keeps its navigation index there,
+  // and wiping it to null breaks back/forward (the swipe-back gesture needs
+  // several tries and then jumps past pages).
+  history.replaceState(history.state, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
 };
 
 // Restore filters from the URL. State is module-level and persists across SPA
