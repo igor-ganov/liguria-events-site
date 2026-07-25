@@ -23,9 +23,39 @@ const groups = regionsAndCitiesOf(payload.events);
       <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"></path>
       <circle cx="12" cy="10" r="2.5"></circle>
     </svg>
-    <span>{regionName(region)}</span>
+    <span data-region-label>{regionName(region)}</span>
     <span aria-hidden="true">▾</span>
   </button>
+
+  <!-- The region pages are prerendered, so ?city= is only known on the client.
+       This is:inline script runs synchronously during parse — before first
+       paint — so the label reads the city straight away instead of flashing the
+       region name and then swapping to it (and it never depends on the feed
+       script running). Re-applied after SPA navigations. -->
+  <script is:inline>
+    (function () {
+      var pretty = function (s) {
+        return s
+          .split('-')
+          .map(function (w) {
+            return w.charAt(0).toUpperCase() + w.slice(1);
+          })
+          .join(' ');
+      };
+      var apply = function () {
+        var city = new URLSearchParams(location.search).get('city');
+        document.querySelectorAll('[data-region-label]').forEach(function (el) {
+          if (city) el.textContent = pretty(city);
+        });
+        if (!city) return;
+        document.querySelectorAll('.rp-city a').forEach(function (a) {
+          if (a.getAttribute('href').indexOf('city=' + city) !== -1) a.setAttribute('aria-current', 'true');
+        });
+      };
+      apply();
+      document.addEventListener('astro:page-load', apply);
+    })();
+  </script>
 
   <dialog class="region-pop" data-region-pop>
     <label>

@@ -7,7 +7,6 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
-import { cityName } from '../../lib/region/city-name.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -198,11 +197,6 @@ export const initFeed = (): void => {
   const icons = readJson<Record<string, string>>('icons-data', {});
   const today = isoToday();
   readParams(today);
-  // When a city filter is active, the region-picker button names the city.
-  if (state.city !== '') {
-    const label = document.querySelector<HTMLElement>('.region-current span');
-    if (label) label.textContent = cityName(state.city);
-  }
 
   buildIndex(page.lang);
   runSearch();
