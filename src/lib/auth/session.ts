@@ -21,6 +21,18 @@ const hmac = async (secret: string, data: string): Promise<string> =>
 /** Cookie name for the session token. */
 export const SESSION_COOKIE = 'dg_session';
 
+/** Cookie options for the session. In production the domain is widened to
+ *  `.dovego.it` so the session is shared with subdomains (e.g. the admin app at
+ *  admin.dovego.it); dev keeps a host-only cookie so dev.dovego.it stays
+ *  isolated. Used for both set and delete (delete must match the domain). */
+export const sessionCookie = (production: boolean) => ({
+  httpOnly: true as const,
+  secure: true as const,
+  sameSite: 'lax' as const,
+  path: '/',
+  ...(production ? { domain: '.dovego.it' } : {}),
+});
+
 /** Mint a signed session token for a user id, valid 7 days. */
 export const signSession = async (secret: string, subject: string, nowMs: number): Promise<string> => {
   const payload = `${subject}.${nowMs + TTL_MS}`;

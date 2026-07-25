@@ -3,7 +3,7 @@ import type { AuthenticationResponseJSON } from '@simplewebauthn/server';
 import { verifyAuthentication } from '../../../lib/auth/passkey.ts';
 import { getCredential, bumpCounter } from '../../../lib/auth/credentials.ts';
 import { takeChallenge } from '../../../lib/auth/challenges.ts';
-import { signSession, SESSION_COOKIE } from '../../../lib/auth/session.ts';
+import { signSession, SESSION_COOKIE, sessionCookie } from '../../../lib/auth/session.ts';
 
 export const prerender = false;
 
@@ -36,12 +36,6 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   const now = new Date();
   await bumpCounter(env.DB, credential.credentialId, result.authenticationInfo.newCounter, now.toISOString());
   const session = await signSession(env.SESSION_SECRET, credential.userId, now.getTime());
-  cookies.set(SESSION_COOKIE, session, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 3600,
-  });
+  cookies.set(SESSION_COOKIE, session, { ...sessionCookie(env.ENVIRONMENT === 'production'), maxAge: 7 * 24 * 3600 });
   return Response.json({ ok: true, verified: true });
 };
