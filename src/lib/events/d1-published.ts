@@ -77,19 +77,32 @@ export const publishedEventById = async (db: D1Database, id: string): Promise<Re
 // Author-preview: a published event is visible to everyone; a not-yet-published
 // one (pending/held/rejected) only to its author, so the post-submit redirect
 // lands on a real page instead of a 404 while moderation runs.
+export type EventContacts = { address?: string; phone?: string; website?: string };
+
 export const eventForDetail = async (
   db: D1Database,
   id: string,
   viewerId?: string,
-): Promise<{ compact: Record<string, unknown>; status: string; owned: boolean } | undefined> => {
+): Promise<{ compact: Record<string, unknown>; status: string; owned: boolean; contacts: EventContacts } | undefined> => {
   const row = await db
-    .prepare(`SELECT ${COLUMNS}, status, submitter_id FROM events WHERE id = ?`)
+    .prepare(`SELECT ${COLUMNS}, address, phone, website, status, submitter_id FROM events WHERE id = ?`)
     .bind(id)
-    .first<Row & { status: string; submitter_id: string | null }>();
+    .first<Row & { address: string | null; phone: string | null; website: string | null; status: string; submitter_id: string | null }>();
   if (!row) return undefined;
   const owned = viewerId !== undefined && row.submitter_id === viewerId;
   if (row.status !== 'published' && !owned) return undefined;
-  return { compact: toCompact(row), status: row.status, owned };
+  const contacts: EventContacts = {
+    ...(row.address ? { address: row.address } : {}),
+    ...(row.phone ? { phone: row.phone } : {}),
+    ...(row.website ? { website: row.website } : {}),
+  };
+  return { compact: toCompact(row), status: row.status, owned, contacts };
+};
+
+export type EventFormValues = {
+  title: string; description: string; startDate: string; endDate: string; venue: string;
+  categories: string[]; free: boolean; coverImage: string; address: string; phone: string;
+  website: string; lat: string; lng: string;
 };
 
 /** The author's own event as editable form values, or undefined if not theirs. */
@@ -97,9 +110,9 @@ export const editableEventById = async (
   db: D1Database,
   id: string,
   userId: string,
-): Promise<{ title: string; description: string; startDate: string; endDate: string; venue: string; categories: string[]; free: boolean } | undefined> => {
+): Promise<EventFormValues | undefined> => {
   const row = await db
-    .prepare('SELECT title_en, desc_en, start_date, end_date, venue, categories, free, submitter_id FROM events WHERE id = ?')
+    .prepare('SELECT title_en, desc_en, start_date, end_date, venue, categories, free, cover_image, address, phone, website, lat, lng, submitter_id FROM events WHERE id = ?')
     .bind(id)
     .first<{
       title_en: string | null;
@@ -109,6 +122,12 @@ export const editableEventById = async (
       venue: string | null;
       categories: string | null;
       free: number;
+      cover_image: string | null;
+      address: string | null;
+      phone: string | null;
+      website: string | null;
+      lat: number | null;
+      lng: number | null;
       submitter_id: string | null;
     }>();
   if (!row || row.submitter_id !== userId) return undefined;
@@ -120,5 +139,11 @@ export const editableEventById = async (
     venue: row.venue ?? '',
     categories: parseCats(row.categories),
     free: row.free === 1,
+    coverImage: row.cover_image ?? '',
+    address: row.address ?? '',
+    phone: row.phone ?? '',
+    website: row.website ?? '',
+    lat: row.lat === null ? '' : String(row.lat),
+    lng: row.lng === null ? '' : String(row.lng),
   };
 };

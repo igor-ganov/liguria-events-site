@@ -109,8 +109,9 @@ export default tseslint.config(
       'src/lib/landmarks/**/*.ts',
       'src/lib/places/**/*.ts',
       'src/lib/region/region-bounds.ts',
-      'src/lib/img/commons-img.ts',
+      'src/lib/img/**/*.ts',
       'src/lib/events/d1-published.ts',
+      'src/lib/events/event-input.ts',
       'src/components/feed/**/*.ts',
       'src/components/events/**/*.ts',
       'src/components/landmarks/**/*.ts',
@@ -121,6 +122,7 @@ export default tseslint.config(
       'src/lib/i18n/ui-schema.ts',
       'src/content.config.ts',
       'src/pages/api/**/*.ts',
+      'src/pages/uploads/**/*.ts',
       'src/middleware.ts',
     ],
     rules: {

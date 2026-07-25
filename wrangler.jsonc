@@ -22,6 +22,7 @@
     { "binding": "DB", "database_name": "dovego", "database_id": "2f65133c-071e-4366-8214-e0942845f792" }
   ],
   "kv_namespaces": [{ "binding": "SESSION", "id": "8b7c9fc86355423c8c143d7dc8f18506" }],
+  "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "dovego-uploads" }],
   "routes": [
     { "pattern": "dovego.it", "custom_domain": true },
     { "pattern": "www.dovego.it", "custom_domain": true }
@@ -45,6 +46,7 @@
         { "binding": "DB", "database_name": "dovego-dev", "database_id": "cf5ff131-46c0-40bc-b97c-b0dff591344c" }
       ],
       "kv_namespaces": [{ "binding": "SESSION", "id": "71a97b9d5c814596aa2834aed3bf76b6" }],
+      "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "dovego-uploads-dev" }],
       "routes": [{ "pattern": "dev.dovego.it", "custom_domain": true }]
     }
   }

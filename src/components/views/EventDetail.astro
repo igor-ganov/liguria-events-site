@@ -11,11 +11,15 @@ import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
+import { resized } from '../../lib/img/resized.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
+import type { EventContacts } from '../../lib/events/d1-published.ts';
 
-type Props = Readonly<{ lang: Locale; event: CompactEvent; editable?: boolean | undefined; status?: string | undefined }>;
-const { lang, event, editable = false, status } = Astro.props;
+type Props = Readonly<{ lang: Locale; event: CompactEvent; editable?: boolean | undefined; status?: string | undefined; contacts?: EventContacts | undefined }>;
+const { lang, event, editable = false, status, contacts } = Astro.props;
+const site = contacts?.website;
+const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const statusLabel: Record<string, string> = {
   pending: 'Pending review',
   held: 'Under review',
@@ -50,7 +54,7 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
     {
       event.img !== undefined && (
         <figure class="event-hero">
-          <img src={event.img} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+          <img src={resized(event.img, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
           <figcaption>{ui.photoBy}: {photoSource}</figcaption>
         </figure>
       )
@@ -85,6 +89,24 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
           </div>
         )
       }
+      {contacts?.address && (
+        <div>
+          <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
+          <dd>{contacts.address}</dd>
+        </div>
+      )}
+      {contacts?.phone && (
+        <div>
+          <dt title="Phone"><Fragment set:html={uiIcon('phone', 17)} /></dt>
+          <dd><a href={`tel:${contacts.phone.replace(/\s+/g, '')}`}>{contacts.phone}</a></dd>
+        </div>
+      )}
+      {site && (
+        <div>
+          <dt title="Website"><Fragment set:html={uiIcon('external', 17)} /></dt>
+          <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
+        </div>
+      )}
     </dl>
     {desc !== '' && <p class="event-desc">{desc}</p>}
     {

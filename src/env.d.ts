@@ -4,6 +4,7 @@
 interface Env {
   DB: D1Database;
   SESSION: KVNamespace;
+  UPLOADS: R2Bucket;
   AI: unknown;
   ENVIRONMENT: string;
   CRAWLER_ENABLED: string;

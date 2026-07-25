@@ -285,6 +285,17 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   background: var(--bg); color: var(--ink); font: inherit;
 }
 .submit-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.form-image { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
+.form-image-label { font-size: 0.9rem; color: var(--ink-2); }
+.form-image-preview { max-width: 100%; max-height: 12rem; border-radius: var(--radius-sm); border: 1px solid var(--line); object-fit: cover; }
+.form-image-pick {
+  display: inline-flex; cursor: pointer; font-size: 0.9rem; color: var(--ink);
+  border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 0.55rem 0.9rem; background: var(--surface);
+}
+.form-image-status { font-size: 0.85rem; color: var(--ink-2); }
+.form-loc { display: flex; flex-direction: column; gap: 0.4rem; }
+.form-loc-map { height: 15rem; border-radius: var(--radius-sm); border: 1px solid var(--line); overflow: hidden; }
+.form-loc-hint { font-size: 0.8rem; color: var(--ink-2); }
 .submit-form .cats {
   border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.6rem 0.8rem;
   display: flex; flex-wrap: wrap; gap: 0.5rem 1rem;

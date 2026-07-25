@@ -1,6 +1,7 @@
 ---
 import { CATEGORIES } from '../lib/events/categories.ts';
 import { uiOf } from '../lib/i18n/ui-of.ts';
+import { resized } from '../lib/img/resized.ts';
 
 // Shared create/edit form. `mode` switches the submit target (POST /submit vs
 // PATCH /event/<id>) and the button label; `event` prefills it on edit.
@@ -12,21 +13,48 @@ type Prefill = Readonly<{
   venue: string;
   categories: readonly string[];
   free: boolean;
+  coverImage: string;
+  address: string;
+  phone: string;
+  website: string;
+  lat: string;
+  lng: string;
 }>;
 type Props = Readonly<{ mode: 'create' | 'edit'; eventId?: string | undefined; event?: Prefill | undefined }>;
 const { mode, eventId, event } = Astro.props;
 const ui = await uiOf('en');
-const v: Prefill = event ?? { title: '', description: '', startDate: '', endDate: '', venue: '', categories: [], free: false };
+const v: Prefill = event ?? {
+  title: '', description: '', startDate: '', endDate: '', venue: '', categories: [],
+  free: false, coverImage: '', address: '', phone: '', website: '', lat: '', lng: '',
+};
 ---
 
 <form id="event-form" class="submit-form" data-mode={mode} data-id={eventId}>
   <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
   <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
+
+  <div class="form-image" data-image>
+    <span class="form-image-label">Image</span>
+    <img class="form-image-preview" src={v.coverImage ? resized(v.coverImage, 480) : ''} alt="" data-image-preview hidden={v.coverImage === ''} />
+    <label class="form-image-pick">
+      <input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" data-image-input hidden />
+      <span>{v.coverImage === '' ? 'Upload an image' : 'Replace image'}</span>
+    </label>
+    <input type="hidden" name="coverImage" value={v.coverImage} data-cover />
+    <span class="form-image-status" data-image-status role="status" aria-live="polite"></span>
+  </div>
+
   <div class="row2">
     <label>Starts<input type="date" name="startDate" required value={v.startDate} /></label>
     <label>Ends (optional)<input type="date" name="endDate" value={v.endDate} /></label>
   </div>
   <label>Venue<input name="venue" maxlength="200" value={v.venue} /></label>
+  <label>Address<input name="address" maxlength="300" value={v.address} placeholder="Street, city" /></label>
+  <div class="row2">
+    <label>Phone<input name="phone" type="tel" maxlength="40" value={v.phone} /></label>
+    <label>Website<input name="website" type="url" maxlength="300" value={v.website} placeholder="https://" /></label>
+  </div>
+
   <fieldset class="cats">
     <legend>Categories</legend>
     {CATEGORIES.map((c) => (
@@ -36,6 +64,10 @@ const v: Prefill = event ?? { title: '', description: '', startDate: '', endDate
     ))}
   </fieldset>
   <label class="inline"><input type="checkbox" name="free" checked={v.free} /> Free entry</label>
+
+  <input type="hidden" name="lat" value={v.lat} data-lat />
+  <input type="hidden" name="lng" value={v.lng} data-lng />
+
   <button type="submit">{mode === 'edit' ? 'Save changes' : 'Submit for review'}</button>
 </form>
 <p id="submit-status" role="status" aria-live="polite"></p>

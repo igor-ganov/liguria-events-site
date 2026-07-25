@@ -9,6 +9,7 @@ import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { eventForDetail } from '../../lib/events/d1-published.ts';
+import type { EventContacts } from '../../lib/events/d1-published.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
@@ -18,12 +19,14 @@ const corpus = await cachedEvents(EVENTS_URL);
 let event: CompactEvent | undefined = corpus.events.find((e) => e.id === id);
 let editable = false;
 let status: string | undefined;
+let contacts: EventContacts | undefined;
 if (event === undefined && id) {
   const found = await eventForDetail(Astro.locals.runtime.env.DB, id, user?.id);
   if (found) {
     event = decodeEventList([found.compact])[0];
     editable = found.owned;
     status = found.status;
+    contacts = found.contacts;
   }
 }
 if (event === undefined) Astro.response.status = 404;
@@ -32,7 +35,7 @@ const notFound = 'This event could not be found.';
 
 {
   event ? (
-    <EventDetail lang="en" event={event} editable={editable} status={status} />
+    <EventDetail lang="en" event={event} editable={editable} status={status} contacts={contacts} />
   ) : (
     <Layout lang="en" title="Event not found">
       <p class="feed-empty">{notFound}</p>
