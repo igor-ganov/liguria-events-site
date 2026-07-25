@@ -40,7 +40,6 @@ const syncUrl = (today: string): void => {
   if (state.to !== '') p.set('to', state.to);
   if (state.free) p.set('free', '1');
   if (state.gems) p.set('gems', '1');
-  if (state.city !== '') p.set('city', state.city);
   const qs = p.toString();
   history.replaceState(null, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
 };
@@ -60,7 +59,10 @@ const readParams = (today: string): void => {
   state.to = p.get('to') ?? '';
   state.free = p.get('free') === '1';
   state.gems = p.get('gems') === '1';
-  state.city = p.get('city') ?? '';
+  // The city is a path segment (/<region>/<city>/), server-rendered onto the
+  // list — not a query filter. It stays fixed for the page; reading it keeps the
+  // ct filter (which also drops late D1 events that carry no city) honest.
+  state.city = document.querySelector('[data-feed-list]')?.getAttribute('data-city') ?? '';
 };
 
 const matches = (li: HTMLElement): boolean => {

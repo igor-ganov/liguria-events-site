@@ -3,11 +3,14 @@ import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import { regionsAndCitiesOf } from '../lib/region/regions-cities-of.ts';
 import { regionName } from '../lib/region/region-name.ts';
+import { cityName } from '../lib/region/city-name.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
+import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; region: string; page?: string }>;
-const { lang, region, page = '' } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string; page?: string; city?: string | undefined }>;
+const { lang, region, page = '', city } = Astro.props;
+const label = city ? cityName(city) : regionName(region);
 
 // A combined region+city picker: every region is a bold group header, its
 // cities listed under it, each row carrying its event count. Region headers keep
@@ -23,39 +26,9 @@ const groups = regionsAndCitiesOf(payload.events);
       <path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11Z"></path>
       <circle cx="12" cy="10" r="2.5"></circle>
     </svg>
-    <span data-region-label>{regionName(region)}</span>
+    <span>{label}</span>
     <span aria-hidden="true">▾</span>
   </button>
-
-  <!-- The region pages are prerendered, so ?city= is only known on the client.
-       This is:inline script runs synchronously during parse — before first
-       paint — so the label reads the city straight away instead of flashing the
-       region name and then swapping to it (and it never depends on the feed
-       script running). Re-applied after SPA navigations. -->
-  <script is:inline>
-    (function () {
-      var pretty = function (s) {
-        return s
-          .split('-')
-          .map(function (w) {
-            return w.charAt(0).toUpperCase() + w.slice(1);
-          })
-          .join(' ');
-      };
-      var apply = function () {
-        var city = new URLSearchParams(location.search).get('city');
-        document.querySelectorAll('[data-region-label]').forEach(function (el) {
-          if (city) el.textContent = pretty(city);
-        });
-        if (!city) return;
-        document.querySelectorAll('.rp-city a').forEach(function (a) {
-          if (a.getAttribute('href').indexOf('city=' + city) !== -1) a.setAttribute('aria-current', 'true');
-        });
-      };
-      apply();
-      document.addEventListener('astro:page-load', apply);
-    })();
-  </script>
 
   <dialog class="region-pop" data-region-pop>
     <label>
@@ -66,13 +39,13 @@ const groups = regionsAndCitiesOf(payload.events);
       {groups.map((g) => (
         <Fragment>
           <li class="rp-region" data-name={g.name.toLowerCase()} data-region={g.slug}>
-            <a href={regionUrl(lang, g.slug, page)} aria-current={g.slug === region ? 'true' : undefined}>
+            <a href={regionUrl(lang, g.slug, page)} aria-current={g.slug === region && city === undefined ? 'true' : undefined}>
               <span>{g.name}</span><small>{g.count}</small>
             </a>
           </li>
           {g.cities.map((c) => (
             <li class="rp-city" data-name={`${g.name.toLowerCase()} ${c.name.toLowerCase()}`} data-region={g.slug}>
-              <a href={`${regionUrl(lang, g.slug, '')}?city=${c.slug}`}>
+              <a href={localizedUrl(lang, `${g.slug}/${c.slug}/`)} aria-current={g.slug === region && c.slug === city ? 'true' : undefined}>
                 <span>{c.name}</span><small>{c.count}</small>
               </a>
             </li>

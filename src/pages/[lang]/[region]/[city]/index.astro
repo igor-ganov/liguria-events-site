@@ -1,0 +1,22 @@
+---
+import FeedView from '../../../../components/views/FeedView.astro';
+import { cachedEvents } from '../../../../data/cached-events.ts';
+import { EVENTS_URL } from '../../../../data/events-url.ts';
+import { regionsAndCitiesOf } from '../../../../lib/region/regions-cities-of.ts';
+import { LOCALES } from '../../../../lib/i18n/locales.ts';
+
+// Localized twin of /[region]/[city]/ for it/ru (en lives at the unprefixed path).
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  const groups = regionsAndCitiesOf(payload.events);
+  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+    groups.flatMap((group) =>
+      group.cities.map((c) => ({ params: { lang, region: group.slug, city: c.slug }, props: { lang, region: group.slug, city: c.slug } })),
+    ),
+  );
+};
+
+const { lang, region, city } = Astro.props;
+---
+
+<FeedView lang={lang} region={region} city={city} />

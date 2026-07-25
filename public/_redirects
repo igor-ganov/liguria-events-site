@@ -14,16 +14,16 @@
 # city, the legacy city FEED lands on that filter (?city=…); the exact feed rules
 # come first so they win over the splat below. The city sub-pages (calendar/map,
 # which don't filter by city) still land on the region's sub-page via the splat.
-/genova/         /liguria/?city=genova      301
-/milano/         /lombardia/?city=milano    301
-/torino/         /piemonte/?city=torino     301
-/it/genova/      /it/liguria/?city=genova   301
-/ru/genova/      /ru/liguria/?city=genova   301
-/genova          /liguria/?city=genova      301
-/milano          /lombardia/?city=milano    301
-/torino          /piemonte/?city=torino     301
-/it/genova       /it/liguria/?city=genova   301
-/ru/genova       /ru/liguria/?city=genova   301
+/genova/         /liguria/genova/           301
+/milano/         /lombardia/milano/         301
+/torino/         /piemonte/torino/          301
+/it/genova/      /it/liguria/genova/        301
+/ru/genova/      /ru/liguria/genova/        301
+/genova          /liguria/genova/           301
+/milano          /lombardia/milano/         301
+/torino          /piemonte/torino/          301
+/it/genova       /it/liguria/genova/        301
+/ru/genova       /ru/liguria/genova/        301
 /genova/*        /liguria/:splat            301
 /milano/*        /lombardia/:splat          301
 /torino/*        /piemonte/:splat           301
