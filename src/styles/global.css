@@ -240,6 +240,7 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 .passkey-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
 .passkey-status { font-size: 0.85rem; color: var(--ink-2); }
 .link-btn { background: none; border: none; color: var(--accent); cursor: pointer; font: inherit; padding: 0; text-align: left; }
+.passkey-link { margin-top: 0.8rem; display: inline-block; }
 .muted { color: var(--ink-2); font-size: 0.9rem; }
 .settings-section { display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--line); padding-top: 1rem; }
 .settings-section h2 { margin: 0; font-size: 1.1rem; }

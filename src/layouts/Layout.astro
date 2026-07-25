@@ -158,12 +158,13 @@ const alternates = LOCALES.map((loc) => ({
       <div data-step="email">
         <p>{ui.auth.emailPrompt}</p>
         <form id="signin-form">
-          <!-- `webauthn` autofill token: if a passkey exists (this device or a
-               nearby phone over QR), the browser offers it inline here — no
-               blocking modal that hangs when there is none. -->
-          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email webauthn" />
+          <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
           <button type="submit">{ui.auth.sendCode}</button>
         </form>
+        <!-- Passkey retry: the modal auto-runs on open, but if it's dismissed the
+             viewer can re-trigger it here — this ceremony offers a local passkey
+             AND "use a passkey on another device" over QR. -->
+        <button type="button" class="link-btn passkey-link" data-passkey-retry hidden>{ui.auth.passkey}</button>
       </div>
 
       <div data-step="code" hidden>
@@ -258,37 +259,44 @@ const alternates = LOCALES.map((loc) => ({
       const esc = (s: string): string =>
         s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] ?? c);
       let pendingEmail = '';
-      let conditionalStarted = false;
+      let passkeyBusy = false;
 
       const signOut = async (): Promise<void> => {
         await fetch('/api/auth/logout', { method: 'POST' });
         location.href = '/';
       };
 
-      // Passkey sign-in via conditional UI (autofill mediation): the browser
-      // surfaces a discoverable credential inline on the email field — including
-      // a nearby phone over QR — with NO blocking modal, so there is nothing to
-      // hang when the device has no passkey. Started silently on dialog open.
-      const startConditionalPasskey = async (): Promise<void> => {
-        if (conditionalStarted || !hasWebAuthn()) return;
-        const mediation = globalThis.PublicKeyCredential.isConditionalMediationAvailable;
-        if (!mediation || !(await mediation.call(globalThis.PublicKeyCredential).catch(() => false))) return;
-        conditionalStarted = true;
+      // Passkey sign-in via the MODAL ceremony (not autofill): the browser offers
+      // BOTH a local passkey AND "use a passkey on another device" over QR — the
+      // only way to sign in on a phone with the passkey kept on a laptop. Auto-run
+      // on open; the email form stays visible so dismissing the sheet just falls
+      // back to email. Nothing hangs — the promise settles on use or cancel.
+      const passkeyLogin = async (): Promise<void> => {
+        if (!hasWebAuthn() || passkeyBusy) return;
+        passkeyBusy = true;
         try {
           const opt = (await (await fetch('/api/passkey/auth-options', { method: 'POST' })).json()) as {
             challengeId: string;
             options: import('@simplewebauthn/browser').PublicKeyCredentialRequestOptionsJSON;
           };
-          const response = await startAuthentication({ optionsJSON: opt.options, useBrowserAutofill: true });
+          const response = await startAuthentication({ optionsJSON: opt.options });
+          setStatus(auth.verifying);
           const res = await fetch('/api/passkey/auth-verify', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ challengeId: opt.challengeId, response }),
           });
-          if (res.ok) location.reload();
+          if (res.ok) {
+            location.reload();
+            return;
+          }
+          setStatus(auth.passkeyFailed);
         } catch {
-          // The viewer ignored the autofill offer, or none was available — the
-          // email path stays fully usable. Never surfaced as an error.
+          // Cancelled the passkey sheet, or none was offered — the email form is
+          // right here, so we clear the status and let them type their email.
+          setStatus('');
+        } finally {
+          passkeyBusy = false;
         }
       };
 
@@ -322,8 +330,11 @@ const alternates = LOCALES.map((loc) => ({
         showStep('email');
         setStatus('');
         dialog()?.showModal();
+        // Show the passkey retry affordance only where WebAuthn exists.
+        const retry = document.querySelector<HTMLElement>('[data-passkey-retry]');
+        if (retry) retry.hidden = !hasWebAuthn();
         document.querySelector<HTMLInputElement>('#signin-form input[name=email]')?.focus();
-        void startConditionalPasskey();
+        void passkeyLogin();
       };
 
       const stripAuthParams = (): void => {
@@ -455,6 +466,11 @@ const alternates = LOCALES.map((loc) => ({
             showStep('email');
             setStatus('');
           });
+        }
+        const retry = document.querySelector<HTMLElement>('[data-passkey-retry]');
+        if (retry && retry.dataset['bound'] !== 'true') {
+          retry.dataset['bound'] = 'true';
+          retry.addEventListener('click', () => void passkeyLogin());
         }
       };
 
