@@ -10,18 +10,25 @@
 
 # The city URLs the site shipped with for a few hours, before the slice became
 # the region. A browser that saw "/" 301 to "/genova/" cached that answer
-# forever and never asks again, so these have to keep resolving — permanently,
-# and carrying the page the visitor was on.
+# forever, so these keep resolving. Now that a region feed can be filtered to a
+# city, the legacy city FEED lands on that filter (?city=…); the exact feed rules
+# come first so they win over the splat below. The city sub-pages (calendar/map,
+# which don't filter by city) still land on the region's sub-page via the splat.
+/genova/         /liguria/?city=genova      301
+/milano/         /lombardia/?city=milano    301
+/torino/         /piemonte/?city=torino     301
+/it/genova/      /it/liguria/?city=genova   301
+/ru/genova/      /ru/liguria/?city=genova   301
+/genova          /liguria/?city=genova      301
+/milano          /lombardia/?city=milano    301
+/torino          /piemonte/?city=torino     301
+/it/genova       /it/liguria/?city=genova   301
+/ru/genova       /ru/liguria/?city=genova   301
 /genova/*        /liguria/:splat            301
 /milano/*        /lombardia/:splat          301
 /torino/*        /piemonte/:splat           301
 /it/genova/*     /it/liguria/:splat         301
 /ru/genova/*     /ru/liguria/:splat         301
-/genova          /liguria/                  301
-/milano          /lombardia/                301
-/torino          /piemonte/                 301
-/it/genova       /it/liguria/               301
-/ru/genova       /ru/liguria/               301
 
 # The bare paths land in the default region. 302, deliberately: the default
 # region may change, and a permanent redirect is one you must be prepared to
