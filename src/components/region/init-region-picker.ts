@@ -12,12 +12,22 @@ const q = <T>(root: HTMLElement, sel: string): T | null =>
 const filter = (list: HTMLElement, empty: HTMLElement, term: string): void => {
   const needle = term.trim().toLowerCase();
   const rows = Array.from(list.children) as HTMLElement[];
-  const shown = rows.filter((row) => {
-    const hit = needle === '' || (row.dataset['name'] ?? '').includes(needle);
-    row.hidden = !hit;
-    return hit;
+  const selfHit = new Map<HTMLElement, boolean>();
+  rows.forEach((row) => selfHit.set(row, needle === '' || (row.dataset['name'] ?? '').includes(needle)));
+  // A region header stays visible when any of its cities matched, so a matched
+  // city never floats free of its group.
+  const regionsWithCity = new Set<string>();
+  rows.forEach((row) => {
+    if (row.classList.contains('rp-city') && selfHit.get(row)) regionsWithCity.add(row.dataset['region'] ?? '');
   });
-  empty.hidden = shown.length > 0;
+  let shown = 0;
+  rows.forEach((row) => {
+    const header = row.classList.contains('rp-region');
+    const hit = (selfHit.get(row) ?? false) || (header && regionsWithCity.has(row.dataset['region'] ?? ''));
+    row.hidden = !hit;
+    if (hit) shown += 1;
+  });
+  empty.hidden = shown > 0;
 };
 
 /** Phone: a modal bottom sheet, so it sits in the top layer and the header's

@@ -109,6 +109,7 @@ export default tseslint.config(
       'src/lib/landmarks/**/*.ts',
       'src/lib/places/**/*.ts',
       'src/lib/region/region-bounds.ts',
+      'src/lib/region/regions-cities-of.ts',
       'src/lib/img/**/*.ts',
       'src/lib/events/d1-published.ts',
       'src/lib/events/event-input.ts',

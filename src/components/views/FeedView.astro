@@ -66,6 +66,7 @@ const iconsJson = JSON.stringify(
               data-end={event.e ?? event.s}
               data-free={event.f === true ? '1' : '0'}
               data-gem={event.x === true ? '1' : '0'}
+              data-ct={event.ct ?? ''}
             >
               <MiniCard event={event} ui={ui} lang={lang} />
             </li>

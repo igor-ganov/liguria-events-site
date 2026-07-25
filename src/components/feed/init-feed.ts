@@ -7,6 +7,7 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { cityName } from '../../lib/region/city-name.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -26,7 +27,7 @@ const readJson = <T>(id: string, fallback: T): T => {
 
 const state = {
   from: '', to: '', cats: new Set<string>(), free: false, gems: false,
-  query: '', hits: undefined as ReadonlySet<string> | undefined,
+  query: '', city: '', hits: undefined as ReadonlySet<string> | undefined,
 };
 
 // Filters live in the URL so a filtered view is shareable, bookmarkable and
@@ -40,6 +41,7 @@ const syncUrl = (today: string): void => {
   if (state.to !== '') p.set('to', state.to);
   if (state.free) p.set('free', '1');
   if (state.gems) p.set('gems', '1');
+  if (state.city !== '') p.set('city', state.city);
   const qs = p.toString();
   history.replaceState(null, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
 };
@@ -51,6 +53,7 @@ const readParams = (today: string): void => {
   state.query = '';
   state.free = false;
   state.gems = false;
+  state.city = '';
   const p = new URLSearchParams(location.search);
   state.query = p.get('q') ?? '';
   (p.get('cats') ?? '').split(',').filter((c) => c !== '').forEach((c) => state.cats.add(c));
@@ -58,6 +61,7 @@ const readParams = (today: string): void => {
   state.to = p.get('to') ?? '';
   state.free = p.get('free') === '1';
   state.gems = p.get('gems') === '1';
+  state.city = p.get('city') ?? '';
 };
 
 const matches = (li: HTMLElement): boolean => {
@@ -68,6 +72,7 @@ const matches = (li: HTMLElement): boolean => {
   if (state.from !== '' && end < state.from) return false;
   if (state.free && li.dataset['free'] !== '1') return false;
   if (state.gems && li.dataset['gem'] !== '1') return false;
+  if (state.city !== '' && (li.dataset['ct'] ?? '') !== state.city) return false;
   if (state.cats.size === 0) return true;
   return (li.dataset['cats'] ?? '').split(',').some((c) => state.cats.has(c));
 };
@@ -193,6 +198,11 @@ export const initFeed = (): void => {
   const icons = readJson<Record<string, string>>('icons-data', {});
   const today = isoToday();
   readParams(today);
+  // When a city filter is active, the region-picker button names the city.
+  if (state.city !== '') {
+    const label = document.querySelector<HTMLElement>('.region-current span');
+    if (label) label.textContent = cityName(state.city);
+  }
 
   buildIndex(page.lang);
   runSearch();
