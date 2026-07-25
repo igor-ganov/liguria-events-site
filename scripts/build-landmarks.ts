@@ -274,6 +274,51 @@ const norm = (s: string): string =>
 const near = (a: Landmark, b: OsmParsed): boolean =>
   Math.abs(a.lat - b.lat) < 0.0004 && Math.abs(a.lng - b.lng) < 0.0006;
 
+// The Commons file behind an image URL (P18, Special:FilePath, /thumb/…) — two
+// entries pointing at the SAME file are the same subject however the URL is spelt.
+const imgKey = (url: string | undefined): string | undefined => {
+  if (url === undefined) return undefined;
+  const m = url.match(/(?:Special:FilePath\/|\/)([^/?]+\.(?:jpe?g|png|svg|webp|tiff?|gif))/i);
+  return m ? decodeURIComponent(m[1]).toLowerCase().replace(/^file:/, '') : url;
+};
+
+// Two landmarks are the same when they share a photo at essentially one spot
+// (the visible "two identical markers" on the map), or carry the same name a few
+// dozen metres apart (Wikidata's own it/en variants, e.g. "chiesa di Santa Maria
+// Assunta" vs "Santa Maria Assunta Church"). Wikidata was never deduped against
+// itself before, so these slipped through.
+const sameLandmark = (a: Landmark, b: Landmark): boolean => {
+  const dLat = Math.abs(a.lat - b.lat);
+  const dLng = Math.abs(a.lng - b.lng);
+  const ka = imgKey(a.img);
+  if (ka !== undefined && ka === imgKey(b.img) && dLat < 0.0025 && dLng < 0.0035) return true;
+  if (dLat < 0.0004 && dLng < 0.0006) {
+    const na = norm(a.name.en);
+    const nb = norm(b.name.en);
+    return na.length > 3 && nb.length > 3 && (na === nb || na.includes(nb) || nb.includes(na));
+  }
+  return false;
+};
+
+/** Collapse duplicate landmarks, enriching the survivor so nothing is lost. */
+const dedupe = (landmarks: readonly Landmark[]): Landmark[] => {
+  const kept: Landmark[] = [];
+  for (const l of landmarks) {
+    const dup = kept.find((k) => sameLandmark(k, l));
+    if (dup === undefined) {
+      kept.push(l);
+      continue;
+    }
+    dup.img ??= l.img;
+    dup.desc ??= l.desc;
+    dup.wiki ??= l.wiki;
+    dup.wd ??= l.wd;
+    if (l.name.en.length > dup.name.en.length) dup.name = l.name;
+    for (const s of l.src) if (!dup.src.includes(s)) dup.src.push(s);
+  }
+  return kept;
+};
+
 const wikiTag = (tags: Record<string, string>): { lang: Lang; title: string } | undefined => {
   const raw = tags['wikipedia'];
   const [lang, ...rest] = (raw ?? '').split(':');
@@ -370,10 +415,13 @@ const build = async (region: string): Promise<Landmark[]> => {
     if (wikiAny) { wiki.en ||= wiki.it ?? wiki.ru ?? ''; l.wiki = wiki; }
   }
 
+  const deduped = dedupe(landmarks);
+  console.log(`  deduped ${landmarks.length - deduped.length} duplicate landmarks`);
+
   // Notability gate: keep only what is worth showing — an entry with a
   // Wikipedia article, a description or an image. A bare OSM name-point with
   // neither is noise on a "landmarks" showcase, and it triples the payload.
-  const notable = landmarks.filter((l) => l.wiki || l.desc || l.img);
+  const notable = deduped.filter((l) => l.wiki || l.desc || l.img);
 
   // Strip the build-only helper fields before serialisation.
   const clean = notable.map((l) => {
