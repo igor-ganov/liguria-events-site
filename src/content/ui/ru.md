@@ -57,6 +57,7 @@ landmarks:
 chips: { free: 'Только бесплатные', gems: 'Необычное', clear: 'Сбросить' }
 theme: { toggle: 'Переключить тему', light: 'Светлая', dark: 'Тёмная', system: 'Системная' }
 range: { from: 'С', to: 'По' }
+sort: { label: 'Сортировка', date: 'По дате', unique: 'По уникальности' }
 cat:
   music: Музыка
   theatre: Театр

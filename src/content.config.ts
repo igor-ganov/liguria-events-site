@@ -53,6 +53,7 @@ const ui = defineCollection({
     chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
     theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
     range: z.object({ from: z.string(), to: z.string() }),
+    sort: z.object({ label: z.string(), date: z.string(), unique: z.string() }),
     cat,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),

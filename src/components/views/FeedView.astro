@@ -45,6 +45,11 @@ const iconsJson = JSON.stringify(
     <label>{ui.range.to} <input type="date" data-feed-to /></label>
   </div>
 
+  <div class="feed-sort" role="group" aria-label={ui.sort.label}>
+    <button class="chip chip--sort" data-feed-sort="date" aria-pressed="true">{ui.sort.date}</button>
+    <button class="chip chip--sort" data-feed-sort="unique" aria-pressed="false">{ui.sort.unique}</button>
+  </div>
+
   <div class="chips" role="group" aria-label="Filter by category">
     {CATEGORIES.map((category) => (
       <button class="chip" data-cat={category} data-feed-cat={category} aria-pressed="false">

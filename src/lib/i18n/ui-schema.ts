@@ -54,6 +54,7 @@ export const PageDataSchema = Schema.Struct({
     chips: Schema.Struct({ free: Schema.String, gems: Schema.String, clear: Schema.String }),
     theme: Schema.Struct({ toggle: Schema.String, light: Schema.String, dark: Schema.String, system: Schema.String }),
     range: Schema.Struct({ from: Schema.String, to: Schema.String }),
+    sort: Schema.Struct({ label: Schema.String, date: Schema.String, unique: Schema.String }),
     cat,
     weekdays: Schema.Array(Schema.String),
     months: Schema.Array(Schema.String),

@@ -57,6 +57,7 @@ landmarks:
 chips: { free: 'Solo gratuiti', gems: 'Chicche', clear: 'Azzera' }
 theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 range: { from: 'Da', to: 'A' }
+sort: { label: 'Ordina', date: 'Per data', unique: 'Per unicità' }
 cat:
   music: Musica
   theatre: Teatro

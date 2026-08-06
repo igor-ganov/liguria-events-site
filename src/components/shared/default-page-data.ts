@@ -57,6 +57,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
     chips: { free: 'Free only', gems: 'Hidden gems', clear: 'Clear' },
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
     range: { from: 'From', to: 'To' },
+    sort: { label: 'Sort', date: 'By date', unique: 'By uniqueness' },
     cat: {
       music: 'Music', theatre: 'Theatre', art: 'Art', food: 'Food', sport: 'Sport',
       family: 'Family', market: 'Markets', nightlife: 'Nightlife', culture: 'Culture',

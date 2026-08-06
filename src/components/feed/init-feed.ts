@@ -27,6 +27,7 @@ const readJson = <T>(id: string, fallback: T): T => {
 const state = {
   from: '', to: '', cats: new Set<string>(), free: false, gems: false,
   query: '', city: '', hits: undefined as ReadonlySet<string> | undefined,
+  sort: 'date' as 'date' | 'unique',
 };
 
 // Filters live in the URL so a filtered view is shareable, bookmarkable and
@@ -40,6 +41,7 @@ const syncUrl = (today: string): void => {
   if (state.to !== '') p.set('to', state.to);
   if (state.free) p.set('free', '1');
   if (state.gems) p.set('gems', '1');
+  if (state.sort === 'unique') p.set('sort', 'unique');
   const qs = p.toString();
   // Preserve history.state — the ClientRouter keeps its navigation index there,
   // and wiping it to null breaks back/forward (the swipe-back gesture needs
@@ -62,6 +64,7 @@ const readParams = (today: string): void => {
   state.to = p.get('to') ?? '';
   state.free = p.get('free') === '1';
   state.gems = p.get('gems') === '1';
+  state.sort = p.get('sort') === 'unique' ? 'unique' : 'date';
   // The city is a path segment (/<region>/<city>/), server-rendered onto the
   // list — not a query filter. It stays fixed for the page; reading it keeps the
   // ct filter (which also drops late D1 events that carry no city) honest.
@@ -125,6 +128,39 @@ const apply = (): void => {
   if (clear) clear.hidden = state.cats.size === 0 && !state.free && !state.gems;
 };
 
+// The server renders each day's events in start order; that original order is
+// stamped onto every card so the "by date" sort can be restored exactly.
+const stampOrder = (): void => {
+  document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
+    ul.querySelectorAll<HTMLElement>(':scope > li').forEach((li, i) => {
+      li.dataset['ord'] = String(i);
+    });
+  });
+};
+
+// Whole-day span (end − start) in days: 0 for a one-day event. Shorter = more
+// "unique" — it pins to the window instead of running through it.
+const spanDays = (li: HTMLElement): number => {
+  const start = li.dataset['start'] ?? '';
+  const end = li.dataset['end'] || start;
+  return (Date.parse(end) - Date.parse(start)) / 86_400_000;
+};
+
+// Reorder cards WITHIN each day group. "By uniqueness" lifts the short, pinned
+// events above the long multi-week runs; "by date" restores the server order.
+// Grouping (the day headings) is untouched — only the order inside a day.
+const reorder = (): void => {
+  document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
+    const cards = [...ul.querySelectorAll<HTMLElement>(':scope > li')];
+    const ord = (li: HTMLElement): number => Number(li.dataset['ord'] ?? '9999');
+    const sorted =
+      state.sort === 'unique'
+        ? cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b))
+        : cards.toSorted((a, b) => ord(a) - ord(b));
+    sorted.forEach((li) => ul.appendChild(li));
+  });
+};
+
 const esc = (s: string): string =>
   s.replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c] ?? c);
 
@@ -164,9 +200,13 @@ const insertEvent = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<st
 
   const existing = list.querySelector<HTMLElement>(`.feed-group[data-day="${day}"] .feed-list`);
   if (existing) {
+    // Late events land after the server-rendered ones in "by date"; reorder()
+    // re-places them by span in "by uniqueness".
+    li.dataset['ord'] = String(existing.children.length);
     existing.appendChild(li);
     return;
   }
+  li.dataset['ord'] = '0';
   const section = document.createElement('section');
   section.className = 'feed-group';
   section.dataset['day'] = day;
@@ -191,6 +231,7 @@ const augment = async (ui: Ui, lang: Locale, icons: Record<string, string>, toda
     buildIndex(lang);
     runSearch();
     apply();
+    reorder();
   } catch {
     /* keep the server-rendered set */
   }
@@ -202,6 +243,7 @@ export const initFeed = (): void => {
   const icons = readJson<Record<string, string>>('icons-data', {});
   const today = isoToday();
   readParams(today);
+  stampOrder();
 
   buildIndex(page.lang);
   runSearch();
@@ -273,6 +315,20 @@ export const initFeed = (): void => {
     syncUrl(today);
   });
 
+  const sortButtons = document.querySelectorAll<HTMLButtonElement>('[data-feed-sort]');
+  sortButtons.forEach((btn) => {
+    const mode = btn.dataset['feedSort'] === 'unique' ? 'unique' : 'date';
+    btn.setAttribute('aria-pressed', String(state.sort === mode));
+    btn.addEventListener('click', () => {
+      if (state.sort === mode) return;
+      state.sort = mode;
+      sortButtons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+      reorder();
+      syncUrl(today);
+    });
+  });
+
   apply();
+  reorder();
   void augment(page.ui, page.lang, icons, today);
 };
