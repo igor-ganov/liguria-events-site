@@ -15,6 +15,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 import { commonsImg } from '../src/lib/img/commons-img.ts';
+import { indexLandmarks, isLandmarkDuplicate, type LandmarkPoint } from './lib/place-landmark-dup.ts';
 
 const UA = 'DoveGo-places/1.0 (https://dovego.it; igor.ganov@gmail.com)';
 // One region per invocation (CI matrixes over all 20); no arg → every region.
@@ -249,6 +250,30 @@ const merge = (osm: readonly Place[], overture: readonly Place[]): Place[] => {
   return merged;
 };
 
+// Museums/theatres/galleries are collected by build-landmarks too; the two map
+// layers never co-cluster, so such a POI shows as two markers. Load the region's
+// committed landmark shards and drop places that duplicate a landmark — the
+// landmark (curated, photo-bearing) wins. See scripts/lib/place-landmark-dup.ts.
+const readLandmarks = (region: string): LandmarkPoint[] => {
+  const byId = new Map<string, { lat: number; lng: number; names: Set<string> }>();
+  for (const lang of LANGS) {
+    const url = new URL(`../public/data/landmarks/${region}.${lang}.json`, import.meta.url);
+    if (!existsSync(url)) continue;
+    for (const r of JSON.parse(readFileSync(url, 'utf8')) as { id: string; name: string; lat: number; lng: number }[]) {
+      const cur = byId.get(r.id) ?? { lat: r.lat, lng: r.lng, names: new Set<string>() };
+      cur.names.add(r.name);
+      byId.set(r.id, cur);
+    }
+  }
+  return [...byId.values()].map((v) => ({ lat: v.lat, lng: v.lng, names: [...v.names] }));
+};
+
+const dropLandmarkDuplicates = (places: readonly Place[], landmarks: readonly LandmarkPoint[]): Place[] => {
+  if (landmarks.length === 0) return [...places];
+  const index = indexLandmarks(landmarks);
+  return places.filter((p) => !isLandmarkDuplicate({ cat: p.cat, names: [p.name], lat: p.lat, lng: p.lng }, index));
+};
+
 /* ── Wikipedia + Wikidata enrichment (OSM-tagged only) ──────────────────────── */
 
 const chunk = <T>(xs: readonly T[], n: number): T[][] =>
@@ -420,8 +445,9 @@ const buildRegion = async (region: string): Promise<void> => {
   // data with a partial set.
   if (osm.length === 0) throw new Error(`${region}: OSM returned 0 places — aborting`);
   if (overture.length === 0) throw new Error(`${region}: Overture returned 0 places — aborting`);
-  const merged = merge(osm, overture);
-  console.log(`· merged: ${merged.length} places`);
+  const mergedRaw = merge(osm, overture);
+  const merged = dropLandmarkDuplicates(mergedRaw, readLandmarks(region));
+  console.log(`· merged: ${merged.length} places (dropped ${mergedRaw.length - merged.length} landmark duplicates)`);
   await enrich(merged);
 
   merged.sort((a, b) => a.id.localeCompare(b.id));

@@ -6,6 +6,7 @@ import { REGION_NAMES } from '../src/lib/region/regions.ts';
 import { commonsImg } from '../src/lib/img/commons-img.ts';
 import { decodePlaces } from '../src/lib/places/decode-places.ts';
 import { decodeLandmarks } from '../src/lib/landmarks/decode-landmarks.ts';
+import { indexLandmarks, isLandmarkDuplicate, type LandmarkPoint } from '../scripts/lib/place-landmark-dup.ts';
 
 // Guards the DATA, not just the logic: a region that silently built empty, a
 // half-added region (the "only Liguria" gap), or an image URL the render path
@@ -52,6 +53,43 @@ describe('data shards: structure', () => {
       }
     }
   });
+});
+
+// A museum/theatre/gallery collected by BOTH build-landmarks and build-places
+// shows as two markers that only merge when zoomed in (the two map layers never
+// co-cluster). build-places + dedupe-places-vs-landmarks strip the place-side
+// duplicate; this guards that no such duplicate is reintroduced in any shard.
+describe('data shards: no cross-layer landmark/place duplicates', () => {
+  // One test per region — each reads only its six shards, so every case stays
+  // well under the default timeout and a failure names the offending region.
+  for (const region of Object.keys(REGION_NAMES)) {
+    test(`${region}: no cultural place duplicates a same-named landmark within 45m`, () => {
+      const lm = new Map<string, { lat: number; lng: number; names: Set<string> }>();
+      for (const lang of LANGS) {
+        for (const r of read('landmarks', region, lang) as { id: string; name: string; lat: number; lng: number }[]) {
+          const cur = lm.get(r.id) ?? { lat: r.lat, lng: r.lng, names: new Set<string>() };
+          cur.names.add(r.name);
+          lm.set(r.id, cur);
+        }
+      }
+      const landmarks: LandmarkPoint[] = [...lm.values()].map((v) => ({ lat: v.lat, lng: v.lng, names: [...v.names] }));
+      const index = indexLandmarks(landmarks);
+      const places = new Map<string, { cat: string; lat: number; lng: number; names: Set<string> }>();
+      for (const lang of LANGS) {
+        for (const r of read('places', region, lang) as { i: string; n: string; c: string; a: number; o: number }[]) {
+          const cur = places.get(r.i) ?? { cat: r.c, lat: r.a, lng: r.o, names: new Set<string>() };
+          cur.names.add(r.n);
+          places.set(r.i, cur);
+        }
+      }
+      for (const [id, p] of places) {
+        assert.ok(
+          !isLandmarkDuplicate({ cat: p.cat, names: [...p.names], lat: p.lat, lng: p.lng }, index),
+          `${region}: place ${id} "${[...p.names][0]}" duplicates a landmark`,
+        );
+      }
+    });
+  }
 });
 
 describe('data shards: every image survives commonsImg (no http, no rejected width)', () => {
