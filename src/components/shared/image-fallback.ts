@@ -16,11 +16,19 @@ const toCategory = (value: string | undefined): Category =>
 
 const isEventImage = (target: unknown): target is HTMLImageElement =>
   target instanceof HTMLImageElement &&
-  (target.classList.contains('mini-thumb') || Boolean(target.closest('.event-hero')));
+  (target.classList.contains('mini-thumb') ||
+    Boolean(target.closest('.event-hero')) ||
+    Boolean(target.closest('.gallery-photo')));
 
 const degrade = (img: HTMLImageElement): void => {
   if (img.dataset[FALLEN] === '1') return;
   img.dataset[FALLEN] = '1';
+  // A dead gallery thumbnail drops itself, leaving the rest of the strip.
+  const photo = img.closest('.gallery-photo');
+  if (photo) {
+    photo.remove();
+    return;
+  }
   // Detail hero: no cover is better than a broken one — drop the whole figure.
   const hero = img.closest('.event-hero');
   if (hero) {

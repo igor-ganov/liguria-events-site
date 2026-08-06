@@ -81,4 +81,5 @@ footer: 'Raccolti automaticamente da visitgenoa.it, mentelocale.it, genovateatro
 photoBy: 'foto'
 summaryNote: 'Riassunto generato automaticamente dalle fonti qui sotto.'
 mapLink: 'Vedi sulla mappa'
+tickets: 'Compra biglietti'
 ---

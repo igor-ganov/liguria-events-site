@@ -4,6 +4,8 @@ import { CATEGORIES } from './categories.ts';
 const SourceLinkSchema = Schema.Struct({
   source: Schema.String,
   url: Schema.String,
+  /** That source's own cover image — feeds the multi-source gallery. */
+  image: Schema.optional(Schema.String),
 });
 
 /** Per-language description map (en always present; it/ru fall back to en). */

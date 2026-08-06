@@ -67,6 +67,7 @@ export const PageDataSchema = Schema.Struct({
     photoBy: Schema.String,
     summaryNote: Schema.String,
     mapLink: Schema.String,
+    tickets: Schema.String,
   }),
 });
 

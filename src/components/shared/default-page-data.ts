@@ -81,5 +81,6 @@ export const DEFAULT_PAGE_DATA: PageData = {
     photoBy: 'photo',
     summaryNote: '',
     mapLink: 'View on map',
+    tickets: 'Buy tickets',
   },
 };

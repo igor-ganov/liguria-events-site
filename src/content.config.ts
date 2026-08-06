@@ -66,6 +66,7 @@ const ui = defineCollection({
     photoBy: z.string(),
     summaryNote: z.string(),
     mapLink: z.string(),
+    tickets: z.string(),
   }),
 });
 

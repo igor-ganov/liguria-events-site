@@ -12,6 +12,8 @@ import { eventPath } from '../../lib/event-path.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
 import { resized } from '../../lib/img/resized.ts';
+import { eventGallery } from '../../lib/events/event-gallery.ts';
+import { ticketUrl } from '../../lib/events/ticket-link.ts';
 import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -33,7 +35,6 @@ const ui = await uiOf(lang);
 const links = eventLinks(event);
 const desc = descriptionOf(lang)(event);
 const title = titleOf(lang)(event);
-const photoSource = links[0]?.name ?? ui.photoBy;
 const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
 const query = mapQuery(event);
 const mapSearchUrl =
@@ -42,6 +43,18 @@ const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponen
 const heroImage =
   event.img !== undefined ? new URL(resized(event.img, 1024), Astro.site).toString() : undefined;
 const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: contacts?.address });
+// Multi-source gallery: the primary cover plus every other source's photo,
+// each attributed. `more` is the strip shown under the hero.
+const gallery = eventGallery(event);
+const more = gallery.slice(1);
+const tickets = ticketUrl(event);
+// The crawler's own address (LLM/Ticketmaster). Owner-submitted `contacts.address`
+// wins when present; otherwise surface the crawler address if it adds detail
+// beyond the venue name already shown.
+const crawlerAddress =
+  contacts?.address === undefined && event.a !== undefined && event.a !== event.v
+    ? event.a
+    : undefined;
 ---
 
 <Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)} image={heroImage}>
@@ -57,11 +70,28 @@ const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: cont
       )
     }
     {
-      event.img !== undefined && (
+      gallery.length > 0 && (
         <figure class="event-hero">
-          <img src={resized(event.img, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
-          <figcaption>{ui.photoBy}: {photoSource}</figcaption>
+          <img src={resized(gallery[0]!.image, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+          <figcaption>
+            {ui.photoBy}:{' '}
+            <a href={gallery[0]!.href} target="_blank" rel="noopener">{gallery[0]!.name}</a>
+          </figcaption>
         </figure>
+      )
+    }
+    {
+      more.length > 0 && (
+        <div class="event-gallery-more">
+          {more.map((photo) => (
+            <figure class="gallery-photo">
+              <a href={photo.href} target="_blank" rel="noopener">
+                <img src={resized(photo.image, 400)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+              </a>
+              <figcaption>{ui.photoBy}: {photo.name}</figcaption>
+            </figure>
+          ))}
+        </div>
       )
     }
     <h1>{title}</h1>
@@ -77,6 +107,14 @@ const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: cont
       {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
       {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
     </div>
+    {
+      tickets && (
+        <a class="event-tickets" href={tickets} target="_blank" rel="noopener">
+          <Fragment set:html={uiIcon('external', 16)} />
+          {ui.tickets}
+        </a>
+      )
+    }
     <dl class="event-facts">
       <div><dt><Fragment set:html={uiIcon('clock', 17)} /></dt><dd>{formatWhen(eventNoVenue)}</dd></div>
       {
@@ -94,6 +132,12 @@ const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: cont
           </div>
         )
       }
+      {crawlerAddress && (
+        <div>
+          <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
+          <dd>{crawlerAddress}</dd>
+        </div>
+      )}
       {contacts?.address && (
         <div>
           <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
