@@ -134,7 +134,7 @@ const cardHtml = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<strin
   const thumb =
     event.img === undefined
       ? `<div class="mini-thumb--empty" data-cat="${primaryCategory(event.c)}">${icons[primaryCategory(event.c)] ?? ''}</div>`
-      : `<img class="mini-thumb" src="${esc(event.img)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`;
+      : `<img class="mini-thumb" src="${esc(event.img)}" alt="" data-cat="${primaryCategory(event.c)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`;
   const tags = event.c
     .map((c) => `<span class="cat-tag" data-cat="${c}">${icons[c] ?? ''} ${esc(ui.cat[c] ?? c)}</span>`)
     .join('');

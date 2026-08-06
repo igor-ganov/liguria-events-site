@@ -21,7 +21,7 @@ const desc = descriptionOf(lang)(event);
       <Fragment set:html={iconSvg(primaryCategory(event.c), 26)} />
     </div>
   ) : (
-    <img class="mini-thumb" src={event.img} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+    <img class="mini-thumb" src={event.img} alt="" data-cat={primaryCategory(event.c)} loading="lazy" decoding="async" referrerpolicy="no-referrer" />
   )}
   <div class="mini-body">
     <h4 class="mini-title">{titleOf(lang)(event)}</h4>

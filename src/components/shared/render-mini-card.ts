@@ -25,6 +25,7 @@ const renderThumb = (event: CompactEvent): TemplateResult =>
         class="mini-thumb"
         src=${event.img ?? ''}
         alt=""
+        data-cat=${primaryCategory(event.c)}
         loading="lazy"
         decoding="async"
         referrerpolicy="no-referrer"

@@ -243,6 +243,13 @@ const alternates = LOCALES.map((loc) => ({
     </script>
 
     <script>
+      // Swap dead event covers (expired source URLs) for the category tile.
+      import { initImageFallback } from '../components/shared/image-fallback.ts';
+      initImageFallback();
+      document.addEventListener('astro:page-load', initImageFallback);
+    </script>
+
+    <script>
       import { startAuthentication, startRegistration } from '@simplewebauthn/browser';
       import { readUiIsland } from '../components/shared/read-ui-island.ts';
 
