@@ -4,14 +4,17 @@ import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { CATEGORIES } from '../../lib/events/categories.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
+import { regionName } from '../../lib/region/region-name.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string }>;
 const { lang, region } = Astro.props;
 const ui = await uiOf(lang);
+const placeName = regionName(region);
+const description = ui.seo.map.replace('{place}', placeName);
 ---
 
-<Layout lang={lang} region={region} title={ui.nav.map} path={`${region}/map/`} needsEvents>
+<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.map}`} description={description} path={`${region}/map/`} needsEvents>
   <!-- The map carries every event in the country and merely opens on the region:
        pan or zoom out and the rest are already there. -->
   <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />

@@ -17,6 +17,7 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
+import { regionName } from '../../lib/region/region-name.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -38,6 +39,8 @@ const kindOf = dayKindOf(monthKey, today);
 const heading = dayHeading(ui);
 const ongoing = ongoingInMonth(monthKey)(events);
 const monthUrl = (m: string): string => regionUrl(lang, region, `calendar/${m}/`);
+const placeName = regionName(region);
+const description = ui.seo.calendar.replace('{place}', placeName);
 
 const DAY_CLASS: Record<string, string> = {
   out: 'cal-day cal-day--out',
@@ -46,7 +49,7 @@ const DAY_CLASS: Record<string, string> = {
 };
 ---
 
-<Layout lang={lang} region={region} title={ui.nav.calendar} path={`${region}/calendar/${monthKey}/`}>
+<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.calendar}`} description={description} path={`${region}/calendar/${monthKey}/`}>
   <h1 class="visually-hidden">{ui.nav.calendar}</h1>
 
   <header class="cal-head">

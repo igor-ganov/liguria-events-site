@@ -1,0 +1,21 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { regionUrl } from '../lib/region/region-url.ts';
+import { DEFAULT_REGION } from '../lib/region/default-region.ts';
+
+// Astro serves this automatically for unmatched routes; on Cloudflare Pages the
+// prerendered 404.html is returned with a 404 status, so no manual status set is
+// needed here.
+const home = regionUrl('en', DEFAULT_REGION);
+---
+
+<Layout lang="en" title="Page not found" description="The page you were looking for could not be found.">
+  <article class="legal">
+    <h1>Page not found</h1>
+    <p>
+      We couldn't find the page you were looking for. It may have moved, or the link may be out of
+      date.
+    </p>
+    <p><a href={home}>← Back to events</a></p>
+  </article>
+</Layout>

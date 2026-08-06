@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dovego.it/sitemap-index.xml

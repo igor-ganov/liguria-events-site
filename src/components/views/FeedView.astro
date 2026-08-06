@@ -10,6 +10,7 @@ import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
 import { cityName } from '../../lib/region/city-name.ts';
+import { regionName } from '../../lib/region/region-name.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
@@ -28,12 +29,33 @@ const events = city ? regionEvents.filter((event) => event.ct === city) : region
 const groups = [...groupByDay(today)(events).entries()];
 const heading = dayHeading(ui);
 const path = city ? `${region}/${city}/` : `${region}/`;
+const placeName = city ? cityName(city) : regionName(region);
+const description = ui.seo.feed.replace('{place}', placeName);
 const iconsJson = JSON.stringify(
   Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])),
 );
+// WebSite (with a sitewide SearchAction) + Organization for the site's home /
+// region feed; `<` escaped so the string is safe inside the ld+json script.
+const siteJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: 'Dove Go',
+      url: 'https://dovego.it',
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: 'https://dovego.it/liguria/?q={search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    { '@type': 'Organization', name: 'Dove Go', url: 'https://dovego.it' },
+  ],
+}).replace(/</g, '\\u003c');
 ---
 
-<Layout lang={lang} region={region} city={city} title={city ? cityName(city) : ui.nav.feed} path={path}>
+<Layout lang={lang} region={region} city={city} title={`${placeName} — ${ui.nav.feed}`} description={description} path={path}>
+  <script is:inline type="application/ld+json" set:html={siteJsonLd} />
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
 
   <div class="feed-search">

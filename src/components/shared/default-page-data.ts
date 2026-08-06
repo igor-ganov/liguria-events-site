@@ -58,6 +58,11 @@ export const DEFAULT_PAGE_DATA: PageData = {
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
     range: { from: 'From', to: 'To' },
     sort: { label: 'Sort', date: 'By date', unique: 'By uniqueness' },
+    seo: {
+      feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.",
+      calendar: "Event calendar for {place} — what's on, day by day.",
+      map: "Map of events in {place} — find what's on near you.",
+    },
     cat: {
       music: 'Music', theatre: 'Theatre', art: 'Art', food: 'Food', sport: 'Sport',
       family: 'Family', market: 'Markets', nightlife: 'Nightlife', culture: 'Culture',

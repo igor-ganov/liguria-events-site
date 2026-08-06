@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
+import sitemap from '@astrojs/sitemap';
 
 // One Worker per environment (Cloudflare adapter): public pages stay
 // prerendered (static assets), while auth / submit / API routes opt into
@@ -12,6 +13,9 @@ export default defineConfig({
   base: '/',
   output: 'static',
   adapter: cloudflare({ platformProxy: { enabled: false }, imageService: 'compile' }),
+  // Emits sitemap-index.xml + sitemap-0.xml over the prerendered routes. SSR
+  // event detail pages (prerender = false) are intentionally excluded.
+  integrations: [sitemap()],
   i18n: {
     locales: ['en', 'it', 'ru'],
     defaultLocale: 'en',

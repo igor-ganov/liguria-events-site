@@ -11,6 +11,7 @@ import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
+import { DEFAULT_LOCALE } from '../lib/i18n/default-locale.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 import '../styles/global.css';
 
@@ -22,6 +23,7 @@ type Props = Readonly<{
   description?: string;
   path?: string;
   needsEvents?: boolean;
+  image?: string | undefined;
 }>;
 const {
   lang,
@@ -31,7 +33,11 @@ const {
   description = "What's on in Italy — auto-collected events",
   path = '',
   needsEvents = false,
+  image,
 } = Astro.props;
+
+// og:locale expects a language_TERRITORY tag, not the bare ISO code.
+const OG_LOCALE: Record<Locale, string> = { en: 'en_US', it: 'it_IT', ru: 'ru_RU' };
 
 // Only feed / calendar / map embed the full event list; every other page skips
 // this ~44 KB (compressed) island and the build-time fetch entirely.
@@ -51,6 +57,8 @@ const alternates = LOCALES.map((loc) => ({
   loc,
   href: new URL(localizedUrl(loc, path), Astro.site).toString(),
 }));
+const canonical = new URL(localizedUrl(lang, path), Astro.site).toString();
+const xDefault = new URL(localizedUrl(DEFAULT_LOCALE, path), Astro.site).toString();
 ---
 
 <!doctype html>
@@ -66,7 +74,20 @@ const alternates = LOCALES.map((loc) => ({
       href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`}
     />
     <title>{title} · Dove Go</title>
+    <link rel="canonical" href={canonical} />
     {alternates.map(({ loc, href }) => <link rel="alternate" hreflang={loc} href={href} />)}
+    <link rel="alternate" hreflang="x-default" href={xDefault} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Dove Go" />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {image && <meta name="twitter:image" content={image} />}
     <ClientRouter />
     <script is:inline>
       // No-flash theme init: preference is 'light' | 'dark' | 'system'

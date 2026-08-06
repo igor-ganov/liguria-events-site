@@ -58,6 +58,7 @@ chips: { free: 'Solo gratuiti', gems: 'Chicche', clear: 'Azzera' }
 theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 range: { from: 'Da', to: 'A' }
 sort: { label: 'Ordina', date: 'Per data', unique: 'Per unicità' }
+seo: { feed: "Eventi e cosa fare a {place} — concerti, mostre, mercati e altro.", calendar: "Calendario eventi di {place} — cosa fare, giorno per giorno.", map: "Mappa degli eventi a {place} — scopri cosa c'è vicino a te." }
 cat:
   music: Musica
   theatre: Teatro

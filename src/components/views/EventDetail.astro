@@ -12,6 +12,7 @@ import { eventPath } from '../../lib/event-path.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
 import { resized } from '../../lib/img/resized.ts';
+import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import type { EventContacts } from '../../lib/events/d1-published.ts';
@@ -38,9 +39,13 @@ const query = mapQuery(event);
 const mapSearchUrl =
   query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
+const heroImage =
+  event.img !== undefined ? new URL(resized(event.img, 1024), Astro.site).toString() : undefined;
+const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: contacts?.address });
 ---
 
-<Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)}>
+<Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)} image={heroImage}>
+  <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
     {
