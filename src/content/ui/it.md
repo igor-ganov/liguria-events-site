@@ -1,5 +1,5 @@
 ---
-nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', places: 'Locali', bot: 'Bot Telegram', ical: 'iCal' }
+nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', places: 'Locali', favorites: 'Preferiti', bot: 'Bot Telegram', ical: 'iCal' }
 search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla ricerca.' }
 mapLayers: { events: 'Eventi', landmarks: 'Luoghi', places: 'Locali' }
 places:

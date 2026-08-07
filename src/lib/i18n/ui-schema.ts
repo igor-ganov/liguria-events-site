@@ -25,7 +25,7 @@ const placeCats = Schema.Struct({
 export const PageDataSchema = Schema.Struct({
   lang: Schema.Literal(...LOCALES),
   ui: Schema.Struct({
-    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, places: Schema.String, bot: Schema.String, ical: Schema.String }),
+    nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, places: Schema.String, favorites: Schema.String, bot: Schema.String, ical: Schema.String }),
     search: Schema.Struct({ placeholder: Schema.String, none: Schema.String }),
     mapLayers: Schema.Struct({ events: Schema.String, landmarks: Schema.String, places: Schema.String }),
     landmarks: Schema.Struct({

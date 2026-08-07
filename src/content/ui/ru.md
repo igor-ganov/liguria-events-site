@@ -1,5 +1,5 @@
 ---
-nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', places: 'Заведения', bot: 'Telegram-бот', ical: 'iCal' }
+nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', places: 'Заведения', favorites: 'Избранное', bot: 'Telegram-бот', ical: 'iCal' }
 search: { placeholder: 'Поиск событий…', none: 'Ничего не найдено по запросу.' }
 mapLayers: { events: 'События', landmarks: 'Места', places: 'Заведения' }
 places:

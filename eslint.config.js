@@ -108,6 +108,8 @@ export default tseslint.config(
       'src/lib/search/**/*.ts',
       'src/lib/landmarks/**/*.ts',
       'src/lib/places/**/*.ts',
+      'src/lib/favorites/**/*.ts',
+      'src/components/favorites/**/*.ts',
       'src/lib/region/region-bounds.ts',
       'src/lib/region/regions-cities-of.ts',
       'src/lib/img/**/*.ts',

@@ -1,5 +1,7 @@
 import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import type { TemplateResult } from 'lit';
+import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { branch } from '../../lib/branch.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
@@ -38,6 +40,7 @@ export const renderMiniCard = (event: CompactEvent, ui: Ui, lang: Locale): Templ
   return html`
     <li>
       <a class="mini-card" href=${localizedUrl(lang, eventPath(event.id))}>
+        ${unsafeHTML(favButtonHtml(event.id, ui.nav.favorites))}
         ${renderThumb(event)}
         <div class="mini-body">
           <h4 class="mini-title">${titleOf(lang)(event)}</h4>

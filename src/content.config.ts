@@ -25,7 +25,7 @@ const placeCats = z.object({
 const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
-    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), places: z.string(), bot: z.string(), ical: z.string() }),
+    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), places: z.string(), favorites: z.string(), bot: z.string(), ical: z.string() }),
     search: z.object({ placeholder: z.string(), none: z.string() }),
     mapLayers: z.object({ events: z.string(), landmarks: z.string(), places: z.string() }),
     landmarks: z.object({

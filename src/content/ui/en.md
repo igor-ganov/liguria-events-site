@@ -1,5 +1,5 @@
 ---
-nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', places: 'Places', bot: 'Telegram bot', ical: 'iCal' }
+nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', places: 'Places', favorites: 'Favourites', bot: 'Telegram bot', ical: 'iCal' }
 search: { placeholder: 'Search events…', none: 'No events match your search.' }
 mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' }
 places:

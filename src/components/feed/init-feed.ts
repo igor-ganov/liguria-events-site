@@ -7,6 +7,7 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
+import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { prepare, search } from '../../lib/search/index.ts';
 import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -177,7 +178,9 @@ const cardHtml = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<strin
   const free = event.f === true ? `<span class="badge-free">${esc(ui.badges.free)}</span>` : '';
   const gem = event.x === true ? `<span class="badge-gem">${esc(ui.badges.gem)}</span>` : '';
   return (
-    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event.id))}">${thumb}` +
+    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event.id))}">` +
+    favButtonHtml(event.id, ui.nav.favorites) +
+    thumb +
     `<div class="mini-body"><h4 class="mini-title">${esc(titleOf(lang)(event))}</h4>` +
     `<span class="mini-when">${esc(formatWhen(event))}</span>` +
     (desc === '' ? '' : `<p class="mini-desc">${esc(desc)}</p>`) +

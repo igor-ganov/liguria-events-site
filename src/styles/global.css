@@ -443,6 +443,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 
 /* ══ mini event cards (feed + ongoing) ══════════════════════════════ */
 .mini-card {
+  position: relative;
   display: grid; grid-template-columns: auto 1fr; gap: 0.75rem;
   background: var(--surface); border: 1px solid var(--line);
   border-radius: var(--radius-md); padding: 0.65rem;
@@ -507,6 +508,36 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .map-dates, .feed-dates { display: flex; flex-wrap: wrap; gap: 0.8rem; }
 .feed-dates { margin: 0 0 0.7rem; }
 .feed-sort { display: flex; gap: 0.45rem; margin: 0 0 1rem; }
+
+/* Favourites: the heart toggle on a card corner, the labelled button on the
+   detail page, and the count badge in the nav. */
+.fav-btn {
+  position: absolute; top: 0.45rem; right: 0.45rem; z-index: 4;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2rem; height: 2rem; padding: 0; border: none; border-radius: 50%;
+  cursor: pointer; color: #fff; background: rgb(0 0 0 / 0.45);
+  transition: transform var(--speed), background var(--speed);
+}
+.fav-btn:hover { transform: scale(1.12); background: rgb(0 0 0 / 0.6); }
+.fav-btn svg { fill: none; stroke: currentColor; stroke-width: 1.9; }
+.fav-btn[aria-pressed='true'] { background: hsl(350 78% 52%); }
+.fav-btn[aria-pressed='true'] svg { fill: currentColor; }
+.event-fav {
+  display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 0 1.1rem;
+  padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  transition: transform var(--speed), border-color var(--speed), color var(--speed);
+}
+.event-fav:hover { transform: translateY(-1px); }
+.event-fav svg { fill: none; stroke: currentColor; stroke-width: 1.9; }
+.event-fav[aria-pressed='true'] { border-color: hsl(350 78% 52%); color: hsl(350 78% 52%); }
+.event-fav[aria-pressed='true'] svg { fill: currentColor; }
+.nav-fav { display: inline-flex; align-items: center; gap: 0.25rem; }
+.fav-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.15rem; height: 1.15rem; padding: 0 0.3rem; border-radius: 999px;
+  background: hsl(350 78% 52%); color: #fff; font-size: 0.7rem; font-weight: 700; line-height: 1;
+}
 .map-dates label, .feed-dates label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--ink-2); }
 .map-dates input, .feed-dates input {
   border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.3rem 0.5rem;

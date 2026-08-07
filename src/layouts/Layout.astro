@@ -144,6 +144,9 @@ const xDefault = new URL(localizedUrl(DEFAULT_LOCALE, path), Astro.site).toStrin
         <a href={regionUrl(lang, region, 'map/')}>{ui.nav.map}</a>
         <a href={regionUrl(lang, region, 'landmarks/')}>{ui.nav.landmarks}</a>
         <a href={regionUrl(lang, region, 'places/')}>{ui.nav.places}</a>
+        <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
+          {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
+        </a>
         <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
         <a
           href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
@@ -268,6 +271,13 @@ const xDefault = new URL(localizedUrl(DEFAULT_LOCALE, path), Astro.site).toStrin
       import { initImageFallback } from '../components/shared/image-fallback.ts';
       initImageFallback();
       document.addEventListener('astro:page-load', initImageFallback);
+    </script>
+
+    <script>
+      // Favourites (localStorage + D1 sync on sign-in), star toggles + count.
+      import { initFavorites } from '../components/favorites/init-favorites.ts';
+      initFavorites();
+      document.addEventListener('astro:page-load', initFavorites);
     </script>
 
     <script>

@@ -1,0 +1,28 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { CATEGORIES } from '../../lib/events/categories.ts';
+import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { DEFAULT_REGION } from '../../lib/region/default-region.ts';
+import { LOCALES } from '../../lib/i18n/locales.ts';
+
+export const getStaticPaths = () => LOCALES.filter((loc) => loc !== 'en').map((lang) => ({ params: { lang } }));
+
+const lang = LOCALES.find((loc) => loc === Astro.params.lang) ?? 'en';
+const ui = await uiOf(lang);
+const iconsJson = JSON.stringify(Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])));
+---
+
+<Layout lang={lang} region={DEFAULT_REGION} title={ui.nav.favorites} path="favorites/">
+  <h1>{ui.nav.favorites}</h1>
+  <div class="fav-tools" data-fav-tools hidden></div>
+  <ul class="feed-list" data-fav-list></ul>
+  <p class="feed-empty" data-fav-empty>{ui.empty}</p>
+</Layout>
+
+<script is:inline type="application/json" id="icons-data" set:html={iconsJson} />
+
+<script>
+  import { initFavoritesPage } from '../../components/favorites/init-favorites-page.ts';
+  document.addEventListener('astro:page-load', initFavoritesPage);
+</script>

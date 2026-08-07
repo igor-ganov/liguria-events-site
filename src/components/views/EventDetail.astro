@@ -14,6 +14,7 @@ import { regionOf } from '../../lib/region/region-of.ts';
 import { resized } from '../../lib/img/resized.ts';
 import { eventGallery } from '../../lib/events/event-gallery.ts';
 import { ticketUrl } from '../../lib/events/ticket-link.ts';
+import { HEART } from '../../lib/favorites/fav-button.ts';
 import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -107,6 +108,10 @@ const crawlerAddress =
       {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
       {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
     </div>
+    <button type="button" class="event-fav" data-fav-toggle data-fav-id={event.id} aria-pressed="false">
+      <Fragment set:html={HEART} />
+      {ui.nav.favorites}
+    </button>
     {
       tickets && (
         <a class="event-tickets" href={tickets} target="_blank" rel="noopener">
