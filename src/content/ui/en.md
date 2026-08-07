@@ -59,6 +59,7 @@ theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'S
 range: { from: 'From', to: 'To' }
 sort: { label: 'Sort', date: 'By date', unique: 'By uniqueness' }
 route: { walk: 'Walking', drive: 'Driving', transit: 'Transit', generate: 'Generate route', save: 'Save route', saved: 'Saved', tight: 'Tight connection', min: 'min', empty: 'No favourites yet — tap the heart on an event to add it.' }
+menu: { events: "What's on", explore: 'Explore', more: 'More' }
 seo: { feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.", calendar: "Event calendar for {place} — what's on, day by day.", map: "Map of events in {place} — find what's on near you." }
 cat:
   music: Music

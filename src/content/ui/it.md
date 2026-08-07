@@ -59,6 +59,7 @@ theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: '
 range: { from: 'Da', to: 'A' }
 sort: { label: 'Ordina', date: 'Per data', unique: 'Per unicità' }
 route: { walk: 'A piedi', drive: 'In auto', transit: 'Mezzi', generate: 'Genera itinerario', save: 'Salva itinerario', saved: 'Salvato', tight: 'Coincidenza stretta', min: 'min', empty: 'Nessun preferito — tocca il cuore su un evento per aggiungerlo.' }
+menu: { events: 'Cosa fare', explore: 'Esplora', more: 'Altro' }
 seo: { feed: "Eventi e cosa fare a {place} — concerti, mostre, mercati e altro.", calendar: "Calendario eventi di {place} — cosa fare, giorno per giorno.", map: "Mappa degli eventi a {place} — scopri cosa c'è vicino a te." }
 cat:
   music: Musica

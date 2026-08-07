@@ -403,6 +403,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .fab-menu.open .fab-overlay { opacity: 1; pointer-events: auto; visibility: visible; }
 .fab-popup {
   position: fixed; z-index: 201; min-width: 210px;
+  /* Never taller than the screen (the FAB sits ~80px in from its corner, so
+     leave room for that plus a margin) — scroll within instead of running off. */
+  max-height: calc(100dvh - 7rem); overflow-y: auto; overscroll-behavior: contain;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
   padding: 0.5rem; box-shadow: var(--shadow-md);
   opacity: 0; transform: scale(0.95); pointer-events: none; visibility: hidden;
@@ -410,6 +413,11 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .fab-menu.open .fab-popup { opacity: 1; transform: scale(1); pointer-events: auto; visibility: visible; }
 .fab-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.fab-group + .fab-group { margin-top: 0.3rem; padding-top: 0.4rem; border-top: 1px solid var(--line); }
+.fab-group-label {
+  margin: 0.1rem 0.8rem 0.15rem; font-size: 0.67rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-2);
+}
 .fab-links a {
   display: flex; align-items: center; min-height: 44px; padding: 0.5rem 0.8rem;
   color: var(--ink); border-radius: var(--radius-sm); font-size: 1rem;

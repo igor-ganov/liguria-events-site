@@ -15,14 +15,35 @@ import type { Locale } from '../lib/i18n/locales.ts';
 type Props = Readonly<{ lang: Locale; path: string; region?: string }>;
 const { lang, path, region = DEFAULT_REGION } = Astro.props;
 const ui = await uiOf(lang);
-const links = [
-  { href: regionUrl(lang, region), icon: 'feed' as const, label: ui.nav.feed },
-  { href: regionUrl(lang, region, 'calendar/'), icon: 'calendar' as const, label: ui.nav.calendar },
-  { href: regionUrl(lang, region, 'map/'), icon: 'map' as const, label: ui.nav.map },
-  { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin' as const, label: ui.nav.landmarks },
-  { href: regionUrl(lang, region, 'places/'), icon: 'places' as const, label: ui.nav.places },
-  { href: 'https://t.me/liguria_events_bot', icon: 'bot' as const, label: ui.nav.bot },
-  { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', icon: 'ical' as const, label: ui.nav.ical },
+// Grouped into sub-categories so the menu reads as sections instead of one long
+// wall of links (and stays tidy on a small screen). Favourites is a personal
+// destination — it sits at the end of the first group with its heart + count.
+const groups = [
+  {
+    label: ui.menu.events,
+    favourites: true,
+    links: [
+      { href: regionUrl(lang, region), icon: 'feed' as const, label: ui.nav.feed },
+      { href: regionUrl(lang, region, 'calendar/'), icon: 'calendar' as const, label: ui.nav.calendar },
+      { href: regionUrl(lang, region, 'map/'), icon: 'map' as const, label: ui.nav.map },
+    ],
+  },
+  {
+    label: ui.menu.explore,
+    favourites: false,
+    links: [
+      { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin' as const, label: ui.nav.landmarks },
+      { href: regionUrl(lang, region, 'places/'), icon: 'places' as const, label: ui.nav.places },
+    ],
+  },
+  {
+    label: ui.menu.more,
+    favourites: false,
+    links: [
+      { href: 'https://t.me/liguria_events_bot', icon: 'bot' as const, label: ui.nav.bot },
+      { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', icon: 'ical' as const, label: ui.nav.ical },
+    ],
+  },
 ];
 ---
 
@@ -56,18 +77,25 @@ const links = [
   <div class="fab-overlay" data-fab-overlay aria-hidden="true"></div>
 
   <nav id="fab-popup" class="fab-popup" data-fab-panel role="dialog" aria-modal="true" aria-label="Menu">
-    <ul class="fab-links">
-      {links.map(({ href, icon, label }) => (
-        <li>
-          <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
-        </li>
-      ))}
-      <li>
-        <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
-          <Fragment set:html={HEART} /> {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
-        </a>
-      </li>
-    </ul>
+    {groups.map((group) => (
+      <div class="fab-group">
+        <p class="fab-group-label">{group.label}</p>
+        <ul class="fab-links">
+          {group.links.map(({ href, icon, label }) => (
+            <li>
+              <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
+            </li>
+          ))}
+          {group.favourites && (
+            <li>
+              <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
+                <Fragment set:html={HEART} /> {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
+              </a>
+            </li>
+          )}
+        </ul>
+      </div>
+    ))}
     <div class="fab-tools">
       <LanguageSwitcher lang={lang} path={path} />
       <ThemeToggle ui={ui} labelled />

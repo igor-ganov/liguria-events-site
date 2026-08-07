@@ -56,6 +56,7 @@ export const PageDataSchema = Schema.Struct({
     range: Schema.Struct({ from: Schema.String, to: Schema.String }),
     sort: Schema.Struct({ label: Schema.String, date: Schema.String, unique: Schema.String }),
     route: Schema.Struct({ walk: Schema.String, drive: Schema.String, transit: Schema.String, generate: Schema.String, save: Schema.String, saved: Schema.String, tight: Schema.String, min: Schema.String, empty: Schema.String }),
+    menu: Schema.Struct({ events: Schema.String, explore: Schema.String, more: Schema.String }),
     seo: Schema.Struct({ feed: Schema.String, calendar: Schema.String, map: Schema.String }),
     cat,
     weekdays: Schema.Array(Schema.String),
