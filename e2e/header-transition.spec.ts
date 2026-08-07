@@ -36,9 +36,21 @@ test('header stays out of the root snapshot during a ClientRouter transition', a
   // Wait on the real state: a view-transition animation is mid-flight.
   await transitionActive(page);
 
-  // During the transition the header must be its own persisted group.
-  const nameDuringTx = await page.evaluate(
-    () => getComputedStyle(document.querySelector('header.site-head')!).viewTransitionName,
-  );
-  expect(nameDuringTx, 'header must have its own view-transition-name during the transition').not.toBe('none');
+  const state = await page.evaluate(() => {
+    const name = getComputedStyle(document.querySelector('header.site-head')!).viewTransitionName;
+    // Any UA animation on the header's own group means it cross-fades/dims
+    // (the visible "header covered" flicker). A truly static header has none.
+    const headerAnims = document
+      .getAnimations()
+      .filter((a) => {
+        const pe = a.effect instanceof KeyframeEffect ? a.effect.pseudoElement ?? '' : '';
+        return pe.includes(name);
+      }).length;
+    return { name, headerAnims };
+  });
+
+  // Its own group (excluded from the root cross-fade)…
+  expect(state.name, 'header must have its own view-transition-name').not.toBe('none');
+  // …AND that group must not animate, or the header still dims mid-transition.
+  expect(state.headerAnims, 'header group must be static (no fade animation)').toBe(0);
 });

@@ -67,6 +67,17 @@ html:active-view-transition-type(theme) {
   &::view-transition-old(root) { animation: none; mix-blend-mode: normal; z-index: 1; }
   &::view-transition-new(root) { animation: reveal 0.5s ease-in-out forwards; mix-blend-mode: normal; z-index: 2; }
 }
+/* The header is its own view-transition group (.site-head sets the name), which
+   excludes it from the root cross-fade — but a named group STILL gets the UA's
+   default fade, so it dimmed mid-navigation. Freeze that group so the header
+   stays fully opaque and static. During the theme reveal the header folds into
+   root (name: none), so this selector is inert there. */
+::view-transition-group(site-header),
+::view-transition-image-pair(site-header),
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none !important;
+}
 @keyframes reveal {
   from { clip-path: circle(0 at var(--x, 50%) var(--y, 50%)); }
   to { clip-path: circle(var(--r, 100vmax) at var(--x, 50%) var(--y, 50%)); }
