@@ -54,6 +54,7 @@ const ui = defineCollection({
     theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
     range: z.object({ from: z.string(), to: z.string() }),
     sort: z.object({ label: z.string(), date: z.string(), unique: z.string() }),
+    route: z.object({ walk: z.string(), drive: z.string(), transit: z.string(), generate: z.string(), save: z.string(), saved: z.string(), tight: z.string(), min: z.string(), empty: z.string() }),
     seo: z.object({ feed: z.string(), calendar: z.string(), map: z.string() }),
     cat,
     weekdays: z.array(z.string()).length(7),
