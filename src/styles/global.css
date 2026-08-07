@@ -59,6 +59,9 @@ html:active-view-transition-type(theme) {
      group and swaps instantly while only the chrome reveals, and the fixed FAB
      glitches between the two groups. */
   main { view-transition-name: none; }
+  /* The header is its own group for nav, but the theme reveal must sweep the
+     WHOLE page (header included), so fold it back into root here. */
+  .site-head { view-transition-name: none; }
   &::view-transition-group(root),
   &::view-transition-image-pair(root) { isolation: isolate; }
   &::view-transition-old(root) { animation: none; mix-blend-mode: normal; z-index: 1; }
@@ -125,6 +128,10 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
 /* ══ header / footer ════════════════════════════════════════════════ */
 .site-head {
   position: sticky; top: 0; z-index: 10;
+  /* Own view-transition group so the ClientRouter root cross-fade never
+     captures the header — it stays static and on top during navigation
+     instead of being covered. Folded back into root for the theme reveal. */
+  view-transition-name: site-header;
   display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; align-items: center;
   padding: 0.65rem clamp(0.7rem, 3vw, 1.5rem);
   background: color-mix(in hsl, var(--surface) 88%, transparent);
