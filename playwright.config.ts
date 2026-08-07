@@ -10,10 +10,14 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: 'http://localhost:4399', trace: 'on-first-retry' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // Serve the BUILT site (prerendered pages, corpus baked in) rather than the
+  // dev server (which re-fetches the corpus server-side per request and stalls
+  // under parallel load). Deterministic and fast; client-side fetches are
+  // mocked per test.
   webServer: {
-    command: 'bun run dev -- --port 4399 --host',
+    command: 'bun run build && bunx serve dist -l 4399',
     url: 'http://localhost:4399/liguria/',
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    timeout: 180_000,
   },
 });

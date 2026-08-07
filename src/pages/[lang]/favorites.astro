@@ -37,5 +37,9 @@ const iconsJson = JSON.stringify(Object.fromEntries(CATEGORIES.map((c) => [c, ic
 <script>
   import { initFavoritesPage } from '../../components/favorites/init-favorites-page.ts';
   import { initRoute } from '../../components/favorites/init-route.ts';
-  document.addEventListener('astro:page-load', () => { initFavoritesPage(); initRoute(); });
+  // Run for THIS visit (a ClientRouter swap runs this script after the swap,
+  // and astro:page-load may already have fired), plus every later navigation.
+  const run = () => { initFavoritesPage(); initRoute(); };
+  run();
+  document.addEventListener('astro:page-load', run);
 </script>

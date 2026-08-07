@@ -26,12 +26,12 @@ const transitionActive = (page: Page) =>
 test('header stays out of the root snapshot during a ClientRouter transition', async ({ page }) => {
   await page.goto('/liguria/');
   await expect(page.locator('header.site-head')).toBeVisible();
-  await expect(page.locator('.mini-card').first()).toBeVisible();
 
   await page.addStyleTag({ content: SLOW_TX });
 
-  // Start a same-site SPA navigation (ClientRouter intercepts the anchor).
-  await page.locator('.mini-card').first().click();
+  // Start a same-site SPA navigation to another prerendered page (ClientRouter
+  // intercepts the anchor and runs a view transition).
+  await page.locator('header.site-head nav a[href$="/calendar/"]').first().click();
 
   // Wait on the real state: a view-transition animation is mid-flight.
   await transitionActive(page);

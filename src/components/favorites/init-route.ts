@@ -189,24 +189,39 @@ const generate = async (): Promise<void> => {
   drawMap(lastDays);
 };
 
+const setMode = (btn: HTMLElement): void => {
+  const chosen = btn.dataset['routeMode'];
+  mode = chosen === 'driving' || chosen === 'transit' ? chosen : 'walking';
+  document.querySelectorAll<HTMLElement>('[data-route-mode]').forEach((b) =>
+    b.setAttribute('aria-pressed', String(b === btn)),
+  );
+};
+
 let wired = false;
 
+// Delegated on the document so the controls keep working after a ClientRouter
+// navigation replaces the favourites page DOM (a one-time per-button wiring
+// left the fresh buttons dead — the bug that made "Generate route" do nothing
+// when you arrived via the menu).
 export const initRoute = (): void => {
   if (wired) return;
   wired = true;
-  document.querySelectorAll<HTMLElement>('[data-route-mode]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const chosen = btn.dataset['routeMode'];
-      mode = chosen === 'driving' || chosen === 'transit' ? chosen : 'walking';
-      document.querySelectorAll<HTMLElement>('[data-route-mode]').forEach((b) =>
-        b.setAttribute('aria-pressed', String(b === btn)),
-      );
-    });
-  });
-  document.querySelector('[data-route-generate]')?.addEventListener('click', () => void generate());
-  document.querySelector('[data-route-save]')?.addEventListener('click', () => {
-    void saveRoute(lastDays);
-    const btn = document.querySelector<HTMLElement>('[data-route-save]');
-    if (btn) btn.textContent = readUiIsland().ui.route.saved;
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : undefined;
+    if (!target) return;
+    const modeBtn = target.closest('[data-route-mode]');
+    if (modeBtn instanceof HTMLElement) {
+      setMode(modeBtn);
+      return;
+    }
+    if (target.closest('[data-route-generate]')) {
+      void generate();
+      return;
+    }
+    if (target.closest('[data-route-save]')) {
+      void saveRoute(lastDays);
+      const btn = document.querySelector<HTMLElement>('[data-route-save]');
+      if (btn) btn.textContent = readUiIsland().ui.route.saved;
+    }
   });
 };

@@ -39,7 +39,12 @@ const paint = async (): Promise<void> => {
   if (listEl) render(html`${favs.map((event) => renderMiniCard(event, island.ui, island.lang))}`, listEl);
 };
 
+let listening = false;
+
 export const initFavoritesPage = (): void => {
   void paint();
-  document.addEventListener('favchange', () => void paint());
+  if (!listening) {
+    listening = true;
+    document.addEventListener('favchange', () => void paint());
+  }
 };
