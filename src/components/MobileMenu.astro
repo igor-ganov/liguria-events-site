@@ -7,6 +7,8 @@ import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { uiIcon } from '../lib/icons/ui-icon.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
+import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { HEART } from '../lib/favorites/fav-button.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
@@ -60,6 +62,11 @@ const links = [
           <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
         </li>
       ))}
+      <li>
+        <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
+          <Fragment set:html={HEART} /> {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
+        </a>
+      </li>
     </ul>
     <div class="fab-tools">
       <LanguageSwitcher lang={lang} path={path} />

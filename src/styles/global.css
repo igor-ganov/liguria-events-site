@@ -533,6 +533,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .event-fav[aria-pressed='true'] { border-color: hsl(350 78% 52%); color: hsl(350 78% 52%); }
 .event-fav[aria-pressed='true'] svg { fill: currentColor; }
 .nav-fav { display: inline-flex; align-items: center; gap: 0.25rem; }
+.nav-fav svg { fill: none; stroke: currentColor; stroke-width: 1.9; }
 
 /* Route builder on the favourites page. */
 .fav-tools { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin: 0 0 1rem; }
