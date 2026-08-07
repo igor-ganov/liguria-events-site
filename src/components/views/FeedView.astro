@@ -113,5 +113,8 @@ const siteJsonLd = JSON.stringify({
 
 <script>
   import { initFeed } from '../../components/feed/init-feed.ts';
-  initFeed();
+  // Re-init on every navigation (astro:page-load fires on first load AND after
+  // each ClientRouter swap), so filters + sort are restored from the URL when
+  // you come back — a one-time initFeed() left a back-navigated feed unsorted.
+  document.addEventListener('astro:page-load', initFeed);
 </script>
