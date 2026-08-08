@@ -6,6 +6,7 @@ import darkStyle from '../../lib/map/styles/dark.json';
 import { buildRoute } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { readFavorites } from './init-favorites.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
@@ -151,7 +152,11 @@ const renderItinerary = (days: readonly RouteDay[], lang: Locale, ui: ReturnType
 const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
   const id = `r${Date.now().toString(36)}`;
   const name = dayLabelSafe(days);
-  const payload = JSON.stringify({ mode, dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })) });
+  const payload = JSON.stringify({
+    mode,
+    range: lastRange,
+    dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })),
+  });
   const KEY = 'dovego:routes';
   try {
     const prev: unknown = JSON.parse(localStorage.getItem(KEY) ?? '[]');
@@ -173,15 +178,29 @@ const dayLabelSafe = (days: readonly RouteDay[]): string =>
 /* ── wiring ──────────────────────────────────────────────────────────── */
 
 let lastDays: readonly RouteDay[] = [];
+let lastRange: Readonly<{ from: string; to?: string }> = { from: '' };
 
 const generate = async (): Promise<void> => {
   const { lang, ui } = readUiIsland();
   const favs = new Set(readFavorites());
   const events = (await fetchCorpus()).filter((e) => favs.has(e.id));
-  lastDays = buildRoute(events, mode);
+  const fromEl = document.querySelector<HTMLInputElement>('[data-route-from]');
+  const toEl = document.querySelector<HTMLInputElement>('[data-route-to]');
+  const from = fromEl?.value || isoToday();
+  const to = toEl?.value || undefined;
+  lastRange = to === undefined ? { from } : { from, to };
+  lastDays = buildRoute(events, mode, lastRange);
   const output = document.querySelector<HTMLElement>('[data-route-output]');
   const saveBtn = document.querySelector<HTMLElement>('[data-route-save]');
-  if (output) output.innerHTML = renderItinerary(lastDays, lang, ui);
+  if (output) {
+    // The computed trip end is simply the last scheduled day.
+    const end = lastDays.at(-1)?.day ?? from;
+    const span =
+      lastDays.length > 0
+        ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
+        : '';
+    output.innerHTML = span + renderItinerary(lastDays, lang, ui);
+  }
   if (saveBtn) {
     saveBtn.hidden = lastDays.length === 0;
     saveBtn.textContent = ui.route.save;

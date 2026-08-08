@@ -563,6 +563,13 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 
 /* Route builder on the favourites page. */
 .fav-tools { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; margin: 0 0 1rem; }
+.route-dates { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+.route-dates label { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: var(--ink-2); }
+.route-dates input {
+  border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.3rem 0.5rem;
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem;
+}
+.route-span { margin: 0 0 0.8rem; font-weight: 700; color: hsl(var(--hue) 70% 42%); text-transform: capitalize; }
 .route-modes { display: flex; gap: 0.4rem; }
 .route-actions { display: flex; gap: 0.5rem; margin-left: auto; }
 .route-generate, .route-save {

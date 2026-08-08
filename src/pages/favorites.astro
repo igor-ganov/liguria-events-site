@@ -4,15 +4,21 @@ import { uiOf } from '../lib/i18n/ui-of.ts';
 import { CATEGORIES } from '../lib/events/categories.ts';
 import { iconSvg } from '../lib/icons/icon-svg.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
+import { isoToday } from '../lib/calendar/iso-today.ts';
 
 const lang = 'en' as const;
 const ui = await uiOf(lang);
+const today = isoToday();
 const iconsJson = JSON.stringify(Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])));
 ---
 
 <Layout lang={lang} region={DEFAULT_REGION} title={ui.nav.favorites} path="favorites/">
   <h1>{ui.nav.favorites}</h1>
   <div class="fav-tools" data-fav-tools hidden>
+    <div class="route-dates">
+      <label>{ui.range.from} <input type="date" data-route-from value={today} /></label>
+      <label>{ui.range.to} <input type="date" data-route-to /></label>
+    </div>
     <div class="route-modes" role="group" aria-label={ui.route.generate}>
       <button class="chip" data-route-mode="walking" aria-pressed="true">{ui.route.walk}</button>
       <button class="chip" data-route-mode="driving" aria-pressed="false">{ui.route.drive}</button>

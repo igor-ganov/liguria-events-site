@@ -1,7 +1,8 @@
 {
   "generatedAt": "2026-01-01T00:00:00.000Z",
   "events": [
-    { "id": "e1", "t": "Concert One", "s": "2026-07-10", "c": ["music"], "u": "https://example.test/1", "g": [44.4074, 8.9340], "h": "18:00", "v": "Teatro Uno" },
-    { "id": "e2", "t": "Show Two", "s": "2026-07-10", "c": ["theatre"], "u": "https://example.test/2", "g": [44.4110, 8.9300], "h": "21:00", "v": "Teatro Due" }
+    { "id": "e1", "t": "Concert One", "s": "2099-07-10", "c": ["music"], "u": "https://example.test/1", "g": [44.4074, 8.9340], "h": "18:00", "v": "Teatro Uno" },
+    { "id": "e2", "t": "Show Two", "s": "2099-07-10", "c": ["theatre"], "u": "https://example.test/2", "g": [44.4110, 8.9300], "h": "21:00", "v": "Teatro Due" },
+    { "id": "e3", "t": "Early Event", "s": "2099-07-05", "c": ["market"], "u": "https://example.test/3", "g": [44.4050, 8.9200], "v": "Piazza Tre" }
   ]
 }

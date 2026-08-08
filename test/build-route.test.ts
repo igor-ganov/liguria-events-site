@@ -32,4 +32,26 @@ describe('buildRoute', () => {
     const url = mapsDirUrl([1, 2], [3, 4], 'transit');
     assert.ok(url.includes('origin=1,2') && url.includes('destination=3,4') && url.includes('travelmode=transit'));
   });
+
+  test('range: from drops earlier events, to drops later ones', () => {
+    const before = ev({ id: 'b', t: 'Before', s: '2026-07-05', g: [44.4, 8.9] });
+    const inside = ev({ id: 'i', t: 'In', s: '2026-07-11', g: [44.4, 8.9] });
+    const after = ev({ id: 'a', t: 'After', s: '2026-07-20', g: [44.4, 8.9] });
+    const ids = buildRoute([before, inside, after], 'walking', { from: '2026-07-10', to: '2026-07-15' })
+      .flatMap((d) => d.stops.map((s) => s.id));
+    assert.deepEqual(ids, ['i']);
+  });
+
+  test('range: an ongoing multi-day event is placed on the trip start, not its own start', () => {
+    const ongoing = ev({ id: 'o', t: 'Run', s: '2026-07-08', e: '2026-07-12', g: [44.4, 8.9] });
+    const route = buildRoute([ongoing], 'walking', { from: '2026-07-10', to: '2026-07-15' });
+    assert.equal(route[0]?.day, '2026-07-10'); // clamped to `from`
+    assert.equal(route[0]?.stops[0]?.id, 'o');
+  });
+
+  test('range without `to` keeps everything from `from` onward', () => {
+    const a = ev({ id: 'a', t: 'A', s: '2026-07-10' });
+    const b = ev({ id: 'b', t: 'B', s: '2026-07-25' });
+    assert.equal(buildRoute([a, b], 'walking', { from: '2026-07-01' }).length, 2);
+  });
 });

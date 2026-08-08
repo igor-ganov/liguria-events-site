@@ -17,6 +17,19 @@ export type Leg = Readonly<{
 
 export type RouteDay = Readonly<{ day: string; stops: readonly CompactEvent[]; legs: readonly Leg[] }>;
 
+/** The trip window. `from` is the first day (the caller defaults it to today);
+ *  `to` is optional — without it the trip runs to the last favourited day. */
+export type DateRange = Readonly<{ from: string; to?: string }>;
+
+// An event belongs to the trip when its own span [s, e] overlaps [from, to].
+const inRange = (event: CompactEvent, range: DateRange): boolean =>
+  (event.e ?? event.s) >= range.from && (range.to === undefined || event.s <= range.to);
+
+// Which day to visit it on: its start, or the trip start if it is already
+// running when the trip begins (an ongoing multi-day event).
+const displayDay = (event: CompactEvent, from: string): string =>
+  event.s > from ? event.s : from;
+
 const EARTH_R = 6371000;
 const rad = (d: number): number => (d * Math.PI) / 180;
 
@@ -85,12 +98,19 @@ const legBetween = (from: CompactEvent, to: CompactEvent, mode: Mode): Leg => {
   return { meters, minutes, mapsUrl, tight };
 };
 
-/** Build the itinerary: one section per day (an event's start date), each with
- *  its stops ordered and the legs between them. */
-export const buildRoute = (events: readonly CompactEvent[], mode: Mode): readonly RouteDay[] => {
+/** Build the itinerary: one section per day, each with its stops ordered and
+ *  the legs between them. A `range` limits the trip to events overlapping the
+ *  window (ongoing events clamped to the trip start); without it, all events
+ *  are scheduled on their own start day. */
+export const buildRoute = (
+  events: readonly CompactEvent[],
+  mode: Mode,
+  range?: DateRange,
+): readonly RouteDay[] => {
+  const scoped = range === undefined ? events : events.filter((event) => inRange(event, range));
   const byDay = new Map<string, CompactEvent[]>();
-  for (const event of events) {
-    const day = event.s;
+  for (const event of scoped) {
+    const day = range === undefined ? event.s : displayDay(event, range.from);
     (byDay.get(day) ?? byDay.set(day, []).get(day)!).push(event);
   }
   return [...byDay.keys()]
