@@ -35,6 +35,8 @@ export const EventSchema = Schema.Struct({
   rg: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
+  /** Attendance length in minutes, when the source stated one (AC-duration). */
+  du: Schema.optional(Schema.Number),
   d: Schema.optional(LocalizedTextSchema),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
   x: Schema.optional(Schema.Boolean),

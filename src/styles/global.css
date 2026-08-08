@@ -597,6 +597,11 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .route-stop a:hover { text-decoration: underline; }
 .route-stop-meta { display: flex; gap: 0.6rem; font-size: 0.82rem; color: var(--ink-2); }
 .route-stop-time { font-weight: 700; color: hsl(var(--hue) 70% 42%); }
+.route-stop-dur { display: inline-flex; align-items: center; gap: 0.25rem; }
+.dur-input {
+  width: 3.6rem; border: 1px solid var(--line); border-radius: 0.4rem; padding: 0.1rem 0.3rem;
+  background: var(--surface); color: var(--ink); font: inherit; font-size: 0.78rem;
+}
 .route-leg {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.6rem;
   margin-left: 2.1rem; padding: 0.2rem 0; font-size: 0.8rem; color: var(--ink-2);

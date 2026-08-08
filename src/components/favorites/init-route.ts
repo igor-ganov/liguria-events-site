@@ -5,6 +5,7 @@ import brightStyle from '../../lib/map/styles/bright.json';
 import darkStyle from '../../lib/map/styles/dark.json';
 import { buildRoute } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
+import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { readFavorites } from './init-favorites.ts';
@@ -17,6 +18,22 @@ import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 const esc = (s: string): string => s.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`);
+
+// Manual per-event duration overrides (minutes), keyed by event id.
+const DUR_KEY = 'dovego:durations';
+let overrides: Readonly<Record<string, number>> = {};
+const readDurations = (): Record<string, number> => {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(DUR_KEY) ?? '{}');
+    const out: Record<string, number> = {};
+    if (raw && typeof raw === 'object') {
+      for (const [id, min] of Object.entries(raw)) if (typeof min === 'number') out[id] = min;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+};
 
 let mode: Mode = 'walking';
 let corpus: readonly CompactEvent[] | undefined;
@@ -124,10 +141,15 @@ const legHtml = (leg: RouteDay['legs'][number], ui: ReturnType<typeof readUiIsla
 const stopHtml = (event: CompactEvent, n: number, lang: Locale): string => {
   const time = event.h ? `<span class="route-stop-time">${esc(event.h)}</span>` : '';
   const venue = event.v ? `<span class="route-stop-venue">${esc(event.v)}</span>` : '';
+  const dur = eventDuration(event, overrides[event.id]);
+  const duration =
+    `<span class="route-stop-dur" title="Duration">⏱ ${esc(formatDuration(dur))} ` +
+    `<input type="number" class="dur-input" data-dur-input data-dur-id="${esc(event.id)}" ` +
+    `value="${dur}" min="15" step="15" aria-label="Duration in minutes" /></span>`;
   return (
     `<li class="route-stop"><span class="route-num">${n}</span>` +
     `<div><a href="${localizedUrl(lang, eventPath(event.id))}">${esc(titleOf(lang)(event))}</a>` +
-    `<div class="route-stop-meta">${time}${venue}</div></div></li>`
+    `<div class="route-stop-meta">${time}${venue}${duration}</div></div></li>`
   );
 };
 
@@ -182,6 +204,7 @@ let lastRange: Readonly<{ from: string; to?: string }> = { from: '' };
 
 const generate = async (): Promise<void> => {
   const { lang, ui } = readUiIsland();
+  overrides = readDurations();
   const favs = new Set(readFavorites());
   const events = (await fetchCorpus()).filter((e) => favs.has(e.id));
   const fromEl = document.querySelector<HTMLInputElement>('[data-route-from]');
@@ -242,5 +265,18 @@ export const initRoute = (): void => {
       const btn = document.querySelector<HTMLElement>('[data-route-save]');
       if (btn) btn.textContent = readUiIsland().ui.route.saved;
     }
+  });
+  // Manual duration override → persist and recompute the itinerary.
+  document.addEventListener('change', (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || !input.hasAttribute('data-dur-input')) return;
+    const id = input.dataset['durId'] ?? '';
+    const min = Math.max(15, Math.round(Number(input.value) || 0));
+    try {
+      localStorage.setItem(DUR_KEY, JSON.stringify({ ...readDurations(), [id]: min }));
+    } catch {
+      /* storage blocked — ignore */
+    }
+    void generate();
   });
 };
