@@ -61,10 +61,13 @@ export const buildDaySchedule = (
     prev = event;
     prevEnd = endMin;
   }
-  return placed.map((item, i) => {
-    const clashesBefore = i > 0 && item.startMin < placed[i - 1]!.endMin;
-    const clashesAfter = i < placed.length - 1 && placed[i + 1]!.startMin < item.endMin;
-    return clashesBefore || clashesAfter ? { ...item, overlap: true } : item;
+  // Overlap is a true pairwise interval test, not list adjacency: a drag can
+  // set times so that a later-listed stop actually starts earlier.
+  return placed.map((item) => {
+    const overlap = placed.some(
+      (other) => other.id !== item.id && item.startMin < other.endMin && other.startMin < item.endMin,
+    );
+    return overlap ? { ...item, overlap: true } : item;
   });
 };
 

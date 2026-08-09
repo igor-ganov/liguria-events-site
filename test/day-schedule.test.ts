@@ -62,6 +62,18 @@ describe('buildDaySchedule', () => {
     const items = buildDaySchedule([a, b], 'walking', {}, { a: 120, b: 60 }, DAY_START); // a ends 12:00 > b start 11:00
     assert.deepEqual(items.map((i) => i.overlap), [true, true]);
   });
+
+  test('overlap is a true interval test, not list adjacency (drag can reorder in time)', () => {
+    // Listed a-then-b, but a drag put b (10:00–11:00) before a (12:00–13:00):
+    // disjoint in time, so neither overlaps despite b being listed second.
+    const a = ev({ id: 'a', t: 'A', s: '2026-07-10' });
+    const b = ev({ id: 'b', t: 'B', s: '2026-07-10' });
+    const disjoint = buildDaySchedule([a, b], 'walking', { a: '12:00', b: '10:00' }, { a: 60, b: 60 }, DAY_START);
+    assert.deepEqual(disjoint.map((i) => i.overlap), [false, false]);
+    // Now make them actually clash while still reversed in time.
+    const clash = buildDaySchedule([a, b], 'walking', { a: '12:00', b: '11:30' }, { a: 60, b: 60 }, DAY_START);
+    assert.deepEqual(clash.map((i) => i.overlap), [true, true]);
+  });
 });
 
 const stop = (id: string, startMin: number, endMin: number): ScheduledStop => ({
