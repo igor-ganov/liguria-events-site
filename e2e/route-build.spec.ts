@@ -47,3 +47,19 @@ test('route tools stay visible when favourites exist but the corpus is unavailab
 
   await expect(page.locator('[data-route-generate]')).toBeVisible();
 });
+
+// toBeVisible() only checks layout, not contrast: the Generate button used
+// hsl(var(--hue) …) but --hue is only defined on category chips, so off a chip
+// it's an invalid colour → transparent fill + near-black text → invisible on the
+// dark theme. Assert it actually has a filled (non-transparent) background.
+test('the Generate route button has a real filled background (not invisible)', async ({ page }) => {
+  await page.goto('/favorites/');
+  await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1'])));
+  await page.goto('/favorites/');
+
+  const btn = page.locator('[data-route-generate]');
+  await expect(btn).toBeVisible();
+  const bg = await btn.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)'); // transparent = the invisible-button bug
+  expect(bg).not.toBe('transparent');
+});

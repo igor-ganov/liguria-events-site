@@ -441,9 +441,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   --hue: var(--cat-other);
   display: inline-flex; align-items: center; gap: 0.35rem;
   border-radius: 999px; font-weight: 600;
-  color: hsl(var(--hue) var(--chip-sat) var(--chip-text-l));
-  background: hsl(var(--hue) var(--chip-sat) var(--chip-bg-l));
-  border: 1px solid hsl(var(--hue) var(--chip-sat) var(--chip-line-l));
+  color: hsl(var(--hue, 30) var(--chip-sat) var(--chip-text-l));
+  background: hsl(var(--hue, 30) var(--chip-sat) var(--chip-bg-l));
+  border: 1px solid hsl(var(--hue, 30) var(--chip-sat) var(--chip-line-l));
 }
 [data-cat='music'] { --hue: var(--cat-music); }
 [data-cat='theatre'] { --hue: var(--cat-theatre); }
@@ -460,8 +460,8 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .chip[aria-pressed='true'] {
   color: var(--on-accent);
-  background: hsl(var(--hue) 70% 42%);
-  border-color: hsl(var(--hue) 70% 42%);
+  background: hsl(var(--hue, 30) 70% 42%);
+  border-color: hsl(var(--hue, 30) 70% 42%);
 }
 .chip--free[aria-pressed='true'] { background: var(--free); border-color: var(--free); }
 .cat-tag { padding: 0.12rem 0.55rem; font-size: 0.72rem; }
@@ -569,13 +569,13 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   border: 1px solid var(--line); border-radius: 0.5rem; padding: 0.3rem 0.5rem;
   background: var(--surface); color: var(--ink); font: inherit; font-size: 0.85rem;
 }
-.route-span { margin: 0 0 0.8rem; font-weight: 700; color: hsl(var(--hue) 70% 42%); text-transform: capitalize; }
+.route-span { margin: 0 0 0.8rem; font-weight: 700; color: hsl(var(--hue, 30) 70% 42%); text-transform: capitalize; }
 .route-modes { display: flex; gap: 0.4rem; }
 .route-actions { display: flex; gap: 0.5rem; margin-left: auto; }
 .route-generate, .route-save {
   padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: 1px solid transparent;
 }
-.route-generate { color: var(--on-accent); background: hsl(var(--hue) 70% 42%); }
+.route-generate { color: var(--on-accent); background: hsl(var(--hue, 30) 70% 42%); }
 .route-save { background: var(--surface); border-color: var(--line); color: var(--ink); }
 .route-map { height: 340px; border-radius: var(--radius-md); overflow: hidden; margin: 0 0 1rem; border: 1px solid var(--line); }
 .route-map:not([hidden]) { display: block; }
@@ -612,7 +612,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .route-add { margin: 0.4rem 0 0.2rem; }
 .route-views { display: inline-flex; gap: 0.3rem; margin: 0 0 1rem; }
-.route-views .chip[aria-pressed='true'] { background: hsl(var(--hue) 70% 42%); color: var(--on-accent); border-color: transparent; }
+.route-views .chip[aria-pressed='true'] { background: hsl(var(--hue, 30) 70% 42%); color: var(--on-accent); border-color: transparent; }
 /* Timeline: a vertical clock axis with absolutely-positioned event blocks. */
 .tl-axis {
   position: relative; margin: 0.3rem 0 1.2rem; padding-left: 3.4rem;
@@ -622,7 +622,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-hour > span { position: absolute; left: 0; top: -0.6em; width: 3rem; text-align: right; font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tl-block {
   position: absolute; box-sizing: border-box; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);
-  background: hsl(var(--hue) 60% 92%); border: 1px solid hsl(var(--hue) 55% 60%); color: var(--ink);
+  background: hsl(var(--hue, 30) 60% 92%); border: 1px solid hsl(var(--hue, 30) 55% 60%); color: var(--ink);
   overflow: hidden; cursor: grab; touch-action: none; user-select: none; font-size: 0.78rem; line-height: 1.2;
 }
 .tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow-sm); opacity: 0.92; }
@@ -631,12 +631,12 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-title { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tl-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; cursor: ns-resize; }
 @media (prefers-color-scheme: dark) {
-  .tl-block { background: hsl(var(--hue) 30% 24%); border-color: hsl(var(--hue) 35% 42%); }
+  .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 35% 42%); }
   .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
 }
-:root[data-theme='dark'] .tl-block { background: hsl(var(--hue) 30% 24%); border-color: hsl(var(--hue) 35% 42%); }
+:root[data-theme='dark'] .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 35% 42%); }
 :root[data-theme='dark'] .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
-:root[data-theme='light'] .tl-block { background: hsl(var(--hue) 60% 92%); border-color: hsl(var(--hue) 55% 60%); }
+:root[data-theme='light'] .tl-block { background: hsl(var(--hue, 30) 60% 92%); border-color: hsl(var(--hue, 30) 55% 60%); }
 :root[data-theme='light'] .tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
 .route-day { margin: 0 0 1rem; }
 .route-day h3 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--ink-2); text-transform: capitalize; }
@@ -644,12 +644,12 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .route-stop { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.35rem 0; }
 .route-num {
   flex: none; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%;
-  background: hsl(var(--hue) 70% 42%); color: var(--on-accent); font-size: 0.78rem; font-weight: 700;
+  background: hsl(var(--hue, 30) 70% 42%); color: var(--on-accent); font-size: 0.78rem; font-weight: 700;
 }
 .route-stop a { font-weight: 600; text-decoration: none; color: var(--ink); }
 .route-stop a:hover { text-decoration: underline; }
 .route-stop-meta { display: flex; gap: 0.6rem; font-size: 0.82rem; color: var(--ink-2); }
-.route-stop-time { font-weight: 700; color: hsl(var(--hue) 70% 42%); }
+.route-stop-time { font-weight: 700; color: hsl(var(--hue, 30) 70% 42%); }
 .route-stop-dur { display: inline-flex; align-items: center; gap: 0.25rem; }
 .dur-input {
   width: 3.6rem; border: 1px solid var(--line); border-radius: 0.4rem; padding: 0.1rem 0.3rem;
@@ -661,7 +661,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   border-left: 2px dashed var(--line); padding-left: 0.8rem;
 }
 .route-leg--tight { color: #b45309; }
-.route-leg a { color: hsl(var(--hue) 70% 42%); text-decoration: none; }
+.route-leg a { color: hsl(var(--hue, 30) 70% 42%); text-decoration: none; }
 .route-leg-mode::before { content: '·'; }
 .fav-badge {
   display: inline-flex; align-items: center; justify-content: center;
@@ -862,11 +862,11 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   --hue: var(--cat-other);
   display: flex; align-items: center; gap: 0.3rem;
   padding: 0.14rem 0.45rem; border-radius: 0.45rem;
-  color: hsl(var(--hue) var(--chip-sat) var(--chip-text-l));
-  background: hsl(var(--hue) var(--chip-sat) var(--chip-bg-l));
+  color: hsl(var(--hue, 30) var(--chip-sat) var(--chip-text-l));
+  background: hsl(var(--hue, 30) var(--chip-sat) var(--chip-bg-l));
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.cal-pill:hover { text-decoration: none; outline: 1px solid hsl(var(--hue) var(--chip-sat) var(--chip-line-l)); }
+.cal-pill:hover { text-decoration: none; outline: 1px solid hsl(var(--hue, 30) var(--chip-sat) var(--chip-line-l)); }
 .cal-pill span { overflow: hidden; text-overflow: ellipsis; }
 
 .ongoing h3 { margin: 1.6rem 0 0.6rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -910,7 +910,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .event-tickets {
   display: inline-flex; align-items: center; gap: 0.4rem; margin: 0 0 1.1rem;
   padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700;
-  color: var(--on-accent); background: hsl(var(--hue) 70% 42%);
+  color: var(--on-accent); background: hsl(var(--hue, 30) 70% 42%);
   text-decoration: none; box-shadow: var(--shadow-sm); transition: transform var(--speed), box-shadow var(--speed);
 }
 .event-tickets:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
