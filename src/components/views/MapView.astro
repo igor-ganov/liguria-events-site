@@ -634,6 +634,10 @@ const description = ui.seo.map.replace('{place}', placeName);
     // first time its bbox enters the viewport (nationwide, no single huge file).
     let landmarkData: Landmark[] = [];
     const lmLoaded = new Set<string>();
+    // A landmark near a region boundary lives in several region shards, so once
+    // the viewport (zoomed out) spans neighbours, the same id arrives twice —
+    // two markers on one spot. Dedupe by id so it renders exactly once.
+    const lmIds = new Set<string>();
     let lmIndex: Supercluster<LmProps> | undefined;
     const lmMarkers: maplibregl.Marker[] = [];
     const landmarkHref = (l: Landmark): string => localizedUrl(lang, landmarkPath(l.region, l.name, l.id));
@@ -758,7 +762,11 @@ const description = ui.seo.map.replace('{place}', placeName);
       const need = [...want].filter((r) => !lmLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => lmLoaded.add(r));
-      const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat();
+      const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat().filter((l) => {
+        if (lmIds.has(l.id)) return false;
+        lmIds.add(l.id);
+        return true;
+      });
       if (added.length === 0) return;
       landmarkData = landmarkData.concat(added);
       rebuildLmIndex();
@@ -773,6 +781,7 @@ const description = ui.seo.map.replace('{place}', placeName);
     type PlProps = { p: Place };
     let placeData: Place[] = [];
     const plLoaded = new Set<string>();
+    const plIds = new Set<string>(); // dedupe cross-region shard overlap, like landmarks
     let plIndex: Supercluster<PlProps> | undefined;
     const plMarkers: maplibregl.Marker[] = [];
     const placeHref = (p: Place): string => localizedUrl(lang, placePath(p.region, p.name, p.id));
@@ -893,7 +902,11 @@ const description = ui.seo.map.replace('{place}', placeName);
       const need = [...want].filter((r) => !plLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => plLoaded.add(r));
-      const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat();
+      const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat().filter((p) => {
+        if (plIds.has(p.id)) return false;
+        plIds.add(p.id);
+        return true;
+      });
       if (added.length === 0) return;
       placeData = placeData.concat(added);
       rebuildPlIndex();
