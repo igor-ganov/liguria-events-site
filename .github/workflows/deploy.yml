@@ -27,7 +27,10 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - run: bun run typecheck
-      - run: bun test
+      # Scoped to ./test: a bare `bun test` also picks up the Playwright specs in
+      # e2e/, which throw "test() called here" under bun's runner. E2E runs
+      # separately via `bun run test:e2e`.
+      - run: bun run test
       - run: bun run build:prod
       - run: bun x wrangler d1 migrations apply dovego --remote
       - run: bun x wrangler deploy
