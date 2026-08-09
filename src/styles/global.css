@@ -611,6 +611,33 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
 }
 .route-add { margin: 0.4rem 0 0.2rem; }
+.route-views { display: inline-flex; gap: 0.3rem; margin: 0 0 1rem; }
+.route-views .chip[aria-pressed='true'] { background: hsl(var(--hue) 70% 42%); color: var(--on-accent); border-color: transparent; }
+/* Timeline: a vertical clock axis with absolutely-positioned event blocks. */
+.tl-axis {
+  position: relative; margin: 0.3rem 0 1.2rem; padding-left: 3.4rem;
+  border-left: 1px solid var(--line); touch-action: pan-x;
+}
+.tl-hour { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line); }
+.tl-hour > span { position: absolute; left: 0; top: -0.6em; width: 3rem; text-align: right; font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tl-block {
+  position: absolute; box-sizing: border-box; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);
+  background: hsl(var(--hue) 60% 92%); border: 1px solid hsl(var(--hue) 55% 60%); color: var(--ink);
+  overflow: hidden; cursor: grab; touch-action: none; user-select: none; font-size: 0.78rem; line-height: 1.2;
+}
+.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow-sm); opacity: 0.92; }
+.tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
+.tl-time { display: block; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tl-title { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; cursor: ns-resize; }
+@media (prefers-color-scheme: dark) {
+  .tl-block { background: hsl(var(--hue) 30% 24%); border-color: hsl(var(--hue) 35% 42%); }
+  .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
+}
+:root[data-theme='dark'] .tl-block { background: hsl(var(--hue) 30% 24%); border-color: hsl(var(--hue) 35% 42%); }
+:root[data-theme='dark'] .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
+:root[data-theme='light'] .tl-block { background: hsl(var(--hue) 60% 92%); border-color: hsl(var(--hue) 55% 60%); }
+:root[data-theme='light'] .tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
 .route-day { margin: 0 0 1rem; }
 .route-day h3 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--ink-2); text-transform: capitalize; }
 .route-list { list-style: none; margin: 0; padding: 0; }

@@ -14,11 +14,14 @@ import type { Ui } from './route-render.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
 import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
+import { PX_PER_MIN, renderTimeline } from './route-timeline.ts';
+import { snapMinutes, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 
 const drawMap = makeMapDrawer();
-let payload: Payload = { mode: 'walking', groups: [], durations: {} };
+let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {} };
 let byId: ReadonlyMap<string, CompactEvent> = new Map();
 let favourites: ReadonlySet<string> = new Set();
+let view: 'list' | 'timeline' = 'list';
 
 /* ── owner favourites (server island + this device's localStorage) ─────── */
 
@@ -97,13 +100,25 @@ const dayHtml = (day: RouteDay, lang: Locale, ui: Ui): string => {
   return `<section class="route-day" data-day="${esc(day.day)}"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${rows}</ul>${add}</section>`;
 };
 
+const viewToggle = (ui: Ui): string =>
+  `<div class="route-views" role="group">` +
+  `<button type="button" class="chip" data-route-view="list" aria-pressed="${view === 'list'}">${esc(ui.route.viewList)}</button>` +
+  `<button type="button" class="chip" data-route-view="timeline" aria-pressed="${view === 'timeline'}">${esc(ui.route.viewTimeline)}</button>` +
+  `</div>`;
+
 function render(): void {
   const output = document.querySelector<HTMLElement>('[data-route-output]');
   if (!output) return;
   const { lang, ui } = readUiIsland();
   const days = routeFromGroups(payload.groups, payload.mode, byId);
   counter = 0;
-  output.innerHTML = days.length > 0 ? days.map((d) => dayHtml(d, lang, ui)).join('') : `<p class="feed-empty">${esc(ui.route.empty)}</p>`;
+  const body =
+    days.length === 0
+      ? `<p class="feed-empty">${esc(ui.route.empty)}</p>`
+      : view === 'timeline'
+        ? renderTimeline(days, payload, byId, lang)
+        : days.map((d) => dayHtml(d, lang, ui)).join('');
+  output.innerHTML = viewToggle(ui) + body;
   drawMap(days);
 }
 
@@ -137,6 +152,12 @@ const onClick = (event: MouseEvent): void => {
     void saveEdits();
     return;
   }
+  const viewBtn = target.closest<HTMLElement>('[data-route-view]');
+  if (viewBtn) {
+    view = viewBtn.dataset['routeView'] === 'timeline' ? 'timeline' : 'list';
+    render();
+    return;
+  }
   const btn = target.closest<HTMLElement>('[data-op]');
   if (!btn || btn.tagName === 'SELECT') return;
   const id = btn.dataset['id'] ?? '';
@@ -162,6 +183,68 @@ const onChange = (event: Event): void => {
   }
 };
 
+/* ── timeline drag / resize ────────────────────────────────────────────── */
+
+// During a drag the block element is mutated in place (not re-rendered), so the
+// pointer capture survives; the override is committed and the day re-scheduled
+// only on release.
+type Drag = Readonly<{ id: string; kind: 'move' | 'resize'; startY: number; origTop: number; origStart: number; origDur: number; el: HTMLElement }>;
+let drag: Drag | undefined;
+let dragStart = 0;
+let dragDur = 0;
+
+const setLabel = (el: HTMLElement, startMin: number, durMin: number): void => {
+  const label = el.querySelector('.tl-time');
+  if (label) label.textContent = `${timeOfMinutes(startMin)}–${timeOfMinutes(startMin + durMin)}`;
+};
+
+const onPointerDown = (event: PointerEvent): void => {
+  const target = event.target instanceof Element ? event.target : undefined;
+  const block = target?.closest<HTMLElement>('.tl-block');
+  if (!block) return;
+  const origStart = Number(block.dataset['tlStart']);
+  const origDur = Number(block.dataset['tlDur']);
+  drag = {
+    id: block.dataset['tlId'] ?? '',
+    kind: target?.closest('[data-tl-resize]') ? 'resize' : 'move',
+    startY: event.clientY,
+    origTop: Number.parseFloat(block.style.top) || 0,
+    origStart,
+    origDur,
+    el: block,
+  };
+  dragStart = origStart;
+  dragDur = origDur;
+  block.setPointerCapture(event.pointerId);
+  block.classList.add('tl-block--dragging');
+  event.preventDefault();
+};
+
+const onPointerMove = (event: PointerEvent): void => {
+  if (!drag) return;
+  const deltaMin = (event.clientY - drag.startY) / PX_PER_MIN;
+  if (drag.kind === 'move') {
+    dragStart = Math.max(0, snapMinutes(drag.origStart + deltaMin));
+    drag.el.style.top = `${drag.origTop + (dragStart - drag.origStart) * PX_PER_MIN}px`;
+  } else {
+    dragDur = Math.max(15, snapMinutes(drag.origDur + deltaMin));
+    drag.el.style.height = `${Math.max(20, dragDur * PX_PER_MIN)}px`;
+  }
+  setLabel(drag.el, dragStart, dragDur);
+};
+
+const onPointerUp = (): void => {
+  if (!drag) return;
+  const finished = drag;
+  drag = undefined;
+  finished.el.classList.remove('tl-block--dragging');
+  payload =
+    finished.kind === 'move'
+      ? { ...payload, times: { ...payload.times, [finished.id]: timeOfMinutes(dragStart) } }
+      : { ...payload, durations: { ...payload.durations, [finished.id]: dragDur } };
+  render();
+};
+
 const load = async (): Promise<void> => {
   const island = document.querySelector<HTMLElement>('#route-data')?.textContent;
   if (!island) return;
@@ -177,4 +260,7 @@ export const initRouteEditor = (): void => {
   wired = true;
   document.addEventListener('click', onClick);
   document.addEventListener('change', onChange);
+  document.addEventListener('pointerdown', onPointerDown);
+  document.addEventListener('pointermove', onPointerMove);
+  document.addEventListener('pointerup', onPointerUp);
 };

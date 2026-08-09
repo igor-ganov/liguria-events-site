@@ -51,6 +51,14 @@ export const haversineMeters = (a: readonly [number, number], b: readonly [numbe
   return 2 * EARTH_R * Math.asin(Math.sqrt(h));
 };
 
+/** Estimated travel time (minutes) between two points for the chosen mode —
+ *  the same estimate legs use, exposed for the timeline's auto-scheduling. */
+export const travelMinutesBetween = (
+  a: readonly [number, number],
+  b: readonly [number, number],
+  mode: Mode,
+): number => Math.max(1, Math.round(haversineMeters(a, b) / SPEED_MPS[mode] / 60));
+
 /** Google Maps directions deep-link between two points for the chosen mode. */
 export const mapsDirUrl = (
   from: readonly [number, number],
