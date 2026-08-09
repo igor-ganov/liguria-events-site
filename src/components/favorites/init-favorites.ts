@@ -3,6 +3,8 @@
 // mirrored back to localStorage so the two never diverge. Toggling is delegated
 // (one document listener) so it covers cards rendered now and after any SPA nav.
 
+import { deleteFavPoi, parseFavPoiAttr, setFavPoi } from '../../lib/favorites/fav-pois.ts';
+
 const KEY = 'dovego:favorites';
 
 export const readFavorites = (): ReadonlySet<string> => {
@@ -44,10 +46,19 @@ const send = async (method: string, body: object): Promise<Response | undefined>
   }
 };
 
-const toggle = (id: string): void => {
+const toggle = (btn: HTMLElement): void => {
+  const id = btn.dataset['favId'] ?? '';
+  if (id === '') return;
   const turningOn = !favs.has(id);
-  if (turningOn) favs.add(id);
-  else favs.delete(id);
+  if (turningOn) {
+    favs.add(id);
+    // A landmark/place button carries its render data; stash it (events don't).
+    const poi = parseFavPoiAttr(btn.dataset['favPoi']);
+    if (poi) setFavPoi(poi);
+  } else {
+    favs.delete(id);
+    deleteFavPoi(id);
+  }
   persist();
   paint();
   if (loggedIn) void send(turningOn ? 'POST' : 'DELETE', { event: id });
@@ -87,7 +98,7 @@ export const initFavorites = (): void => {
         if (!(btn instanceof HTMLElement)) return;
         event.preventDefault();
         event.stopPropagation();
-        toggle(btn.dataset['favId'] ?? '');
+        toggle(btn);
       },
       true,
     );

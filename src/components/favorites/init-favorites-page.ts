@@ -1,8 +1,10 @@
 import { html, render } from 'lit';
 import { renderMiniCard } from '../shared/render-mini-card.ts';
+import { renderPoiCard } from '../shared/render-poi-card.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 import { readFavorites } from './init-favorites.ts';
+import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
@@ -37,11 +39,19 @@ const paint = async (): Promise<void> => {
   // the events that resolve.
   if (emptyEl) emptyEl.hidden = ids.size > 0;
   if (toolsEl) toolsEl.hidden = ids.size === 0;
+  // Favourited landmarks/places render from the local fav-pois store (their id
+  // doesn't encode a region, so we can't look them up in the corpus).
+  const pois = Object.values(readFavPois()).filter((p) => ids.has(p.id));
   const events = await fetchCorpus();
   const favs = events
     .filter((event) => ids.has(event.id))
     .toSorted((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : 0));
-  if (listEl) render(html`${favs.map((event) => renderMiniCard(event, island.ui, island.lang))}`, listEl);
+  if (listEl) {
+    render(
+      html`${pois.map((poi) => renderPoiCard(poi, island.ui))}${favs.map((event) => renderMiniCard(event, island.ui, island.lang))}`,
+      listEl,
+    );
+  }
 };
 
 let listening = false;

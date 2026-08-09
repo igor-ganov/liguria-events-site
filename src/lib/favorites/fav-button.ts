@@ -6,9 +6,14 @@ export const HEART =
   '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
   '<path d="M12 20.3l-1.4-1.3C5.4 14.2 2 11.2 2 7.5 2 5 4 3 6.5 3c1.7 0 3.3.9 4.5 2.3C12.2 3.9 13.8 3 15.5 3 18 3 20 5 20 7.5c0 3.7-3.4 6.7-8.6 11.5L12 20.3z"/></svg>';
 
+import type { FavPoi } from './fav-pois.ts';
+
 const esc = (s: string): string => s.replace(/[<>&"]/g, (c) => `&#${c.charCodeAt(0)};`);
 
-/** A compact heart toggle for a card corner. `label` is the accessible name. */
-export const favButtonHtml = (id: string, label: string): string =>
+/** A compact heart toggle for a card corner. `label` is the accessible name.
+ *  For a landmark/place, pass `poi` so the toggle can stash what it needs to
+ *  render the favourite later (a POI id doesn't encode its region). */
+export const favButtonHtml = (id: string, label: string, poi?: FavPoi): string =>
   `<button type="button" class="fav-btn" data-fav-toggle data-fav-id="${esc(id)}" aria-pressed="false" ` +
+  (poi ? `data-fav-poi="${esc(JSON.stringify(poi))}" ` : '') +
   `aria-label="${esc(label)}" title="${esc(label)}">${HEART}</button>`;

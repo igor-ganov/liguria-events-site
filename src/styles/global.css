@@ -548,6 +548,11 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .fav-btn svg { fill: none; stroke: currentColor; stroke-width: 1.9; }
 .fav-btn[aria-pressed='true'] { background: hsl(350 78% 52%); }
 .fav-btn[aria-pressed='true'] svg { fill: currentColor; }
+/* Heart in a detail-page header: inline next to the title, not a card corner. */
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.detail-head > h1 { margin: 0; }
+.detail-head .fav-btn { position: static; flex: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.detail-head .fav-btn[aria-pressed='true'] { background: hsl(350 78% 52%); color: #fff; border-color: transparent; }
 .event-fav {
   display: inline-flex; align-items: center; gap: 0.45rem; margin: 0 0 1.1rem;
   padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700; cursor: pointer;

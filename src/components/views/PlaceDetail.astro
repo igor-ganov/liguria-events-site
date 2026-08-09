@@ -11,6 +11,7 @@ import { commonsImg } from '../../lib/img/commons-img.ts';
 import { slug } from '../../lib/slug.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { uiIcon } from '../../lib/icons/ui-icon.ts';
+import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 // Worker-SSR'd (prerender = false): the record is looked up server-side from the
@@ -32,6 +33,12 @@ const mapUrl = place
   : '';
 const embedSrc = place ? `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=15&output=embed` : '';
 const sources = place ? placeSources(place) : [];
+const favHtml = place
+  ? favButtonHtml(place.id, ui.nav.favorites, {
+      id: place.id, kind: 'place', region: place.region, name: place.name,
+      lat: place.lat, lng: place.lng, cat: place.cat, url: localizedUrl(lang, path),
+    })
+  : '';
 const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.', ru: 'Место не найдено.' }[lang];
 
 // Our own reviews (D1): summary + recent list, and the caller's own review if
@@ -56,7 +63,10 @@ const stars = (r: number): string =>
               <img src={commonsImg(place.img, 1024)} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
             </figure>
           )}
-          <h1>{place.name}</h1>
+          <div class="detail-head">
+            <h1>{place.name}</h1>
+            <Fragment set:html={favHtml} />
+          </div>
           <div class="event-tags">
             <span class="cat-tag lm-tag" style={`--lm:${placeColor(place.cat)}`}>
               <Fragment set:html={placeIcon(place.cat, 13)} /> {ui.places.categories[place.cat]}
