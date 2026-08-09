@@ -11,8 +11,10 @@ import type { Ui } from '../../lib/i18n/ui-schema.ts';
 // Its data comes from the fav-pois store (captured when favourited), so no shard
 // is loaded. The whole card links to the POI's detail page.
 const label = (poi: FavPoi, ui: Ui): string => {
-  const dict = branch(poi.kind === 'place')(() => ui.places.categories, () => ui.landmarks.kinds);
-  const found = Reflect.get(dict, poi.cat);
+  const found = branch(poi.kind === 'place')(
+    () => Reflect.get(ui.places.categories, poi.cat),
+    () => Reflect.get(ui.landmarks.kinds, poi.cat),
+  );
   return branch(typeof found === 'string')(() => String(found), () => poi.cat);
 };
 
