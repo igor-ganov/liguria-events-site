@@ -15,6 +15,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 import { commonsImg } from '../src/lib/img/commons-img.ts';
+import { isJunkImage } from '../src/lib/img/is-junk-image.ts';
 
 const UA = 'DoveGo-landmarks/1.0 (https://dovego.it; igor.ganov@gmail.com)';
 // One region per invocation (CI matrixes over all 20); no arg → every region.
@@ -90,6 +91,13 @@ const qid = (uri: string): string => uri.split('/').pop() ?? uri;
 const commons = (url: string): string =>
   `${url}${url.includes('?') ? '&' : '?'}width=800`;
 
+// A Wikidata P18 image only when it's a real photo — reject infobox maps,
+// flags and coats of arms that P18 sometimes points at.
+const photoCell = (row: Row): string | undefined => {
+  const url = cell(row, 'image');
+  return url && !isJunkImage(url) ? commons(url) : undefined;
+};
+
 type WdEntry = Landmark & { enTitle?: string; itTitle?: string; ruTitle?: string };
 
 const fetchWikidata = async (region: string): Promise<Map<string, WdEntry>> => {
@@ -114,7 +122,7 @@ const fetchWikidata = async (region: string): Promise<Map<string, WdEntry>> => {
     if (existing) {
       const rank = (k: Kind): number => Object.values(WD_KIND).indexOf(k);
       if (rank(kind) < rank(existing.kind)) existing.kind = kind;
-      existing.img ??= cell(row, 'image') ? commons(cell(row, 'image') ?? '') : undefined;
+      existing.img ??= photoCell(row);
       continue;
     }
     out.set(id, {
@@ -124,7 +132,7 @@ const fetchWikidata = async (region: string): Promise<Map<string, WdEntry>> => {
       lng: Number(cell(row, 'lon')),
       kind,
       region,
-      img: cell(row, 'image') ? commons(cell(row, 'image') ?? '') : undefined,
+      img: photoCell(row),
       wd: `https://www.wikidata.org/wiki/${id}`,
       src: ['wikidata'],
       enTitle: cell(row, 'enTitle'),
@@ -409,7 +417,7 @@ const build = async (region: string): Promise<Landmark[]> => {
       wikiAny = true;
       const ex = extracts[lang].get(title);
       if (ex?.extract) { desc[lang] = ex.extract; any = true; }
-      if (!l.img && ex?.thumb) l.img = ex.thumb;
+      if (!l.img && ex?.thumb && !isJunkImage(ex.thumb)) l.img = ex.thumb;
     }
     if (any) { desc.en ||= desc.it ?? desc.ru ?? ''; l.desc = desc; }
     if (wikiAny) { wiki.en ||= wiki.it ?? wiki.ru ?? ''; l.wiki = wiki; }

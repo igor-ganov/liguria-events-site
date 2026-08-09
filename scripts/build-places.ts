@@ -15,6 +15,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 import { commonsImg } from '../src/lib/img/commons-img.ts';
+import { isJunkImage } from '../src/lib/img/is-junk-image.ts';
 import { indexLandmarks, isLandmarkDuplicate, type LandmarkPoint } from './lib/place-landmark-dup.ts';
 
 const UA = 'DoveGo-places/1.0 (https://dovego.it; igor.ganov@gmail.com)';
@@ -199,7 +200,7 @@ const readOsm = async (region: string): Promise<Place[]> => {
       cat,
       region,
       website: t['website'] ?? t['contact:website'] ?? undefined,
-      img: t['image'] ?? undefined,
+      img: t['image'] && !isJunkImage(t['image']) ? t['image'] : undefined,
       ...(clean(t['phone']) ?? clean(t['contact:phone']) ? { phone: clean(t['phone']) ?? clean(t['contact:phone']) } : {}),
       ...(socials.length > 0 ? { socials } : {}),
       ...(address ? { address } : {}),
@@ -346,7 +347,10 @@ const enrich = async (places: Place[]): Promise<void> => {
   const images = await fetchWikidataImages(qids);
   for (const p of places) {
     const qid = (p as Place & { qid?: string }).qid;
-    if (qid && !p.img && images.has(qid)) p.img = images.get(qid);
+    if (qid && !p.img) {
+      const cand = images.get(qid);
+      if (cand && !isJunkImage(cand)) p.img = cand;
+    }
   }
   const extracts: Record<Lang, Map<string, { extract?: string; thumb?: string }>> = {
     en: await fetchExtracts('en', titles.en),
@@ -361,7 +365,7 @@ const enrich = async (places: Place[]): Promise<void> => {
       const title = titleOf[lang].get(p.id);
       const ex = title ? extracts[lang].get(title) : undefined;
       if (ex?.extract) desc[lang] = ex.extract;
-      if (!p.img && ex?.thumb) p.img = ex.thumb;
+      if (!p.img && ex?.thumb && !isJunkImage(ex.thumb)) p.img = ex.thumb;
     }
     if (desc.en || desc.it || desc.ru) p.desc = desc;
   }
@@ -390,7 +394,7 @@ const localize = (p: Place, lang: Lang) => ({
   ...(p.address ? { ad: p.address } : {}),
   ...(pick(p.wiki, lang) ? { k: pick(p.wiki, lang) } : {}),
   ...(p.wd ? { q: p.wd } : {}),
-  ...(p.img ? { m: commonsImg(p.img, 800) } : {}),
+  ...(p.img && !isJunkImage(p.img) ? { m: commonsImg(p.img, 800) } : {}),
 });
 
 // Cloudflare Workers reject any single asset over 25 MiB, and a 25 MB shard is

@@ -1,6 +1,7 @@
 import { PLACE_CATEGORIES } from './place-categories.ts';
 import type { PlaceCategory } from './place-categories.ts';
 import type { Place } from './place-schema.ts';
+import { isJunkImage } from '../img/is-junk-image.ts';
 
 // The asset is compact rows (short keys, absent fields omitted) — see
 // scripts/build-places.ts. Expand into readable Place objects; region is always
@@ -20,7 +21,7 @@ const toPlace = (region: string) => (r: Row): Place[] =>
         ...(r.ad ? { address: r.ad } : {}),
         ...(r.k ? { wiki: r.k } : {}),
         ...(r.q ? { wd: r.q } : {}),
-        ...(r.m ? { img: r.m } : {}),
+        ...(r.m && !isJunkImage(r.m) ? { img: r.m } : {}),
       }]
     : [];
 
