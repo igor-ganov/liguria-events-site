@@ -29,13 +29,18 @@ const paint = async (): Promise<void> => {
   const listEl = document.querySelector<HTMLElement>('[data-fav-list]');
   const emptyEl = document.querySelector<HTMLElement>('[data-fav-empty]');
   const toolsEl = document.querySelector<HTMLElement>('[data-fav-tools]');
-  const events = await fetchCorpus();
   const ids = readFavorites();
+  // Gate the route tools on whether the user HAS favourites, not on whether the
+  // corpus currently resolves them. Otherwise a slow/failed corpus fetch, or
+  // favourites whose events have rolled off it, hides the whole toolbar — the
+  // "Generate route button disappeared" bug. The list below still shows only
+  // the events that resolve.
+  if (emptyEl) emptyEl.hidden = ids.size > 0;
+  if (toolsEl) toolsEl.hidden = ids.size === 0;
+  const events = await fetchCorpus();
   const favs = events
     .filter((event) => ids.has(event.id))
     .toSorted((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : 0));
-  if (emptyEl) emptyEl.hidden = favs.length > 0;
-  if (toolsEl) toolsEl.hidden = favs.length === 0;
   if (listEl) render(html`${favs.map((event) => renderMiniCard(event, island.ui, island.lang))}`, listEl);
 };
 

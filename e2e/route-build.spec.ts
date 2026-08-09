@@ -32,3 +32,18 @@ test('route builds after opening Favourites via the SPA router', async ({ page }
   await expect(page.locator('.route-leg')).toHaveCount(1);
   await expect(page.locator('.route-leg a[href*="travelmode=driving"]')).toBeVisible();
 });
+
+// The route tools must stay visible for anyone who has favourites — even when
+// the corpus can't be loaded (bot worker down/slow) or every favourited event
+// has rolled off it. The old gate hid the whole toolbar (and the Generate
+// button with it) whenever nothing resolved, so the button "randomly
+// disappeared". Aborting the corpus fetch reproduces that.
+test('route tools stay visible when favourites exist but the corpus is unavailable', async ({ page }) => {
+  await page.route('**/events.json*', (route) => route.abort());
+
+  await page.goto('/favorites/');
+  await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1'])));
+  await page.goto('/favorites/');
+
+  await expect(page.locator('[data-route-generate]')).toBeVisible();
+});
