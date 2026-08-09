@@ -17,9 +17,10 @@ import type { Payload } from './route-payload.ts';
 import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
 import { PX_PER_MIN, renderTimeline } from './route-timeline.ts';
 import { snapMinutes, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+import { writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
 const drawMap = makeMapDrawer();
-let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {}, pois: {} };
+let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {}, pois: {}, dayStart: '', dayEnd: '', dayHours: {} };
 let byId: ReadonlyMap<string, RouteStop> = new Map();
 let favourites: ReadonlySet<string> = new Set();
 // POI data for resolving stops — the route's embedded pois plus this device's
@@ -110,6 +111,15 @@ const viewToggle = (ui: Ui): string =>
   `<button type="button" class="chip" data-route-view="timeline" aria-pressed="${view === 'timeline'}">${esc(ui.route.viewTimeline)}</button>` +
   `</div>`;
 
+// Route-level day window + a "set as my default" toggle that writes the global.
+// Per-day overrides live on each timeline day header.
+const dayHoursControl = (ui: Ui): string =>
+  `<div class="route-dayhours no-print">` +
+  `<label>${esc(ui.route.day)} <input type="time" data-route-day-start value="${esc(payload.dayStart)}" aria-label="${esc(ui.route.day)}" />` +
+  `–<input type="time" data-route-day-end value="${esc(payload.dayEnd)}" aria-label="${esc(ui.route.day)}" /></label>` +
+  `<label class="route-dayhours-def"><input type="checkbox" data-route-day-default /> ${esc(ui.route.setDefault)}</label>` +
+  `</div>`;
+
 function render(): void {
   const output = document.querySelector<HTMLElement>('[data-route-output]');
   if (!output) return;
@@ -122,7 +132,7 @@ function render(): void {
       : view === 'timeline'
         ? renderTimeline(days, payload, byId, lang)
         : days.map((d) => dayHtml(d, lang, ui)).join('');
-  output.innerHTML = viewToggle(ui) + body;
+  output.innerHTML = viewToggle(ui) + dayHoursControl(ui) + body;
   drawMap(days);
 }
 
@@ -189,7 +199,37 @@ const onChange = (event: Event): void => {
   }
   if (el instanceof HTMLInputElement && el.hasAttribute('data-dur-input')) {
     setDuration(el.dataset['durId'] ?? '', Math.max(15, Math.round(Number(el.value) || 0)));
+    return;
   }
+  if (el instanceof HTMLInputElement && (el.hasAttribute('data-day-start') || el.hasAttribute('data-day-end'))) {
+    setDayHours(el.dataset['day'] ?? '', el);
+    return;
+  }
+  if (el instanceof HTMLInputElement && (el.hasAttribute('data-route-day-start') || el.hasAttribute('data-route-day-end'))) {
+    setRouteDayHours();
+  }
+};
+
+// A per-day window override → payload.dayHours[day] (needs both ends set).
+const setDayHours = (day: string, changed: HTMLInputElement): void => {
+  const box = changed.closest('.tl-day-hours') ?? document;
+  const start = box.querySelector<HTMLInputElement>('[data-day-start]')?.value ?? '';
+  const end = box.querySelector<HTMLInputElement>('[data-day-end]')?.value ?? '';
+  const dayHours = { ...payload.dayHours };
+  if (start !== '' && end !== '') dayHours[day] = { start, end };
+  else delete dayHours[day];
+  payload = { ...payload, dayHours };
+  render();
+};
+
+// The route-level window; "set as default" also persists it as the global.
+const setRouteDayHours = (): void => {
+  const start = document.querySelector<HTMLInputElement>('[data-route-day-start]')?.value ?? '';
+  const end = document.querySelector<HTMLInputElement>('[data-route-day-end]')?.value ?? '';
+  payload = { ...payload, dayStart: start, dayEnd: end };
+  const asDefault = document.querySelector<HTMLInputElement>('[data-route-day-default]')?.checked === true;
+  if (asDefault && start !== '' && end !== '') writeGlobalDayHours({ start, end });
+  render();
 };
 
 /* ── timeline drag / resize ────────────────────────────────────────────── */

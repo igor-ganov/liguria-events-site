@@ -9,15 +9,21 @@ import type { Durations } from './route-render.ts';
 import type { Times } from '../../lib/favorites/day-schedule.ts';
 import { parseFavPoiMap } from '../../lib/favorites/fav-pois.ts';
 import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
+import type { DayHours } from '../../lib/favorites/day-hours.ts';
 
 // `pois` embeds the data for any landmark/place stop in THIS route, so a shared
 // or cross-device viewer resolves it without the author's localStorage.
+// `dayStart`/`dayEnd` are this route's day window ('' = unset → global/default);
+// `dayHours` holds per-day overrides.
 export type Payload = Readonly<{
   mode: Mode;
   groups: readonly DayGroup[];
   durations: Durations;
   times: Times;
   pois: Readonly<Record<string, FavPoi>>;
+  dayStart: string;
+  dayEnd: string;
+  dayHours: Readonly<Record<string, DayHours>>;
 }>;
 
 const field = (obj: unknown, key: string): unknown => (Object(obj) === obj ? Reflect.get(Object(obj), key) : undefined);
@@ -40,6 +46,21 @@ const asTimes = (v: unknown): Times => {
   return out;
 };
 
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const asTime = (v: unknown): string => (typeof v === 'string' && TIME_RE.test(v) ? v : '');
+
+const asDayHours = (v: unknown): Readonly<Record<string, DayHours>> => {
+  const out: Record<string, DayHours> = {};
+  if (v && typeof v === 'object') {
+    for (const [day, h] of Object.entries(v)) {
+      const start = asTime(field(h, 'start'));
+      const end = asTime(field(h, 'end'));
+      if (start !== '' && end !== '') out[day] = { start, end };
+    }
+  }
+  return out;
+};
+
 const asGroups = (v: unknown): readonly DayGroup[] =>
   Array.isArray(v)
     ? v.flatMap((d) => {
@@ -58,6 +79,9 @@ export const parsePayload = (raw: string): Payload => {
     durations: asDurations(field(json, 'durations')),
     times: asTimes(field(json, 'times')),
     pois: parseFavPoiMap(field(json, 'pois')),
+    dayStart: asTime(field(json, 'dayStart')),
+    dayEnd: asTime(field(json, 'dayEnd')),
+    dayHours: asDayHours(field(json, 'dayHours')),
   };
 };
 
@@ -68,6 +92,9 @@ export const serializePayload = (p: Payload): string =>
     durations: p.durations,
     times: p.times,
     pois: p.pois,
+    dayStart: p.dayStart,
+    dayEnd: p.dayEnd,
+    dayHours: p.dayHours,
   });
 
 export const fetchCorpus = async (): Promise<readonly CompactEvent[]> => {

@@ -3,8 +3,9 @@
 // duration); overlapping stops share the day in separate lanes and turn red.
 // The drag/resize wiring lives in route-editor; this only produces the markup,
 // carrying each block's current start/duration in data-* for the drag maths.
-import { assignLanes, axisRange, buildDaySchedule, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+import { assignLanes, axisRange, buildDaySchedule, minutesOfTime, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { eventDuration } from '../../lib/favorites/event-duration.ts';
+import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import type { RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
@@ -23,10 +24,21 @@ const hourLines = (start: number, end: number): string => {
 };
 
 const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, RouteStop>, lang: Locale): string => {
-  const items = buildDaySchedule(day.stops, payload.mode, payload.times, payload.durations, DAY_START_MIN);
-  const { start, end } = axisRange(items, DAY_START_MIN);
+  // Effective day window: per-day override → this route's setting → global → default.
+  const routeHours = payload.dayStart !== '' && payload.dayEnd !== '' ? { start: payload.dayStart, end: payload.dayEnd } : undefined;
+  const hours = effectiveDayHours(day.day, payload.dayHours, routeHours, readGlobalDayHours());
+  const dayStartMin = minutesOfTime(hours.start) ?? DAY_START_MIN;
+  const dayEndMin = minutesOfTime(hours.end) ?? 22 * 60;
+  const items = buildDaySchedule(day.stops, payload.mode, payload.times, payload.durations, dayStartMin);
+  const range = axisRange(items, dayStartMin);
+  const start = range.start;
+  const end = Math.max(range.end, Math.ceil(dayEndMin / 60) * 60); // extend the axis to the day end
   const { lane, count } = assignLanes(items);
   const height = (end - start) * PX_PER_MIN;
+  const hoursCtl =
+    `<span class="tl-day-hours no-print">` +
+    `<input type="time" class="tl-hour-input" data-day-start data-day="${esc(day.day)}" value="${esc(hours.start)}" aria-label="day start" />` +
+    `–<input type="time" class="tl-hour-input" data-day-end data-day="${esc(day.day)}" value="${esc(hours.end)}" aria-label="day end" /></span>`;
   const blocks = items
     .map((it) => {
       const event = byId.get(it.id);
@@ -48,7 +60,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
     })
     .join('');
   return (
-    `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}</h3>` +
+    `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}${hoursCtl}</h3>` +
     `<div class="tl-axis" data-tl-axis style="height:${height}px">${hourLines(start, end)}${blocks}</div></section>`
   );
 };
