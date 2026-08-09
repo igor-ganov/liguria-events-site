@@ -29,8 +29,13 @@ const iconsJson = JSON.stringify(Object.fromEntries(CATEGORIES.map((c) => [c, ic
       <button class="route-save" data-route-save hidden>{ui.route.save}</button>
     </div>
   </div>
+  <p class="route-share" data-route-share hidden></p>
   <div class="route-map" data-route-map hidden></div>
   <div class="route-output" data-route-output></div>
+  <section class="route-mine" data-route-mine hidden>
+    <h2>{ui.route.mine}</h2>
+    <ul class="route-mine-list" data-route-mine-list></ul>
+  </section>
   <ul class="feed-list" data-fav-list></ul>
   <p class="feed-empty" data-fav-empty>{ui.route.empty}</p>
 </Layout>
@@ -40,9 +45,10 @@ const iconsJson = JSON.stringify(Object.fromEntries(CATEGORIES.map((c) => [c, ic
 <script>
   import { initFavoritesPage } from '../components/favorites/init-favorites-page.ts';
   import { initRoute } from '../components/favorites/init-route.ts';
+  import { initMyRoutes } from '../components/favorites/init-my-routes.ts';
   // Run for THIS visit (a ClientRouter swap runs this script after the swap,
   // and astro:page-load may already have fired), plus every later navigation.
-  const run = () => { initFavoritesPage(); initRoute(); };
+  const run = () => { initFavoritesPage(); initRoute(); initMyRoutes(); };
   run();
   document.addEventListener('astro:page-load', run);
 </script>

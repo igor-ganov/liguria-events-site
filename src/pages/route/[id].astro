@@ -1,0 +1,41 @@
+---
+// SSR (not prerendered): a saved route lives only in D1. A public route opens
+// for anyone with the link; a private one only for its owner. Anything else —
+// missing, or private and not yours — 404s without revealing it exists.
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { getRoute } from '../../lib/favorites/favorites-db.ts';
+
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+const { id } = Astro.params;
+const user = Astro.locals.user;
+const route = id ? await getRoute(Astro.locals.runtime.env.DB, id) : undefined;
+const allowed = route !== undefined && (route.public || route.userId === user?.id);
+if (!allowed) Astro.response.status = 404;
+const notFound = 'This route could not be found.';
+const title = allowed ? `${ui.route.title} · ${route.name}` : ui.route.title;
+---
+
+{
+  allowed ? (
+    <Layout lang={lang} title={title} path={`route/${id}`}>
+      <h1>{route.name}</h1>
+      <p class="route-by">{ui.route.by}</p>
+      <div class="route-map" data-route-map hidden />
+      <div class="route-output" data-route-output />
+      <script is:inline type="application/json" id="route-data" set:html={route.data} />
+      <script>
+        import { initRouteView } from '../../components/favorites/route-view.ts';
+        const run = () => initRouteView();
+        run();
+        document.addEventListener('astro:page-load', run);
+      </script>
+    </Layout>
+  ) : (
+    <Layout lang={lang} title={title}>
+      <p class="feed-empty">{notFound}</p>
+    </Layout>
+  )
+}
