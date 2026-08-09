@@ -62,7 +62,7 @@ export const PageDataSchema = Schema.Struct({
       private: Schema.String, public: Schema.String, makePrivate: Schema.String, makePublic: Schema.String,
       remove: Schema.String, title: Schema.String, by: Schema.String,
       moveDay: Schema.String, moveUp: Schema.String, moveDown: Schema.String, addFav: Schema.String, saveChanges: Schema.String,
-      viewList: Schema.String, viewTimeline: Schema.String,
+      viewList: Schema.String, viewTimeline: Schema.String, pdf: Schema.String,
     }),
     menu: Schema.Struct({ events: Schema.String, explore: Schema.String, more: Schema.String }),
     seo: Schema.Struct({ feed: Schema.String, calendar: Schema.String, map: Schema.String }),

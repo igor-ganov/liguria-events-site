@@ -28,13 +28,16 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
   allowed ? (
     <Layout lang={lang} title={title} path={`route/${id}`}>
       <h1>{route.name}</h1>
+      <div class="route-page-actions no-print">
+        <button class="chip" type="button" data-route-pdf>{ui.route.pdf}</button>
+      </div>
       {owned ? (
-        <div class="route-edit-actions" data-route-edit-actions>
+        <div class="route-edit-actions no-print" data-route-edit-actions>
           <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
           <span class="route-edit-status" data-route-edit-status />
         </div>
       ) : (
-        <p class="route-by">{ui.route.by}</p>
+        <p class="route-by no-print">{ui.route.by}</p>
       )}
       <div class="route-map" data-route-map hidden />
       <div class="route-output" data-route-output />
@@ -52,6 +55,12 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
         };
         run();
         document.addEventListener('astro:page-load', run);
+        // "Download PDF" = the browser's print → Save as PDF, styled by the
+        // print stylesheet. One document-level listener survives SPA nav.
+        document.addEventListener('click', (e) => {
+          const t = e.target;
+          if (t instanceof Element && t.closest('[data-route-pdf]')) window.print();
+        });
       </script>
     </Layout>
   ) : (

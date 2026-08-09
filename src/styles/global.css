@@ -643,6 +643,25 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 :root[data-theme='dark'] .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
 :root[data-theme='light'] .tl-block { background: hsl(var(--hue, 30) 60% 92%); border-color: hsl(var(--hue, 30) 55% 60%); }
 :root[data-theme='light'] .tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
+
+/* Route → PDF: the browser's Save-as-PDF, with the site chrome and interactive
+ * controls stripped so the itinerary prints clean on white paper. */
+.route-page-actions { margin: 0 0 1rem; }
+@media print {
+  .site-head, footer, .site-foot, .no-print, .route-map, .route-views,
+  .route-edit-controls, .route-add, .dur-input, .route-mine, .fab-toggle,
+  .fab-popup, .route-page-actions { display: none !important; }
+  :root { background: #fff; }
+  body { background: #fff; color: #000; }
+  main { max-width: 100%; margin: 0; padding: 0; }
+  a { color: #000; text-decoration: none; }
+  h1 { margin: 0 0 0.5rem; }
+  .route-day { break-inside: avoid; }
+  .route-stop { break-inside: avoid; }
+  .route-span, .route-stop-time, .route-leg a, .route-num { color: #000; }
+  .route-num { background: #000; color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .route-stop-dur { color: #000; }
+}
 .route-day { margin: 0 0 1rem; }
 .route-day h3 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--ink-2); text-transform: capitalize; }
 .route-list { list-style: none; margin: 0; padding: 0; }
