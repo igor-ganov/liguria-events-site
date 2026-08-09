@@ -1,6 +1,6 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { buildRoute, mapsDirUrl } from '../src/lib/favorites/build-route.ts';
+import { buildRoute, mapsDirUrl, routeFromGroups } from '../src/lib/favorites/build-route.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const ev = (o: Partial<CompactEvent> & Pick<CompactEvent, 'id' | 't' | 's'>): CompactEvent => ({
@@ -53,5 +53,39 @@ describe('buildRoute', () => {
     const a = ev({ id: 'a', t: 'A', s: '2026-07-10' });
     const b = ev({ id: 'b', t: 'B', s: '2026-07-25' });
     assert.equal(buildRoute([a, b], 'walking', { from: '2026-07-01' }).length, 2);
+  });
+});
+
+describe('routeFromGroups', () => {
+  const a = ev({ id: 'a', t: 'A', s: '2026-07-10', h: '21:00', g: [44.4, 8.94] });
+  const b = ev({ id: 'b', t: 'B', s: '2026-07-10', h: '18:00', g: [44.41, 8.93] });
+  const c = ev({ id: 'c', t: 'C', s: '2026-07-11', g: [44.4, 8.95] });
+  const byId = new Map<string, CompactEvent>([a, b, c].map((e) => [e.id, e]));
+
+  test('honours the saved order verbatim — no automatic re-ordering', () => {
+    // buildRoute would sort b(18:00) before a(21:00); the editor may have put a
+    // first, and that manual order must survive.
+    const route = routeFromGroups([{ day: '2026-07-10', ids: ['a', 'b'] }], 'walking', byId);
+    assert.deepEqual(route[0]?.stops.map((s) => s.id), ['a', 'b']);
+    assert.equal(route[0]?.legs.length, 1);
+    assert.ok((route[0]?.legs[0]?.meters ?? 0) > 0);
+  });
+
+  test('keeps the saved day grouping and drops ids no longer in the corpus', () => {
+    const route = routeFromGroups(
+      [
+        { day: '2026-07-10', ids: ['b'] },
+        { day: '2026-07-11', ids: ['gone', 'c'] },
+      ],
+      'walking',
+      byId,
+    );
+    assert.deepEqual(route.map((d) => d.day), ['2026-07-10', '2026-07-11']);
+    assert.deepEqual(route[1]?.stops.map((s) => s.id), ['c']); // 'gone' filtered out
+  });
+
+  test('a day left empty after filtering is dropped', () => {
+    const route = routeFromGroups([{ day: '2026-07-10', ids: ['gone'] }], 'walking', byId);
+    assert.equal(route.length, 0);
   });
 });

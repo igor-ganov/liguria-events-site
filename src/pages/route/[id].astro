@@ -1,34 +1,55 @@
 ---
 // SSR (not prerendered): a saved route lives only in D1. A public route opens
 // for anyone with the link; a private one only for its owner. Anything else —
-// missing, or private and not yours — 404s without revealing it exists.
+// missing, or private and not yours — 404s without revealing it exists. The
+// owner also gets an in-place editor (reorder / move / remove / add-from-
+// favourites); other viewers get the read-only view.
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
-import { getRoute } from '../../lib/favorites/favorites-db.ts';
+import { getRoute, listFavorites } from '../../lib/favorites/favorites-db.ts';
 
 const lang = 'en' as const;
 const ui = await uiOf(lang);
 const { id } = Astro.params;
 const user = Astro.locals.user;
-const route = id ? await getRoute(Astro.locals.runtime.env.DB, id) : undefined;
-const allowed = route !== undefined && (route.public || route.userId === user?.id);
+const db = Astro.locals.runtime.env.DB;
+const route = id ? await getRoute(db, id) : undefined;
+const owned = route !== undefined && route.userId === user?.id && user !== undefined;
+const allowed = route !== undefined && (route.public || owned);
 if (!allowed) Astro.response.status = 404;
 const notFound = 'This route could not be found.';
 const title = allowed ? `${ui.route.title} · ${route.name}` : ui.route.title;
+// The owner's favourite ids seed the editor's "add from favourites" picker.
+const favorites = owned && user ? await listFavorites(db, user.id) : [];
 ---
 
 {
   allowed ? (
     <Layout lang={lang} title={title} path={`route/${id}`}>
       <h1>{route.name}</h1>
-      <p class="route-by">{ui.route.by}</p>
+      {owned ? (
+        <div class="route-edit-actions" data-route-edit-actions>
+          <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
+          <span class="route-edit-status" data-route-edit-status />
+        </div>
+      ) : (
+        <p class="route-by">{ui.route.by}</p>
+      )}
       <div class="route-map" data-route-map hidden />
       <div class="route-output" data-route-output />
+      <div data-route-root data-owned={owned ? '1' : '0'} data-id={id} hidden />
       <script is:inline type="application/json" id="route-data" set:html={route.data} />
+      {owned && <script is:inline type="application/json" id="route-favorites" set:html={JSON.stringify(favorites)} />}
       <script>
         import { initRouteView } from '../../components/favorites/route-view.ts';
-        const run = () => initRouteView();
+        import { initRouteEditor } from '../../components/favorites/route-editor.ts';
+        // The owner edits in place; everyone else gets the read-only render.
+        const run = () => {
+          const owned = document.querySelector('[data-route-root]')?.getAttribute('data-owned') === '1';
+          if (owned) initRouteEditor();
+          else initRouteView();
+        };
         run();
         document.addEventListener('astro:page-load', run);
       </script>

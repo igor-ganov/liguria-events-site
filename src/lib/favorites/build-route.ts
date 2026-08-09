@@ -17,6 +17,10 @@ export type Leg = Readonly<{
 
 export type RouteDay = Readonly<{ day: string; stops: readonly CompactEvent[]; legs: readonly Leg[] }>;
 
+/** A saved route's explicit arrangement: one entry per day, event ids in the
+ *  exact order the user arranged them. */
+export type DayGroup = Readonly<{ day: string; ids: readonly string[] }>;
+
 /** The trip window. `from` is the first day (the caller defaults it to today);
  *  `to` is optional — without it the trip runs to the last favourited day. */
 export type DateRange = Readonly<{ from: string; to?: string }>;
@@ -29,6 +33,12 @@ const inRange = (event: CompactEvent, range: DateRange): boolean =>
 // running when the trip begins (an ongoing multi-day event).
 const displayDay = (event: CompactEvent, from: string): string =>
   event.s > from ? event.s : from;
+
+/** Whether an event can be scheduled on a given ISO day — its span [s, e]
+ *  (single-day when `e` is absent) must cover that day. Governs which days a
+ *  stop may be moved to and where a favourite may be added. */
+export const eventAvailableOn = (event: CompactEvent, day: string): boolean =>
+  event.s <= day && day <= (event.e ?? event.s);
 
 const EARTH_R = 6371000;
 const rad = (d: number): number => (d * Math.PI) / 180;
@@ -121,3 +131,23 @@ export const buildRoute = (
       return { day, stops, legs };
     });
 };
+
+/** Build the itinerary from an explicit, user-arranged set of day groups —
+ *  the saved/edited shape. Unlike buildRoute this preserves the exact order
+ *  within each day (no re-sorting); ids missing from `byId` (events that have
+ *  since left the corpus) drop out, and a day left empty is removed. */
+export const routeFromGroups = (
+  groups: readonly DayGroup[],
+  mode: Mode,
+  byId: ReadonlyMap<string, CompactEvent>,
+): readonly RouteDay[] =>
+  groups
+    .map((group) => {
+      const stops = group.ids.flatMap((id) => {
+        const event = byId.get(id);
+        return event ? [event] : [];
+      });
+      const legs = stops.slice(1).map((stop, i) => legBetween(stops[i]!, stop, mode));
+      return { day: group.day, stops, legs };
+    })
+    .filter((day) => day.stops.length > 0);

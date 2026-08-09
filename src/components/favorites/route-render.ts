@@ -28,14 +28,16 @@ export const dayLabel = (iso: string, lang: Locale): string => {
 
 const km = (m: number): string => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 
-const legHtml = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): string =>
+export const renderLeg = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): string =>
   `<li class="route-leg${leg.tight ? ' route-leg--tight' : ''}">` +
   `<span class="route-leg-mode" data-mode="${mode}"></span>` +
   `<span>${km(leg.meters)} · ${leg.minutes} ${esc(ui.route.min)}${leg.tight ? ` · ⚠ ${esc(ui.route.tight)}` : ''}</span>` +
   (leg.mapsUrl ? ` <a href="${leg.mapsUrl}" target="_blank" rel="noopener">Google&nbsp;Maps ↗</a>` : '') +
   `</li>`;
 
-const stopHtml = (event: CompactEvent, n: number, lang: Locale, overrides: Durations): string => {
+/** The stop's inner content (title + meta), shared by the read-only itinerary
+ *  and the owner editor, which each wrap it with their own <li>/controls. */
+export const stopBody = (event: CompactEvent, lang: Locale, overrides: Durations): string => {
   const time = event.h ? `<span class="route-stop-time">${esc(event.h)}</span>` : '';
   const venue = event.v ? `<span class="route-stop-venue">${esc(event.v)}</span>` : '';
   const dur = eventDuration(event, overrides[event.id]);
@@ -44,11 +46,13 @@ const stopHtml = (event: CompactEvent, n: number, lang: Locale, overrides: Durat
     `<input type="number" class="dur-input" data-dur-input data-dur-id="${esc(event.id)}" ` +
     `value="${dur}" min="15" step="15" aria-label="Duration in minutes" /></span>`;
   return (
-    `<li class="route-stop"><span class="route-num">${n}</span>` +
     `<div><a href="${localizedUrl(lang, eventPath(event.id))}">${esc(titleOf(lang)(event))}</a>` +
-    `<div class="route-stop-meta">${time}${venue}${duration}</div></div></li>`
+    `<div class="route-stop-meta">${time}${venue}${duration}</div></div>`
   );
 };
+
+const stopHtml = (event: CompactEvent, n: number, lang: Locale, overrides: Durations): string =>
+  `<li class="route-stop"><span class="route-num">${n}</span>${stopBody(event, lang, overrides)}</li>`;
 
 export const renderItinerary = (
   days: readonly RouteDay[],
@@ -63,7 +67,7 @@ export const renderItinerary = (
       const rows = day.stops
         .map((stop, i) => {
           n += 1;
-          const leg = i > 0 ? legHtml(day.legs[i - 1]!, mode, ui) : '';
+          const leg = i > 0 ? renderLeg(day.legs[i - 1]!, mode, ui) : '';
           return leg + stopHtml(stop, n, lang, overrides);
         })
         .join('');

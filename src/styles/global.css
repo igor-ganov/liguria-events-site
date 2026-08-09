@@ -595,6 +595,22 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .route-mine-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .route-mine-row > a { font-weight: 600; margin-right: auto; }
 .route-mine-status { font-size: 0.8rem; color: var(--muted); }
+.route-edit-actions { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 1rem; }
+.route-edit-status { font-size: 0.85rem; color: var(--muted); }
+.route-stop--edit .route-stop-main { display: flex; flex-direction: column; gap: 0.3rem; }
+.route-edit-controls { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.route-ctl {
+  display: inline-grid; place-items: center; min-width: 1.9rem; height: 1.9rem; padding: 0 0.4rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
+  font: inherit; font-size: 0.9rem; cursor: pointer;
+}
+.route-ctl:disabled { opacity: 0.4; cursor: default; }
+.route-ctl--del { color: #e5484d; }
+.route-move, .route-add > select {
+  font: inherit; font-size: 0.85rem; padding: 0.25rem 0.4rem; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--surface); color: var(--ink);
+}
+.route-add { margin: 0.4rem 0 0.2rem; }
 .route-day { margin: 0 0 1rem; }
 .route-day h3 { font-size: 0.95rem; margin: 0 0 0.5rem; color: var(--ink-2); text-transform: capitalize; }
 .route-list { list-style: none; margin: 0; padding: 0; }
