@@ -31,17 +31,22 @@ const parsePoi = (v: unknown): FavPoi | undefined => {
   return { id, kind, region: str(field(v, 'region')) ?? 'liguria', name, lat, lng, cat: str(field(v, 'cat')) ?? '', url };
 };
 
+/** Parse a { id: FavPoi } map (from localStorage or an embedded route payload),
+ *  dropping any malformed entry. */
+export const parseFavPoiMap = (raw: unknown): Record<string, FavPoi> => {
+  const out: Record<string, FavPoi> = {};
+  if (raw && typeof raw === 'object') {
+    for (const value of Object.values(raw)) {
+      const poi = parsePoi(value);
+      if (poi) out[poi.id] = poi;
+    }
+  }
+  return out;
+};
+
 export const readFavPois = (): Readonly<Record<string, FavPoi>> => {
   try {
-    const raw: unknown = JSON.parse(localStorage.getItem(KEY) ?? '{}');
-    const out: Record<string, FavPoi> = {};
-    if (raw && typeof raw === 'object') {
-      for (const value of Object.values(raw)) {
-        const poi = parsePoi(value);
-        if (poi) out[poi.id] = poi;
-      }
-    }
-    return out;
+    return parseFavPoiMap(JSON.parse(localStorage.getItem(KEY) ?? '{}'));
   } catch {
     return {};
   }

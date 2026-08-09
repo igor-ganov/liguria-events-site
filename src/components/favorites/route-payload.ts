@@ -7,8 +7,18 @@ import { EVENTS_URL } from '../../data/events-url.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Durations } from './route-render.ts';
 import type { Times } from '../../lib/favorites/day-schedule.ts';
+import { parseFavPoiMap } from '../../lib/favorites/fav-pois.ts';
+import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
 
-export type Payload = Readonly<{ mode: Mode; groups: readonly DayGroup[]; durations: Durations; times: Times }>;
+// `pois` embeds the data for any landmark/place stop in THIS route, so a shared
+// or cross-device viewer resolves it without the author's localStorage.
+export type Payload = Readonly<{
+  mode: Mode;
+  groups: readonly DayGroup[];
+  durations: Durations;
+  times: Times;
+  pois: Readonly<Record<string, FavPoi>>;
+}>;
 
 const field = (obj: unknown, key: string): unknown => (Object(obj) === obj ? Reflect.get(Object(obj), key) : undefined);
 
@@ -47,11 +57,18 @@ export const parsePayload = (raw: string): Payload => {
     groups: asGroups(field(json, 'dayIds')),
     durations: asDurations(field(json, 'durations')),
     times: asTimes(field(json, 'times')),
+    pois: parseFavPoiMap(field(json, 'pois')),
   };
 };
 
 export const serializePayload = (p: Payload): string =>
-  JSON.stringify({ mode: p.mode, dayIds: p.groups.map((g) => ({ day: g.day, ids: [...g.ids] })), durations: p.durations, times: p.times });
+  JSON.stringify({
+    mode: p.mode,
+    dayIds: p.groups.map((g) => ({ day: g.day, ids: [...g.ids] })),
+    durations: p.durations,
+    times: p.times,
+    pois: p.pois,
+  });
 
 export const fetchCorpus = async (): Promise<readonly CompactEvent[]> => {
   try {

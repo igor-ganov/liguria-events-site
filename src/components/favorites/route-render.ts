@@ -7,13 +7,12 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import { brightStyle } from '../../lib/map/styles/bright-typed.ts';
 import { darkStyle } from '../../lib/map/styles/dark-typed.ts';
-import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
+import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import type { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 export type Ui = ReturnType<typeof readUiIsland>['ui'];
@@ -37,7 +36,7 @@ export const renderLeg = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): st
 
 /** The stop's inner content (title + meta), shared by the read-only itinerary
  *  and the owner editor, which each wrap it with their own <li>/controls. */
-export const stopBody = (event: CompactEvent, lang: Locale, overrides: Durations): string => {
+export const stopBody = (event: RouteStop, lang: Locale, overrides: Durations): string => {
   const time = event.h ? `<span class="route-stop-time">${esc(event.h)}</span>` : '';
   const venue = event.v ? `<span class="route-stop-venue">${esc(event.v)}</span>` : '';
   const dur = eventDuration(event, overrides[event.id]);
@@ -46,12 +45,12 @@ export const stopBody = (event: CompactEvent, lang: Locale, overrides: Durations
     `<input type="number" class="dur-input" data-dur-input data-dur-id="${esc(event.id)}" ` +
     `value="${dur}" min="15" step="15" aria-label="Duration in minutes" /></span>`;
   return (
-    `<div><a href="${localizedUrl(lang, eventPath(event.id))}">${esc(titleOf(lang)(event))}</a>` +
+    `<div><a href="${event.href ?? localizedUrl(lang, eventPath(event.id))}">${esc(titleOf(lang)(event))}</a>` +
     `<div class="route-stop-meta">${time}${venue}${duration}</div></div>`
   );
 };
 
-const stopHtml = (event: CompactEvent, n: number, lang: Locale, overrides: Durations): string =>
+const stopHtml = (event: RouteStop, n: number, lang: Locale, overrides: Durations): string =>
   `<li class="route-stop"><span class="route-num">${n}</span>${stopBody(event, lang, overrides)}</li>`;
 
 export const renderItinerary = (

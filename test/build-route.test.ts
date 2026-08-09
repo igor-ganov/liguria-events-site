@@ -1,7 +1,9 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { buildRoute, mapsDirUrl, routeFromGroups } from '../src/lib/favorites/build-route.ts';
+import { buildRoute, eventAvailableOn, mapsDirUrl, poiToStop, routeFromGroups } from '../src/lib/favorites/build-route.ts';
+import { eventDuration } from '../src/lib/favorites/event-duration.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
+import type { FavPoi } from '../src/lib/favorites/fav-pois.ts';
 
 const ev = (o: Partial<CompactEvent> & Pick<CompactEvent, 'id' | 't' | 's'>): CompactEvent => ({
   c: ['other'],
@@ -87,5 +89,33 @@ describe('routeFromGroups', () => {
   test('a day left empty after filtering is dropped', () => {
     const route = routeFromGroups([{ day: '2026-07-10', ids: ['gone'] }], 'walking', byId);
     assert.equal(route.length, 0);
+  });
+});
+
+describe('poiToStop', () => {
+  const poi: FavPoi = {
+    id: 'wd:Q1048820', kind: 'landmark', region: 'liguria', name: 'Castello di Campo Ligure',
+    lat: 44.5369, lng: 8.7, cat: 'castle', url: '/it/landmark/liguria/castello--x/',
+  };
+
+  test('resolves a POI to a stop: coords, own link, 60-min default, available any day', () => {
+    const stop = poiToStop(poi);
+    assert.deepEqual(stop.g, [44.5369, 8.7]);
+    assert.equal(stop.t, 'Castello di Campo Ligure');
+    assert.equal(stop.href, '/it/landmark/liguria/castello--x/');
+    assert.equal(eventDuration(stop, undefined), 60); // default attendance for a POI
+    assert.equal(eventAvailableOn(stop, '2026-07-10'), true);
+    assert.equal(eventAvailableOn(stop, '2030-01-01'), true); // no date → any day
+  });
+
+  test('a POI routes with events, its legs computed from coordinates', () => {
+    const event = ev({ id: 'e', t: 'E', s: '2026-07-10', g: [44.41, 8.93], h: '10:00' });
+    const route = routeFromGroups(
+      [{ day: '2026-07-10', ids: ['e', 'wd:Q1048820'] }],
+      'walking',
+      new Map([['e', event], ['wd:Q1048820', poiToStop(poi)]]),
+    );
+    assert.deepEqual(route[0]?.stops.map((s) => s.id), ['e', 'wd:Q1048820']);
+    assert.ok((route[0]?.legs[0]?.meters ?? 0) > 0); // real distance between the two coords
   });
 });

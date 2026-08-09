@@ -1,5 +1,6 @@
-import { buildRoute } from '../../lib/favorites/build-route.ts';
+import { buildRoute, poiToStop } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
+import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { readFavorites } from './init-favorites.ts';
@@ -87,11 +88,18 @@ const showShareLink = (url: string | undefined): void => {
 const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
   if (days.length === 0) return;
   const name = dayLabelSafe(days);
+  // Embed the POIs that ended up in the route, so it resolves them anywhere.
+  const placed = new Set(days.flatMap((d) => d.stops.map((s) => s.id)));
+  const allPois = readFavPois();
+  const pois: Record<string, (typeof allPois)[string]> = {};
+  for (const [id, poi] of Object.entries(allPois)) if (placed.has(id)) pois[id] = poi;
   const payload = JSON.stringify({
     mode,
     range: lastRange,
     dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })),
     durations: pickDurations(days),
+    times: {},
+    pois,
   });
   let saved: Readonly<{ id: string; url: string }> | undefined;
   try {
@@ -122,7 +130,10 @@ const generate = async (): Promise<void> => {
   const { lang, ui } = readUiIsland();
   overrides = readDurations();
   const favs = new Set(readFavorites());
-  const events = (await fetchCorpus()).filter((e) => favs.has(e.id));
+  // Favourited events (from the corpus) + favourited landmarks/places (POIs).
+  const favEvents = (await fetchCorpus()).filter((e) => favs.has(e.id));
+  const poiStops = Object.values(readFavPois()).filter((p) => favs.has(p.id)).map(poiToStop);
+  const events = [...favEvents, ...poiStops];
   const fromEl = document.querySelector<HTMLInputElement>('[data-route-from]');
   const toEl = document.querySelector<HTMLInputElement>('[data-route-to]');
   const from = fromEl?.value || isoToday();

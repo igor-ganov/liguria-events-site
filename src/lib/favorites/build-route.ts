@@ -1,6 +1,27 @@
 import type { CompactEvent } from '../events/event-schema.ts';
+import type { FavPoi } from './fav-pois.ts';
 
 export type Mode = 'walking' | 'driving' | 'transit';
+
+// A route stop is an event OR a landmark/place. Both share the fields the route
+// pipeline needs (id, title, coords, duration); a POI adds `href` (its own
+// detail link, since it isn't an /event/ page) and no date/time — it's
+// available on any day of the trip.
+export type RouteStop = CompactEvent & Readonly<{ href?: string }>;
+
+/** Resolve a favourited landmark/place into a stop: no fixed time, a wide date
+ *  span (so it's available every day), and a 60-minute default duration. */
+export const poiToStop = (poi: FavPoi): RouteStop => ({
+  id: poi.id,
+  t: poi.name,
+  s: '0000-01-01',
+  e: '9999-12-31',
+  c: ['other'],
+  g: [poi.lat, poi.lng],
+  u: poi.url,
+  href: poi.url,
+  du: 60,
+});
 
 // Rough average speeds (m/s) for the travel-time ESTIMATE only — the real
 // turn-by-turn comes from the Google Maps deep-link. Transit is deliberately
@@ -15,7 +36,7 @@ export type Leg = Readonly<{
   tight: boolean;
 }>;
 
-export type RouteDay = Readonly<{ day: string; stops: readonly CompactEvent[]; legs: readonly Leg[] }>;
+export type RouteDay = Readonly<{ day: string; stops: readonly RouteStop[]; legs: readonly Leg[] }>;
 
 /** A saved route's explicit arrangement: one entry per day, event ids in the
  *  exact order the user arranged them. */
@@ -26,18 +47,18 @@ export type DayGroup = Readonly<{ day: string; ids: readonly string[] }>;
 export type DateRange = Readonly<{ from: string; to?: string }>;
 
 // An event belongs to the trip when its own span [s, e] overlaps [from, to].
-const inRange = (event: CompactEvent, range: DateRange): boolean =>
+const inRange = (event: RouteStop, range: DateRange): boolean =>
   (event.e ?? event.s) >= range.from && (range.to === undefined || event.s <= range.to);
 
 // Which day to visit it on: its start, or the trip start if it is already
 // running when the trip begins (an ongoing multi-day event).
-const displayDay = (event: CompactEvent, from: string): string =>
+const displayDay = (event: RouteStop, from: string): string =>
   event.s > from ? event.s : from;
 
 /** Whether an event can be scheduled on a given ISO day — its span [s, e]
  *  (single-day when `e` is absent) must cover that day. Governs which days a
  *  stop may be moved to and where a favourite may be added. */
-export const eventAvailableOn = (event: CompactEvent, day: string): boolean =>
+export const eventAvailableOn = (event: RouteStop, day: string): boolean =>
   event.s <= day && day <= (event.e ?? event.s);
 
 const EARTH_R = 6371000;
@@ -72,17 +93,17 @@ const minutesOf = (time: string | undefined): number | undefined => {
   return m ? Number(m.slice(0, 2)) * 60 + Number(m.slice(3)) : undefined;
 };
 
-const coord = (event: CompactEvent): readonly [number, number] | undefined => event.g;
+const coord = (event: RouteStop): readonly [number, number] | undefined => event.g;
 
 // Order a day's events: timed ones in chronological order (the fixed
 // constraints), then the untimed ones as a nearest-neighbour chain from the
 // last placed point — so "whenever" stops still form a sensible path.
-const orderDay = (events: readonly CompactEvent[]): readonly CompactEvent[] => {
+const orderDay = (events: readonly RouteStop[]): readonly RouteStop[] => {
   const timed = events
     .filter((e) => minutesOf(e.h) !== undefined)
     .toSorted((a, b) => (minutesOf(a.h) ?? 0) - (minutesOf(b.h) ?? 0));
   const untimed = events.filter((e) => minutesOf(e.h) === undefined);
-  const ordered: CompactEvent[] = [...timed];
+  const ordered: RouteStop[] = [...timed];
   const pool = [...untimed];
   const lastCoord = (): readonly [number, number] | undefined =>
     [...ordered].reverse().map(coord).find((c) => c !== undefined);
@@ -104,7 +125,7 @@ const orderDay = (events: readonly CompactEvent[]): readonly CompactEvent[] => {
   return ordered;
 };
 
-const legBetween = (from: CompactEvent, to: CompactEvent, mode: Mode): Leg => {
+const legBetween = (from: RouteStop, to: RouteStop, mode: Mode): Leg => {
   const a = coord(from);
   const b = coord(to);
   const meters = a && b ? Math.round(haversineMeters(a, b)) : 0;
@@ -121,12 +142,12 @@ const legBetween = (from: CompactEvent, to: CompactEvent, mode: Mode): Leg => {
  *  window (ongoing events clamped to the trip start); without it, all events
  *  are scheduled on their own start day. */
 export const buildRoute = (
-  events: readonly CompactEvent[],
+  events: readonly RouteStop[],
   mode: Mode,
   range?: DateRange,
 ): readonly RouteDay[] => {
   const scoped = range === undefined ? events : events.filter((event) => inRange(event, range));
-  const byDay = new Map<string, CompactEvent[]>();
+  const byDay = new Map<string, RouteStop[]>();
   for (const event of scoped) {
     const day = range === undefined ? event.s : displayDay(event, range.from);
     (byDay.get(day) ?? byDay.set(day, []).get(day)!).push(event);
@@ -147,7 +168,7 @@ export const buildRoute = (
 export const routeFromGroups = (
   groups: readonly DayGroup[],
   mode: Mode,
-  byId: ReadonlyMap<string, CompactEvent>,
+  byId: ReadonlyMap<string, RouteStop>,
 ): readonly RouteDay[] =>
   groups
     .map((group) => {

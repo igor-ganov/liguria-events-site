@@ -3,11 +3,12 @@
 // owner's favourites. Every edit recomputes the itinerary (legs) and redraws
 // the map; "Save changes" PATCHes the route's payload back to D1. Non-owners
 // get the read-only route-view instead.
-import { routeFromGroups } from '../../lib/favorites/build-route.ts';
-import type { DayGroup, RouteDay } from '../../lib/favorites/build-route.ts';
+import { poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
+import type { DayGroup, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
+import { readFavPois } from '../../lib/favorites/fav-pois.ts';
+import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { dayLabel, esc, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
 import type { Ui } from './route-render.ts';
@@ -18,9 +19,12 @@ import { PX_PER_MIN, renderTimeline } from './route-timeline.ts';
 import { snapMinutes, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 
 const drawMap = makeMapDrawer();
-let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {} };
-let byId: ReadonlyMap<string, CompactEvent> = new Map();
+let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {}, pois: {} };
+let byId: ReadonlyMap<string, RouteStop> = new Map();
 let favourites: ReadonlySet<string> = new Set();
+// POI data for resolving stops — the route's embedded pois plus this device's
+// favourites (so a just-added POI resolves before the route is saved).
+let poiMap: Readonly<Record<string, FavPoi>> = {};
 let view: 'list' | 'timeline' = 'list';
 
 /* ── owner favourites (server island + this device's localStorage) ─────── */
@@ -57,7 +61,7 @@ const setDuration = (id: string, min: number): void => {
 
 /* ── rendering ─────────────────────────────────────────────────────────── */
 
-const controlsHtml = (event: CompactEvent, day: string, i: number, last: number, lang: Locale, ui: Ui): string => {
+const controlsHtml = (event: RouteStop, day: string, i: number, last: number, lang: Locale, ui: Ui): string => {
   const moves = moveTargetDays(payload.groups, event, day);
   const moveSel =
     moves.length > 0
@@ -129,11 +133,16 @@ const routeId = (): string => document.querySelector<HTMLElement>('[data-route-r
 const saveEdits = async (): Promise<void> => {
   const status = document.querySelector<HTMLElement>('[data-route-edit-status]');
   const { ui } = readUiIsland();
+  // Embed only the POIs actually in the route, so a shared/cross-device viewer
+  // resolves them without this device's localStorage.
+  const placed = new Set(payload.groups.flatMap((g) => g.ids));
+  const pois: Record<string, FavPoi> = {};
+  for (const [id, poi] of Object.entries(poiMap)) if (placed.has(id)) pois[id] = poi;
   try {
     const res = await fetch(`/api/routes/${routeId()}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ data: serializePayload(payload) }),
+      body: JSON.stringify({ data: serializePayload({ ...payload, pois }) }),
     });
     if (status) status.textContent = res.ok ? ui.route.saved : ui.route.saveFailed;
   } catch {
@@ -250,7 +259,12 @@ const load = async (): Promise<void> => {
   if (!island) return;
   payload = parsePayload(island);
   favourites = ownerFavourites();
-  byId = new Map((await fetchCorpus()).map((e) => [e.id, e]));
+  // Resolve stops from events (corpus) AND landmarks/places (POIs), so a route
+  // can mix all three and "add from favourites" offers POIs too. POI data comes
+  // from the route's own payload plus this device's favourites.
+  poiMap = { ...payload.pois, ...readFavPois() };
+  const stops: readonly RouteStop[] = [...(await fetchCorpus()), ...Object.values(poiMap).map(poiToStop)];
+  byId = new Map(stops.map((s) => [s.id, s]));
   render();
 };
 

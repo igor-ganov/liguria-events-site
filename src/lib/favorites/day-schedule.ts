@@ -3,10 +3,9 @@
 // overrides, it produces each block's [start, end], the travel gap before it,
 // and whether it overlaps its neighbour. The timeline renders from this; drag
 // and resize just change the overrides and rebuild.
-import type { CompactEvent } from '../events/event-schema.ts';
 import { eventDuration } from './event-duration.ts';
 import { travelMinutesBetween } from './build-route.ts';
-import type { Mode } from './build-route.ts';
+import type { Mode, RouteStop } from './build-route.ts';
 
 export type Times = Readonly<Record<string, string>>;
 export type Durations = Readonly<Record<string, number>>;
@@ -32,23 +31,23 @@ export const timeOfMinutes = (m: number): string => {
 
 export const snapMinutes = (m: number, step = 15): number => Math.round(m / step) * step;
 
-const coord = (event: CompactEvent): readonly [number, number] | undefined => event.g;
+const coord = (event: RouteStop): readonly [number, number] | undefined => event.g;
 
 // A stop's fixed start: the route's time override wins, else the corpus time.
-const fixedStart = (event: CompactEvent, times: Times): number | undefined =>
+const fixedStart = (event: RouteStop, times: Times): number | undefined =>
   minutesOfTime(times[event.id] ?? event.h);
 
 /** Place a day's stops on the minute axis. Fixed times (override or corpus) are
  *  honoured; otherwise a stop auto-starts after the previous one plus travel. */
 export const buildDaySchedule = (
-  stops: readonly CompactEvent[],
+  stops: readonly RouteStop[],
   mode: Mode,
   times: Times,
   durations: Durations,
   dayStartMin: number,
 ): readonly ScheduledStop[] => {
   const placed: ScheduledStop[] = [];
-  let prev: CompactEvent | undefined;
+  let prev: RouteStop | undefined;
   let prevEnd = dayStartMin;
   for (const event of stops) {
     const from = prev ? coord(prev) : undefined;

@@ -5,8 +5,7 @@
 // carrying each block's current start/duration in data-* for the drag maths.
 import { assignLanes, axisRange, buildDaySchedule, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { eventDuration } from '../../lib/favorites/event-duration.ts';
-import type { RouteDay } from '../../lib/favorites/build-route.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
+import type { RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { dayLabel, esc } from './route-render.ts';
@@ -23,7 +22,7 @@ const hourLines = (start: number, end: number): string => {
   return lines.join('');
 };
 
-const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, CompactEvent>, lang: Locale): string => {
+const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, RouteStop>, lang: Locale): string => {
   const items = buildDaySchedule(day.stops, payload.mode, payload.times, payload.durations, DAY_START_MIN);
   const { start, end } = axisRange(items, DAY_START_MIN);
   const { lane, count } = assignLanes(items);
@@ -57,6 +56,6 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Comp
 export const renderTimeline = (
   days: readonly RouteDay[],
   payload: Payload,
-  byId: ReadonlyMap<string, CompactEvent>,
+  byId: ReadonlyMap<string, RouteStop>,
   lang: Locale,
 ): string => days.map((day) => dayHtml(day, payload, byId, lang)).join('');

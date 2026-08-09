@@ -2,8 +2,7 @@
 // kept free of the DOM so they can be unit-tested. Each returns a new groups
 // array; days left empty are dropped so the itinerary never shows a blank day.
 import { eventAvailableOn } from '../../lib/favorites/build-route.ts';
-import type { DayGroup } from '../../lib/favorites/build-route.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
+import type { DayGroup, RouteStop } from '../../lib/favorites/build-route.ts';
 
 export const dropEmptyDays = (groups: readonly DayGroup[]): readonly DayGroup[] =>
   groups.filter((g) => g.ids.length > 0);
@@ -48,7 +47,7 @@ export const addStopToDay = (groups: readonly DayGroup[], id: string, day: strin
  *  (its span covers them), excluding the day it's already on. */
 export const moveTargetDays = (
   groups: readonly DayGroup[],
-  event: CompactEvent,
+  event: RouteStop,
   current: string,
 ): readonly string[] =>
   groups.map((g) => g.day).filter((day) => day !== current && eventAvailableOn(event, day));
@@ -58,9 +57,9 @@ export const moveTargetDays = (
 export const addableEvents = (
   groups: readonly DayGroup[],
   favourites: ReadonlySet<string>,
-  byId: ReadonlyMap<string, CompactEvent>,
+  byId: ReadonlyMap<string, RouteStop>,
   day: string,
-): readonly CompactEvent[] => {
+): readonly RouteStop[] => {
   const placed = new Set(groups.flatMap((g) => g.ids));
   return [...favourites]
     .flatMap((id) => {
