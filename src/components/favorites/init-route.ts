@@ -1,5 +1,6 @@
 import { buildRoute, poiToStop } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
+import { enrichDays } from '../../lib/favorites/enrich-route.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
@@ -126,8 +127,10 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
 
 let lastDays: readonly RouteDay[] = [];
 let lastRange: Readonly<{ from: string; to?: string }> = { from: '' };
+let gen = 0; // bumps per generation so a stale async enrichment can't repaint
 
 const generate = async (): Promise<void> => {
+  const my = (gen += 1);
   const { lang, ui } = readUiIsland();
   overrides = readDurations();
   const favs = new Set(readFavorites());
@@ -145,19 +148,27 @@ const generate = async (): Promise<void> => {
   const saveBtn = document.querySelector<HTMLElement>('[data-route-save]');
   const share = document.querySelector<HTMLElement>('[data-route-share]');
   if (share) share.hidden = true; // a fresh generation invalidates the old link
-  if (output) {
-    const end = lastDays.at(-1)?.day ?? from;
-    const span =
-      lastDays.length > 0
-        ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
-        : '';
-    output.innerHTML = span + renderItinerary(lastDays, mode, lang, ui, overrides, baseOf);
-  }
+  const paint = (ds: readonly RouteDay[]): void => {
+    if (output) {
+      const end = ds.at(-1)?.day ?? from;
+      const span =
+        ds.length > 0
+          ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
+          : '';
+      output.innerHTML = span + renderItinerary(ds, mode, lang, ui, overrides, baseOf);
+    }
+    drawMap(ds, baseOf);
+  };
+  // Instant paint with the straight-line estimate, then upgrade to real routing.
+  paint(lastDays);
   if (saveBtn) {
     saveBtn.hidden = lastDays.length === 0;
     saveBtn.textContent = ui.route.save;
   }
-  drawMap(lastDays, baseOf);
+  const enriched = await enrichDays(lastDays, mode);
+  if (my !== gen) return; // a newer generation superseded this one
+  lastDays = enriched;
+  paint(enriched);
 };
 
 // A generated route honours the user's global base (departure/return); route-

@@ -4,6 +4,8 @@
 // that have since left the corpus simply drop out). The owner editor is a
 // separate module; this is the path for viewers who can't edit.
 import { poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
+import type { RouteDay } from '../../lib/favorites/build-route.ts';
+import { enrichDays } from '../../lib/favorites/enrich-route.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { dayLabel, esc, makeMapDrawer, renderItinerary } from './route-render.ts';
@@ -28,8 +30,13 @@ const render = async (): Promise<void> => {
       ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
       : '';
   const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
-  output.innerHTML = span + renderItinerary(days, payload.mode, lang, ui, payload.durations, baseOf);
-  drawMap(days, baseOf);
+  const paint = (ds: readonly RouteDay[]): void => {
+    output.innerHTML = span + renderItinerary(ds, payload.mode, lang, ui, payload.durations, baseOf);
+    drawMap(ds, baseOf);
+  };
+  // Instant paint with the straight-line estimate, then upgrade to real routing.
+  paint(days);
+  paint(await enrichDays(days, payload.mode));
 };
 
 export const initRouteView = (): void => {

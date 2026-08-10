@@ -34,6 +34,13 @@ export type Leg = Readonly<{
   mapsUrl: string;
   /** The previous timed event plus travel overshoots this stop's start time. */
   tight: boolean;
+  /** Real routed geometry as [lng, lat] pairs, once enriched from transit data
+   *  (undefined for the straight-line estimate). */
+  geometry?: readonly (readonly [number, number])[];
+  /** true once upgraded from the straight-line estimate to real routing. */
+  real?: boolean;
+  /** Transfers on a real transit leg (undefined for walking/estimate). */
+  transfers?: number;
 }>;
 
 export type RouteDay = Readonly<{ day: string; stops: readonly RouteStop[]; legs: readonly Leg[] }>;
@@ -88,7 +95,10 @@ export const mapsDirUrl = (
 ): string =>
   `https://www.google.com/maps/dir/?api=1&origin=${from[0]},${from[1]}&destination=${to[0]},${to[1]}&travelmode=${mode}`;
 
-const minutesOf = (time: string | undefined): number | undefined => {
+/** Minutes-since-midnight for an `HH:MM` clock time, or undefined when absent
+ *  or malformed. Exposed so the async routing enrichment can recompute a leg's
+ *  `tight` flag with real travel times. */
+export const minutesOf = (time: string | undefined): number | undefined => {
   const m = time && /^([01]\d|2[0-3]):[0-5]\d$/.test(time) ? time : undefined;
   return m ? Number(m.slice(0, 2)) * 60 + Number(m.slice(3)) : undefined;
 };

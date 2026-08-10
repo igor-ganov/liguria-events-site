@@ -28,6 +28,7 @@
     "@simplewebauthn/server": "^13.3.2",
     "astro": "^5.17.1",
     "effect": "^3.19.4",
+    "italian-transport-core": "github:igor-ganov/italian-transport-core#dcad5e95d0ebb38e0b2b01554e0247181547e5dd",
     "lit": "^3.3.2",
     "maplibre-gl": "^5.24.0",
     "pmtiles": "^4.4.1",

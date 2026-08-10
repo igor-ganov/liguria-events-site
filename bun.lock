@@ -11,6 +11,7 @@
         "@simplewebauthn/server": "^13.3.2",
         "astro": "^5.17.1",
         "effect": "^3.19.4",
+        "italian-transport-core": "github:igor-ganov/italian-transport-core#dcad5e95d0ebb38e0b2b01554e0247181547e5dd",
         "lit": "^3.3.2",
         "maplibre-gl": "^5.24.0",
         "pmtiles": "^4.4.1",
@@ -712,6 +713,8 @@
     "is-wsl": ["is-wsl@3.1.1", "", { "dependencies": { "is-inside-container": "^1.0.0" } }, "sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw=="],
 
     "isexe": ["isexe@2.0.0", "", {}, "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="],
+
+    "italian-transport-core": ["italian-transport-core@github:igor-ganov/italian-transport-core#dcad5e9", {}, "igor-ganov-italian-transport-core-dcad5e9", "sha512-J75X2PSaAhUDaf37yrXe03kvQdD+3WFnnOsxhXF2FfQRTfcRa7lwj4m59K9cmL6WTEyMK++8p6WDeUjGKYBN6A=="],
 
     "js-yaml": ["js-yaml@4.3.0", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q=="],
 

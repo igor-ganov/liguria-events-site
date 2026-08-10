@@ -30,9 +30,9 @@ export const dayLabel = (iso: string, lang: Locale): string => {
 const km = (m: number): string => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 
 export const renderLeg = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): string =>
-  `<li class="route-leg${leg.tight ? ' route-leg--tight' : ''}">` +
+  `<li class="route-leg${leg.tight ? ' route-leg--tight' : ''}${leg.real ? ' route-leg--real' : ''}"${leg.real ? ' data-real="1"' : ''}>` +
   `<span class="route-leg-mode" data-mode="${mode}"></span>` +
-  `<span>${km(leg.meters)} · ${leg.minutes} ${esc(ui.route.min)}${leg.tight ? ` · ⚠ ${esc(ui.route.tight)}` : ''}</span>` +
+  `<span>${km(leg.meters)} · ${leg.minutes} ${esc(ui.route.min)}${leg.transfers ? ` · ⇄ ${leg.transfers}` : ''}${leg.tight ? ` · ⚠ ${esc(ui.route.tight)}` : ''}</span>` +
   (leg.mapsUrl ? ` <a href="${leg.mapsUrl}" target="_blank" rel="noopener">Google&nbsp;Maps ↗</a>` : '') +
   `</li>`;
 
@@ -130,6 +130,24 @@ const baseMarkerEl = (final: boolean): HTMLElement => {
   return el;
 };
 
+// A day's drawn path: real routed geometry between stops when a leg carries it,
+// else the straight segment between the two stop points. Output is [lng, lat];
+// stop.g is [lat, lng]; leg geometry is already [lng, lat].
+const dayLine = (day: RouteDay): [number, number][] => {
+  const out: [number, number][] = [];
+  day.stops.forEach((stop, i) => {
+    const g = stop.g;
+    if (i === 0) {
+      if (g) out.push([g[1], g[0]]);
+      return;
+    }
+    const leg = day.legs[i - 1];
+    if (leg?.geometry && leg.geometry.length > 1) for (const p of leg.geometry) out.push([p[0], p[1]]);
+    else if (g) out.push([g[1], g[0]]);
+  });
+  return out;
+};
+
 export type LngLat = Readonly<{ lng: number; lat: number }>;
 
 /** A drawer owns one map instance and re-renders markers/line on each call.
@@ -176,8 +194,10 @@ export const makeMapDrawer = (
       const bounds = pts.reduce((acc, p) => acc.extend(p), new maplibregl.LngLatBounds(pts[0], pts[0]));
       live.fitBounds(bounds, { padding: 48, maxZoom: 15, duration: 0 });
     }
+    // One line per day, following real routed geometry where a leg carries it.
+    const lines = days.map(dayLine).filter((l) => l.length > 1);
     const drawLine = (): void => {
-      const line: GeoJSON.Feature = { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts } };
+      const line: GeoJSON.Feature = { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: lines } };
       const src = live.getSource<maplibregl.GeoJSONSource>('route');
       if (src) src.setData(line);
       else {
