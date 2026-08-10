@@ -1,6 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { enrichDays, type Planner } from '../src/lib/favorites/enrich-route.ts';
+import { applyLegCache, enrichDays, fillLegCache, legKey, type Planner, type RoutedLeg } from '../src/lib/favorites/enrich-route.ts';
 import type { Leg, RouteDay, RouteStop } from '../src/lib/favorites/build-route.ts';
 import type { BestLeg } from 'italian-transport-core';
 
@@ -64,4 +64,46 @@ test('tight is recomputed from the real travel time vs the next fixed start', as
   const d = day([stop('a', [44.4, 8.9], '10:00'), stop('b', [44.41, 8.94], '10:20')]);
   const [e] = await enrichDays([d], 'transit', planner);
   assert.equal(e!.legs[0]!.tight, true);
+});
+
+test('applyLegCache applies cached real routing and recomputes tight', () => {
+  const cache = new Map<string, RoutedLeg | undefined>();
+  cache.set(legKey('a', 'b', 'transit'), { meters: 2500, minutes: 30, geometry: [[8.9, 44.4]], transfers: 1 });
+  const d = day([stop('a', [44.4, 8.9], '10:00'), stop('b', [44.41, 8.94], '10:20')]);
+  const [out] = applyLegCache([d], 'transit', cache);
+  const leg = out!.legs[0]!;
+  assert.equal(leg.real, true);
+  assert.equal(leg.minutes, 30);
+  assert.equal(leg.meters, 2500);
+  assert.equal(leg.tight, true); // 10:00 + 30 min > 10:20
+});
+
+test('fillLegCache fetches each missing pair once, then reuses the cache', async () => {
+  let calls = 0;
+  const plan: Planner = async () => {
+    calls += 1;
+    return best;
+  };
+  const cache = new Map<string, RoutedLeg | undefined>();
+  const d = day([stop('a', [44.4, 8.9]), stop('b', [44.41, 8.94])]);
+  const added1 = await fillLegCache([d], 'transit', cache, plan);
+  const added2 = await fillLegCache([d], 'transit', cache, plan);
+  assert.equal(added1, true);
+  assert.equal(added2, false); // cached — no refetch
+  assert.equal(calls, 1);
+});
+
+test('fillLegCache records an unavailable pair so it is not refetched', async () => {
+  let calls = 0;
+  const plan: Planner = async () => {
+    calls += 1;
+    return undefined;
+  };
+  const cache = new Map<string, RoutedLeg | undefined>();
+  const d = day([stop('a', [44.4, 8.9]), stop('b', [44.41, 8.94])]);
+  await fillLegCache([d], 'driving', cache, plan);
+  await fillLegCache([d], 'driving', cache, plan);
+  assert.equal(calls, 1); // undefined result cached, not retried
+  const [out] = applyLegCache([d], 'driving', cache);
+  assert.equal(out!.legs[0]!.real, undefined); // still the estimate
 });

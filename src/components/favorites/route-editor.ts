@@ -12,6 +12,8 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { baseLegs, dayLabel, esc, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
 import type { LngLat, Ui } from './route-render.ts';
+import { applyLegCache, fillLegCache } from '../../lib/favorites/enrich-route.ts';
+import type { RoutedLeg } from '../../lib/favorites/enrich-route.ts';
 import { readGlobalBase, resolveDayBase, writeGlobalBase } from '../../lib/favorites/base-point.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
@@ -48,6 +50,11 @@ let favourites: ReadonlySet<string> = new Set();
 // favourites (so a just-added POI resolves before the route is saved).
 let poiMap: Readonly<Record<string, FavPoi>> = {};
 let view: 'list' | 'timeline' = 'list';
+// Real-routing cache keyed by (fromId,toId,mode); reorders/drags reuse it so a
+// re-render never refetches a pair it already resolved. `enrichGen` drops stale
+// async fills when a newer edit has since re-rendered.
+const legCache = new Map<string, RoutedLeg | undefined>();
+let enrichGen = 0;
 
 /* ── owner favourites (server island + this device's localStorage) ─────── */
 
@@ -162,7 +169,9 @@ function render(): void {
   const output = document.querySelector<HTMLElement>('[data-route-output]');
   if (!output) return;
   const { lang, ui } = readUiIsland();
-  const days = routeFromGroups(payload.groups, payload.mode, byId);
+  // Apply any already-cached real routing synchronously (instant), then fetch
+  // the rest and re-render once — so the editor never blocks on the network.
+  const days = applyLegCache(routeFromGroups(payload.groups, payload.mode, byId), payload.mode, legCache);
   counter = 0;
   const body =
     days.length === 0
@@ -172,7 +181,17 @@ function render(): void {
         : days.map((d) => dayHtml(d, lang, ui)).join('');
   output.innerHTML = viewToggle(ui) + dayHoursControl(ui) + baseControl(ui) + body;
   drawMap(days, baseOf);
+  void enrichRealRouting(days);
 }
+
+// Fill the leg cache for pairs not yet resolved, then re-render if any real
+// routing arrived. Guarded so a stale fill (superseded by a newer edit) can
+// still populate the shared cache but won't trigger an outdated re-render.
+const enrichRealRouting = async (days: readonly RouteDay[]): Promise<void> => {
+  const my = (enrichGen += 1);
+  const added = await fillLegCache(days, payload.mode, legCache);
+  if (added && my === enrichGen) render();
+};
 
 /* ── save ──────────────────────────────────────────────────────────────── */
 
