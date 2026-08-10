@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test';
 import corpus from './fixtures/corpus.json' with { type: 'json' };
-import { signSession } from '../src/lib/auth/session.ts';
+import { signInAsOwner } from './owner-fixture.ts';
 
 // The one interaction the claude-in-chrome tool couldn't drive (WebGL): setting
 // the base by CLICKING the map. Real Chromium under Playwright renders maplibre,
 // so this closes the last gap — arm the base picker, click the map, and the
 // from/back-to-base legs must appear.
-const OWNER = 'e2e-owner';
-const SECRET = 'e2e-secret';
-
 test('clicking the map sets the base and the from/back legs appear', async ({ page, context }) => {
-  const token = await signSession(SECRET, OWNER, Date.now());
-  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://127.0.0.1:4410' }]);
+  await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
   const day = corpus.events[0].s;

@@ -1,17 +1,13 @@
 import { test, expect } from '@playwright/test';
 import corpus from './fixtures/corpus.json' with { type: 'json' };
-import { signSession } from '../src/lib/auth/session.ts';
+import { signInAsOwner } from './owner-fixture.ts';
 
 // The AUTHENTICATED owner-route editor, against the real worker (wrangler dev
-// --local) with a seeded test user. Mints the session cookie the same way the
-// app does (signSession with the test SESSION_SECRET), so no real login/creds.
-const OWNER = 'e2e-owner';
-const SECRET = 'e2e-secret'; // matches playwright.config's --var SESSION_SECRET
+// --local) with a seeded test user, signed in with a minted cookie.
 const POI = { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Castle', lat: 44.41, lng: 8.94, cat: 'castle', url: '/landmark/liguria/test--x/' };
 
 test('owner adds a favourite POI, reorders, and the save persists to D1', async ({ page, context }) => {
-  const token = await signSession(SECRET, OWNER, Date.now());
-  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://127.0.0.1:4410' }]);
+  await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
   // Create a route OWNED by the test user (e1 + e2 on their shared day). page.request
