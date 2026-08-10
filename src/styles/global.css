@@ -621,6 +621,13 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .route-dayhours-def { display: inline-flex; align-items: center; gap: 0.3rem; }
 .tl-day-hours { margin-left: 0.6rem; font-size: 0.75rem; font-weight: 400; color: var(--muted); white-space: nowrap; }
 .tl-hour-input { font: inherit; font-size: 0.72rem; padding: 0 0.2rem; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--ink); }
+.route-base { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0 0 0.9rem; }
+.route-base .chip[aria-pressed='true'] { background: hsl(var(--hue, 30) 70% 42%); color: var(--on-accent); border-color: transparent; }
+.route-pick-hint { font-size: 0.85rem; color: hsl(var(--hue, 30) 70% 45%); font-weight: 600; }
+.route-day-base { display: flex; gap: 0.4rem; margin: 0.3rem 0 0.2rem; }
+.route-day-base .chip[aria-pressed='true'] { background: hsl(var(--hue, 30) 70% 42%); color: var(--on-accent); border-color: transparent; }
+.route-leg--base > span:nth-child(2) { font-weight: 600; }
+.route-pin--base { background: #1f7a4d; border-color: #fff; font-size: 0.9rem; }
 .route-views { display: inline-flex; gap: 0.3rem; margin: 0 0 1rem; }
 .route-views .chip[aria-pressed='true'] { background: hsl(var(--hue, 30) 70% 42%); color: var(--on-accent); border-color: transparent; }
 /* Timeline: a vertical clock axis with absolutely-positioned event blocks. */

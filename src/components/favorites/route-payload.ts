@@ -10,6 +10,8 @@ import type { Times } from '../../lib/favorites/day-schedule.ts';
 import { parseFavPoiMap } from '../../lib/favorites/fav-pois.ts';
 import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
 import type { DayHours } from '../../lib/favorites/day-hours.ts';
+import { asPoint } from '../../lib/favorites/base-point.ts';
+import type { Point } from '../../lib/favorites/base-point.ts';
 
 // `pois` embeds the data for any landmark/place stop in THIS route, so a shared
 // or cross-device viewer resolves it without the author's localStorage.
@@ -24,6 +26,11 @@ export type Payload = Readonly<{
   dayStart: string;
   dayEnd: string;
   dayHours: Readonly<Record<string, DayHours>>;
+  // The base (accommodation) the route departs from / returns to, and per-day
+  // overrides; `dayFinals` lets a day END at a different point than the base.
+  base: Point | undefined;
+  dayBases: Readonly<Record<string, Point>>;
+  dayFinals: Readonly<Record<string, Point>>;
 }>;
 
 const field = (obj: unknown, key: string): unknown => (Object(obj) === obj ? Reflect.get(Object(obj), key) : undefined);
@@ -61,6 +68,17 @@ const asDayHours = (v: unknown): Readonly<Record<string, DayHours>> => {
   return out;
 };
 
+const asPointMap = (v: unknown): Readonly<Record<string, Point>> => {
+  const out: Record<string, Point> = {};
+  if (v && typeof v === 'object') {
+    for (const [day, p] of Object.entries(v)) {
+      const point = asPoint(p);
+      if (point) out[day] = point;
+    }
+  }
+  return out;
+};
+
 const asGroups = (v: unknown): readonly DayGroup[] =>
   Array.isArray(v)
     ? v.flatMap((d) => {
@@ -82,6 +100,9 @@ export const parsePayload = (raw: string): Payload => {
     dayStart: asTime(field(json, 'dayStart')),
     dayEnd: asTime(field(json, 'dayEnd')),
     dayHours: asDayHours(field(json, 'dayHours')),
+    base: asPoint(field(json, 'base')),
+    dayBases: asPointMap(field(json, 'dayBases')),
+    dayFinals: asPointMap(field(json, 'dayFinals')),
   };
 };
 
@@ -95,6 +116,9 @@ export const serializePayload = (p: Payload): string =>
     dayStart: p.dayStart,
     dayEnd: p.dayEnd,
     dayHours: p.dayHours,
+    base: p.base,
+    dayBases: p.dayBases,
+    dayFinals: p.dayFinals,
   });
 
 export const fetchCorpus = async (): Promise<readonly CompactEvent[]> => {

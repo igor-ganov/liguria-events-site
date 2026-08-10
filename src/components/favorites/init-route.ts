@@ -1,6 +1,7 @@
 import { buildRoute, poiToStop } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
+import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { readFavorites } from './init-favorites.ts';
@@ -150,14 +151,18 @@ const generate = async (): Promise<void> => {
       lastDays.length > 0
         ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
         : '';
-    output.innerHTML = span + renderItinerary(lastDays, mode, lang, ui, overrides);
+    output.innerHTML = span + renderItinerary(lastDays, mode, lang, ui, overrides, baseOf);
   }
   if (saveBtn) {
     saveBtn.hidden = lastDays.length === 0;
     saveBtn.textContent = ui.route.save;
   }
-  drawMap(lastDays);
+  drawMap(lastDays, baseOf);
 };
+
+// A generated route honours the user's global base (departure/return); route-
+// and per-day bases are set on the saved-route editor.
+const baseOf = (day: string) => resolveDayBase(day, {}, undefined, readGlobalBase(), {});
 
 const setMode = (btn: HTMLElement): void => {
   const chosen = btn.dataset['routeMode'];

@@ -4,6 +4,7 @@
 // that have since left the corpus simply drop out). The owner editor is a
 // separate module; this is the path for viewers who can't edit.
 import { poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
+import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { dayLabel, esc, makeMapDrawer, renderItinerary } from './route-render.ts';
 import { fetchCorpus, parsePayload } from './route-payload.ts';
@@ -26,8 +27,9 @@ const render = async (): Promise<void> => {
     days.length > 0 && from !== ''
       ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
       : '';
-  output.innerHTML = span + renderItinerary(days, payload.mode, lang, ui, payload.durations);
-  drawMap(days);
+  const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
+  output.innerHTML = span + renderItinerary(days, payload.mode, lang, ui, payload.durations, baseOf);
+  drawMap(days, baseOf);
 };
 
 export const initRouteView = (): void => {

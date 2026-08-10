@@ -7,7 +7,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import { brightStyle } from '../../lib/map/styles/bright-typed.ts';
 import { darkStyle } from '../../lib/map/styles/dark-typed.ts';
-import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
+import type { Leg, Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
+import { legTo } from '../../lib/favorites/base-point.ts';
+import type { DayBase } from '../../lib/favorites/base-point.ts';
 import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import type { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
@@ -34,6 +36,23 @@ export const renderLeg = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): st
   (leg.mapsUrl ? ` <a href="${leg.mapsUrl}" target="_blank" rel="noopener">Google&nbsp;Maps ↗</a>` : '') +
   `</li>`;
 
+const baseLegRow = (leg: Leg, label: string, mode: Mode, ui: Ui): string =>
+  `<li class="route-leg route-leg--base"><span class="route-leg-mode" data-mode="${mode}"></span>` +
+  `<span>🏠 ${esc(label)} · ${km(leg.meters)} · ${leg.minutes} ${esc(ui.route.min)}</span>` +
+  (leg.mapsUrl ? ` <a href="${leg.mapsUrl}" target="_blank" rel="noopener">Google&nbsp;Maps ↗</a>` : '') +
+  `</li>`;
+
+/** The "depart from base" row (before the first stop) and "return to base/final"
+ *  row (after the last), for a day with a base set. */
+export const baseLegs = (day: RouteDay, db: DayBase | undefined, mode: Mode, ui: Ui): Readonly<{ before: string; after: string }> => {
+  const first = day.stops[0]?.g;
+  const last = day.stops.at(-1)?.g;
+  const before = db?.base && first ? baseLegRow(legTo([db.base.lat, db.base.lng], first, mode), ui.route.fromBase, mode, ui) : '';
+  const end = db?.final ?? db?.base;
+  const after = end && last ? baseLegRow(legTo(last, [end.lat, end.lng], mode), ui.route.toBase, mode, ui) : '';
+  return { before, after };
+};
+
 /** The stop's inner content (title + meta), shared by the read-only itinerary
  *  and the owner editor, which each wrap it with their own <li>/controls. */
 export const stopBody = (event: RouteStop, lang: Locale, overrides: Durations): string => {
@@ -59,6 +78,7 @@ export const renderItinerary = (
   lang: Locale,
   ui: Ui,
   overrides: Durations,
+  baseOf?: (day: string) => DayBase,
 ): string => {
   let n = 0;
   return days
@@ -70,7 +90,8 @@ export const renderItinerary = (
           return leg + stopHtml(stop, n, lang, overrides);
         })
         .join('');
-      return `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${rows}</ul></section>`;
+      const bl = baseLegs(day, baseOf?.(day.day), mode, ui);
+      return `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul></section>`;
     })
     .join('');
 };
@@ -102,11 +123,24 @@ const markerEl = (n: number, tight: boolean): HTMLElement => {
   return el;
 };
 
-/** A drawer owns one map instance and re-renders markers/line on each call. */
-export const makeMapDrawer = (): ((days: readonly RouteDay[]) => void) => {
+const baseMarkerEl = (final: boolean): HTMLElement => {
+  const el = document.createElement('div');
+  el.className = 'route-pin route-pin--base';
+  el.textContent = final ? '🏁' : '🏠';
+  return el;
+};
+
+export type LngLat = Readonly<{ lng: number; lat: number }>;
+
+/** A drawer owns one map instance and re-renders markers/line on each call.
+ *  `onClick` (when given) reports map clicks — used to set the base by clicking. */
+export const makeMapDrawer = (
+  onClick?: (at: LngLat) => void,
+): ((days: readonly RouteDay[], baseOf?: (day: string) => DayBase) => void) => {
   let map: maplibregl.Map | undefined;
   let markers: maplibregl.Marker[] = [];
-  return (days) => {
+  let clickWired = false;
+  return (days, baseOf) => {
     const canvas = document.querySelector<HTMLElement>('[data-route-map]');
     if (!canvas) return;
     canvas.hidden = false;
@@ -116,6 +150,10 @@ export const makeMapDrawer = (): ((days: readonly RouteDay[]) => void) => {
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     }
     const live = map;
+    if (onClick && !clickWired) {
+      clickWired = true;
+      live.on('click', (e) => onClick({ lng: e.lngLat.lng, lat: e.lngLat.lat }));
+    }
     markers.forEach((m) => m.remove());
     markers = [];
     const pts: [number, number][] = [];
@@ -129,6 +167,10 @@ export const makeMapDrawer = (): ((days: readonly RouteDay[]) => void) => {
         const tight = i > 0 && day.legs[i - 1]?.tight === true;
         markers.push(new maplibregl.Marker({ element: markerEl(n, tight) }).setLngLat([g[1], g[0]]).addTo(live));
       }
+      // Base (and optional distinct final) markers for the day.
+      const db = baseOf?.(day.day);
+      if (db?.base) { markers.push(new maplibregl.Marker({ element: baseMarkerEl(false) }).setLngLat([db.base.lng, db.base.lat]).addTo(live)); pts.push([db.base.lng, db.base.lat]); }
+      if (db?.final) { markers.push(new maplibregl.Marker({ element: baseMarkerEl(true) }).setLngLat([db.final.lng, db.final.lat]).addTo(live)); pts.push([db.final.lng, db.final.lat]); }
     }
     if (pts.length > 0) {
       const bounds = pts.reduce((acc, p) => acc.extend(p), new maplibregl.LngLatBounds(pts[0], pts[0]));

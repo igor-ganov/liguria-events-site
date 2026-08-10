@@ -10,8 +10,9 @@ import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
-import { dayLabel, esc, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
-import type { Ui } from './route-render.ts';
+import { baseLegs, dayLabel, esc, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
+import type { LngLat, Ui } from './route-render.ts';
+import { readGlobalBase, resolveDayBase, writeGlobalBase } from '../../lib/favorites/base-point.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
 import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
@@ -19,8 +20,28 @@ import { PX_PER_MIN, renderTimeline } from './route-timeline.ts';
 import { snapMinutes, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
-const drawMap = makeMapDrawer();
-let payload: Payload = { mode: 'walking', groups: [], durations: {}, times: {}, pois: {}, dayStart: '', dayEnd: '', dayHours: {} };
+const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
+
+// "Set base by clicking the map": the next map click sets a point at this target.
+type PickMode = Readonly<{ scope: 'route' | 'global' | 'day'; day?: string; kind: 'base' | 'final' }>;
+let pickMode: PickMode | undefined;
+
+function handleMapClick(at: LngLat): void {
+  if (!pickMode) return;
+  const point = { lat: at.lat, lng: at.lng };
+  if (pickMode.scope === 'global') writeGlobalBase(point);
+  else if (pickMode.scope === 'route') payload = { ...payload, base: point };
+  else if (pickMode.kind === 'final') payload = { ...payload, dayFinals: { ...payload.dayFinals, [pickMode.day ?? '']: point } };
+  else payload = { ...payload, dayBases: { ...payload.dayBases, [pickMode.day ?? '']: point } };
+  pickMode = undefined;
+  render();
+}
+
+const drawMap = makeMapDrawer(handleMapClick);
+let payload: Payload = {
+  mode: 'walking', groups: [], durations: {}, times: {}, pois: {},
+  dayStart: '', dayEnd: '', dayHours: {}, base: undefined, dayBases: {}, dayFinals: {},
+};
 let byId: ReadonlyMap<string, RouteStop> = new Map();
 let favourites: ReadonlySet<string> = new Set();
 // POI data for resolving stops — the route's embedded pois plus this device's
@@ -102,7 +123,14 @@ const dayHtml = (day: RouteDay, lang: Locale, ui: Ui): string => {
         addable.map((e) => `<option value="${esc(e.id)}">${esc(titleOf(lang)(e))}</option>`).join('') +
         `</select></div>`
       : '';
-  return `<section class="route-day" data-day="${esc(day.day)}"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${rows}</ul>${add}</section>`;
+  const bl = baseLegs(day, baseOf(day.day), payload.mode, ui);
+  // Per-day base / final-point pickers.
+  const dayBaseCtl =
+    `<div class="route-day-base no-print">` +
+    `<button type="button" class="chip" data-pick-base data-day="${esc(day.day)}"${pickMode?.scope === 'day' && pickMode.kind === 'base' && pickMode.day === day.day ? ' aria-pressed="true"' : ''}>🏠 ${esc(ui.route.dayBase)}</button>` +
+    `<button type="button" class="chip" data-pick-final data-day="${esc(day.day)}"${pickMode?.scope === 'day' && pickMode.kind === 'final' && pickMode.day === day.day ? ' aria-pressed="true"' : ''}>🏁 ${esc(ui.route.dayFinal)}</button>` +
+    `</div>`;
+  return `<section class="route-day" data-day="${esc(day.day)}"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul>${dayBaseCtl}${add}</section>`;
 };
 
 const viewToggle = (ui: Ui): string =>
@@ -120,6 +148,16 @@ const dayHoursControl = (ui: Ui): string =>
   `<label class="route-dayhours-def"><input type="checkbox" data-route-day-default /> ${esc(ui.route.setDefault)}</label>` +
   `</div>`;
 
+// Base (accommodation) at route or global level; per-day pickers live on each
+// day. When a picker is armed, a hint tells the user to click the map.
+const baseControl = (ui: Ui): string =>
+  `<div class="route-base no-print">` +
+  `<button type="button" class="chip" data-pick-base-route${pickMode?.scope === 'route' ? ' aria-pressed="true"' : ''}>🏠 ${esc(ui.route.setBase)}</button>` +
+  `<button type="button" class="chip" data-pick-base-global${pickMode?.scope === 'global' ? ' aria-pressed="true"' : ''}>🏠 ${esc(ui.route.setBaseDefault)}</button>` +
+  (payload.base ? `<button type="button" class="chip" data-clear-base>✕ ${esc(ui.route.clearBase)}</button>` : '') +
+  (pickMode ? ` <span class="route-pick-hint">${esc(ui.route.clickMap)}</span>` : '') +
+  `</div>`;
+
 function render(): void {
   const output = document.querySelector<HTMLElement>('[data-route-output]');
   if (!output) return;
@@ -132,8 +170,8 @@ function render(): void {
       : view === 'timeline'
         ? renderTimeline(days, payload, byId, lang)
         : days.map((d) => dayHtml(d, lang, ui)).join('');
-  output.innerHTML = viewToggle(ui) + dayHoursControl(ui) + body;
-  drawMap(days);
+  output.innerHTML = viewToggle(ui) + dayHoursControl(ui) + baseControl(ui) + body;
+  drawMap(days, baseOf);
 }
 
 /* ── save ──────────────────────────────────────────────────────────────── */
@@ -177,6 +215,22 @@ const onClick = (event: MouseEvent): void => {
     render();
     return;
   }
+  // Base pickers: arm (or toggle off) a target, then a map click sets the point.
+  const arm = (mode: PickMode): void => {
+    pickMode = pickMode?.scope === mode.scope && pickMode.kind === mode.kind && pickMode.day === mode.day ? undefined : mode;
+    render();
+  };
+  if (target.closest('[data-pick-base-route]')) return arm({ scope: 'route', kind: 'base' });
+  if (target.closest('[data-pick-base-global]')) return arm({ scope: 'global', kind: 'base' });
+  if (target.closest('[data-clear-base]')) {
+    payload = { ...payload, base: undefined };
+    render();
+    return;
+  }
+  const dayBaseBtn = target.closest<HTMLElement>('[data-pick-base]');
+  if (dayBaseBtn) return arm({ scope: 'day', day: dayBaseBtn.dataset['day'] ?? '', kind: 'base' });
+  const dayFinalBtn = target.closest<HTMLElement>('[data-pick-final]');
+  if (dayFinalBtn) return arm({ scope: 'day', day: dayFinalBtn.dataset['day'] ?? '', kind: 'final' });
   const btn = target.closest<HTMLElement>('[data-op]');
   if (!btn || btn.tagName === 'SELECT') return;
   const id = btn.dataset['id'] ?? '';
