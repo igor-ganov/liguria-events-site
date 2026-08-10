@@ -62,17 +62,24 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
       - uses: actions/download-artifact@v4
         with:
           pattern: landmarks-*
           merge-multiple: true
           path: public/data/landmarks
+      # Refreshed landmarks can newly duplicate an existing cultural place
+      # (museum/gallery/theatre); re-run the cross-layer dedupe so the place
+      # shards drop the duplicate — otherwise data-shards.test.ts fails the next
+      # deploy (the "duplicates a landmark" regression).
+      - run: bun run scripts/dedupe-places-vs-landmarks.ts
       - name: Commit if changed
         run: |
           if [ -n "$(git status --porcelain public/data)" ]; then
             git config user.name 'github-actions[bot]'
             git config user.email 'github-actions[bot]@users.noreply.github.com'
-            git add public/data/landmarks
+            git add public/data
             git commit -m 'Refresh landmarks from Wikidata + OpenStreetMap (all regions)'
             # The two refresh matrices can finish together; rebase before pushing
             # so whichever commits second doesn't lose a non-fast-forward race.
