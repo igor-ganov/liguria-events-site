@@ -11,7 +11,7 @@ const POI = { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Cast
 
 test('owner adds a favourite POI, reorders, and the save persists to D1', async ({ page, context }) => {
   const token = await signSession(SECRET, OWNER, Date.now());
-  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://localhost:4410' }]);
+  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://127.0.0.1:4410' }]);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
   // Create a route OWNED by the test user (e1 + e2 on their shared day). page.request

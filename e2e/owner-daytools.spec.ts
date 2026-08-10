@@ -8,7 +8,7 @@ const SECRET = 'e2e-secret';
 
 const ownerRoute = async (page: import('@playwright/test').Page, context: import('@playwright/test').BrowserContext, data: string) => {
   const token = await signSession(SECRET, OWNER, Date.now());
-  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://localhost:4410' }]);
+  await context.addCookies([{ name: 'dg_session', value: token, url: 'http://127.0.0.1:4410' }]);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
   const created = await page.request.post('/api/routes', { data: { name: 'Day tools', data } });
   const body = await created.json();
