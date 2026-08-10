@@ -1,5 +1,5 @@
 import { buildRoute, poiToStop } from '../../lib/favorites/build-route.ts';
-import type { Mode, RouteDay } from '../../lib/favorites/build-route.ts';
+import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { enrichDays } from '../../lib/favorites/enrich-route.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
@@ -10,7 +10,11 @@ import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { dayLabel, esc, makeMapDrawer, renderItinerary } from './route-render.ts';
-import type { Durations } from './route-render.ts';
+import type { Durations, Ui } from './route-render.ts';
+import { renderTimeline } from './route-timeline.ts';
+import { makeTimelineDrag } from './timeline-drag.ts';
+import { timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+import type { Payload } from './route-payload.ts';
 
 const B = import.meta.env.BASE_URL.replace(/\/$/, '');
 const field = (obj: unknown, key: string): unknown => (Object(obj) === obj ? Reflect.get(Object(obj), key) : undefined);
@@ -34,6 +38,76 @@ const readDurations = (): Record<string, number> => {
 let mode: Mode = 'walking';
 let corpus: readonly CompactEvent[] | undefined;
 const drawMap = makeMapDrawer();
+
+/* ── timeline view (vertical clock axis + Teams-style drag) ────────────── */
+
+// List is the default; the generator can also arrange the day on the timeline,
+// with the same drag/resize the saved-route editor uses. A drag commits a start
+// time (genTimes) or a duration override (overrides); both persist so a later
+// Save embeds the arrangement.
+let view: 'list' | 'timeline' = 'list';
+let byId: ReadonlyMap<string, RouteStop> = new Map();
+const TIMES_KEY = 'dovego:route-times';
+let genTimes: Record<string, string> = {};
+let genDayHours: Record<string, { start: string; end: string }> = {};
+
+const readTimes = (): Record<string, string> => {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(TIMES_KEY) ?? '{}');
+    const out: Record<string, string> = {};
+    if (raw && typeof raw === 'object') {
+      for (const [id, t] of Object.entries(raw)) if (typeof t === 'string') out[id] = t;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+};
+
+// A payload shim so the shared timeline renderer works without a saved route.
+const genPayload = (): Payload => ({
+  mode,
+  groups: [],
+  durations: overrides,
+  times: genTimes,
+  pois: {},
+  dayStart: '',
+  dayEnd: '',
+  dayHours: genDayHours,
+  base: undefined,
+  dayBases: {},
+  dayFinals: {},
+});
+
+const viewToggle = (ui: Ui): string =>
+  `<div class="route-views no-print" role="group">` +
+  `<button type="button" class="chip" data-route-view="list" aria-pressed="${view === 'list'}">${esc(ui.route.viewList)}</button>` +
+  `<button type="button" class="chip" data-route-view="timeline" aria-pressed="${view === 'timeline'}">${esc(ui.route.viewTimeline)}</button>` +
+  `</div>`;
+
+// Module-level so the view toggle and the timeline drag can repaint the last
+// generated route without re-running generation.
+const paintRoute = (ds: readonly RouteDay[]): void => {
+  const output = document.querySelector<HTMLElement>('[data-route-output]');
+  const { lang, ui } = readUiIsland();
+  const from = lastRange.from;
+  if (output) {
+    const end = ds.at(-1)?.day ?? from;
+    const span =
+      ds.length > 0
+        ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
+        : '';
+    const toggle = ds.length > 0 ? viewToggle(ui) : '';
+    const body =
+      ds.length === 0
+        ? ''
+        : view === 'timeline'
+          ? renderTimeline(ds, genPayload(), byId, lang)
+          : renderItinerary(ds, mode, lang, ui, overrides, baseOf);
+    output.innerHTML = span + toggle + body;
+  }
+  drawMap(ds, baseOf);
+};
 
 const fetchCorpus = async (): Promise<readonly CompactEvent[]> => {
   if (corpus) return corpus;
@@ -59,6 +133,16 @@ const pickDurations = (days: readonly RouteDay[]): Record<string, number> => {
   for (const day of days) for (const stop of day.stops) {
     const min = overrides[stop.id];
     if (min !== undefined) out[stop.id] = min;
+  }
+  return out;
+};
+
+// Likewise for timeline start-time arrangements, so a saved route keeps them.
+const pickTimes = (days: readonly RouteDay[]): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const day of days) for (const stop of day.stops) {
+    const t = genTimes[stop.id];
+    if (t !== undefined) out[stop.id] = t;
   }
   return out;
 };
@@ -100,7 +184,7 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
     range: lastRange,
     dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })),
     durations: pickDurations(days),
-    times: {},
+    times: pickTimes(days),
     pois,
   });
   let saved: Readonly<{ id: string; url: string }> | undefined;
@@ -131,36 +215,26 @@ let gen = 0; // bumps per generation so a stale async enrichment can't repaint
 
 const generate = async (): Promise<void> => {
   const my = (gen += 1);
-  const { lang, ui } = readUiIsland();
+  const { ui } = readUiIsland();
   overrides = readDurations();
+  genTimes = readTimes();
   const favs = new Set(readFavorites());
   // Favourited events (from the corpus) + favourited landmarks/places (POIs).
   const favEvents = (await fetchCorpus()).filter((e) => favs.has(e.id));
   const poiStops = Object.values(readFavPois()).filter((p) => favs.has(p.id)).map(poiToStop);
   const events = [...favEvents, ...poiStops];
+  byId = new Map(events.map((e) => [e.id, e]));
   const fromEl = document.querySelector<HTMLInputElement>('[data-route-from]');
   const toEl = document.querySelector<HTMLInputElement>('[data-route-to]');
   const from = fromEl?.value || isoToday();
   const to = toEl?.value || undefined;
   lastRange = to === undefined ? { from } : { from, to };
   lastDays = buildRoute(events, mode, lastRange);
-  const output = document.querySelector<HTMLElement>('[data-route-output]');
   const saveBtn = document.querySelector<HTMLElement>('[data-route-save]');
   const share = document.querySelector<HTMLElement>('[data-route-share]');
   if (share) share.hidden = true; // a fresh generation invalidates the old link
-  const paint = (ds: readonly RouteDay[]): void => {
-    if (output) {
-      const end = ds.at(-1)?.day ?? from;
-      const span =
-        ds.length > 0
-          ? `<p class="route-span">${esc(dayLabel(from, lang))} → ${esc(dayLabel(end, lang))}</p>`
-          : '';
-      output.innerHTML = span + renderItinerary(ds, mode, lang, ui, overrides, baseOf);
-    }
-    drawMap(ds, baseOf);
-  };
   // Instant paint with the straight-line estimate, then upgrade to real routing.
-  paint(lastDays);
+  paintRoute(lastDays);
   if (saveBtn) {
     saveBtn.hidden = lastDays.length === 0;
     saveBtn.textContent = ui.route.save;
@@ -168,7 +242,7 @@ const generate = async (): Promise<void> => {
   const enriched = await enrichDays(lastDays, mode);
   if (my !== gen) return; // a newer generation superseded this one
   lastDays = enriched;
-  paint(enriched);
+  paintRoute(enriched);
 };
 
 // A generated route honours the user's global base (departure/return); route-
@@ -181,6 +255,40 @@ const setMode = (btn: HTMLElement): void => {
   document.querySelectorAll<HTMLElement>('[data-route-mode]').forEach((b) =>
     b.setAttribute('aria-pressed', String(b === btn)),
   );
+};
+
+// Drag a block to set its start time (genTimes); resize to set its duration
+// (overrides). Both persist so a later Save embeds the arrangement.
+const timelineDrag = makeTimelineDrag((id, kind, startMin, durMin) => {
+  if (kind === 'move') {
+    genTimes = { ...genTimes, [id]: timeOfMinutes(startMin) };
+    try {
+      localStorage.setItem(TIMES_KEY, JSON.stringify(genTimes));
+    } catch {
+      /* storage blocked — ignore */
+    }
+  } else {
+    overrides = { ...overrides, [id]: durMin };
+    try {
+      localStorage.setItem(DUR_KEY, JSON.stringify(overrides));
+    } catch {
+      /* storage blocked — ignore */
+    }
+  }
+  paintRoute(lastDays);
+});
+
+// A per-day window override on the timeline (needs both ends set); in-memory.
+const setGenDayHours = (changed: HTMLInputElement): void => {
+  const box = changed.closest('.tl-day-hours') ?? document;
+  const start = box.querySelector<HTMLInputElement>('[data-day-start]')?.value ?? '';
+  const end = box.querySelector<HTMLInputElement>('[data-day-end]')?.value ?? '';
+  const day = changed.dataset['day'] ?? '';
+  const next = { ...genDayHours };
+  if (start !== '' && end !== '') next[day] = { start, end };
+  else delete next[day];
+  genDayHours = next;
+  paintRoute(lastDays);
 };
 
 let wired = false;
@@ -198,6 +306,12 @@ export const initRoute = (): void => {
       setMode(modeBtn);
       return;
     }
+    const viewBtn = target.closest<HTMLElement>('[data-route-view]');
+    if (viewBtn) {
+      view = viewBtn.dataset['routeView'] === 'timeline' ? 'timeline' : 'list';
+      paintRoute(lastDays);
+      return;
+    }
     if (target.closest('[data-route-generate]')) {
       void generate();
       return;
@@ -210,7 +324,12 @@ export const initRoute = (): void => {
   });
   document.addEventListener('change', (event) => {
     const input = event.target;
-    if (!(input instanceof HTMLInputElement) || !input.hasAttribute('data-dur-input')) return;
+    if (!(input instanceof HTMLInputElement)) return;
+    if (input.hasAttribute('data-day-start') || input.hasAttribute('data-day-end')) {
+      setGenDayHours(input);
+      return;
+    }
+    if (!input.hasAttribute('data-dur-input')) return;
     const id = input.dataset['durId'] ?? '';
     const min = Math.max(15, Math.round(Number(input.value) || 0));
     try {
@@ -220,4 +339,8 @@ export const initRoute = (): void => {
     }
     void generate();
   });
+  // Timeline drag/resize (only fires when a .tl-block is under the pointer).
+  document.addEventListener('pointerdown', timelineDrag.onPointerDown);
+  document.addEventListener('pointermove', timelineDrag.onPointerMove);
+  document.addEventListener('pointerup', timelineDrag.onPointerUp);
 };
