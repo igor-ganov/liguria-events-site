@@ -18,7 +18,6 @@ const description = ui.seo.map.replace('{place}', placeName);
   <!-- The map carries every event in the country and merely opens on the region:
        pan or zoom out and the rest are already there. -->
   <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
-  <link rel="preconnect" href="https://tiles.dovego.it" crossorigin />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <div class="map-filters">
     <div class="map-layers" role="group" aria-label="Map layers">
