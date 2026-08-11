@@ -138,6 +138,13 @@ export const updateRouteData = async (
   await db.prepare(`UPDATE saved_routes SET data = ? WHERE id = ? AND user_id = ?`).bind(data, id, userId).run();
 };
 
+/** Overwrite an anonymous (owner-less) route's itinerary — editable by anyone
+ *  with its link, since an anonymous route is public and link-shared. The
+ *  `user_id IS NULL` guard makes sure this can never touch an owned route. */
+export const updateAnonymousRouteData = async (db: D1Database, id: string, data: string): Promise<void> => {
+  await db.prepare(`UPDATE saved_routes SET data = ? WHERE id = ? AND user_id IS NULL`).bind(data, id).run();
+};
+
 export const deleteRoute = async (db: D1Database, userId: string, id: string): Promise<void> => {
   await db.prepare(`DELETE FROM saved_routes WHERE user_id = ? AND id = ?`).bind(userId, id).run();
 };

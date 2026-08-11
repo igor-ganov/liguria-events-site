@@ -16,6 +16,10 @@ const user = Astro.locals.user;
 const db = Astro.locals.runtime.env.DB;
 const route = id ? await getRoute(db, id) : undefined;
 const owned = route !== undefined && route.userId === user?.id && user !== undefined;
+// An anonymous (owner-less) route is editable by anyone with its link — that is
+// the only way its creator (who saved it without logging in) can ever edit it.
+const anonymous = route !== undefined && route.userId === undefined;
+const editable = owned || anonymous;
 const allowed = route !== undefined && (route.public || owned);
 if (!allowed) Astro.response.status = 404;
 const notFound = 'This route could not be found.';
@@ -31,7 +35,7 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
       <div class="route-page-actions no-print">
         <button class="chip" type="button" data-route-pdf>{ui.route.pdf}</button>
       </div>
-      {owned ? (
+      {editable ? (
         <div class="route-edit-actions no-print" data-route-edit-actions>
           <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
           <span class="route-edit-status" data-route-edit-status />
@@ -41,7 +45,7 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
       )}
       <div class="route-map" data-route-map hidden />
       <div class="route-output" data-route-output />
-      <div data-route-root data-owned={owned ? '1' : '0'} data-id={id} hidden />
+      <div data-route-root data-owned={editable ? '1' : '0'} data-id={id} hidden />
       <script is:inline type="application/json" id="route-data" set:html={route.data} />
       {owned && <script is:inline type="application/json" id="route-favorites" set:html={JSON.stringify(favorites)} />}
       <script>
