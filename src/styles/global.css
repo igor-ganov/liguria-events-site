@@ -638,14 +638,26 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-hour { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line); }
 .tl-hour > span { position: absolute; left: 0; top: -0.6em; width: 3rem; text-align: right; font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tl-block {
-  position: absolute; box-sizing: border-box; padding: 0.25rem 0.4rem; border-radius: var(--radius-sm);
-  background: hsl(var(--hue, 30) 60% 92%); border: 1px solid hsl(var(--hue, 30) 55% 60%); color: var(--ink);
-  overflow: hidden; cursor: grab; touch-action: none; user-select: none; font-size: 0.78rem; line-height: 1.2;
+  position: absolute; left: 0; right: 0; box-sizing: border-box;
+  padding: 0.3rem 0.5rem 0.35rem 0.6rem; border-radius: var(--radius-sm);
+  background: hsl(var(--hue, 30) 60% 94%); border: 1px solid hsl(var(--hue, 30) 45% 78%);
+  border-left: 3px solid hsl(var(--hue, 30) 65% 52%); color: var(--ink);
+  overflow: hidden; cursor: grab; touch-action: none; user-select: none;
+  font-size: 0.8rem; line-height: 1.25; box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.12s ease;
 }
-.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow-sm); opacity: 0.92; }
-.tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
-.tl-time { display: block; font-variant-numeric: tabular-nums; color: var(--muted); }
-.tl-title { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-block:hover { box-shadow: var(--shadow); }
+.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow); opacity: 0.95; }
+/* Off-schedule: the block sticks out of the event's official window. */
+.tl-block--offschedule { background: hsl(2 75% 95%); border-color: hsl(2 70% 82%); border-left-color: #e5484d; }
+.tl-time { display: block; font-size: 0.72rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.tl-title { display: block; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The real window an off-schedule block has drifted out of. */
+.tl-flag {
+  display: inline-block; margin-top: 0.12rem; padding: 0 0.35rem; border-radius: 999px;
+  background: #e5484d; color: #fff; font-size: 0.64rem; font-weight: 600;
+  font-variant-numeric: tabular-nums; line-height: 1.55;
+}
 .tl-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; cursor: ns-resize; touch-action: none; }
 /* A visible grabber so finger-resize is discoverable (Teams-style). */
 .tl-resize::after {
@@ -672,13 +684,13 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .confirm-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
 .confirm-danger { background: #e5484d; border-color: #e5484d; color: #fff; }
 @media (prefers-color-scheme: dark) {
-  .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 35% 42%); }
-  .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
+  .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 30% 38%); border-left-color: hsl(var(--hue, 30) 45% 55%); }
+  .tl-block--offschedule { background: hsl(2 40% 28%); border-color: hsl(2 45% 45%); border-left-color: #e5484d; }
 }
-:root[data-theme='dark'] .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 35% 42%); }
-:root[data-theme='dark'] .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }
-:root[data-theme='light'] .tl-block { background: hsl(var(--hue, 30) 60% 92%); border-color: hsl(var(--hue, 30) 55% 60%); }
-:root[data-theme='light'] .tl-block--overlap { background: hsl(2 75% 92%); border-color: #e5484d; }
+:root[data-theme='dark'] .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 30% 38%); border-left-color: hsl(var(--hue, 30) 45% 55%); }
+:root[data-theme='dark'] .tl-block--offschedule { background: hsl(2 40% 28%); border-color: hsl(2 45% 45%); border-left-color: #e5484d; }
+:root[data-theme='light'] .tl-block { background: hsl(var(--hue, 30) 60% 94%); border-color: hsl(var(--hue, 30) 45% 78%); border-left-color: hsl(var(--hue, 30) 65% 52%); }
+:root[data-theme='light'] .tl-block--offschedule { background: hsl(2 75% 95%); border-color: hsl(2 70% 82%); border-left-color: #e5484d; }
 
 /* Route → PDF: the browser's Save-as-PDF, with the site chrome and interactive
  * controls stripped so the itinerary prints clean on white paper. */

@@ -26,6 +26,23 @@ export const reorderStop = (
     return { ...g, ids };
   });
 
+/** Move a stop to an absolute index within its day (the timeline drag-to-reorder
+ *  commit). The index is clamped to the day's length after the stop is lifted
+ *  out, so dropping past the end appends. */
+export const moveStopToIndex = (
+  groups: readonly DayGroup[],
+  id: string,
+  day: string,
+  index: number,
+): readonly DayGroup[] =>
+  groups.map((g) => {
+    if (g.day !== day) return g;
+    const without = g.ids.filter((x) => x !== id);
+    if (without.length === g.ids.length) return g; // id not on this day
+    const at = Math.max(0, Math.min(Math.round(index), without.length));
+    return { ...g, ids: [...without.slice(0, at), id, ...without.slice(at)] };
+  });
+
 export const moveStopToDay = (
   groups: readonly DayGroup[],
   id: string,

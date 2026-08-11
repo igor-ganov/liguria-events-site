@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-// The favourites generator must offer the vertical-timeline view with the same
-// Teams-style drag as the saved-route editor: dragging a block sets its start
-// time and the arrangement persists. This also covers the shared makeTimelineDrag.
+// The favourites generator offers the vertical-timeline view with the same
+// Teams-style drag as the saved-route editor: dragging a block REORDERS the
+// stop (insert above/below — no overlaps) and the arrangement persists. This
+// also covers the shared makeTimelineDrag reorder path.
 const PLAN = {
   itineraries: [],
   direct: [
@@ -38,12 +39,12 @@ const poi = (id: string, lat: number, lng: number) => ({
   url: `/landmark/liguria/${id}/`,
 });
 
-test('generator timeline: dragging a block sets and persists its start time', async ({ page }) => {
+test('generator timeline: dragging a block reorders the stop and persists', async ({ page }) => {
   const pois = { f1: poi('f1', 44.4, 8.9), f2: poi('f2', 44.41, 8.94) };
   await page.addInitScript((data) => {
     localStorage.setItem('dovego:favorites', JSON.stringify(['f1', 'f2']));
     localStorage.setItem('dovego:fav-pois', JSON.stringify(data));
-    localStorage.removeItem('dovego:route-times');
+    localStorage.removeItem('dovego:route-order');
   }, pois);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ events: [] }) }));
   await page.route('https://api.transitous.org/**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(PLAN) }));
@@ -51,27 +52,27 @@ test('generator timeline: dragging a block sets and persists its start time', as
   await page.goto('/favorites/');
   await page.locator('[data-route-generate]').click();
 
-  // Wait until real routing has settled (lastDays stable) before switching views,
-  // so the timeline blocks aren't re-rendered mid-drag.
+  // Wait until real routing has settled before switching views, so the timeline
+  // blocks aren't re-rendered mid-drag.
   await expect(page.locator('.route-leg[data-real="1"]').first()).toBeVisible();
 
-  // Switch to the timeline view.
+  // Switch to the timeline view; two stops → two ordered blocks.
   await page.locator('[data-route-view="timeline"]').click();
-  const block = page.locator('.tl-block').first();
-  await expect(block).toBeVisible();
-  const before = await block.locator('.tl-time').textContent();
+  await expect(page.locator('.tl-block')).toHaveCount(2);
+  const firstTitle = await page.locator('.tl-block').first().locator('.tl-title').textContent();
 
-  // Drag the block body down (later start). Grab near the top to avoid the
-  // resize handle at the bottom.
-  const box = (await block.boundingBox())!;
+  // Drag the first block down, past the second (grab near the top to avoid the
+  // bottom resize handle). It should drop into the last slot.
+  const box = (await page.locator('.tl-block').first().boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + 8);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2, box.y + 8 + 66, { steps: 6 });
+  await page.mouse.move(box.x + box.width / 2, box.y + 8 + 160, { steps: 8 });
   await page.mouse.up();
 
-  // The start time was committed and persisted.
-  await expect(page.locator('.tl-block').first().locator('.tl-time')).not.toHaveText(before ?? '');
-  const times = await page.evaluate(() => localStorage.getItem('dovego:route-times'));
-  expect(times).toBeTruthy();
-  expect(Object.keys(JSON.parse(times ?? '{}')).length).toBeGreaterThan(0);
+  // The order changed: the first block is now the OTHER stop, and it persisted.
+  await expect(page.locator('.tl-block').first().locator('.tl-title')).not.toHaveText(firstTitle ?? '');
+  const order = await page.evaluate(() => localStorage.getItem('dovego:route-order'));
+  expect(order).toBeTruthy();
+  const days: Record<string, string[]> = JSON.parse(order ?? '{}');
+  expect(Object.values(days).some((ids) => ids.length === 2)).toBe(true);
 });

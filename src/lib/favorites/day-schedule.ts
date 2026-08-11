@@ -1,13 +1,13 @@
 // Lay a day's stops onto a minute-of-day axis for the timeline view. Pure and
-// unit-tested: given the stops in order plus the route's time/duration
-// overrides, it produces each block's [start, end], the travel gap before it,
-// and whether it overlaps its neighbour. The timeline renders from this; drag
-// and resize just change the overrides and rebuild.
+// unit-tested. The stops are a strict SEQUENCE (their list order): the first
+// starts at the day's opening, each next one after the previous plus travel.
+// There are no overlaps and no lanes — dragging reorders the sequence, which
+// reflows the times. A stop with a fixed official time turns "off-schedule"
+// when the sequence places its block outside the event's real window.
 import { eventDuration } from './event-duration.ts';
 import { travelMinutesBetween } from './build-route.ts';
 import type { Mode, RouteStop } from './build-route.ts';
 
-export type Times = Readonly<Record<string, string>>;
 export type Durations = Readonly<Record<string, number>>;
 
 export type ScheduledStop = Readonly<{
@@ -16,7 +16,10 @@ export type ScheduledStop = Readonly<{
   endMin: number;
   /** Estimated travel minutes from the previous stop (0 for the first). */
   travelMin: number;
-  overlap: boolean;
+  /** The scheduled block falls outside the event's official window — placed
+   *  before it opens, or running past its close. Stops without a fixed time
+   *  (POIs/landmarks) are flexible and never off-schedule. */
+  offSchedule: boolean;
 }>;
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -33,16 +36,22 @@ export const snapMinutes = (m: number, step = 15): number => Math.round(m / step
 
 const coord = (event: RouteStop): readonly [number, number] | undefined => event.g;
 
-// A stop's fixed start: the route's time override wins, else the corpus time.
-const fixedStart = (event: RouteStop, times: Times): number | undefined =>
-  minutesOfTime(times[event.id] ?? event.h);
+// The event's official window: when it actually runs. Start from the corpus
+// time; length is the source-stated duration or the category default — NOT the
+// visitor's override, since an over-long visit is exactly what may overrun the
+// close. Undefined for stops with no fixed time (they are always flexible).
+export const officialWindow = (event: RouteStop): Readonly<{ start: number; end: number }> | undefined => {
+  const start = minutesOfTime(event.h);
+  return start === undefined ? undefined : { start, end: start + eventDuration(event) };
+};
 
-/** Place a day's stops on the minute axis. Fixed times (override or corpus) are
- *  honoured; otherwise a stop auto-starts after the previous one plus travel. */
+/** Place a day's stops on the minute axis as a strict sequence: the order is
+ *  the itinerary. The first stop opens the day; each next one follows the
+ *  previous plus travel. `offSchedule` flags a fixed-time stop whose resulting
+ *  block sticks out of the event's official window. */
 export const buildDaySchedule = (
   stops: readonly RouteStop[],
   mode: Mode,
-  times: Times,
   durations: Durations,
   dayStartMin: number,
 ): readonly ScheduledStop[] => {
@@ -53,38 +62,15 @@ export const buildDaySchedule = (
     const from = prev ? coord(prev) : undefined;
     const to = coord(event);
     const travelMin = prev && from && to ? travelMinutesBetween(from, to, mode) : 0;
-    const autoStart = prev ? prevEnd + travelMin : dayStartMin;
-    const startMin = fixedStart(event, times) ?? autoStart;
+    const startMin = prev ? prevEnd + travelMin : dayStartMin;
     const endMin = startMin + eventDuration(event, durations[event.id]);
-    placed.push({ id: event.id, startMin, endMin, travelMin, overlap: false });
+    const win = officialWindow(event);
+    const offSchedule = win !== undefined && (startMin < win.start || endMin > win.end);
+    placed.push({ id: event.id, startMin, endMin, travelMin, offSchedule });
     prev = event;
     prevEnd = endMin;
   }
-  // Overlap is a true pairwise interval test, not list adjacency: a drag can
-  // set times so that a later-listed stop actually starts earlier.
-  return placed.map((item) => {
-    const overlap = placed.some(
-      (other) => other.id !== item.id && item.startMin < other.endMin && other.startMin < item.endMin,
-    );
-    return overlap ? { ...item, overlap: true } : item;
-  });
-};
-
-/** Assign each block a lane (column) so overlapping blocks sit side-by-side and
- *  stay readable; disjoint blocks reuse the earliest free lane. Greedy interval
- *  partitioning — `count` is the max simultaneous blocks. */
-export const assignLanes = (
-  items: readonly ScheduledStop[],
-): Readonly<{ lane: Readonly<Record<string, number>>; count: number }> => {
-  const laneEnds: number[] = [];
-  const lane: Record<string, number> = {};
-  for (const item of [...items].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin)) {
-    const free = laneEnds.findIndex((end) => end <= item.startMin);
-    const l = free === -1 ? laneEnds.length : free;
-    laneEnds[l] = item.endMin;
-    lane[item.id] = l;
-  }
-  return { lane, count: Math.max(1, laneEnds.length) };
+  return placed;
 };
 
 /** The visible time window: whole hours spanning the day start and every block,

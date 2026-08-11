@@ -1,6 +1,7 @@
-import { buildRoute, poiToStop } from '../../lib/favorites/build-route.ts';
+import { buildRoute, poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { enrichDays } from '../../lib/favorites/enrich-route.ts';
+import { moveStopToIndex } from './route-edit-ops.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
@@ -13,7 +14,6 @@ import { dayLabel, esc, makeMapDrawer, renderItinerary } from './route-render.ts
 import type { Durations, Ui } from './route-render.ts';
 import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
-import { timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import type { Payload } from './route-payload.ts';
 
 const B = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -42,21 +42,25 @@ const drawMap = makeMapDrawer();
 /* ── timeline view (vertical clock axis + Teams-style drag) ────────────── */
 
 // List is the default; the generator can also arrange the day on the timeline,
-// with the same drag/resize the saved-route editor uses. A drag commits a start
-// time (genTimes) or a duration override (overrides); both persist so a later
+// with the same drag/resize the saved-route editor uses. A drag reorders the
+// stop (genOrder) or resizes its duration (overrides); both persist so a later
 // Save embeds the arrangement.
 let view: 'list' | 'timeline' = 'list';
 let byId: ReadonlyMap<string, RouteStop> = new Map();
-const TIMES_KEY = 'dovego:route-times';
-let genTimes: Record<string, string> = {};
+const ORDER_KEY = 'dovego:route-order';
+// Per-day custom stop order from timeline drag-to-reorder, so a tweak survives a
+// regenerate (buildRoute otherwise re-derives its own order).
+let genOrder: Record<string, readonly string[]> = {};
 let genDayHours: Record<string, { start: string; end: string }> = {};
 
-const readTimes = (): Record<string, string> => {
+const readOrder = (): Record<string, readonly string[]> => {
   try {
-    const raw: unknown = JSON.parse(localStorage.getItem(TIMES_KEY) ?? '{}');
-    const out: Record<string, string> = {};
+    const raw: unknown = JSON.parse(localStorage.getItem(ORDER_KEY) ?? '{}');
+    const out: Record<string, readonly string[]> = {};
     if (raw && typeof raw === 'object') {
-      for (const [id, t] of Object.entries(raw)) if (typeof t === 'string') out[id] = t;
+      for (const [day, ids] of Object.entries(raw)) {
+        if (Array.isArray(ids)) out[day] = ids.filter((x): x is string => typeof x === 'string');
+      }
     }
     return out;
   } catch {
@@ -64,12 +68,26 @@ const readTimes = (): Record<string, string> => {
   }
 };
 
+// Reorder each day's stops to the saved order (unknown ids keep their place at
+// the end), then rebuild the legs from the reordered groups.
+const applyGenOrder = (days: readonly RouteDay[]): readonly RouteDay[] => {
+  if (Object.keys(genOrder).length === 0) return days;
+  const groups = days.map((d) => {
+    const ids = d.stops.map((s) => s.id);
+    const order = genOrder[d.day];
+    if (!order) return { day: d.day, ids };
+    const rank = new Map(order.map((id, i) => [id, i]));
+    return { day: d.day, ids: [...ids].sort((a, b) => (rank.get(a) ?? 1e9) - (rank.get(b) ?? 1e9)) };
+  });
+  return routeFromGroups(groups, mode, byId);
+};
+
 // A payload shim so the shared timeline renderer works without a saved route.
 const genPayload = (): Payload => ({
   mode,
   groups: [],
   durations: overrides,
-  times: genTimes,
+  times: {},
   pois: {},
   dayStart: '',
   dayEnd: '',
@@ -137,16 +155,6 @@ const pickDurations = (days: readonly RouteDay[]): Record<string, number> => {
   return out;
 };
 
-// Likewise for timeline start-time arrangements, so a saved route keeps them.
-const pickTimes = (days: readonly RouteDay[]): Record<string, string> => {
-  const out: Record<string, string> = {};
-  for (const day of days) for (const stop of day.stops) {
-    const t = genTimes[stop.id];
-    if (t !== undefined) out[stop.id] = t;
-  }
-  return out;
-};
-
 const rememberRoute = (route: Readonly<{ id: string; name: string; data: string; editToken?: string }>): void => {
   const KEY = 'dovego:routes';
   try {
@@ -184,7 +192,7 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
     range: lastRange,
     dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })),
     durations: pickDurations(days),
-    times: pickTimes(days),
+    times: {},
     pois,
   });
   let saved: Readonly<{ id: string; url: string; editToken?: string }> | undefined;
@@ -219,7 +227,7 @@ const generate = async (): Promise<void> => {
   const my = (gen += 1);
   const { ui } = readUiIsland();
   overrides = readDurations();
-  genTimes = readTimes();
+  genOrder = readOrder();
   const favs = new Set(readFavorites());
   // Favourited events (from the corpus) + favourited landmarks/places (POIs).
   const favEvents = (await fetchCorpus()).filter((e) => favs.has(e.id));
@@ -231,7 +239,7 @@ const generate = async (): Promise<void> => {
   const from = fromEl?.value || isoToday();
   const to = toEl?.value || undefined;
   lastRange = to === undefined ? { from } : { from, to };
-  lastDays = buildRoute(events, mode, lastRange);
+  lastDays = applyGenOrder(buildRoute(events, mode, lastRange));
   const saveBtn = document.querySelector<HTMLElement>('[data-route-save]');
   const share = document.querySelector<HTMLElement>('[data-route-share]');
   if (share) share.hidden = true; // a fresh generation invalidates the old link
@@ -259,25 +267,40 @@ const setMode = (btn: HTMLElement): void => {
   );
 };
 
-// Drag a block to set its start time (genTimes); resize to set its duration
-// (overrides). Both persist so a later Save embeds the arrangement.
-const timelineDrag = makeTimelineDrag((id, kind, startMin, durMin) => {
-  if (kind === 'move') {
-    genTimes = { ...genTimes, [id]: timeOfMinutes(startMin) };
+// After a reorder, upgrade the straight-line legs back to real routing (guarded
+// like generate(), so a stale fill can't repaint over a newer arrangement).
+const reEnrich = async (): Promise<void> => {
+  const my = (gen += 1);
+  const enriched = await enrichDays(lastDays, mode);
+  if (my !== gen) return;
+  lastDays = enriched;
+  paintRoute(enriched);
+};
+
+// A vertical drag reorders the stop (genOrder → rebuild legs); resize sets the
+// duration (overrides). Both persist so a later Save embeds the arrangement.
+const timelineDrag = makeTimelineDrag((commit) => {
+  if (commit.kind === 'reorder') {
+    const groups = lastDays.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) }));
+    const next = moveStopToIndex(groups, commit.id, commit.day, commit.index);
+    genOrder = Object.fromEntries(next.map((g) => [g.day, [...g.ids]]));
     try {
-      localStorage.setItem(TIMES_KEY, JSON.stringify(genTimes));
+      localStorage.setItem(ORDER_KEY, JSON.stringify(genOrder));
     } catch {
       /* storage blocked — ignore */
     }
+    lastDays = routeFromGroups(next, mode, byId);
+    paintRoute(lastDays);
+    void reEnrich();
   } else {
-    overrides = { ...overrides, [id]: durMin };
+    overrides = { ...overrides, [commit.id]: commit.durMin };
     try {
       localStorage.setItem(DUR_KEY, JSON.stringify(overrides));
     } catch {
       /* storage blocked — ignore */
     }
+    paintRoute(lastDays);
   }
-  paintRoute(lastDays);
 });
 
 // A per-day window override on the timeline (needs both ends set); in-memory.

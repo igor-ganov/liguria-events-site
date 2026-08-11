@@ -17,11 +17,10 @@ import type { RoutedLeg } from '../../lib/favorites/enrich-route.ts';
 import { readGlobalBase, resolveDayBase, writeGlobalBase } from '../../lib/favorites/base-point.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
-import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
+import { addStopToDay, addableEvents, moveStopToDay, moveStopToIndex, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
 import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
 import { confirmDialog } from './confirm-dialog.ts';
-import { timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
 const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
@@ -330,14 +329,14 @@ const requestRemove = async (id: string): Promise<void> => {
   withGroups(removeStop(payload.groups, id, block?.dataset['tlDay'] ?? ''));
 };
 
-// Move commits an explicit start time; resize commits a duration override; a
-// left swipe (or the block's ✕ button) asks to remove the stop.
+// A vertical drag reorders the stop within its day; resize commits a duration
+// override; a left swipe (or the block's ✕ button) asks to remove the stop.
 const { onPointerDown, onPointerMove, onPointerUp } = makeTimelineDrag(
-  (id, kind, startMin, durMin) => {
+  (commit) => {
     payload =
-      kind === 'move'
-        ? { ...payload, times: { ...payload.times, [id]: timeOfMinutes(startMin) } }
-        : { ...payload, durations: { ...payload.durations, [id]: durMin } };
+      commit.kind === 'reorder'
+        ? { ...payload, groups: moveStopToIndex(payload.groups, commit.id, commit.day, commit.index) }
+        : { ...payload, durations: { ...payload.durations, [commit.id]: commit.durMin } };
     render();
   },
   { onSwipeDelete: (id) => void requestRemove(id) },

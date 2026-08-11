@@ -1,9 +1,11 @@
 // Renders the day timeline (vertical clock axis) from the pure day-schedule
-// model. Each stop is an absolutely-positioned block (top ∝ start, height ∝
-// duration); overlapping stops share the day in separate lanes and turn red.
-// The drag/resize wiring lives in route-editor; this only produces the markup,
-// carrying each block's current start/duration in data-* for the drag maths.
-import { assignLanes, axisRange, buildDaySchedule, minutesOfTime, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+// model. Stops are a single ordered column — each an absolutely-positioned block
+// (top ∝ start, height ∝ duration). There are no lanes: dragging reorders the
+// sequence. A fixed-time stop whose block sticks out of the event's official
+// window turns red, with its real window shown as a hint. The drag/resize wiring
+// lives in route-editor / init-route; this only produces the markup, carrying
+// each block's current duration in data-* for the drag maths.
+import { axisRange, buildDaySchedule, minutesOfTime, officialWindow, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { eventDuration } from '../../lib/favorites/event-duration.ts';
 import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import type { RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
@@ -29,11 +31,10 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
   const hours = effectiveDayHours(day.day, payload.dayHours, routeHours, readGlobalDayHours());
   const dayStartMin = minutesOfTime(hours.start) ?? DAY_START_MIN;
   const dayEndMin = minutesOfTime(hours.end) ?? 22 * 60;
-  const items = buildDaySchedule(day.stops, payload.mode, payload.times, payload.durations, dayStartMin);
+  const items = buildDaySchedule(day.stops, payload.mode, payload.durations, dayStartMin);
   const range = axisRange(items, dayStartMin);
   const start = range.start;
   const end = Math.max(range.end, Math.ceil(dayEndMin / 60) * 60); // extend the axis to the day end
-  const { lane, count } = assignLanes(items);
   const height = (end - start) * PX_PER_MIN;
   const hoursCtl =
     `<span class="tl-day-hours no-print">` +
@@ -43,17 +44,21 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
     .map((it) => {
       const event = byId.get(it.id);
       const top = (it.startMin - start) * PX_PER_MIN;
-      const h = Math.max(20, (it.endMin - it.startMin) * PX_PER_MIN);
-      const width = 100 / count;
-      const left = (lane[it.id] ?? 0) * width;
+      const h = Math.max(28, (it.endMin - it.startMin) * PX_PER_MIN);
       const dur = event ? eventDuration(event, payload.durations[it.id]) : it.endMin - it.startMin;
       const title = event ? esc(titleOf(lang)(event)) : esc(it.id);
+      // When off-schedule, surface the real window the block has drifted out of.
+      const win = event ? officialWindow(event) : undefined;
+      const flag =
+        it.offSchedule && win
+          ? `<span class="tl-flag" aria-label="Runs ${timeOfMinutes(win.start)}–${timeOfMinutes(win.end)}">${timeOfMinutes(win.start)}–${timeOfMinutes(win.end)}</span>`
+          : '';
       return (
-        `<div class="tl-block${it.overlap ? ' tl-block--overlap' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
-        `data-tl-start="${it.startMin}" data-tl-dur="${dur}" ` +
-        `style="top:${top}px;height:${h}px;left:${left}%;width:calc(${width}% - 4px)">` +
+        `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
+        `data-tl-dur="${dur}" style="top:${top}px;height:${h}px">` +
         `<span class="tl-time">${timeOfMinutes(it.startMin)}–${timeOfMinutes(it.endMin)}</span>` +
         `<span class="tl-title">${title}</span>` +
+        flag +
         (editable ? `<button type="button" class="tl-del no-print" data-tl-del data-tl-id="${esc(it.id)}" aria-label="Remove from route">✕</button>` : '') +
         `<span class="tl-resize" data-tl-resize aria-hidden="true"></span>` +
         `</div>`
