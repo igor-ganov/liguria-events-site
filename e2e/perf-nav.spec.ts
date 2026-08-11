@@ -28,9 +28,16 @@ const log = (msg: string): void => void process.stdout.write(`${msg}\n`);
 const STEPS = ['/calendar/', '/map/', '/landmarks/', '/places/'];
 
 test('main pages navigate forward and back under Fast-3G without hanging', async ({ page }) => {
+  // A deliberately long walk: 9 sequential navigations, each throttled to
+  // Fast-3G. The per-navigation BUDGET (30s) is what fails a genuine hang; the
+  // whole test needs room for the sum of those slow-but-fine navigations.
+  test.setTimeout(150_000);
   await throttle(page);
   const t0 = Date.now();
-  await page.goto('/liguria/');
+  // `commit` (not the default `load`): waiting for the full load event would
+  // block on every feed image under Fast-3G — a timeout in disguise. Readiness
+  // is `settled` (main visible + progress bar hidden = astro:page-load fired).
+  await page.goto('/liguria/', { waitUntil: 'commit' });
   await settled(page);
   log(`load /liguria/: ${Date.now() - t0}ms`);
 

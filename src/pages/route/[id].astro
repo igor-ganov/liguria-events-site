@@ -47,6 +47,7 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
       <script>
         import { initRouteView } from '../../components/favorites/route-view.ts';
         import { initRouteEditor } from '../../components/favorites/route-editor.ts';
+        import { initRoutePdf } from '../../components/favorites/route-pdf.ts';
         // The owner edits in place; everyone else gets the read-only render.
         const run = () => {
           const owned = document.querySelector('[data-route-root]')?.getAttribute('data-owned') === '1';
@@ -55,12 +56,9 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
         };
         run();
         document.addEventListener('astro:page-load', run);
-        // "Download PDF" = the browser's print → Save as PDF, styled by the
-        // print stylesheet. One document-level listener survives SPA nav.
-        document.addEventListener('click', (e) => {
-          const t = e.target;
-          if (t instanceof Element && t.closest('[data-route-pdf]')) window.print();
-        });
+        // "Download PDF" generates a real PDF file (jsPDF), not a print dialog.
+        // One document-level listener (wired once) survives SPA navigation.
+        initRoutePdf();
       </script>
     </Layout>
   ) : (
