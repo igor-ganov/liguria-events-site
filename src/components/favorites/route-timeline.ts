@@ -14,7 +14,7 @@ import { titleOf } from '../../lib/events/title-of.ts';
 import { dayLabel, esc } from './route-render.ts';
 import type { Payload } from './route-payload.ts';
 
-export const PX_PER_MIN = 1.1;
+export const PX_PER_MIN = 0.9;
 export const DAY_START_MIN = 9 * 60; // 09:00 — the timeline's default opening hour
 
 const hourLines = (start: number, end: number): string => {
@@ -65,9 +65,21 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
       );
     })
     .join('');
+  // The gap before a stop is its travel time (the sequence starts each stop at
+  // the previous end + travel). Fill it with a small mode-aware chip so the dead
+  // space between blocks reads as "walk/ride N min", not emptiness.
+  const glyph = payload.mode === 'driving' ? '🚗' : payload.mode === 'transit' ? '🚌' : '🚶';
+  const gaps = items
+    .map((it, i) => {
+      if (i === 0 || it.travelMin < 5) return '';
+      const mid = (items[i - 1]!.endMin + it.startMin) / 2;
+      const top = (mid - start) * PX_PER_MIN;
+      return `<div class="tl-gap" style="top:${top}px">${glyph} ${Math.round(it.travelMin)} min</div>`;
+    })
+    .join('');
   return (
     `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}${hoursCtl}</h3>` +
-    `<div class="tl-axis" data-tl-axis style="height:${height}px">${hourLines(start, end)}${blocks}</div></section>`
+    `<div class="tl-axis" data-tl-axis style="height:${height}px">${hourLines(start, end)}${gaps}${blocks}</div></section>`
   );
 };
 

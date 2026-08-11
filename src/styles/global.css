@@ -638,16 +638,25 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-hour { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line); }
 .tl-hour > span { position: absolute; left: 0; top: -0.6em; width: 3rem; text-align: right; font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tl-block {
-  position: absolute; left: 0; right: 0; box-sizing: border-box;
+  position: absolute; left: 3.4rem; right: 0; box-sizing: border-box;
   padding: 0.3rem 0.5rem 0.35rem 0.6rem; border-radius: var(--radius-sm);
   background: hsl(var(--hue, 30) 60% 94%); border: 1px solid hsl(var(--hue, 30) 45% 78%);
   border-left: 3px solid hsl(var(--hue, 30) 65% 52%); color: var(--ink);
   overflow: hidden; cursor: grab; touch-action: none; user-select: none;
   font-size: 0.8rem; line-height: 1.25; box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.12s ease;
+  transition: box-shadow 0.12s ease, transform 0.16s cubic-bezier(0.2, 0, 0, 1);
 }
 .tl-block:hover { box-shadow: var(--shadow); }
-.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow); opacity: 0.95; }
+/* The block being dragged follows the finger 1:1 (no transition); its neighbours
+   keep the transition above so they glide aside to open the drop slot. */
+.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow); opacity: 0.97; transition: box-shadow 0.12s ease; }
+/* Travel between two stops, as a small mode-aware chip centred in the gap. */
+.tl-gap {
+  position: absolute; left: 3.4rem; right: 0; transform: translateY(-50%);
+  text-align: center; font-size: 0.68rem; color: var(--muted); pointer-events: none;
+  font-variant-numeric: tabular-nums; transition: opacity 0.12s ease;
+}
+.tl-axis--dragging .tl-gap { opacity: 0; } /* hide travel chips mid-drag — the schedule is in flux */
 /* Off-schedule: the block sticks out of the event's official window. */
 .tl-block--offschedule { background: hsl(2 75% 95%); border-color: hsl(2 70% 82%); border-left-color: #e5484d; }
 .tl-time { display: block; font-size: 0.72rem; font-variant-numeric: tabular-nums; color: var(--muted); }
