@@ -1,6 +1,7 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { byUniqueness, spanMs } from '../src/lib/events/by-uniqueness.ts';
+import { byUniqueness } from '../src/lib/events/by-uniqueness.ts';
+import { spanMs } from '../src/lib/events/event-span.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const ev = (o: Partial<CompactEvent> & Pick<CompactEvent, 'id' | 's'>): CompactEvent => ({
