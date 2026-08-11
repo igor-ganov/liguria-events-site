@@ -34,6 +34,7 @@ test('a base in the payload renders the from/back legs', async ({ page, context 
   );
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
+  await page.locator('[data-route-view="list"]').click(); // base legs render in the list view
   // "From base" before the first stop and "Back to base" after the last.
   await expect(page.locator('.route-leg--base')).toHaveCount(2);
   await expect(page.locator('.route-leg--base').first()).toContainText(/from base/i);

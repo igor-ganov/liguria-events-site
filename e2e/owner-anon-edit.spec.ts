@@ -34,6 +34,8 @@ test("anonymous route: the author's device (holds the token) can edit and save",
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
   await expect(page.locator('[data-route-save-edits]')).toBeVisible();
   await expect(page.locator('[data-route-view="timeline"]')).toBeVisible();
+  // The editor opens on the timeline; switch to the list for the remove control.
+  await page.locator('[data-route-view="list"]').click();
   await expect(page.locator('.route-stop')).toHaveCount(2);
 
   await page.locator('[data-op="remove"]').first().click();
@@ -42,6 +44,7 @@ test("anonymous route: the author's device (holds the token) can edit and save",
   await expect(page.locator('[data-route-edit-status]')).toHaveText(/saved/i);
 
   await page.reload();
+  await page.locator('[data-route-view="list"]').click();
   await expect(page.locator('.route-stop')).toHaveCount(1); // persisted via the token
 });
 

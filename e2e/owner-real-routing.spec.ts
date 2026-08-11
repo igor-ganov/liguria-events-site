@@ -55,6 +55,7 @@ test('the owner editor upgrades a leg to real routing (cached, throttled)', asyn
 
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
+  await page.locator('[data-route-view="list"]').click(); // the routed leg summary is in the list
   await expect(page.locator('.route-stop')).toHaveCount(2);
 
   // The estimate paints first; then the cached real routing arrives → 30 min.

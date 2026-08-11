@@ -29,7 +29,7 @@ test('authenticated route editor loads and navigates back and forth under Fast-3
   const t0 = Date.now();
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1', { timeout: BUDGET });
-  await expect(page.locator('.route-stop')).toHaveCount(2, { timeout: BUDGET });
+  await expect(page.locator('.tl-block')).toHaveCount(2, { timeout: BUDGET }); // editor opens on the timeline
   await expect(page.locator('#nav-progress')).toHaveCSS('opacity', '0', { timeout: BUDGET });
   const loadMs = Date.now() - t0;
   log(`owner /route load: ${loadMs}ms`);

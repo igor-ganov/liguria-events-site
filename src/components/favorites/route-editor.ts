@@ -51,7 +51,10 @@ let favourites: ReadonlySet<string> = new Set();
 // POI data for resolving stops — the route's embedded pois plus this device's
 // favourites (so a just-added POI resolves before the route is saved).
 let poiMap: Readonly<Record<string, FavPoi>> = {};
-let view: 'list' | 'timeline' = 'list';
+// The route editor opens on the vertical timeline (drag to move, drag the edge
+// to resize — no number-typing); the list view stays a click away for adding
+// favourites, moving stops between days and precise duration entry.
+let view: 'list' | 'timeline' = 'timeline';
 // Real-routing cache keyed by (fromId,toId,mode); reorders/drags reuse it so a
 // re-render never refetches a pair it already resolved. `enrichGen` drops stale
 // async fills when a newer edit has since re-rendered.

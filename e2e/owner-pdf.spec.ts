@@ -15,7 +15,7 @@ test('Download PDF saves a real .pdf file (not a print dialog)', async ({ page, 
 
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
-  await expect(page.locator('.route-stop')).toHaveCount(2);
+  await expect(page.locator('.tl-block')).toHaveCount(2); // editor opens on the timeline
 
   const downloadPromise = page.waitForEvent('download');
   await page.locator('[data-route-pdf]').click();

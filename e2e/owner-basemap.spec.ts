@@ -17,6 +17,7 @@ test('clicking the map sets the base and the from/back legs appear', async ({ pa
 
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
+  await page.locator('[data-route-view="list"]').click(); // base legs render in the list view
   await expect(page.locator('.route-leg--base')).toHaveCount(0); // no base yet
 
   // The map must actually initialise (a maplibre canvas) for the click to project.

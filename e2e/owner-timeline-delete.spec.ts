@@ -13,8 +13,7 @@ const openTimeline = async (page: import('@playwright/test').Page, context: impo
   const id = (await created.json()).id;
   await page.goto(`/route/${id}`);
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
-  await expect(page.locator('.route-stop')).toHaveCount(2);
-  await page.locator('[data-route-view="timeline"]').click();
+  // The editor opens on the timeline by default.
   await expect(page.locator('.tl-block')).toHaveCount(2);
 };
 

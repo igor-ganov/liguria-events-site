@@ -29,6 +29,8 @@ test('owner adds a favourite POI, reorders, and the save persists to D1', async 
   // SSR renders the OWNER editor (not the read-only view) for the signed-in owner.
   await expect(page.locator('[data-route-root]')).toHaveAttribute('data-owned', '1');
   await expect(page.locator('[data-route-save-edits]')).toBeVisible();
+  // The editor opens on the timeline now; the list has the add/reorder controls.
+  await page.locator('[data-route-view="list"]').click();
   await expect(page.locator('.route-stop')).toHaveCount(2);
 
   // Add the favourited landmark via the picker → becomes a 3rd stop, its own link.
@@ -44,6 +46,7 @@ test('owner adds a favourite POI, reorders, and the save persists to D1', async 
 
   // Reload from D1 — the added POI and the edit survived (real PATCH persistence).
   await page.reload();
+  await page.locator('[data-route-view="list"]').click();
   await expect(page.locator('.route-stop')).toHaveCount(3);
   await expect(page.locator(`.route-stop a[href="${POI.url}"]`)).toBeVisible();
 });
