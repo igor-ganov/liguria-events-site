@@ -57,7 +57,7 @@ export const DEFAULT_PAGE_DATA: PageData = {
     chips: { free: 'Free only', gems: 'Hidden gems', clear: 'Clear' },
     theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' },
     range: { from: 'From', to: 'To' },
-    sort: { label: 'Sort', unique: 'By uniqueness', created: 'Newest first' },
+    sort: { label: 'Sort', date: 'By date', created: 'Newest first' },
     route: { walk: 'Walking', drive: 'Driving', transit: 'Transit', generate: 'Generate route', save: 'Save route', saved: 'Saved', tight: 'Tight connection', min: 'min', empty: 'No favourites yet — tap the heart on an event to add it.', link: 'Shareable link', saveFailed: 'Could not save the route — try again.', mine: 'My routes', open: 'Open', private: 'Private', public: 'Public', makePrivate: 'Make private', makePublic: 'Make public', remove: 'Delete', title: 'Route', by: 'A shared itinerary', moveDay: 'Move to day', moveUp: 'Move up', moveDown: 'Move down', addFav: 'Add from favourites…', saveChanges: 'Save changes', viewList: 'List', viewTimeline: 'Timeline', pdf: 'Download PDF', day: 'Day', setDefault: 'Set as default', setBase: 'Set base', setBaseDefault: 'Default base', clearBase: 'Clear', clickMap: 'Click the map to set the point…', dayBase: 'Base', dayFinal: 'End', fromBase: 'From base', toBase: 'Back to base' },
     menu: { events: "What's on", explore: 'Explore', more: 'More' },
     seo: {

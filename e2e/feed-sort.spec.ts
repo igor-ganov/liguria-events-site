@@ -1,17 +1,27 @@
 import { test, expect } from '@playwright/test';
 
-// The feed defaults to "By uniqueness" (the old "By date" is gone) and offers a
-// "Newest first" sort that orders cards WITHIN a day by first-seen time (the
-// data-created stamp projected from the crawler's addedAt).
-test('feed defaults to uniqueness and Newest first orders by creation time', async ({ page }) => {
+// The feed defaults to "By date" — the server's chronological order — so there
+// is no reflow on first load; "Newest first" orders cards WITHIN a day by
+// first-seen time (the data-created stamp projected from the crawler's addedAt).
+test('feed defaults to By date (no reflow) and Newest first orders by creation time', async ({ page }) => {
   await page.goto('/liguria/');
 
-  await expect(page.locator('[data-feed-sort="unique"]')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.locator('[data-feed-sort="date"]')).toHaveCount(0); // old default removed
+  await expect(page.locator('[data-feed-sort="date"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-feed-sort="unique"]')).toHaveCount(0); // uniqueness removed
   await expect(page.locator('[data-feed-sort="created"]')).toBeVisible();
 
   const firstList = page.locator('.feed-list').first();
   await expect(firstList.locator(':scope > li').first()).toBeVisible();
+
+  // No FOUC: the default keeps the server order, so data-ord is ascending in the
+  // DOM (a reorder to any other order would break this).
+  const inOrder = await page.evaluate(() => {
+    const ul = document.querySelector('.feed-list');
+    if (!ul) return true;
+    const ords = [...ul.querySelectorAll(':scope > li')].map((li) => (li instanceof HTMLElement ? Number(li.dataset['ord']) : 0));
+    return ords.every((o, i) => i === 0 || o >= (ords[i - 1] ?? 0));
+  });
+  expect(inOrder).toBe(true);
 
   // Stamp creation times on the first three cards, far larger than any real
   // epoch-seconds `cr` in the corpus, so they deterministically float to the top.

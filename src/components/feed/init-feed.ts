@@ -25,14 +25,14 @@ const readJson = <T>(id: string, fallback: T): T => {
   }
 };
 
-type FeedSort = 'unique' | 'created';
+type FeedSort = 'date' | 'created';
 const state: {
   from: string; to: string; cats: Set<string>; free: boolean; gems: boolean;
   query: string; city: string; hits: ReadonlySet<string> | undefined; sort: FeedSort;
 } = {
   from: '', to: '', cats: new Set<string>(), free: false, gems: false,
   query: '', city: '', hits: undefined,
-  sort: 'unique',
+  sort: 'date',
 };
 
 // Filters live in the URL so a filtered view is shareable, bookmarkable and
@@ -69,7 +69,7 @@ const readParams = (today: string): void => {
   state.to = p.get('to') ?? '';
   state.free = p.get('free') === '1';
   state.gems = p.get('gems') === '1';
-  state.sort = p.get('sort') === 'created' ? 'created' : 'unique';
+  state.sort = p.get('sort') === 'created' ? 'created' : 'date';
   // The city is a path segment (/<region>/<city>/), server-rendered onto the
   // list — not a query filter. It stays fixed for the page; reading it keeps the
   // ct filter (which also drops late D1 events that carry no city) honest.
@@ -143,18 +143,10 @@ const stampOrder = (): void => {
   });
 };
 
-// Whole-day span (end − start) in days: 0 for a one-day event. Shorter = more
-// "unique" — it pins to the window instead of running through it.
-const spanDays = (li: HTMLElement): number => {
-  const start = li.dataset['start'] ?? '';
-  const end = li.dataset['end'] || start;
-  return (Date.parse(end) - Date.parse(start)) / 86_400_000;
-};
-
-// Reorder cards WITHIN each day group. "By uniqueness" (default) lifts the
-// short, pinned events above the long multi-week runs; "Newest first" orders by
-// first-seen time (data-created) descending. Grouping (the day headings) is
-// untouched — only the order inside a day.
+// Reorder cards WITHIN each day group. "By date" (default) keeps the server's
+// chronological start order — which is exactly what the SSR already rendered,
+// so the first load never reflows; "Newest first" orders by first-seen time
+// (data-created) descending. Grouping (the day headings) is untouched.
 const reorder = (): void => {
   document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
     const cards = [...ul.querySelectorAll<HTMLElement>(':scope > li')];
@@ -163,7 +155,7 @@ const reorder = (): void => {
     const sorted =
       state.sort === 'created'
         ? cards.toSorted((a, b) => created(b) - created(a) || ord(a) - ord(b))
-        : cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b));
+        : cards.toSorted((a, b) => ord(a) - ord(b));
     sorted.forEach((li) => ul.appendChild(li));
   });
 };
@@ -327,7 +319,7 @@ export const initFeed = (): void => {
 
   const sortButtons = document.querySelectorAll<HTMLButtonElement>('[data-feed-sort]');
   sortButtons.forEach((btn) => {
-    const mode: FeedSort = btn.dataset['feedSort'] === 'created' ? 'created' : 'unique';
+    const mode: FeedSort = btn.dataset['feedSort'] === 'created' ? 'created' : 'date';
     btn.setAttribute('aria-pressed', String(state.sort === mode));
     btn.addEventListener('click', () => {
       if (state.sort === mode) return;
