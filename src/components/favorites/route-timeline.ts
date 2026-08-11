@@ -23,7 +23,7 @@ const hourLines = (start: number, end: number): string => {
   return lines.join('');
 };
 
-const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, RouteStop>, lang: Locale): string => {
+const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, RouteStop>, lang: Locale, editable: boolean): string => {
   // Effective day window: per-day override → this route's setting → global → default.
   const routeHours = payload.dayStart !== '' && payload.dayEnd !== '' ? { start: payload.dayStart, end: payload.dayEnd } : undefined;
   const hours = effectiveDayHours(day.day, payload.dayHours, routeHours, readGlobalDayHours());
@@ -49,11 +49,12 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
       const dur = event ? eventDuration(event, payload.durations[it.id]) : it.endMin - it.startMin;
       const title = event ? esc(titleOf(lang)(event)) : esc(it.id);
       return (
-        `<div class="tl-block${it.overlap ? ' tl-block--overlap' : ''}" data-tl-id="${esc(it.id)}" ` +
+        `<div class="tl-block${it.overlap ? ' tl-block--overlap' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
         `data-tl-start="${it.startMin}" data-tl-dur="${dur}" ` +
         `style="top:${top}px;height:${h}px;left:${left}%;width:calc(${width}% - 4px)">` +
         `<span class="tl-time">${timeOfMinutes(it.startMin)}–${timeOfMinutes(it.endMin)}</span>` +
         `<span class="tl-title">${title}</span>` +
+        (editable ? `<button type="button" class="tl-del no-print" data-tl-del data-tl-id="${esc(it.id)}" aria-label="Remove from route">✕</button>` : '') +
         `<span class="tl-resize" data-tl-resize aria-hidden="true"></span>` +
         `</div>`
       );
@@ -70,4 +71,5 @@ export const renderTimeline = (
   payload: Payload,
   byId: ReadonlyMap<string, RouteStop>,
   lang: Locale,
-): string => days.map((day) => dayHtml(day, payload, byId, lang)).join('');
+  editable = false,
+): string => days.map((day) => dayHtml(day, payload, byId, lang, editable)).join('');

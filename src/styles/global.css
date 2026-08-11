@@ -647,6 +647,25 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-time { display: block; font-variant-numeric: tabular-nums; color: var(--muted); }
 .tl-title { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tl-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; cursor: ns-resize; }
+.tl-del {
+  position: absolute; top: 2px; right: 2px; width: 1.05rem; height: 1.05rem; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; border: none; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.14); color: inherit; font-size: 0.7rem; line-height: 1; cursor: pointer;
+  opacity: 0.5; transition: opacity 0.12s;
+}
+.tl-block:hover .tl-del, .tl-del:focus-visible { opacity: 1; }
+.tl-block--will-delete { background: hsl(2 75% 86%) !important; border-color: #e5484d !important; }
+.confirm-backdrop {
+  position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: 1rem; background: rgba(0, 0, 0, 0.45);
+}
+.confirm-box {
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.1rem 1.2rem; max-width: 22rem; width: 100%; box-shadow: var(--shadow);
+}
+.confirm-msg { margin: 0 0 1rem; }
+.confirm-actions { display: flex; gap: 0.6rem; justify-content: flex-end; }
+.confirm-danger { background: #e5484d; border-color: #e5484d; color: #fff; }
 @media (prefers-color-scheme: dark) {
   .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 35% 42%); }
   .tl-block--overlap { background: hsl(2 40% 26%); border-color: #e5484d; }

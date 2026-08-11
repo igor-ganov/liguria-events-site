@@ -20,6 +20,7 @@ import type { Payload } from './route-payload.ts';
 import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
 import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
+import { confirmDialog } from './confirm-dialog.ts';
 import { timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import { writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
@@ -178,7 +179,7 @@ function render(): void {
     days.length === 0
       ? `<p class="feed-empty">${esc(ui.route.empty)}</p>`
       : view === 'timeline'
-        ? renderTimeline(days, payload, byId, lang)
+        ? renderTimeline(days, payload, byId, lang, true)
         : days.map((d) => dayHtml(d, lang, ui)).join('');
   output.innerHTML = viewToggle(ui) + dayHoursControl(ui) + baseControl(ui) + body;
   drawMap(days, baseOf);
@@ -233,6 +234,11 @@ const onClick = (event: MouseEvent): void => {
   if (viewBtn) {
     view = viewBtn.dataset['routeView'] === 'timeline' ? 'timeline' : 'list';
     render();
+    return;
+  }
+  const delBtn = target.closest<HTMLElement>('[data-tl-del]');
+  if (delBtn) {
+    void requestRemove(delBtn.dataset['tlId'] ?? '');
     return;
   }
   // Base pickers: arm (or toggle off) a target, then a map click sets the point.
@@ -306,16 +312,31 @@ const setRouteDayHours = (): void => {
   render();
 };
 
-/* ── timeline drag / resize ────────────────────────────────────────────── */
+/* ── timeline drag / resize / swipe-to-delete ──────────────────────────── */
 
-// Move commits an explicit start time; resize commits a duration override.
-const { onPointerDown, onPointerMove, onPointerUp } = makeTimelineDrag((id, kind, startMin, durMin) => {
-  payload =
-    kind === 'move'
-      ? { ...payload, times: { ...payload.times, [id]: timeOfMinutes(startMin) } }
-      : { ...payload, durations: { ...payload.durations, [id]: durMin } };
-  render();
-});
+// Confirm, then remove a stop from the route (the /route page is English-only).
+const requestRemove = async (id: string): Promise<void> => {
+  const { lang, ui } = readUiIsland();
+  const stop = byId.get(id);
+  const title = stop ? titleOf(lang)(stop) : id;
+  const ok = await confirmDialog({ message: `Remove “${title}” from the route?`, cancel: 'Cancel', confirm: ui.route.remove });
+  if (!ok) return;
+  const block = document.querySelector<HTMLElement>(`.tl-block[data-tl-id="${CSS.escape(id)}"]`);
+  withGroups(removeStop(payload.groups, id, block?.dataset['tlDay'] ?? ''));
+};
+
+// Move commits an explicit start time; resize commits a duration override; a
+// left swipe (or the block's ✕ button) asks to remove the stop.
+const { onPointerDown, onPointerMove, onPointerUp } = makeTimelineDrag(
+  (id, kind, startMin, durMin) => {
+    payload =
+      kind === 'move'
+        ? { ...payload, times: { ...payload.times, [id]: timeOfMinutes(startMin) } }
+        : { ...payload, durations: { ...payload.durations, [id]: durMin } };
+    render();
+  },
+  { onSwipeDelete: (id) => void requestRemove(id) },
+);
 
 const load = async (): Promise<void> => {
   const island = document.querySelector<HTMLElement>('#route-data')?.textContent;
