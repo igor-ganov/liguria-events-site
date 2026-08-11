@@ -133,8 +133,9 @@ const apply = (): void => {
   if (clear) clear.hidden = state.cats.size === 0 && !state.free && !state.gems;
 };
 
-// The server renders each day's events in start order; that original order is
-// stamped onto every card so the "by date" sort can be restored exactly.
+// The server renders each day's events unique-first (short span leads); that
+// order is stamped onto every card so the default sort restores it exactly and
+// "Newest first" can fall back to it as a tie-break.
 const stampOrder = (): void => {
   document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
     ul.querySelectorAll<HTMLElement>(':scope > li').forEach((li, i) => {
@@ -143,10 +144,19 @@ const stampOrder = (): void => {
   });
 };
 
-// Reorder cards WITHIN each day group. "By date" (default) keeps the server's
-// chronological start order — which is exactly what the SSR already rendered,
-// so the first load never reflows; "Newest first" orders by first-seen time
-// (data-created) descending. Grouping (the day headings) is untouched.
+// Whole-day span (end − start) in days: 0 for a one-day event. Shorter = more
+// "unique" — it pins to a moment instead of running through the window, so it
+// leads. This is the curation that makes the feed useful, not a date dump.
+const spanDays = (li: HTMLElement): number => {
+  const start = li.dataset['start'] ?? '';
+  const end = li.dataset['end'] || start;
+  return (Date.parse(end) - Date.parse(start)) / 86_400_000;
+};
+
+// Reorder cards WITHIN each day group. "By date" (default) lifts the short,
+// time-pinned events above the long multi-week runs — the exact order the server
+// already emits, so the first load never reflows; "Newest first" orders by
+// first-seen time (data-created) descending. Grouping (day headings) is untouched.
 const reorder = (): void => {
   document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
     const cards = [...ul.querySelectorAll<HTMLElement>(':scope > li')];
@@ -155,7 +165,7 @@ const reorder = (): void => {
     const sorted =
       state.sort === 'created'
         ? cards.toSorted((a, b) => created(b) - created(a) || ord(a) - ord(b))
-        : cards.toSorted((a, b) => ord(a) - ord(b));
+        : cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b));
     sorted.forEach((li) => ul.appendChild(li));
   });
 };
