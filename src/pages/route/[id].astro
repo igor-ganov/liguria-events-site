@@ -19,7 +19,6 @@ const owned = route !== undefined && route.userId === user?.id && user !== undef
 // An anonymous (owner-less) route is editable by anyone with its link — that is
 // the only way its creator (who saved it without logging in) can ever edit it.
 const anonymous = route !== undefined && route.userId === undefined;
-const editable = owned || anonymous;
 const allowed = route !== undefined && (route.public || owned);
 if (!allowed) Astro.response.status = 404;
 const notFound = 'This route could not be found.';
