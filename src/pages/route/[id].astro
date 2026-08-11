@@ -35,33 +35,56 @@ const favorites = owned && user ? await listFavorites(db, user.id) : [];
       <div class="route-page-actions no-print">
         <button class="chip" type="button" data-route-pdf>{ui.route.pdf}</button>
       </div>
-      {editable ? (
-        <div class="route-edit-actions no-print" data-route-edit-actions>
-          <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
-          <span class="route-edit-status" data-route-edit-status />
-        </div>
-      ) : (
-        <p class="route-by no-print">{ui.route.by}</p>
-      )}
+      <div class="route-edit-actions no-print" data-route-edit-actions hidden={!owned}>
+        <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
+        <span class="route-edit-status" data-route-edit-status />
+      </div>
+      {!owned && !anonymous && <p class="route-by no-print">{ui.route.by}</p>}
       <div class="route-map" data-route-map hidden />
       <div class="route-output" data-route-output />
-      <div data-route-root data-owned={editable ? '1' : '0'} data-id={id} hidden />
+      <div data-route-root data-owned={owned ? '1' : '0'} data-anon={anonymous ? '1' : '0'} data-id={id} hidden />
       <script is:inline type="application/json" id="route-data" set:html={route.data} />
       {owned && <script is:inline type="application/json" id="route-favorites" set:html={JSON.stringify(favorites)} />}
       <script>
         import { initRouteView } from '../../components/favorites/route-view.ts';
         import { initRouteEditor } from '../../components/favorites/route-editor.ts';
         import { initRoutePdf } from '../../components/favorites/route-pdf.ts';
-        // The owner edits in place; everyone else gets the read-only render.
+        // The logged-in owner edits in place. For an ANONYMOUS route, only the
+        // author's device — which stored the route + its secret edit token in
+        // localStorage — may edit; a plain public link is read-only.
+        const authorToken = (id: string): string | undefined => {
+          try {
+            const rows = JSON.parse(localStorage.getItem('dovego:routes') || '[]');
+            const mine = Array.isArray(rows) ? rows.find((r) => r && r.id === id) : undefined;
+            if (!mine) return undefined;
+            // A route saved before edit tokens existed: mint one now, kept
+            // locally; the server claims it (edit_token was empty) on first save.
+            if (!mine.editToken) {
+              mine.editToken = crypto.randomUUID().replace(/-/g, '');
+              localStorage.setItem('dovego:routes', JSON.stringify(rows));
+            }
+            return mine.editToken;
+          } catch {
+            return undefined;
+          }
+        };
         const run = () => {
-          const owned = document.querySelector('[data-route-root]')?.getAttribute('data-owned') === '1';
-          if (owned) initRouteEditor();
+          const root = document.querySelector('[data-route-root]');
+          if (!root) return;
+          if (root.getAttribute('data-owned') !== '1' && root.getAttribute('data-anon') === '1') {
+            const token = authorToken(root.getAttribute('data-id') || '');
+            if (token) {
+              root.setAttribute('data-owned', '1');
+              root.setAttribute('data-edit-token', token);
+              document.querySelector('[data-route-edit-actions]')?.removeAttribute('hidden');
+            }
+          }
+          if (root.getAttribute('data-owned') === '1') initRouteEditor();
           else initRouteView();
         };
         run();
         document.addEventListener('astro:page-load', run);
         // "Download PDF" generates a real PDF file (jsPDF), not a print dialog.
-        // One document-level listener (wired once) survives SPA navigation.
         initRoutePdf();
       </script>
     </Layout>

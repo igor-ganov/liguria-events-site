@@ -147,7 +147,7 @@ const pickTimes = (days: readonly RouteDay[]): Record<string, string> => {
   return out;
 };
 
-const rememberRoute = (route: Readonly<{ id: string; name: string; data: string }>): void => {
+const rememberRoute = (route: Readonly<{ id: string; name: string; data: string; editToken?: string }>): void => {
   const KEY = 'dovego:routes';
   try {
     const prev: unknown = JSON.parse(localStorage.getItem(KEY) ?? '[]');
@@ -187,7 +187,7 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
     times: pickTimes(days),
     pois,
   });
-  let saved: Readonly<{ id: string; url: string }> | undefined;
+  let saved: Readonly<{ id: string; url: string; editToken?: string }> | undefined;
   try {
     const res = await fetch('/api/routes', {
       method: 'POST',
@@ -198,12 +198,14 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
       const json: unknown = await res.json();
       const id = field(json, 'id');
       const url = field(json, 'url');
-      if (typeof id === 'string' && typeof url === 'string') saved = { id, url };
+      const editToken = field(json, 'editToken');
+      if (typeof id === 'string' && typeof url === 'string') saved = { id, url, ...(typeof editToken === 'string' ? { editToken } : {}) };
     }
   } catch {
     /* offline — no shareable link, but keep a local copy below */
   }
-  if (saved) rememberRoute({ id: saved.id, name, data: payload });
+  // Keep the edit token locally — it authorises editing this route later.
+  if (saved) rememberRoute({ id: saved.id, name, data: payload, ...(saved.editToken ? { editToken: saved.editToken } : {}) });
   showShareLink(saved?.url);
 };
 

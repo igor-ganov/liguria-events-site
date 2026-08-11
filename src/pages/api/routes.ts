@@ -28,10 +28,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (data === '') return Response.json({ error: 'invalid' }, { status: 400 });
   const id = newId();
   const isPublic = user ? field(body, 'public') === true : true;
+  // An anonymous route gets a secret edit token: the creating device keeps it
+  // (localStorage) and needs it to edit later — the public link is read-only.
+  const editToken = user ? undefined : crypto.randomUUID().replace(/-/g, '');
   await saveRoute(
     locals.runtime.env.DB,
-    { id, userId: user?.id, name: str(field(body, 'name'), 120) || 'Route', region: region(field(body, 'region')), data, isPublic },
+    { id, userId: user?.id, name: str(field(body, 'name'), 120) || 'Route', region: region(field(body, 'region')), data, isPublic, ...(editToken ? { editToken } : {}) },
     Date.now(),
   );
-  return Response.json({ id, url: `/route/${id}`, public: isPublic });
+  return Response.json({ id, url: `/route/${id}`, public: isPublic, ...(editToken ? { editToken } : {}) });
 };

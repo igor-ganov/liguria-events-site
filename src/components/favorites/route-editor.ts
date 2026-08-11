@@ -207,10 +207,12 @@ const saveEdits = async (): Promise<void> => {
   const placed = new Set(payload.groups.flatMap((g) => g.ids));
   const pois: Record<string, FavPoi> = {};
   for (const [id, poi] of Object.entries(poiMap)) if (placed.has(id)) pois[id] = poi;
+  // Anonymous routes authorise the edit with the author's device token.
+  const token = document.querySelector<HTMLElement>('[data-route-root]')?.dataset['editToken'];
   try {
     const res = await fetch(`/api/routes/${routeId()}`, {
       method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', ...(token ? { 'x-route-token': token } : {}) },
       body: JSON.stringify({ data: serializePayload({ ...payload, pois }) }),
     });
     if (status) status.textContent = res.ok ? ui.route.saved : ui.route.saveFailed;

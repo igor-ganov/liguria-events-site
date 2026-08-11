@@ -95,17 +95,18 @@ export const listRoutes = async (db: D1Database, userId: string): Promise<readon
  *  which is always public; an owned route respects `isPublic`. */
 export const saveRoute = async (
   db: D1Database,
-  route: Readonly<{ id: string; userId: string | undefined; name: string; region: string; data: string; isPublic: boolean }>,
+  route: Readonly<{ id: string; userId: string | undefined; name: string; region: string; data: string; isPublic: boolean; editToken?: string }>,
   now: number,
 ): Promise<void> => {
   const pub = route.isPublic ? 1 : 0;
   const onConflict = `ON CONFLICT(id) DO UPDATE SET name = excluded.name, data = excluded.data, public = excluded.public`;
   // Omit user_id for an anonymous route so SQLite stores SQL NULL (D1 .bind()
   // has no undefined; omitting the column is the clean way to get a NULL owner).
+  // Its edit_token is the author's device's secret key for later edits.
   if (route.userId === undefined) {
     await db
-      .prepare(`INSERT INTO saved_routes (id, name, region, data, public, created_at) VALUES (?, ?, ?, ?, ?, ?) ${onConflict}`)
-      .bind(route.id, route.name, route.region, route.data, pub, now)
+      .prepare(`INSERT INTO saved_routes (id, name, region, data, public, created_at, edit_token) VALUES (?, ?, ?, ?, ?, ?, ?) ${onConflict}`)
+      .bind(route.id, route.name, route.region, route.data, pub, now, route.editToken ?? '')
       .run();
     return;
   }
@@ -138,11 +139,18 @@ export const updateRouteData = async (
   await db.prepare(`UPDATE saved_routes SET data = ? WHERE id = ? AND user_id = ?`).bind(data, id, userId).run();
 };
 
-/** Overwrite an anonymous (owner-less) route's itinerary — editable by anyone
- *  with its link, since an anonymous route is public and link-shared. The
- *  `user_id IS NULL` guard makes sure this can never touch an owned route. */
-export const updateAnonymousRouteData = async (db: D1Database, id: string, data: string): Promise<void> => {
-  await db.prepare(`UPDATE saved_routes SET data = ? WHERE id = ? AND user_id IS NULL`).bind(data, id).run();
+/** Edit an anonymous (owner-less) route's itinerary, authorised by its secret
+ *  edit token — held only by the author's device, so a public link alone grants
+ *  read access, not edit. A legacy token-less route is claimed by the first
+ *  editor's token. Resolves true when a row changed (the token matched, or the
+ *  route had none yet); false on a token mismatch. The `user_id IS NULL` guard
+ *  ensures this can never touch an owned route. */
+export const editAnonymousRoute = async (db: D1Database, id: string, data: string, token: string): Promise<boolean> => {
+  const res = await db
+    .prepare(`UPDATE saved_routes SET data = ?, edit_token = ? WHERE id = ? AND user_id IS NULL AND (edit_token IS NULL OR edit_token = '' OR edit_token = ?)`)
+    .bind(data, token, id, token)
+    .run();
+  return (res.meta?.changes ?? 0) > 0;
 };
 
 export const deleteRoute = async (db: D1Database, userId: string, id: string): Promise<void> => {

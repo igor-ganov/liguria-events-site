@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { deleteRoute, getRoute, setRoutePrivacy, updateAnonymousRouteData, updateRouteData } from '../../../lib/favorites/favorites-db.ts';
+import { deleteRoute, editAnonymousRoute, getRoute, setRoutePrivacy, updateRouteData } from '../../../lib/favorites/favorites-db.ts';
 
 export const prerender = false;
 
@@ -20,12 +20,16 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     if (data.length > 40000) return Response.json({ error: 'too-large' }, { status: 400 });
     if (user !== undefined && route.userId === user.id) {
       await updateRouteData(locals.runtime.env.DB, user.id, id, data);
-    } else if (route.userId === undefined) {
-      await updateAnonymousRouteData(locals.runtime.env.DB, id, data);
-    } else {
-      return Response.json({ error: 'not-found' }, { status: 404 });
+      return Response.json({ id, updated: true });
     }
-    return Response.json({ id, updated: true });
+    if (route.userId === undefined) {
+      // Anonymous route: only its author's device holds the edit token.
+      const token = request.headers.get('x-route-token') ?? '';
+      const ok = token !== '' && (await editAnonymousRoute(locals.runtime.env.DB, id, data, token));
+      if (!ok) return Response.json({ error: 'forbidden' }, { status: 403 });
+      return Response.json({ id, updated: true });
+    }
+    return Response.json({ error: 'not-found' }, { status: 404 });
   }
   // Privacy is owner-only.
   if (user === undefined || route.userId !== user.id) return Response.json({ error: 'auth' }, { status: 401 });
