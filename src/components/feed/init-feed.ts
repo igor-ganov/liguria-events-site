@@ -25,10 +25,14 @@ const readJson = <T>(id: string, fallback: T): T => {
   }
 };
 
-const state = {
+type FeedSort = 'unique' | 'created';
+const state: {
+  from: string; to: string; cats: Set<string>; free: boolean; gems: boolean;
+  query: string; city: string; hits: ReadonlySet<string> | undefined; sort: FeedSort;
+} = {
   from: '', to: '', cats: new Set<string>(), free: false, gems: false,
-  query: '', city: '', hits: undefined as ReadonlySet<string> | undefined,
-  sort: 'date' as 'date' | 'unique',
+  query: '', city: '', hits: undefined,
+  sort: 'unique',
 };
 
 // Filters live in the URL so a filtered view is shareable, bookmarkable and
@@ -42,7 +46,7 @@ const syncUrl = (today: string): void => {
   if (state.to !== '') p.set('to', state.to);
   if (state.free) p.set('free', '1');
   if (state.gems) p.set('gems', '1');
-  if (state.sort === 'unique') p.set('sort', 'unique');
+  if (state.sort === 'created') p.set('sort', 'created');
   const qs = p.toString();
   // Preserve history.state — the ClientRouter keeps its navigation index there,
   // and wiping it to null breaks back/forward (the swipe-back gesture needs
@@ -65,7 +69,7 @@ const readParams = (today: string): void => {
   state.to = p.get('to') ?? '';
   state.free = p.get('free') === '1';
   state.gems = p.get('gems') === '1';
-  state.sort = p.get('sort') === 'unique' ? 'unique' : 'date';
+  state.sort = p.get('sort') === 'created' ? 'created' : 'unique';
   // The city is a path segment (/<region>/<city>/), server-rendered onto the
   // list — not a query filter. It stays fixed for the page; reading it keeps the
   // ct filter (which also drops late D1 events that carry no city) honest.
@@ -147,17 +151,19 @@ const spanDays = (li: HTMLElement): number => {
   return (Date.parse(end) - Date.parse(start)) / 86_400_000;
 };
 
-// Reorder cards WITHIN each day group. "By uniqueness" lifts the short, pinned
-// events above the long multi-week runs; "by date" restores the server order.
-// Grouping (the day headings) is untouched — only the order inside a day.
+// Reorder cards WITHIN each day group. "By uniqueness" (default) lifts the
+// short, pinned events above the long multi-week runs; "Newest first" orders by
+// first-seen time (data-created) descending. Grouping (the day headings) is
+// untouched — only the order inside a day.
 const reorder = (): void => {
   document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
     const cards = [...ul.querySelectorAll<HTMLElement>(':scope > li')];
     const ord = (li: HTMLElement): number => Number(li.dataset['ord'] ?? '9999');
+    const created = (li: HTMLElement): number => Number(li.dataset['created'] ?? '0');
     const sorted =
-      state.sort === 'unique'
-        ? cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b))
-        : cards.toSorted((a, b) => ord(a) - ord(b));
+      state.sort === 'created'
+        ? cards.toSorted((a, b) => created(b) - created(a) || ord(a) - ord(b))
+        : cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b));
     sorted.forEach((li) => ul.appendChild(li));
   });
 };
@@ -199,6 +205,7 @@ const insertEvent = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<st
   li.dataset['end'] = event.e ?? event.s;
   li.dataset['free'] = event.f === true ? '1' : '0';
   li.dataset['gem'] = event.x === true ? '1' : '0';
+  li.dataset['created'] = event.cr === undefined ? '' : String(event.cr);
   li.innerHTML = cardHtml(event, ui, lang, icons);
 
   const existing = list.querySelector<HTMLElement>(`.feed-group[data-day="${day}"] .feed-list`);
@@ -320,7 +327,7 @@ export const initFeed = (): void => {
 
   const sortButtons = document.querySelectorAll<HTMLButtonElement>('[data-feed-sort]');
   sortButtons.forEach((btn) => {
-    const mode = btn.dataset['feedSort'] === 'unique' ? 'unique' : 'date';
+    const mode: FeedSort = btn.dataset['feedSort'] === 'created' ? 'created' : 'unique';
     btn.setAttribute('aria-pressed', String(state.sort === mode));
     btn.addEventListener('click', () => {
       if (state.sort === mode) return;

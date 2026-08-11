@@ -68,8 +68,8 @@ const siteJsonLd = JSON.stringify({
   </div>
 
   <div class="feed-sort" role="group" aria-label={ui.sort.label}>
-    <button class="chip chip--sort" data-feed-sort="date" aria-pressed="true">{ui.sort.date}</button>
-    <button class="chip chip--sort" data-feed-sort="unique" aria-pressed="false">{ui.sort.unique}</button>
+    <button class="chip chip--sort" data-feed-sort="unique" aria-pressed="true">{ui.sort.unique}</button>
+    <button class="chip chip--sort" data-feed-sort="created" aria-pressed="false">{ui.sort.created}</button>
   </div>
 
   <div class="chips" role="group" aria-label="Filter by category">
@@ -98,6 +98,7 @@ const siteJsonLd = JSON.stringify({
               data-free={event.f === true ? '1' : '0'}
               data-gem={event.x === true ? '1' : '0'}
               data-ct={event.ct ?? ''}
+              data-created={event.cr === undefined ? '' : String(event.cr)}
             >
               <MiniCard event={event} ui={ui} lang={lang} />
             </li>
