@@ -5,7 +5,7 @@
 // the real routed values where the planner can serve them.
 import { planBest } from 'italian-transport-core';
 import type { BestLeg, Place, TravelMode } from 'italian-transport-core';
-import type { Leg, Mode, RouteDay, RouteStop } from './build-route.ts';
+import type { Leg, LegSegment, Mode, RouteDay, RouteStop } from './build-route.ts';
 import { minutesOf } from './build-route.ts';
 
 export type Planner = (from: Place, to: Place, mode: TravelMode) => Promise<BestLeg | undefined>;
@@ -14,12 +14,22 @@ const defaultPlanner: Planner = planBest;
 
 const minutesFromSec = (sec: number): number => Math.max(1, Math.round(sec / 60));
 
+// The multimodal breakdown (walk → bus → walk) with each part's mode, line,
+// destination and minutes — for a compact per-part display in the itinerary.
+const segmentsOf = (best: BestLeg): readonly LegSegment[] =>
+  best.legs.map((leg) => ({
+    mode: leg.mode,
+    ...(leg.line ? { line: leg.line } : {}),
+    ...(leg.to.name ? { to: leg.to.name } : {}),
+    minutes: minutesFromSec(leg.durationSec),
+  }));
+
 const upgrade = (leg: Leg, from: RouteStop, to: RouteStop, best: BestLeg): Leg => {
   const minutes = minutesFromSec(best.durationSec);
   const depart = minutesOf(from.h);
   const arrive = minutesOf(to.h);
   const tight = depart !== undefined && arrive !== undefined && depart + minutes > arrive;
-  return { ...leg, meters: best.meters, minutes, tight, geometry: best.geometry, real: true, transfers: best.transfers };
+  return { ...leg, meters: best.meters, minutes, tight, geometry: best.geometry, real: true, transfers: best.transfers, segments: segmentsOf(best) };
 };
 
 const enrichLeg = async (
@@ -63,6 +73,7 @@ export interface RoutedLeg {
   readonly minutes: number;
   readonly geometry: readonly (readonly [number, number])[];
   readonly transfers: number;
+  readonly segments: readonly LegSegment[];
 }
 
 /** Cache key for a directed pair under a travel mode. */
@@ -73,13 +84,14 @@ const routedFromBest = (best: BestLeg): RoutedLeg => ({
   minutes: minutesFromSec(best.durationSec),
   geometry: best.geometry,
   transfers: best.transfers,
+  segments: segmentsOf(best),
 });
 
 const applyRouted = (leg: Leg, from: RouteStop, to: RouteStop, routed: RoutedLeg): Leg => {
   const depart = minutesOf(from.h);
   const arrive = minutesOf(to.h);
   const tight = depart !== undefined && arrive !== undefined && depart + routed.minutes > arrive;
-  return { ...leg, meters: routed.meters, minutes: routed.minutes, tight, geometry: routed.geometry, real: true, transfers: routed.transfers };
+  return { ...leg, meters: routed.meters, minutes: routed.minutes, tight, geometry: routed.geometry, real: true, transfers: routed.transfers, segments: routed.segments };
 };
 
 /** Synchronously apply whatever real routing is already cached to a freshly

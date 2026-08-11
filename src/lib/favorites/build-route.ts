@@ -41,7 +41,13 @@ export type Leg = Readonly<{
   real?: boolean;
   /** Transfers on a real transit leg (undefined for walking/estimate). */
   transfers?: number;
+  /** The multimodal breakdown (walk → bus → walk) of a real transit leg:
+   *  each part's mode, line, destination and minutes, for a compact display. */
+  segments?: readonly LegSegment[];
 }>;
+
+/** One part of a real routed leg — a walk or a boarded vehicle. */
+export type LegSegment = Readonly<{ mode: string; line?: string; to?: string; minutes: number }>;
 
 export type RouteDay = Readonly<{ day: string; stops: readonly RouteStop[]; legs: readonly Leg[] }>;
 

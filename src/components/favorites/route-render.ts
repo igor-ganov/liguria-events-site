@@ -7,7 +7,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import { brightStyle } from '../../lib/map/styles/bright-typed.ts';
 import { darkStyle } from '../../lib/map/styles/dark-typed.ts';
-import type { Leg, Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
+import type { Leg, LegSegment, Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { legTo } from '../../lib/favorites/base-point.ts';
 import type { DayBase } from '../../lib/favorites/base-point.ts';
 import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
@@ -29,10 +29,31 @@ export const dayLabel = (iso: string, lang: Locale): string => {
 
 const km = (m: number): string => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 
+// Compact multimodal breakdown: 🚶 4′ → 🚌 20 → De Ferrari 12′ → 🚶 3′.
+const MODE_ICON: Readonly<Record<string, string>> = {
+  walk: '🚶', bus: '🚌', metro: '🚇', train: '🚆', funicular: '🚡', boat: '⛴',
+};
+const segmentText = (s: LegSegment): string => {
+  const icon = MODE_ICON[s.mode] ?? '🚌';
+  const line = s.line ? ` ${esc(s.line)}` : '';
+  const to = s.mode !== 'walk' && s.to ? ` → ${esc(s.to)}` : '';
+  return `<span class="route-leg-part">${icon}${line}${to} ${s.minutes}′</span>`;
+};
+// Worth showing the parts only when a vehicle is involved or there is more than
+// one part — a lone walk is already summed on the leg line.
+const legParts = (leg: Leg): string => {
+  const segments = leg.segments ?? [];
+  const worth = segments.length > 1 || segments.some((s) => s.mode !== 'walk');
+  return worth
+    ? `<span class="route-leg-parts">${segments.map(segmentText).join('<span class="route-leg-arrow"> → </span>')}</span>`
+    : '';
+};
+
 export const renderLeg = (leg: RouteDay['legs'][number], mode: Mode, ui: Ui): string =>
   `<li class="route-leg${leg.tight ? ' route-leg--tight' : ''}${leg.real ? ' route-leg--real' : ''}"${leg.real ? ' data-real="1"' : ''}>` +
   `<span class="route-leg-mode" data-mode="${mode}"></span>` +
   `<span>${km(leg.meters)} · ${leg.minutes} ${esc(ui.route.min)}${leg.transfers ? ` · ⇄ ${leg.transfers}` : ''}${leg.tight ? ` · ⚠ ${esc(ui.route.tight)}` : ''}</span>` +
+  legParts(leg) +
   (leg.mapsUrl ? ` <a href="${leg.mapsUrl}" target="_blank" rel="noopener">Google&nbsp;Maps ↗</a>` : '') +
   `</li>`;
 

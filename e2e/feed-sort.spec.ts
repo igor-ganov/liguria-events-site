@@ -13,20 +13,21 @@ test('feed defaults to uniqueness and Newest first orders by creation time', asy
   const firstList = page.locator('.feed-list').first();
   await expect(firstList.locator(':scope > li').first()).toBeVisible();
 
-  // Stamp known creation times on the first three cards of the first day group.
+  // Stamp creation times on the first three cards, far larger than any real
+  // epoch-seconds `cr` in the corpus, so they deterministically float to the top.
   await page.evaluate(() => {
     const ul = document.querySelector('.feed-list');
     if (!ul) return;
-    const stamps = [100, 300, 200];
+    const stamps = ['1000000000000000', '3000000000000000', '2000000000000000'];
     [...ul.querySelectorAll(':scope > li')].slice(0, 3).forEach((li, i) => {
-      if (li instanceof HTMLElement) li.dataset['created'] = String(stamps[i]);
+      if (li instanceof HTMLElement) li.dataset['created'] = stamps[i] ?? '';
     });
   });
 
   await page.locator('[data-feed-sort="created"]').click();
   await expect(page.locator('[data-feed-sort="created"]')).toHaveAttribute('aria-pressed', 'true');
 
-  // Newest first: 300, 200, 100 float to the top of the day group, in that order.
+  // Newest first: the three float to the top of the day group in descending order.
   const order = await page.evaluate(() => {
     const ul = document.querySelector('.feed-list');
     if (!ul) return [];
@@ -34,5 +35,5 @@ test('feed defaults to uniqueness and Newest first orders by creation time', asy
       .slice(0, 3)
       .map((li) => (li instanceof HTMLElement ? li.dataset['created'] : ''));
   });
-  expect(order).toEqual(['300', '200', '100']);
+  expect(order).toEqual(['3000000000000000', '2000000000000000', '1000000000000000']);
 });

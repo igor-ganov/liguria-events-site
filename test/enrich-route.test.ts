@@ -32,7 +32,11 @@ const best: BestLeg = {
     [8.9, 44.4],
     [8.94, 44.41],
   ],
-  legs: [],
+  legs: [
+    { mode: 'walk', from: { name: 'A', lat: 44.4, lon: 8.9 }, to: { name: 'Stop', lat: 44.4, lon: 8.91 }, startTime: '', endTime: '', durationSec: 240, geometry: [], approximated: false, intermediateStops: [] },
+    { mode: 'bus', line: '20', from: { name: 'Stop', lat: 44.4, lon: 8.91 }, to: { name: 'De Ferrari', lat: 44.41, lon: 8.93 }, startTime: '', endTime: '', durationSec: 1200, geometry: [], approximated: false, intermediateStops: [] },
+    { mode: 'walk', from: { name: 'De Ferrari', lat: 44.41, lon: 8.93 }, to: { name: 'B', lat: 44.41, lon: 8.94 }, startTime: '', endTime: '', durationSec: 180, geometry: [], approximated: false, intermediateStops: [] },
+  ],
 };
 
 const planner: Planner = async () => best;
@@ -46,6 +50,12 @@ test('enrichDays upgrades a leg to real routing (time, distance, geometry)', asy
   assert.equal(leg.meters, 2500);
   assert.equal(leg.transfers, 1);
   assert.equal(leg.geometry?.length, 2);
+  // Compact multimodal breakdown: walk → bus 20 (De Ferrari) → walk.
+  assert.equal(leg.segments?.length, 3);
+  assert.equal(leg.segments?.[1]?.mode, 'bus');
+  assert.equal(leg.segments?.[1]?.line, '20');
+  assert.equal(leg.segments?.[1]?.to, 'De Ferrari');
+  assert.equal(leg.segments?.[1]?.minutes, 20); // 1200s → 20 min
 });
 
 test('legs the planner cannot serve keep their straight-line estimate', async () => {
@@ -68,7 +78,7 @@ test('tight is recomputed from the real travel time vs the next fixed start', as
 
 test('applyLegCache applies cached real routing and recomputes tight', () => {
   const cache = new Map<string, RoutedLeg | undefined>();
-  cache.set(legKey('a', 'b', 'transit'), { meters: 2500, minutes: 30, geometry: [[8.9, 44.4]], transfers: 1 });
+  cache.set(legKey('a', 'b', 'transit'), { meters: 2500, minutes: 30, geometry: [[8.9, 44.4]], transfers: 1, segments: [{ mode: 'bus', line: '20', to: 'De Ferrari', minutes: 20 }] });
   const d = day([stop('a', [44.4, 8.9], '10:00'), stop('b', [44.41, 8.94], '10:20')]);
   const [out] = applyLegCache([d], 'transit', cache);
   const leg = out!.legs[0]!;
