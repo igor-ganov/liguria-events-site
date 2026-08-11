@@ -22,6 +22,9 @@ export type Payload = Readonly<{
   groups: readonly DayGroup[];
   durations: Durations;
   times: Times;
+  // Manual pauses (minutes) to wait AFTER a stop before the next one, keyed by
+  // the preceding stop's id — a break inserted into the day.
+  pauses: Durations;
   pois: Readonly<Record<string, FavPoi>>;
   dayStart: string;
   dayEnd: string;
@@ -96,6 +99,7 @@ export const parsePayload = (raw: string): Payload => {
     groups: asGroups(field(json, 'dayIds')),
     durations: asDurations(field(json, 'durations')),
     times: asTimes(field(json, 'times')),
+    pauses: asDurations(field(json, 'pauses')),
     pois: parseFavPoiMap(field(json, 'pois')),
     dayStart: asTime(field(json, 'dayStart')),
     dayEnd: asTime(field(json, 'dayEnd')),
@@ -112,6 +116,7 @@ export const serializePayload = (p: Payload): string =>
     dayIds: p.groups.map((g) => ({ day: g.day, ids: [...g.ids] })),
     durations: p.durations,
     times: p.times,
+    pauses: p.pauses,
     pois: p.pois,
     dayStart: p.dayStart,
     dayEnd: p.dayEnd,

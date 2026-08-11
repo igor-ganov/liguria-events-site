@@ -1,7 +1,9 @@
 import { buildRoute, poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { enrichDays } from '../../lib/favorites/enrich-route.ts';
-import { moveStopToIndex } from './route-edit-ops.ts';
+import { resolveNext } from '../../lib/favorites/resolve-next.ts';
+import { minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
@@ -52,6 +54,34 @@ const ORDER_KEY = 'dovego:route-order';
 // regenerate (buildRoute otherwise re-derives its own order).
 let genOrder: Record<string, readonly string[]> = {};
 let genDayHours: Record<string, { start: string; end: string }> = {};
+// Pinned start times and manual pauses set on the timeline (keyed by stop id),
+// persisted so a regenerate keeps them and a Save embeds them.
+const TIMES_KEY = 'dovego:route-times';
+const PAUSES_KEY = 'dovego:route-pauses';
+let genTimes: Record<string, string> = {};
+let genPauses: Record<string, number> = {};
+
+const readTimes = (): Record<string, string> => {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(TIMES_KEY) ?? '{}');
+    const out: Record<string, string> = {};
+    if (raw && typeof raw === 'object') for (const [id, t] of Object.entries(raw)) if (typeof t === 'string') out[id] = t;
+    return out;
+  } catch {
+    return {};
+  }
+};
+
+const readPauses = (): Record<string, number> => {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(PAUSES_KEY) ?? '{}');
+    const out: Record<string, number> = {};
+    if (raw && typeof raw === 'object') for (const [id, m] of Object.entries(raw)) if (typeof m === 'number') out[id] = m;
+    return out;
+  } catch {
+    return {};
+  }
+};
 
 const readOrder = (): Record<string, readonly string[]> => {
   try {
@@ -87,7 +117,8 @@ const genPayload = (): Payload => ({
   mode,
   groups: [],
   durations: overrides,
-  times: {},
+  times: genTimes,
+  pauses: genPauses,
   pois: {},
   dayStart: '',
   dayEnd: '',
@@ -192,7 +223,8 @@ const saveRoute = async (days: readonly RouteDay[]): Promise<void> => {
     range: lastRange,
     dayIds: days.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) })),
     durations: pickDurations(days),
-    times: {},
+    times: genTimes,
+    pauses: genPauses,
     pois,
   });
   let saved: Readonly<{ id: string; url: string; editToken?: string }> | undefined;
@@ -228,6 +260,8 @@ const generate = async (): Promise<void> => {
   const { ui } = readUiIsland();
   overrides = readDurations();
   genOrder = readOrder();
+  genTimes = readTimes();
+  genPauses = readPauses();
   const favs = new Set(readFavorites());
   // Favourited events (from the corpus) + favourited landmarks/places (POIs).
   const favEvents = (await fetchCorpus()).filter((e) => favs.has(e.id));
@@ -267,39 +301,46 @@ const setMode = (btn: HTMLElement): void => {
   );
 };
 
-// After a reorder, upgrade the straight-line legs back to real routing (guarded
-// like generate(), so a stale fill can't repaint over a newer arrangement).
-const reEnrich = async (): Promise<void> => {
-  const my = (gen += 1);
-  const enriched = await enrichDays(lastDays, mode);
-  if (my !== gen) return;
-  lastDays = enriched;
-  paintRoute(enriched);
+const persist = (key: string, value: unknown): void => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* storage blocked — ignore */
+  }
 };
 
-// A vertical drag reorders the stop (genOrder → rebuild legs); resize sets the
-// duration (overrides). Both persist so a later Save embeds the arrangement.
+const genDayWindow = (day: string): Readonly<{ startMin: number; endMin: number }> => {
+  const hours = effectiveDayHours(day, genDayHours, undefined, readGlobalDayHours());
+  return { startMin: minutesOfTime(hours.start) ?? 9 * 60, endMin: minutesOfTime(hours.end) ?? 22 * 60 };
+};
+
+// Pin a stop to a time (optionally with a new length) and resolve the next stop
+// so it doesn't overlap; persist so a Save embeds the arrangement.
+const genApplyPin = (id: string, day: string, startMin: number, durations = overrides): void => {
+  const stops = lastDays.find((d) => d.day === day)?.stops ?? [];
+  const { startMin: ds, endMin: de } = genDayWindow(day);
+  const res = resolveNext(stops, mode, genTimes, durations, genPauses, ds, de, id, startMin);
+  genTimes = { ...res.times };
+  overrides = { ...res.durations };
+  persist(TIMES_KEY, genTimes);
+  persist(DUR_KEY, overrides);
+  paintRoute(lastDays);
+};
+
+// Body drag pins the stop to a time; top-edge pins start + length; bottom-edge
+// sets the length (re-resolving the next stop if this one is pinned).
 const timelineDrag = makeTimelineDrag((commit) => {
-  if (commit.kind === 'reorder') {
-    const groups = lastDays.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) }));
-    const next = moveStopToIndex(groups, commit.id, commit.day, commit.index);
-    genOrder = Object.fromEntries(next.map((g) => [g.day, [...g.ids]]));
-    try {
-      localStorage.setItem(ORDER_KEY, JSON.stringify(genOrder));
-    } catch {
-      /* storage blocked — ignore */
+  if (commit.kind === 'move') genApplyPin(commit.id, commit.day, commit.startMin);
+  else if (commit.kind === 'resize-top') genApplyPin(commit.id, commit.day, commit.startMin, { ...overrides, [commit.id]: commit.durMin });
+  else {
+    const durations = { ...overrides, [commit.id]: commit.durMin };
+    const pinned = minutesOfTime(genTimes[commit.id]);
+    if (pinned !== undefined) genApplyPin(commit.id, commit.day, pinned, durations);
+    else {
+      overrides = durations;
+      persist(DUR_KEY, overrides);
+      paintRoute(lastDays);
     }
-    lastDays = routeFromGroups(next, mode, byId);
-    paintRoute(lastDays);
-    void reEnrich();
-  } else {
-    overrides = { ...overrides, [commit.id]: commit.durMin };
-    try {
-      localStorage.setItem(DUR_KEY, JSON.stringify(overrides));
-    } catch {
-      /* storage blocked — ignore */
-    }
-    paintRoute(lastDays);
   }
 });
 
@@ -334,6 +375,24 @@ export const initRoute = (): void => {
     const viewBtn = target.closest<HTMLElement>('[data-route-view]');
     if (viewBtn) {
       view = viewBtn.dataset['routeView'] === 'timeline' ? 'timeline' : 'list';
+      paintRoute(lastDays);
+      return;
+    }
+    const addPause = target.closest<HTMLElement>('[data-add-pause]');
+    if (addPause) {
+      const after = addPause.dataset['after'] ?? '';
+      genPauses = { ...genPauses, [after]: (genPauses[after] ?? 0) + 60 };
+      persist(PAUSES_KEY, genPauses);
+      paintRoute(lastDays);
+      return;
+    }
+    const clearPause = target.closest<HTMLElement>('[data-clear-pause]');
+    if (clearPause) {
+      const after = clearPause.dataset['after'] ?? '';
+      const next = { ...genPauses };
+      delete next[after];
+      genPauses = next;
+      persist(PAUSES_KEY, genPauses);
       paintRoute(lastDays);
       return;
     }

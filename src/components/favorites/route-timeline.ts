@@ -31,7 +31,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
   const hours = effectiveDayHours(day.day, payload.dayHours, routeHours, readGlobalDayHours());
   const dayStartMin = minutesOfTime(hours.start) ?? DAY_START_MIN;
   const dayEndMin = minutesOfTime(hours.end) ?? 22 * 60;
-  const items = buildDaySchedule(day.stops, payload.mode, payload.durations, dayStartMin);
+  const items = buildDaySchedule(day.stops, payload.mode, payload.times, payload.durations, payload.pauses, dayStartMin);
   const range = axisRange(items, dayStartMin);
   const start = range.start;
   const end = Math.max(range.end, Math.ceil(dayEndMin / 60) * 60); // extend the axis to the day end
@@ -53,14 +53,16 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
         it.offSchedule && win
           ? `<span class="tl-flag" aria-label="Runs ${timeOfMinutes(win.start)}–${timeOfMinutes(win.end)}">${timeOfMinutes(win.start)}–${timeOfMinutes(win.end)}</span>`
           : '';
+      const pinned = payload.times[it.id] !== undefined;
       return (
-        `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
-        `data-tl-dur="${dur}" style="top:${top}px;height:${h}px">` +
-        `<span class="tl-time">${timeOfMinutes(it.startMin)}–${timeOfMinutes(it.endMin)}</span>` +
+        `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}${pinned ? ' tl-block--pinned' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
+        `data-tl-start="${it.startMin}" data-tl-dur="${dur}" style="top:${top}px;height:${h}px">` +
+        `<span class="tl-resize tl-resize--top no-print" data-tl-resize="top" aria-hidden="true"></span>` +
+        `<span class="tl-time">${timeOfMinutes(it.startMin)}–${timeOfMinutes(it.endMin)}${pinned ? ' 📌' : ''}</span>` +
         `<span class="tl-title">${title}</span>` +
         flag +
         (editable ? `<button type="button" class="tl-del no-print" data-tl-del data-tl-id="${esc(it.id)}" aria-label="Remove from route">✕</button>` : '') +
-        `<span class="tl-resize" data-tl-resize aria-hidden="true"></span>` +
+        `<span class="tl-resize tl-resize--bottom no-print" data-tl-resize="bottom" aria-hidden="true"></span>` +
         `</div>`
       );
     })
@@ -71,10 +73,25 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
   const glyph = payload.mode === 'driving' ? '🚗' : payload.mode === 'transit' ? '🚌' : '🚶';
   const gaps = items
     .map((it, i) => {
-      if (i === 0 || it.travelMin < 5) return '';
-      const mid = (items[i - 1]!.endMin + it.startMin) / 2;
-      const top = (mid - start) * PX_PER_MIN;
-      return `<div class="tl-gap" style="top:${top}px">${glyph} ${formatDuration(Math.round(it.travelMin))}</div>`;
+      if (i === 0) return '';
+      const prevId = day.stops[i - 1]!.id;
+      const prevEnd = items[i - 1]!.endMin;
+      const pauseMin = payload.pauses[prevId] ?? 0;
+      const parts: string[] = [];
+      if (it.travelMin >= 5) {
+        const top = (prevEnd + it.travelMin / 2 - start) * PX_PER_MIN;
+        parts.push(`<div class="tl-gap" style="top:${top}px">${glyph} ${formatDuration(Math.round(it.travelMin))}</div>`);
+      }
+      if (pauseMin > 0) {
+        const top = (prevEnd + it.travelMin + pauseMin / 2 - start) * PX_PER_MIN;
+        parts.push(
+          `<div class="tl-gap tl-gap--pause" style="top:${top}px" data-clear-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" role="button" tabindex="0" title="Remove pause">⏸ ${formatDuration(pauseMin)}</div>`,
+        );
+      }
+      // A "+" droplet at the junction to drop a standard 1-hour break here.
+      const top = (it.startMin - start) * PX_PER_MIN;
+      parts.push(`<button type="button" class="tl-add-pause no-print" data-add-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" style="top:${top}px" aria-label="Add a 1-hour pause">+</button>`);
+      return parts.join('');
     })
     .join('');
   return (

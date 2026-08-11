@@ -17,11 +17,13 @@ import type { RoutedLeg } from '../../lib/favorites/enrich-route.ts';
 import { readGlobalBase, resolveDayBase, writeGlobalBase } from '../../lib/favorites/base-point.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
-import { addStopToDay, addableEvents, moveStopToDay, moveStopToIndex, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
+import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
 import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
 import { confirmDialog } from './confirm-dialog.ts';
-import { writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
+import { resolveNext } from '../../lib/favorites/resolve-next.ts';
+import { minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { effectiveDayHours, readGlobalDayHours, writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
 const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
 
@@ -42,7 +44,7 @@ function handleMapClick(at: LngLat): void {
 
 const drawMap = makeMapDrawer(handleMapClick);
 let payload: Payload = {
-  mode: 'walking', groups: [], durations: {}, times: {}, pois: {},
+  mode: 'walking', groups: [], durations: {}, times: {}, pauses: {}, pois: {},
   dayStart: '', dayEnd: '', dayHours: {}, base: undefined, dayBases: {}, dayFinals: {},
 };
 let byId: ReadonlyMap<string, RouteStop> = new Map();
@@ -245,6 +247,24 @@ const onClick = (event: MouseEvent): void => {
     void requestRemove(delBtn.dataset['tlId'] ?? '');
     return;
   }
+  // The "+" droplet drops a standard 1-hour break after a stop; a pause chip
+  // click clears it.
+  const addPause = target.closest<HTMLElement>('[data-add-pause]');
+  if (addPause) {
+    const after = addPause.dataset['after'] ?? '';
+    payload = { ...payload, pauses: { ...payload.pauses, [after]: (payload.pauses[after] ?? 0) + 60 } };
+    render();
+    return;
+  }
+  const clearPause = target.closest<HTMLElement>('[data-clear-pause]');
+  if (clearPause) {
+    const after = clearPause.dataset['after'] ?? '';
+    const pauses = { ...payload.pauses };
+    delete pauses[after];
+    payload = { ...payload, pauses };
+    render();
+    return;
+  }
   // Base pickers: arm (or toggle off) a target, then a map click sets the point.
   const arm = (mode: PickMode): void => {
     pickMode = pickMode?.scope === mode.scope && pickMode.kind === mode.kind && pickMode.day === mode.day ? undefined : mode;
@@ -329,15 +349,45 @@ const requestRemove = async (id: string): Promise<void> => {
   withGroups(removeStop(payload.groups, id, block?.dataset['tlDay'] ?? ''));
 };
 
-// A vertical drag reorders the stop within its day; resize commits a duration
-// override; a left swipe (or the block's ✕ button) asks to remove the stop.
+// The day's resolved stops and its effective time window — needed to pin a stop
+// to a time and resolve the next one against it.
+const dayStopsOf = (day: string): readonly RouteStop[] =>
+  (payload.groups.find((g) => g.day === day)?.ids ?? []).flatMap((id) => {
+    const stop = byId.get(id);
+    return stop ? [stop] : [];
+  });
+
+const dayWindow = (day: string): Readonly<{ startMin: number; endMin: number }> => {
+  const routeHours = payload.dayStart !== '' && payload.dayEnd !== '' ? { start: payload.dayStart, end: payload.dayEnd } : undefined;
+  const hours = effectiveDayHours(day, payload.dayHours, routeHours, readGlobalDayHours());
+  return { startMin: minutesOfTime(hours.start) ?? 9 * 60, endMin: minutesOfTime(hours.end) ?? 22 * 60 };
+};
+
+// Pin a stop to `startMin` (optionally with a new duration) and resolve the next
+// stop so it no longer overlaps.
+const applyPin = (id: string, day: string, startMin: number, durations = payload.durations): void => {
+  const { startMin: ds, endMin: de } = dayWindow(day);
+  const res = resolveNext(dayStopsOf(day), payload.mode, payload.times, durations, payload.pauses, ds, de, id, startMin);
+  payload = { ...payload, times: res.times, durations: res.durations };
+  render();
+};
+
+// Body drag → pin the stop to a time; top-edge → pin a new start + length;
+// bottom-edge → change the length (re-resolving the next stop if this one is
+// pinned). A left swipe (or ✕) asks to remove the stop.
 const { onPointerDown, onPointerMove, onPointerUp } = makeTimelineDrag(
   (commit) => {
-    payload =
-      commit.kind === 'reorder'
-        ? { ...payload, groups: moveStopToIndex(payload.groups, commit.id, commit.day, commit.index) }
-        : { ...payload, durations: { ...payload.durations, [commit.id]: commit.durMin } };
-    render();
+    if (commit.kind === 'move') applyPin(commit.id, commit.day, commit.startMin);
+    else if (commit.kind === 'resize-top') applyPin(commit.id, commit.day, commit.startMin, { ...payload.durations, [commit.id]: commit.durMin });
+    else {
+      const durations = { ...payload.durations, [commit.id]: commit.durMin };
+      const pinned = minutesOfTime(payload.times[commit.id]);
+      if (pinned !== undefined) applyPin(commit.id, commit.day, pinned, durations);
+      else {
+        payload = { ...payload, durations };
+        render();
+      }
+    }
   },
   { onSwipeDelete: (id) => void requestRemove(id) },
 );

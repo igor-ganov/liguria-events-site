@@ -48,14 +48,16 @@ export const officialWindow = (event: RouteStop): Readonly<{ start: number; end:
   return start === undefined ? undefined : { start, end: start + eventDuration(event) };
 };
 
-/** Place a day's stops on the minute axis as a strict sequence: the order is
- *  the itinerary. The first stop opens the day; each next one follows the
- *  previous plus travel. `offSchedule` flags a fixed-time stop whose resulting
- *  block sticks out of the event's official window. */
+/** Place a day's stops on the minute axis. A stop pinned to a time (via `times`)
+ *  sits there; an unpinned one flows after the previous stop plus travel and any
+ *  manual pause. `offSchedule` flags a stop whose block sticks out of the event's
+ *  official window. */
 export const buildDaySchedule = (
   stops: readonly RouteStop[],
   mode: Mode,
+  times: Times,
   durations: Durations,
+  pauses: Durations,
   dayStartMin: number,
 ): readonly ScheduledStop[] => {
   const placed: ScheduledStop[] = [];
@@ -65,7 +67,9 @@ export const buildDaySchedule = (
     const from = prev ? coord(prev) : undefined;
     const to = coord(event);
     const travelMin = prev && from && to ? travelMinutesBetween(from, to, mode) : 0;
-    const startMin = prev ? prevEnd + travelMin : dayStartMin;
+    const pauseMin = prev ? (pauses[prev.id] ?? 0) : 0; // a break waited AFTER the previous stop
+    const pinned = minutesOfTime(times[event.id]);
+    const startMin = pinned ?? (prev ? prevEnd + travelMin + pauseMin : dayStartMin);
     const endMin = startMin + eventDuration(event, durations[event.id]);
     const win = officialWindow(event);
     const offSchedule = win !== undefined && (startMin < win.start || endMin > win.end);
