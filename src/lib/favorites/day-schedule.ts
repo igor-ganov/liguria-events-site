@@ -9,6 +9,9 @@ import { travelMinutesBetween } from './build-route.ts';
 import type { Mode, RouteStop } from './build-route.ts';
 
 export type Durations = Readonly<Record<string, number>>;
+// Kept for the payload schema (legacy routes carry per-stop start times); the
+// sequence model no longer uses them for positioning.
+export type Times = Readonly<Record<string, string>>;
 
 export type ScheduledStop = Readonly<{
   id: string;
