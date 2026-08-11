@@ -6,7 +6,7 @@
 // lives in route-editor / init-route; this only produces the markup, carrying
 // each block's current duration in data-* for the drag maths.
 import { axisRange, buildDaySchedule, minutesOfTime, officialWindow, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
-import { eventDuration } from '../../lib/favorites/event-duration.ts';
+import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import type { RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -74,7 +74,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
       if (i === 0 || it.travelMin < 5) return '';
       const mid = (items[i - 1]!.endMin + it.startMin) / 2;
       const top = (mid - start) * PX_PER_MIN;
-      return `<div class="tl-gap" style="top:${top}px">${glyph} ${Math.round(it.travelMin)} min</div>`;
+      return `<div class="tl-gap" style="top:${top}px">${glyph} ${formatDuration(Math.round(it.travelMin))}</div>`;
     })
     .join('');
   return (
