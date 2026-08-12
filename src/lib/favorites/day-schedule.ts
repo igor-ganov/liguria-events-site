@@ -63,19 +63,27 @@ export const buildDaySchedule = (
   const placed: ScheduledStop[] = [];
   let prev: RouteStop | undefined;
   let prevEnd = dayStartMin;
+  // Travel is measured from the last stop that HAS a location, so a stop with no
+  // coordinates (a break) doesn't zero out the journey — the next real stop still
+  // pays the walk/ride from where you actually were.
+  let lastCoord: readonly [number, number] | undefined;
   for (const event of stops) {
-    const from = prev ? coord(prev) : undefined;
     const to = coord(event);
-    const travelMin = prev && from && to ? travelMinutesBetween(from, to, mode) : 0;
+    const travelMin = lastCoord && to ? travelMinutesBetween(lastCoord, to, mode) : 0;
     const pauseMin = prev ? (pauses[prev.id] ?? 0) : 0; // a break waited AFTER the previous stop
+    const flow = prev ? prevEnd + travelMin + pauseMin : dayStartMin;
     const pinned = minutesOfTime(times[event.id]);
-    const startMin = pinned ?? (prev ? prevEnd + travelMin + pauseMin : dayStartMin);
+    // A pin is a MINIMUM start, not an absolute one: an event can be pushed later
+    // (a gap opens before it) but never earlier than it can be reached — so it can
+    // never land on top of the previous stop. No overlaps, ever.
+    const startMin = pinned !== undefined ? Math.max(pinned, flow) : flow;
     const endMin = startMin + eventDuration(event, durations[event.id]);
     const win = officialWindow(event);
     const offSchedule = win !== undefined && (startMin < win.start || endMin > win.end);
     placed.push({ id: event.id, startMin, endMin, travelMin, offSchedule });
     prev = event;
     prevEnd = endMin;
+    if (to) lastCoord = to;
   }
   return placed;
 };

@@ -1,8 +1,9 @@
 import { buildRoute, poiToStop, routeFromGroups } from '../../lib/favorites/build-route.ts';
 import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { enrichDays } from '../../lib/favorites/enrich-route.ts';
-import { resolveNext } from '../../lib/favorites/resolve-next.ts';
-import { buildDaySchedule, minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { buildDaySchedule, minutesOfTime, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+import { eventDuration } from '../../lib/favorites/event-duration.ts';
+import { moveStopToIndex } from './route-edit-ops.ts';
 import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
@@ -314,15 +315,41 @@ const genDayWindow = (day: string): Readonly<{ startMin: number; endMin: number 
   return { startMin: minutesOfTime(hours.start) ?? 9 * 60, endMin: minutesOfTime(hours.end) ?? 22 * 60 };
 };
 
-// Pin a stop to a time (optionally with a new length) and resolve the next stop
-// so it doesn't overlap; persist so a Save embeds the arrangement.
-const genApplyPin = (id: string, day: string, startMin: number, durations = overrides): void => {
+// Move: reorder to the drop index, rebuild the legs, and pin to the drop time
+// only if that leaves a real gap (a pin is a minimum — it only ever opens a gap).
+const genApplyMove = (id: string, day: string, index: number, startMin: number): void => {
+  const groups = lastDays.map((d) => ({ day: d.day, ids: d.stops.map((s) => s.id) }));
+  const next = moveStopToIndex(groups, id, day, index);
+  genOrder = Object.fromEntries(next.map((g) => [g.day, [...g.ids]]));
+  persist(ORDER_KEY, genOrder);
+  lastDays = routeFromGroups(next, mode, byId);
+  const rest = { ...genTimes };
+  delete rest[id];
   const stops = lastDays.find((d) => d.day === day)?.stops ?? [];
-  const { startMin: ds, endMin: de } = genDayWindow(day);
-  const res = resolveNext(stops, mode, genTimes, durations, genPauses, ds, de, id, startMin);
-  genTimes = { ...res.times };
-  overrides = { ...res.durations };
+  const flow = buildDaySchedule(stops, mode, rest, overrides, genPauses, genDayWindow(day).startMin).find((s) => s.id === id)?.startMin ?? startMin;
+  genTimes = startMin > flow + 10 ? { ...genTimes, [id]: timeOfMinutes(startMin) } : rest;
   persist(TIMES_KEY, genTimes);
+  paintRoute(lastDays);
+};
+
+// Grow a stop by stealing minutes from the following stops (they shrink); shrink
+// just sets it and the rest flows up.
+const genResizeSteal = (id: string, day: string, newDur: number): void => {
+  const stops = lastDays.find((d) => d.day === day)?.stops ?? [];
+  const i = stops.findIndex((s) => s.id === id);
+  if (i < 0) return;
+  const durations: Record<string, number> = { ...overrides };
+  let extra = newDur - eventDuration(stops[i]!, durations[id]);
+  durations[id] = newDur;
+  for (let j = i + 1; extra > 0 && j < stops.length; j += 1) {
+    const cur = eventDuration(stops[j]!, durations[stops[j]!.id]);
+    const take = Math.min(extra, cur - 15);
+    if (take > 0) {
+      durations[stops[j]!.id] = cur - take;
+      extra -= take;
+    }
+  }
+  overrides = durations;
   persist(DUR_KEY, overrides);
   paintRoute(lastDays);
 };
@@ -354,18 +381,14 @@ const timelineDrag = makeTimelineDrag((commit) => {
     paintRoute(lastDays);
     return;
   }
-  if (commit.kind === 'move') genApplyPin(commit.id, commit.day, commit.startMin);
-  else if (commit.kind === 'resize-top') genApplyPin(commit.id, commit.day, commit.startMin, { ...overrides, [commit.id]: commit.durMin });
-  else {
-    const durations = { ...overrides, [commit.id]: commit.durMin };
-    const pinned = minutesOfTime(genTimes[commit.id]);
-    if (pinned !== undefined) genApplyPin(commit.id, commit.day, pinned, durations);
-    else {
-      overrides = durations;
-      persist(DUR_KEY, overrides);
-      paintRoute(lastDays);
-    }
-  }
+  if (commit.kind === 'move') genApplyMove(commit.id, commit.day, commit.index, commit.startMin);
+  else if (commit.kind === 'resize-top') {
+    genTimes = { ...genTimes, [commit.id]: timeOfMinutes(commit.startMin) };
+    overrides = { ...overrides, [commit.id]: commit.durMin };
+    persist(TIMES_KEY, genTimes);
+    persist(DUR_KEY, overrides);
+    paintRoute(lastDays);
+  } else genResizeSteal(commit.id, commit.day, commit.durMin);
 });
 
 // A per-day window override on the timeline (needs both ends set); in-memory.

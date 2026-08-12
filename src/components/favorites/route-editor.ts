@@ -17,12 +17,12 @@ import type { RoutedLeg } from '../../lib/favorites/enrich-route.ts';
 import { readGlobalBase, resolveDayBase, writeGlobalBase } from '../../lib/favorites/base-point.ts';
 import { fetchCorpus, parsePayload, serializePayload } from './route-payload.ts';
 import type { Payload } from './route-payload.ts';
-import { addStopToDay, addableEvents, moveStopToDay, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
+import { addStopToDay, addableEvents, moveStopToDay, moveStopToIndex, moveTargetDays, removeStop, reorderStop } from './route-edit-ops.ts';
 import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
 import { confirmDialog } from './confirm-dialog.ts';
-import { resolveNext } from '../../lib/favorites/resolve-next.ts';
-import { buildDaySchedule, minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { buildDaySchedule, minutesOfTime, timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
+import { eventDuration } from '../../lib/favorites/event-duration.ts';
 import { effectiveDayHours, readGlobalDayHours, writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
 const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
@@ -363,12 +363,42 @@ const dayWindow = (day: string): Readonly<{ startMin: number; endMin: number }> 
   return { startMin: minutesOfTime(hours.start) ?? 9 * 60, endMin: minutesOfTime(hours.end) ?? 22 * 60 };
 };
 
-// Pin a stop to `startMin` (optionally with a new duration) and resolve the next
-// stop so it no longer overlaps.
-const applyPin = (id: string, day: string, startMin: number, durations = payload.durations): void => {
-  const { startMin: ds, endMin: de } = dayWindow(day);
-  const res = resolveNext(dayStopsOf(day), payload.mode, payload.times, durations, payload.pauses, ds, de, id, startMin);
-  payload = { ...payload, times: res.times, durations: res.durations };
+const stopsOfGroups = (groups: readonly DayGroup[], day: string): readonly RouteStop[] =>
+  (groups.find((g) => g.day === day)?.ids ?? []).flatMap((id) => {
+    const stop = byId.get(id);
+    return stop ? [stop] : [];
+  });
+
+// Move: reorder to the drop index, and pin the stop to the drop time ONLY if that
+// leaves a real gap before it. Dropping at or above its natural slot is a plain
+// reorder — no spurious pin (a pin is a minimum, so it can only ever open a gap).
+const applyMove = (id: string, day: string, index: number, startMin: number): void => {
+  const groups = moveStopToIndex(payload.groups, id, day, index);
+  const rest = { ...payload.times };
+  delete rest[id];
+  const flow = buildDaySchedule(stopsOfGroups(groups, day), payload.mode, rest, payload.durations, payload.pauses, dayWindow(day).startMin).find((s) => s.id === id)?.startMin ?? startMin;
+  const times = startMin > flow + 10 ? { ...payload.times, [id]: timeOfMinutes(startMin) } : rest;
+  payload = { ...payload, groups, times };
+  render();
+};
+
+// Grow a stop by stealing minutes from the stops that follow (they shrink to make
+// room, they are not shoved later); shrinking just sets it and the rest flows up.
+const resizeSteal = (id: string, day: string, newDur: number): void => {
+  const stops = dayStopsOf(day);
+  const i = stops.findIndex((s) => s.id === id);
+  const durations: Record<string, number> = { ...payload.durations };
+  let extra = newDur - eventDuration(stops[i]!, durations[id]);
+  durations[id] = newDur;
+  for (let j = i + 1; extra > 0 && j < stops.length; j += 1) {
+    const cur = eventDuration(stops[j]!, durations[stops[j]!.id]);
+    const take = Math.min(extra, cur - 15);
+    if (take > 0) {
+      durations[stops[j]!.id] = cur - take;
+      extra -= take;
+    }
+  }
+  payload = { ...payload, durations };
   render();
 };
 
@@ -402,17 +432,15 @@ const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } = makeTimel
       }
       return;
     }
-    if (commit.kind === 'move') applyPin(commit.id, commit.day, commit.startMin);
-    else if (commit.kind === 'resize-top') applyPin(commit.id, commit.day, commit.startMin, { ...payload.durations, [commit.id]: commit.durMin });
-    else {
-      const durations = { ...payload.durations, [commit.id]: commit.durMin };
-      const pinned = minutesOfTime(payload.times[commit.id]);
-      if (pinned !== undefined) applyPin(commit.id, commit.day, pinned, durations);
-      else {
-        payload = { ...payload, durations };
-        render();
-      }
-    }
+    if (commit.kind === 'move') applyMove(commit.id, commit.day, commit.index, commit.startMin);
+    else if (commit.kind === 'resize-top') {
+      payload = {
+        ...payload,
+        times: { ...payload.times, [commit.id]: timeOfMinutes(commit.startMin) },
+        durations: { ...payload.durations, [commit.id]: commit.durMin },
+      };
+      render();
+    } else resizeSteal(commit.id, commit.day, commit.durMin);
   },
   { onSwipeDelete: (id) => void requestRemove(id) },
 );

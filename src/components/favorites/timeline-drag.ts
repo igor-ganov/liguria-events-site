@@ -24,7 +24,7 @@ type Drag = Readonly<{
 
 export type TimelineCommit = (
   commit:
-    | Readonly<{ kind: 'move'; id: string; day: string; startMin: number }>
+    | Readonly<{ kind: 'move'; id: string; day: string; index: number; startMin: number }>
     | Readonly<{ kind: 'resize'; id: string; day: string; durMin: number }>
     | Readonly<{ kind: 'resize-top'; id: string; day: string; startMin: number; durMin: number }>,
 ) => void;
@@ -76,6 +76,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
   let gesture: Gesture = 'pending';
   let dragStart = 0;
   let dragDur = 0;
+  let moveDy = 0;
   let swipeDx = 0;
 
   const onPointerDown = (event: PointerEvent): void => {
@@ -102,6 +103,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     gesture = handle ? (handle.dataset['tlResize'] === 'top' ? 'resize-top' : 'resize-bottom') : grip ? 'move' : 'pending';
     dragStart = drag.origStart;
     dragDur = drag.origDur;
+    moveDy = 0;
     swipeDx = 0;
     try {
       block.setPointerCapture(event.pointerId);
@@ -142,6 +144,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
       d.el.style.top = `${d.origTop + (dragStart - d.origStart) * PX_PER_MIN}px`;
       d.el.style.height = `${Math.max(20, dragDur * PX_PER_MIN)}px`;
     } else if (gesture === 'move') {
+      moveDy = dy;
       dragStart = Math.max(0, snapMinutes(d.origStart + dy / PX_PER_MIN));
       d.el.style.transform = `translateY(${dy}px)`;
       d.axis.classList.add('tl-axis--dragging');
@@ -162,6 +165,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     const finished = drag;
     if (!finished) return;
     const kind = gesture;
+    const index = kind === 'move' ? reorderIndex(finished, moveDy) : 0;
     reset();
     if (kind === 'swipe') {
       if (swipeDx < -SWIPE_TRIGGER) options.onSwipeDelete?.(finished.id);
@@ -170,7 +174,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     } else if (kind === 'resize-top') {
       commit({ kind: 'resize-top', id: finished.id, day: finished.day, startMin: dragStart, durMin: dragDur });
     } else if (kind === 'move') {
-      commit({ kind: 'move', id: finished.id, day: finished.day, startMin: dragStart });
+      commit({ kind: 'move', id: finished.id, day: finished.day, index, startMin: dragStart });
     }
   };
 

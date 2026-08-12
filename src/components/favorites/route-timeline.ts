@@ -79,7 +79,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
       const prevEnd = items[i - 1]!.endMin;
       const pauseMin = payload.pauses[prevId] ?? 0;
       const parts: string[] = [];
-      if (it.travelMin >= 5) {
+      if (it.travelMin >= 1) {
         const top = (prevEnd + it.travelMin / 2 - start) * PX_PER_MIN;
         parts.push(`<div class="tl-gap" style="top:${top}px">${glyph} ${formatDuration(Math.round(it.travelMin))}</div>`);
       }

@@ -31,11 +31,28 @@ describe('buildDaySchedule', () => {
     assert.deepEqual(items.map((i) => i.offSchedule), [false, false]);
   });
 
-  test('a pinned time places the stop there; the next flows after it', () => {
+  test('a pin later than the flow opens a gap; the next flows after it', () => {
     const a = ev({ id: 'a', t: 'A', s: '2026-07-10' });
     const b = ev({ id: 'b', t: 'B', s: '2026-07-10' });
     const items = buildDaySchedule([a, b], 'walking', { a: '11:00' }, { a: 60, b: 60 }, {}, DAY_START);
     assert.deepEqual(items.map((i) => [i.startMin, i.endMin]), [[660, 720], [720, 780]]);
+  });
+
+  test('a pin is a minimum, never an overlap: a too-early pin is clamped to the flow', () => {
+    const a = ev({ id: 'a', t: 'A', s: '2026-07-10' });
+    const b = ev({ id: 'b', t: 'B', s: '2026-07-10' });
+    // b wants 09:00 but a occupies 09:00–10:00, so b is clamped to 10:00 (no overlap).
+    const items = buildDaySchedule([a, b], 'walking', { b: '09:00' }, { a: 60, b: 60 }, {}, DAY_START);
+    assert.deepEqual(items.map((i) => i.startMin), [540, 600]);
+  });
+
+  test('travel is measured from the last LOCATED stop, skipping a location-less one (a break)', () => {
+    const a = ev({ id: 'a', t: 'A', s: '2026-07-10', g: [44.3, 8.5] });
+    const brk = ev({ id: 'n', t: 'Break', s: '2026-07-10' }); // no coords
+    const c = ev({ id: 'c', t: 'C', s: '2026-07-10', g: [44.6, 9.2] });
+    const items = buildDaySchedule([a, brk, c], 'walking', {}, { a: 60, n: 60, c: 60 }, {}, DAY_START);
+    assert.equal(items[1]!.travelMin, 0); // nothing to travel to a location-less stop
+    assert.equal(items[2]!.travelMin > 0, true); // c still pays the walk from a
   });
 
   test('a pause after a stop pushes the next start', () => {

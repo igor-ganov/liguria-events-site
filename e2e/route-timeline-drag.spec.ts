@@ -58,20 +58,21 @@ test('generator timeline: dragging a block body pins its start time and persists
 
   await page.locator('[data-route-view="timeline"]').click();
   await expect(page.locator('.tl-block')).toHaveCount(2);
-  const first = page.locator('.tl-block').first();
-  const before = await first.locator('.tl-time').textContent();
+  const ids = () => page.evaluate(() => [...document.querySelectorAll('.tl-block')].map((b) => (b instanceof HTMLElement ? b.dataset['tlId'] : '')));
+  const before = await ids();
 
-  // Grab the block BODY (its centre, clear of the top/bottom resize handles) and
-  // drag down — the block is pinned to a later time.
-  const box = (await first.boundingBox())!;
+  // Grab the first block's BODY (its centre, clear of the top/bottom resize
+  // handles) and drag it well below the second — it reorders (and pins if that
+  // opens a gap).
+  const box = (await page.locator('.tl-block').first().boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 120, { steps: 8 });
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 200, { steps: 10 });
   await page.mouse.up();
 
-  // Its time changed and the pin persisted.
-  await expect(page.locator('.tl-block').first().locator('.tl-time')).not.toHaveText(before ?? '');
-  const times = await page.evaluate(() => localStorage.getItem('dovego:route-times'));
-  expect(times).toBeTruthy();
-  expect(Object.keys(JSON.parse(times ?? '{}')).length).toBeGreaterThan(0);
+  // The arrangement changed and persisted (order and/or a pinned time).
+  await expect(page.locator('.tl-block')).toHaveCount(2);
+  expect(await ids()).not.toEqual(before);
+  const persisted = await page.evaluate(() => localStorage.getItem('dovego:route-order') ?? localStorage.getItem('dovego:route-times'));
+  expect(persisted).toBeTruthy();
 });
