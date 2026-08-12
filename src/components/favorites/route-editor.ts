@@ -22,7 +22,7 @@ import { renderTimeline } from './route-timeline.ts';
 import { makeTimelineDrag } from './timeline-drag.ts';
 import { confirmDialog } from './confirm-dialog.ts';
 import { resolveNext } from '../../lib/favorites/resolve-next.ts';
-import { minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { buildDaySchedule, minutesOfTime } from '../../lib/favorites/day-schedule.ts';
 import { effectiveDayHours, readGlobalDayHours, writeGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 
 const baseOf = (day: string) => resolveDayBase(day, payload.dayBases, payload.base, readGlobalBase(), payload.dayFinals);
@@ -372,11 +372,36 @@ const applyPin = (id: string, day: string, startMin: number, durations = payload
   render();
 };
 
-// Body drag → pin the stop to a time; top-edge → pin a new start + length;
-// bottom-edge → change the length (re-resolving the next stop if this one is
-// pinned). A left swipe (or ✕) asks to remove the stop.
-const { onPointerDown, onPointerMove, onPointerUp } = makeTimelineDrag(
+// The real stop whose slot a break at `startMin` falls into — its new anchor
+// after a break is dragged to a different gap.
+const breakGapAt = (day: string, startMin: number): string | undefined => {
+  const sched = buildDaySchedule(dayStopsOf(day), payload.mode, payload.times, payload.durations, {}, dayWindow(day).startMin);
+  let afterId = sched[0]?.id;
+  for (const s of sched) if (s.startMin <= startMin) afterId = s.id;
+  return afterId;
+};
+
+// A break (id "break:<afterId>") moves between gaps or changes its length; a real
+// stop's body pins it to a time, its top-edge pins start + length, its bottom-edge
+// changes the length (re-resolving the next stop if pinned). Swipe/✕ removes.
+const { onPointerDown, onPointerMove, onPointerUp, onPointerCancel } = makeTimelineDrag(
   (commit) => {
+    if (commit.id.startsWith('break:')) {
+      const oldAfter = commit.id.slice(6);
+      if (commit.kind === 'move') {
+        const dur = payload.pauses[oldAfter] ?? 60;
+        const newAfter = breakGapAt(commit.day, commit.startMin) ?? oldAfter;
+        const pauses = { ...payload.pauses };
+        delete pauses[oldAfter];
+        pauses[newAfter] = (pauses[newAfter] ?? 0) + dur;
+        payload = { ...payload, pauses };
+        render();
+      } else if (commit.kind === 'resize') {
+        payload = { ...payload, pauses: { ...payload.pauses, [oldAfter]: Math.max(15, commit.durMin) } };
+        render();
+      }
+      return;
+    }
     if (commit.kind === 'move') applyPin(commit.id, commit.day, commit.startMin);
     else if (commit.kind === 'resize-top') applyPin(commit.id, commit.day, commit.startMin, { ...payload.durations, [commit.id]: commit.durMin });
     else {
@@ -415,4 +440,5 @@ export const initRouteEditor = (): void => {
   document.addEventListener('pointerdown', onPointerDown);
   document.addEventListener('pointermove', onPointerMove);
   document.addEventListener('pointerup', onPointerUp);
+  document.addEventListener('pointercancel', onPointerCancel);
 };

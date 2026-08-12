@@ -58,6 +58,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
         `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}${pinned ? ' tl-block--pinned' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
         `data-tl-start="${it.startMin}" data-tl-dur="${dur}" style="top:${top}px;height:${h}px">` +
         `<span class="tl-resize tl-resize--top no-print" data-tl-resize="top" aria-hidden="true"></span>` +
+        `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">⠿</span>` +
         `<span class="tl-time">${timeOfMinutes(it.startMin)}–${timeOfMinutes(it.endMin)}${pinned ? ' 📌' : ''}</span>` +
         `<span class="tl-title">${title}</span>` +
         flag +
@@ -82,14 +83,23 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
         const top = (prevEnd + it.travelMin / 2 - start) * PX_PER_MIN;
         parts.push(`<div class="tl-gap" style="top:${top}px">${glyph} ${formatDuration(Math.round(it.travelMin))}</div>`);
       }
+      // A break is a first-class block: drag its grip to move it, drag the bottom
+      // edge to shorten it, ✕ to remove it.
       if (pauseMin > 0) {
-        const top = (prevEnd + it.travelMin + pauseMin / 2 - start) * PX_PER_MIN;
+        const bStart = prevEnd + it.travelMin;
+        const bTop = (bStart - start) * PX_PER_MIN;
+        const bH = Math.max(24, pauseMin * PX_PER_MIN);
         parts.push(
-          `<div class="tl-gap tl-gap--pause" style="top:${top}px" data-clear-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" role="button" tabindex="0" title="Remove pause">⏸ ${formatDuration(pauseMin)}</div>`,
+          `<div class="tl-block tl-break" data-tl-id="break:${esc(prevId)}" data-tl-day="${esc(day.day)}" data-tl-start="${bStart}" data-tl-dur="${pauseMin}" style="top:${bTop}px;height:${bH}px">` +
+            `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">⠿</span>` +
+            `<span class="tl-time">⏸ ${formatDuration(pauseMin)}</span>` +
+            (editable ? `<button type="button" class="tl-del no-print" data-clear-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" aria-label="Remove break">✕</button>` : '') +
+            `<span class="tl-resize tl-resize--bottom no-print" data-tl-resize="bottom" aria-hidden="true"></span>` +
+            `</div>`,
         );
       }
-      // A "+" droplet at the junction to drop a standard 1-hour break here.
-      const top = (it.startMin - start) * PX_PER_MIN;
+      // A "+" droplet in the right gutter, dripping from the slot between blocks.
+      const top = (prevEnd - start) * PX_PER_MIN;
       parts.push(`<button type="button" class="tl-add-pause no-print" data-add-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" style="top:${top}px" aria-label="Add a 1-hour pause">+</button>`);
       return parts.join('');
     })

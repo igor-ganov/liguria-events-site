@@ -2,7 +2,7 @@ import { buildRoute, poiToStop, routeFromGroups } from '../../lib/favorites/buil
 import type { Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { enrichDays } from '../../lib/favorites/enrich-route.ts';
 import { resolveNext } from '../../lib/favorites/resolve-next.ts';
-import { minutesOfTime } from '../../lib/favorites/day-schedule.ts';
+import { buildDaySchedule, minutesOfTime } from '../../lib/favorites/day-schedule.ts';
 import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-hours.ts';
 import { readFavPois } from '../../lib/favorites/fav-pois.ts';
 import { readGlobalBase, resolveDayBase } from '../../lib/favorites/base-point.ts';
@@ -327,9 +327,33 @@ const genApplyPin = (id: string, day: string, startMin: number, durations = over
   paintRoute(lastDays);
 };
 
-// Body drag pins the stop to a time; top-edge pins start + length; bottom-edge
-// sets the length (re-resolving the next stop if this one is pinned).
+const genBreakGapAt = (day: string, startMin: number): string | undefined => {
+  const stops = lastDays.find((d) => d.day === day)?.stops ?? [];
+  const sched = buildDaySchedule(stops, mode, genTimes, overrides, {}, genDayWindow(day).startMin);
+  let afterId = sched[0]?.id;
+  for (const s of sched) if (s.startMin <= startMin) afterId = s.id;
+  return afterId;
+};
+
+// A break moves between gaps or changes length; a real stop's body pins to a
+// time, top-edge pins start + length, bottom-edge sets the length.
 const timelineDrag = makeTimelineDrag((commit) => {
+  if (commit.id.startsWith('break:')) {
+    const oldAfter = commit.id.slice(6);
+    if (commit.kind === 'move') {
+      const dur = genPauses[oldAfter] ?? 60;
+      const newAfter = genBreakGapAt(commit.day, commit.startMin) ?? oldAfter;
+      const next = { ...genPauses };
+      delete next[oldAfter];
+      next[newAfter] = (next[newAfter] ?? 0) + dur;
+      genPauses = next;
+    } else if (commit.kind === 'resize') {
+      genPauses = { ...genPauses, [oldAfter]: Math.max(15, commit.durMin) };
+    }
+    persist(PAUSES_KEY, genPauses);
+    paintRoute(lastDays);
+    return;
+  }
   if (commit.kind === 'move') genApplyPin(commit.id, commit.day, commit.startMin);
   else if (commit.kind === 'resize-top') genApplyPin(commit.id, commit.day, commit.startMin, { ...overrides, [commit.id]: commit.durMin });
   else {
@@ -427,4 +451,5 @@ export const initRoute = (): void => {
   document.addEventListener('pointerdown', timelineDrag.onPointerDown);
   document.addEventListener('pointermove', timelineDrag.onPointerMove);
   document.addEventListener('pointerup', timelineDrag.onPointerUp);
+  document.addEventListener('pointercancel', timelineDrag.onPointerCancel);
 };

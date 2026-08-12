@@ -1,8 +1,8 @@
-// Shared vertical-timeline drag (the "Teams-calendar" interaction). Three zones:
-// the BODY moves the stop to any time (its neighbours glide aside live to show
-// the drop), the TOP edge shrinks/grows from the top (start moves), the BOTTOM
-// edge from the bottom (end moves). On release the time/duration is committed and
-// the schedule reflows (resolving the next stop). A left swipe requests deletion.
+// Shared vertical-timeline drag (the "Teams-calendar" interaction). The block
+// BODY stays scrollable (touch-action: pan-y) so the page still scrolls under a
+// finger; you MOVE a block by its grip, RESIZE from the top/bottom edges, and
+// DELETE with a left swipe. On release the time/duration is committed and the
+// schedule reflows. On a mouse, dragging the body also moves (no scroll to lose).
 import { PX_PER_MIN } from './route-timeline.ts';
 import { snapMinutes } from '../../lib/favorites/day-schedule.ts';
 
@@ -19,6 +19,7 @@ type Drag = Readonly<{
   el: HTMLElement;
   axis: HTMLElement;
   oi: number;
+  mouse: boolean;
 }>;
 
 export type TimelineCommit = (
@@ -37,6 +38,7 @@ export interface TimelineDrag {
   readonly onPointerDown: (event: PointerEvent) => void;
   readonly onPointerMove: (event: PointerEvent) => void;
   readonly onPointerUp: () => void;
+  readonly onPointerCancel: () => void;
 }
 
 const AXIS_MIN = 6; // px before a gesture's axis is decided
@@ -47,8 +49,6 @@ const siblings = (axis: HTMLElement): readonly HTMLElement[] => [...axis.querySe
 
 const centre = (b: HTMLElement): number => (Number.parseFloat(b.style.top) || 0) + b.offsetHeight / 2;
 
-// How many OTHER blocks have their centre above the dragged block's dragged
-// centre — used only for the live "make room" preview.
 const reorderIndex = (drag: Drag, dy: number): number => {
   const dragged = centre(drag.el) + dy;
   return siblings(drag.axis).filter((b) => b !== drag.el && centre(b) < dragged).length;
@@ -82,7 +82,7 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     const target = event.target instanceof Element ? event.target : undefined;
     const block = target?.closest<HTMLElement>('.tl-block');
     if (!block) return;
-    if (target?.closest('[data-tl-del]')) return; // let the delete button's click through
+    if (target?.closest('button')) return; // let the ✕/＋ buttons take their own clicks
     const axis = block.closest<HTMLElement>('.tl-axis') ?? block;
     drag = {
       id: block.dataset['tlId'] ?? '',
@@ -95,9 +95,11 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
       el: block,
       axis,
       oi: siblings(axis).indexOf(block),
+      mouse: event.pointerType === 'mouse',
     };
     const handle = target?.closest<HTMLElement>('[data-tl-resize]');
-    gesture = handle ? (handle.dataset['tlResize'] === 'top' ? 'resize-top' : 'resize-bottom') : 'pending';
+    const grip = target?.closest('[data-tl-grip]');
+    gesture = handle ? (handle.dataset['tlResize'] === 'top' ? 'resize-top' : 'resize-bottom') : grip ? 'move' : 'pending';
     dragStart = drag.origStart;
     dragDur = drag.origDur;
     swipeDx = 0;
@@ -107,7 +109,9 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
       /* no active pointer — the document listeners still track the gesture */
     }
     block.classList.add('tl-block--dragging');
-    event.preventDefault();
+    // Only claim the touch (block scrolling) for a deliberate move/resize; leave
+    // the body free so a vertical swipe scrolls the page.
+    if (gesture !== 'pending') event.preventDefault();
   };
 
   const onPointerMove = (event: PointerEvent): void => {
@@ -116,8 +120,12 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     const dx = event.clientX - d.startX;
     const dy = event.clientY - d.startY;
     if (gesture === 'pending') {
+      // Horizontal → swipe-to-delete. Vertical on the body → a move only with a
+      // mouse; on touch the browser scrolls (pan-y) so we don't hijack it.
       if (Math.abs(dx) > AXIS_MIN && Math.abs(dx) > Math.abs(dy)) gesture = 'swipe';
-      else if (Math.abs(dy) > AXIS_MIN) gesture = 'move';
+      else if (d.mouse && Math.abs(dy) > AXIS_MIN) gesture = 'move';
+      else return;
+      event.preventDefault();
     }
     if (gesture === 'swipe') {
       swipeDx = Math.min(0, dx);
@@ -129,7 +137,6 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
       dragDur = Math.max(MIN_DUR, snapMinutes(d.origDur + dy / PX_PER_MIN));
       d.el.style.height = `${Math.max(20, dragDur * PX_PER_MIN)}px`;
     } else if (gesture === 'resize-top') {
-      // The top edge follows the finger: start moves, end stays put.
       dragStart = snapMinutes(Math.min(d.origStart + dy / PX_PER_MIN, d.origStart + d.origDur - MIN_DUR));
       dragDur = d.origStart + d.origDur - dragStart;
       d.el.style.top = `${d.origTop + (dragStart - d.origStart) * PX_PER_MIN}px`;
@@ -142,32 +149,30 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
     }
   };
 
+  const reset = (): void => {
+    const finished = drag;
+    if (!finished) return;
+    drag = undefined;
+    finished.el.classList.remove('tl-block--dragging', 'tl-block--will-delete');
+    clearPreview(finished);
+    finished.el.style.transform = '';
+  };
+
   const onPointerUp = (): void => {
     const finished = drag;
     if (!finished) return;
     const kind = gesture;
-    drag = undefined;
-    finished.el.classList.remove('tl-block--dragging');
+    reset();
     if (kind === 'swipe') {
-      finished.el.style.transform = '';
-      finished.el.classList.remove('tl-block--will-delete');
       if (swipeDx < -SWIPE_TRIGGER) options.onSwipeDelete?.(finished.id);
-      return;
-    }
-    if (kind === 'resize-bottom') {
+    } else if (kind === 'resize-bottom') {
       commit({ kind: 'resize', id: finished.id, day: finished.day, durMin: dragDur });
-      return;
-    }
-    if (kind === 'resize-top') {
+    } else if (kind === 'resize-top') {
       commit({ kind: 'resize-top', id: finished.id, day: finished.day, startMin: dragStart, durMin: dragDur });
-      return;
-    }
-    if (kind === 'move') {
-      clearPreview(finished);
-      finished.el.style.transform = '';
+    } else if (kind === 'move') {
       commit({ kind: 'move', id: finished.id, day: finished.day, startMin: dragStart });
     }
   };
 
-  return { onPointerDown, onPointerMove, onPointerUp };
+  return { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: reset };
 };

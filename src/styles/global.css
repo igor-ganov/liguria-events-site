@@ -633,26 +633,37 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 /* Timeline: a vertical clock axis with absolutely-positioned event blocks. */
 .tl-axis {
   position: relative; margin: 0.3rem 0 1.2rem; padding-left: 3.4rem;
-  border-left: 1px solid var(--line); touch-action: pan-x;
+  border-left: 1px solid var(--line); touch-action: pan-y; /* the page must still scroll under a finger */
 }
 .tl-hour { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line); }
 .tl-hour > span { position: absolute; left: 0; top: -0.6em; width: 3rem; text-align: right; font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tl-block {
-  position: absolute; left: 3.4rem; right: 0; box-sizing: border-box;
-  padding: 0.3rem 0.5rem 0.35rem 0.6rem; border-radius: var(--radius-sm);
+  position: absolute; left: 3.4rem; right: 1.7rem; box-sizing: border-box;
+  padding: 0.3rem 0.5rem 0.35rem 1.4rem; border-radius: var(--radius-sm);
   background: hsl(var(--hue, 30) 60% 94%); border: 1px solid hsl(var(--hue, 30) 45% 78%);
   border-left: 3px solid hsl(var(--hue, 30) 65% 52%); color: var(--ink);
-  overflow: hidden; cursor: grab; touch-action: none; user-select: none;
+  overflow: hidden; touch-action: pan-y; user-select: none;
   font-size: 0.8rem; line-height: 1.25; box-shadow: var(--shadow-sm);
   transition: box-shadow 0.12s ease, transform 0.16s cubic-bezier(0.2, 0, 0, 1);
 }
 .tl-block:hover { box-shadow: var(--shadow); }
+/* Move grip — the only place that hijacks touch to drag (the body scrolls). */
+.tl-grip {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 1.25rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab; touch-action: none; color: var(--muted); opacity: 0.5;
+  font-size: 0.7rem; letter-spacing: -1px;
+}
+.tl-grip:active { cursor: grabbing; }
+.tl-block:hover .tl-grip { opacity: 0.9; }
+/* A break: a neutral, movable/resizable block. */
+.tl-break { background: hsl(220 12% 90%); border-color: hsl(220 12% 78%); border-left-color: hsl(220 10% 60%); color: var(--muted); font-weight: 600; }
 /* The block being dragged follows the finger 1:1 (no transition); its neighbours
    keep the transition above so they glide aside to open the drop slot. */
 .tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow); opacity: 0.97; transition: box-shadow 0.12s ease; }
 /* Travel between two stops, as a small mode-aware chip centred in the gap. */
 .tl-gap {
-  position: absolute; left: 3.4rem; right: 0; transform: translateY(-50%);
+  position: absolute; left: 3.4rem; right: 1.7rem; transform: translateY(-50%);
   text-align: center; font-size: 0.68rem; color: var(--muted); pointer-events: none;
   font-variant-numeric: tabular-nums; transition: opacity 0.12s ease;
 }
@@ -680,21 +691,20 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-resize--top::after { top: 3px; }
 /* Pinned to a specific time — a doubled left edge marks it. */
 .tl-block--pinned { border-left-style: double; border-left-width: 5px; }
-/* The "+" droplet in a gap: drops a standard 1-hour break; grows on hover. */
+/* The "+" teardrop in the right gutter, dripping from the slot between blocks;
+   drops a standard 1-hour break, grows on hover. */
 .tl-add-pause {
-  position: absolute; right: 0.15rem; transform: translateY(-50%); z-index: 6;
-  width: 1.15rem; height: 1.15rem; padding: 0; border-radius: 999px;
+  position: absolute; right: 0.1rem; z-index: 6;
+  width: 1.3rem; height: 1.3rem; padding: 0; border-radius: 0 50% 50% 50%;
   border: 1px solid hsl(var(--hue, 30) 45% 62%); background: var(--surface); color: var(--ink);
-  font-size: 0.85rem; line-height: 1; cursor: pointer; opacity: 0.3;
+  font-size: 0.82rem; line-height: 1; cursor: pointer; opacity: 0.4;
   display: flex; align-items: center; justify-content: center;
   transition: opacity 0.12s ease, transform 0.1s ease, background 0.12s ease;
 }
 .tl-add-pause:hover, .tl-add-pause:focus-visible {
-  opacity: 1; transform: translateY(-50%) scale(1.25); outline: none;
+  opacity: 1; transform: scale(1.2); outline: none;
   background: hsl(var(--hue, 30) 70% 50%); color: var(--on-accent); border-color: transparent;
 }
-/* A dropped pause; click to remove it. */
-.tl-gap--pause { color: hsl(var(--hue, 30) 62% 52%); font-weight: 600; cursor: pointer; pointer-events: auto; }
 .tl-del {
   position: absolute; top: 2px; right: 2px; width: 1.05rem; height: 1.05rem; padding: 0;
   display: inline-flex; align-items: center; justify-content: center; border: none; border-radius: 999px;
@@ -717,9 +727,12 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 @media (prefers-color-scheme: dark) {
   .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 30% 38%); border-left-color: hsl(var(--hue, 30) 45% 55%); }
   .tl-block--offschedule { background: hsl(2 40% 28%); border-color: hsl(2 45% 45%); border-left-color: #e5484d; }
+  .tl-break { background: hsl(220 10% 30%); border-color: hsl(220 10% 42%); border-left-color: hsl(220 8% 58%); }
 }
 :root[data-theme='dark'] .tl-block { background: hsl(var(--hue, 30) 30% 24%); border-color: hsl(var(--hue, 30) 30% 38%); border-left-color: hsl(var(--hue, 30) 45% 55%); }
 :root[data-theme='dark'] .tl-block--offschedule { background: hsl(2 40% 28%); border-color: hsl(2 45% 45%); border-left-color: #e5484d; }
+:root[data-theme='dark'] .tl-break { background: hsl(220 10% 30%); border-color: hsl(220 10% 42%); border-left-color: hsl(220 8% 58%); }
+:root[data-theme='light'] .tl-break { background: hsl(220 12% 90%); border-color: hsl(220 12% 78%); border-left-color: hsl(220 10% 60%); }
 :root[data-theme='light'] .tl-block { background: hsl(var(--hue, 30) 60% 94%); border-color: hsl(var(--hue, 30) 45% 78%); border-left-color: hsl(var(--hue, 30) 65% 52%); }
 :root[data-theme='light'] .tl-block--offschedule { background: hsl(2 75% 95%); border-color: hsl(2 70% 82%); border-left-color: #e5484d; }
 
