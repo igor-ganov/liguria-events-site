@@ -643,8 +643,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   background: hsl(var(--hue, 30) 60% 94%); border: 1px solid hsl(var(--hue, 30) 45% 78%);
   border-left: 3px solid hsl(var(--hue, 30) 65% 52%); color: var(--ink);
   overflow: hidden; touch-action: pan-y; user-select: none;
+  -webkit-user-drag: none; -webkit-touch-callout: none;
   font-size: 0.8rem; line-height: 1.25; box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.12s ease, transform 0.16s cubic-bezier(0.2, 0, 0, 1);
+  transition: box-shadow 0.12s ease;
 }
 .tl-block:hover { box-shadow: var(--shadow); }
 /* Move grip — the only place that hijacks touch to drag (the body scrolls). */
@@ -653,6 +654,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   display: flex; align-items: center; justify-content: center;
   cursor: grab; touch-action: none; color: var(--muted); opacity: 0.5;
   font-size: 0.7rem; letter-spacing: -1px;
+  -webkit-user-drag: none; -webkit-touch-callout: none;
 }
 .tl-grip:active { cursor: grabbing; }
 .tl-block:hover .tl-grip { opacity: 0.9; }
@@ -660,7 +662,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .tl-break { background: hsl(220 12% 90%); border-color: hsl(220 12% 78%); border-left-color: hsl(220 10% 60%); color: var(--muted); font-weight: 600; }
 /* The block being dragged follows the finger 1:1 (no transition); its neighbours
    keep the transition above so they glide aside to open the drop slot. */
-.tl-block--dragging { cursor: grabbing; z-index: 5; box-shadow: var(--shadow); opacity: 0.97; transition: box-shadow 0.12s ease; }
+/* The dragged block floats OPAQUE and on top, so it never ghosts through what it
+   passes over; neighbours don't move (the reorder lands on release). */
+.tl-block--dragging { cursor: grabbing; z-index: 20; box-shadow: var(--shadow); opacity: 1; }
 /* Travel between two stops, as a small mode-aware chip centred in the gap. */
 .tl-gap {
   position: absolute; left: 3.4rem; right: 1.7rem; transform: translateY(-50%);

@@ -54,21 +54,8 @@ const reorderIndex = (drag: Drag, dy: number): number => {
   return siblings(drag.axis).filter((b) => b !== drag.el && centre(b) < dragged).length;
 };
 
-// Slide the neighbours between the block's slot and its target to open the gap.
-const previewShift = (drag: Drag, ti: number): void => {
-  const shift = drag.el.offsetHeight;
-  siblings(drag.axis).forEach((b, i) => {
-    if (b === drag.el) return;
-    const ty = ti > drag.oi && i > drag.oi && i <= ti ? -shift : ti < drag.oi && i >= ti && i < drag.oi ? shift : 0;
-    b.style.transform = ty ? `translateY(${ty}px)` : '';
-  });
-};
-
 const clearPreview = (drag: Drag): void => {
   drag.axis.classList.remove('tl-axis--dragging');
-  siblings(drag.axis).forEach((b) => {
-    if (b !== drag.el) b.style.transform = '';
-  });
 };
 
 export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOptions = {}): TimelineDrag => {
@@ -144,11 +131,12 @@ export const makeTimelineDrag = (commit: TimelineCommit, options: TimelineDragOp
       d.el.style.top = `${d.origTop + (dragStart - d.origStart) * PX_PER_MIN}px`;
       d.el.style.height = `${Math.max(20, dragDur * PX_PER_MIN)}px`;
     } else if (gesture === 'move') {
+      // The dragged block floats with the finger; neighbours stay put and the
+      // reorder is applied cleanly on release (a live shift only ghosted).
       moveDy = dy;
       dragStart = Math.max(0, snapMinutes(d.origStart + dy / PX_PER_MIN));
       d.el.style.transform = `translateY(${dy}px)`;
       d.axis.classList.add('tl-axis--dragging');
-      previewShift(d, reorderIndex(d, dy));
     }
   };
 

@@ -55,7 +55,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
           : '';
       const pinned = payload.times[it.id] !== undefined;
       return (
-        `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}${pinned ? ' tl-block--pinned' : ''}" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
+        `<div class="tl-block${it.offSchedule ? ' tl-block--offschedule' : ''}${pinned ? ' tl-block--pinned' : ''}" draggable="false" data-tl-id="${esc(it.id)}" data-tl-day="${esc(day.day)}" ` +
         `data-tl-start="${it.startMin}" data-tl-dur="${dur}" style="top:${top}px;height:${h}px">` +
         `<span class="tl-resize tl-resize--top no-print" data-tl-resize="top" aria-hidden="true"></span>` +
         `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">⠿</span>` +
@@ -90,7 +90,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
         const bTop = (bStart - start) * PX_PER_MIN;
         const bH = Math.max(24, pauseMin * PX_PER_MIN);
         parts.push(
-          `<div class="tl-block tl-break" data-tl-id="break:${esc(prevId)}" data-tl-day="${esc(day.day)}" data-tl-start="${bStart}" data-tl-dur="${pauseMin}" style="top:${bTop}px;height:${bH}px">` +
+          `<div class="tl-block tl-break" draggable="false" data-tl-id="break:${esc(prevId)}" data-tl-day="${esc(day.day)}" data-tl-start="${bStart}" data-tl-dur="${pauseMin}" style="top:${bTop}px;height:${bH}px">` +
             `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">⠿</span>` +
             `<span class="tl-time">⏸ ${formatDuration(pauseMin)}</span>` +
             (editable ? `<button type="button" class="tl-del no-print" data-clear-pause data-after="${esc(prevId)}" data-day="${esc(day.day)}" aria-label="Remove break">✕</button>` : '') +
