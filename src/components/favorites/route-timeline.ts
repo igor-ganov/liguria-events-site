@@ -11,7 +11,7 @@ import { effectiveDayHours, readGlobalDayHours } from '../../lib/favorites/day-h
 import type { RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
-import { dayLabel, esc } from './route-render.ts';
+import { dayLabel, esc, gmapsButton } from './route-render.ts';
 import type { Payload } from './route-payload.ts';
 
 export const PX_PER_MIN = 0.9;
@@ -105,7 +105,7 @@ const dayHtml = (day: RouteDay, payload: Payload, byId: ReadonlyMap<string, Rout
     })
     .join('');
   return (
-    `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}${hoursCtl}</h3>` +
+    `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}${gmapsButton(day, payload.mode)}${hoursCtl}</h3>` +
     `<div class="tl-axis" data-tl-axis style="height:${height}px">${hourLines(start, end)}${gaps}${blocks}</div></section>`
   );
 };

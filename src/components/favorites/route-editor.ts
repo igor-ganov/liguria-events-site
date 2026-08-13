@@ -10,7 +10,7 @@ import type { FavPoi } from '../../lib/favorites/fav-pois.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
-import { baseLegs, dayLabel, esc, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
+import { baseLegs, dayLabel, esc, gmapsButton, makeMapDrawer, renderLeg, stopBody } from './route-render.ts';
 import type { LngLat, Ui } from './route-render.ts';
 import { applyLegCache, fillLegCache } from '../../lib/favorites/enrich-route.ts';
 import type { RoutedLeg } from '../../lib/favorites/enrich-route.ts';
@@ -143,7 +143,7 @@ const dayHtml = (day: RouteDay, lang: Locale, ui: Ui): string => {
     `<button type="button" class="chip" data-pick-base data-day="${esc(day.day)}"${pickMode?.scope === 'day' && pickMode.kind === 'base' && pickMode.day === day.day ? ' aria-pressed="true"' : ''}>🏠 ${esc(ui.route.dayBase)}</button>` +
     `<button type="button" class="chip" data-pick-final data-day="${esc(day.day)}"${pickMode?.scope === 'day' && pickMode.kind === 'final' && pickMode.day === day.day ? ' aria-pressed="true"' : ''}>🏁 ${esc(ui.route.dayFinal)}</button>` +
     `</div>`;
-  return `<section class="route-day" data-day="${esc(day.day)}"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul>${dayBaseCtl}${add}</section>`;
+  return `<section class="route-day" data-day="${esc(day.day)}"><h3>${esc(dayLabel(day.day, lang))}${gmapsButton(day, payload.mode, baseOf(day.day))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul>${dayBaseCtl}${add}</section>`;
 };
 
 const viewToggle = (ui: Ui): string =>

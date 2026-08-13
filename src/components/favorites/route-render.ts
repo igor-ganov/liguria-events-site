@@ -10,6 +10,7 @@ import { darkStyle } from '../../lib/map/styles/dark-typed.ts';
 import type { Leg, LegSegment, Mode, RouteDay, RouteStop } from '../../lib/favorites/build-route.ts';
 import { legTo } from '../../lib/favorites/base-point.ts';
 import type { DayBase } from '../../lib/favorites/base-point.ts';
+import { googleMapsUrl } from '../../lib/favorites/google-maps.ts';
 import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import type { readUiIsland } from '../shared/read-ui-island.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
@@ -93,6 +94,15 @@ export const stopBody = (event: RouteStop, lang: Locale, overrides: Durations): 
 const stopHtml = (event: RouteStop, n: number, lang: Locale, overrides: Durations): string =>
   `<li class="route-stop"><span class="route-num">${n}</span>${stopBody(event, lang, overrides)}</li>`;
 
+/** The "open the day in Google Maps" button (English — the route page is
+ *  English-only); empty when the day has too few located stops to route. */
+export const gmapsButton = (day: RouteDay, mode: Mode, db?: DayBase): string => {
+  const url = googleMapsUrl(day, mode, db);
+  return url === undefined
+    ? ''
+    : `<a class="route-gmaps no-print" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Open this day as a route in Google Maps">↗ Google Maps</a>`;
+};
+
 export const renderItinerary = (
   days: readonly RouteDay[],
   mode: Mode,
@@ -112,7 +122,7 @@ export const renderItinerary = (
         })
         .join('');
       const bl = baseLegs(day, baseOf?.(day.day), mode, ui);
-      return `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul></section>`;
+      return `<section class="route-day"><h3>${esc(dayLabel(day.day, lang))}${gmapsButton(day, mode, baseOf?.(day.day))}</h3><ul class="route-list">${bl.before}${rows}${bl.after}</ul></section>`;
     })
     .join('');
 };
