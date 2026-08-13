@@ -56,6 +56,22 @@ const crawlerAddress =
   contacts?.address === undefined && event.a !== undefined && event.a !== event.v
     ? event.a
     : undefined;
+// Dated programme (sessions) of an umbrella event: each concrete occurrence on
+// its own night. Already trimmed to upcoming dates upstream; sort defensively.
+const sessionLocale: Record<Locale, string> = { en: 'en-GB', it: 'it-IT', ru: 'ru-RU' };
+const programmeLabel: Record<Locale, string> = { en: 'Programme', it: 'Programma', ru: 'Программа' };
+const sessionDateFmt = new Intl.DateTimeFormat(sessionLocale[lang], {
+  weekday: 'short',
+  day: '2-digit',
+  month: 'short',
+});
+const programme = [...(event.p ?? [])]
+  .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time ?? '').localeCompare(b.time ?? '')))
+  .map((session) => ({
+    date: sessionDateFmt.format(new Date(`${session.date}T12:00:00`)),
+    time: session.time,
+    title: session.title,
+  }));
 ---
 
 <Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)} image={heroImage}>
@@ -163,6 +179,22 @@ const crawlerAddress =
       )}
     </dl>
     {desc !== '' && <p class="event-desc">{desc}</p>}
+    {
+      programme.length > 0 && (
+        <section class="event-programme">
+          <h2>{programmeLabel[lang]}</h2>
+          <ul>
+            {programme.map((session) => (
+              <li>
+                <span class="prog-date">{session.date}</span>
+                {session.time && <span class="prog-time">{session.time}</span>}
+                {session.title && <span class="prog-title">{session.title}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
     {
       mapEmbedUrl && (
         <figure class="event-map">
