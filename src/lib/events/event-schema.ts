@@ -15,6 +15,14 @@ const LocalizedTextSchema = Schema.Struct({
   ru: Schema.String,
 });
 
+/** One dated occurrence inside an umbrella event — the specific concert on a
+ *  given night of a months-long run. */
+const SessionSchema = Schema.Struct({
+  date: Schema.String,
+  time: Schema.optional(Schema.String),
+  title: Schema.optional(Schema.String),
+});
+
 /** Compact event as served by the worker's /events.json (AC-1.2):
  *  c=categories (1..3) img=cover d=AI summary l=other sources' links. */
 export const EventSchema = Schema.Struct({
@@ -37,6 +45,9 @@ export const EventSchema = Schema.Struct({
   img: Schema.optional(Schema.String),
   /** Attendance length in minutes, when the source stated one (AC-duration). */
   du: Schema.optional(Schema.Number),
+  /** Programme: the dated occurrences inside an umbrella event, so the feed can
+   *  show the specific one on each day rather than the whole run. */
+  p: Schema.optional(Schema.Array(SessionSchema)),
   d: Schema.optional(LocalizedTextSchema),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
   x: Schema.optional(Schema.Boolean),
@@ -46,3 +57,4 @@ export const EventSchema = Schema.Struct({
 
 export type CompactEvent = Schema.Schema.Type<typeof EventSchema>;
 export type SourceLink = Schema.Schema.Type<typeof SourceLinkSchema>;
+export type Session = Schema.Schema.Type<typeof SessionSchema>;

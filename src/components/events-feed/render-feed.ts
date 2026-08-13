@@ -7,6 +7,7 @@ import { filterByDateRange } from '../../lib/events/filter-by-date-range.ts';
 import { filterFreeOnly } from '../../lib/events/filter-free-only.ts';
 import { filterGemsOnly } from '../../lib/events/filter-gems-only.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
+import { expandSessions } from '../../lib/events/expand-sessions.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import { renderChips } from './render-chips.ts';
 import { renderDates } from './render-dates.ts';
@@ -29,7 +30,7 @@ export const renderFeed = (host: FeedHost): TemplateResult => {
   const filtered = filterGemsOnly(host.gemsOnly)(
     filterFreeOnly(host.freeOnly)(
       filterByCategories(new Set(host.selected))(
-        filterByDateRange(host.from, host.to)(host.events),
+        filterByDateRange(host.from, host.to)(expandSessions(host.events, host.today)),
       ),
     ),
   );

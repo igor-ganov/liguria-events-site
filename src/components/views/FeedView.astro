@@ -9,6 +9,7 @@ import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { groupByDay } from '../../lib/events/group-by-day.ts';
 import { byUniqueness } from '../../lib/events/by-uniqueness.ts';
+import { expandSessions } from '../../lib/events/expand-sessions.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
 import { cityName } from '../../lib/region/city-name.ts';
 import { regionName } from '../../lib/region/region-name.ts';
@@ -30,7 +31,7 @@ const events = city ? regionEvents.filter((event) => event.ct === city) : region
 // Within each day, lead with the unique, time-pinned events (short span) and
 // sink the long runs. The server emits this order so the default "By date" sort
 // is a no-op on first load — no reflow — while keeping the curation.
-const groups = [...groupByDay(today)(events).entries()].map(
+const groups = [...groupByDay(today)(expandSessions(events, today)).entries()].map(
   ([day, dayEvents]) => [day, [...dayEvents].sort(byUniqueness)] as const,
 );
 const heading = dayHeading(ui);
