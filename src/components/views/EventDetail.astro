@@ -13,6 +13,7 @@ import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
 import { resized } from '../../lib/img/resized.ts';
 import { eventGallery } from '../../lib/events/event-gallery.ts';
+import { descriptionArticleHtml, descriptionPlain } from '../events/description-article.ts';
 import { ticketUrl } from '../../lib/events/ticket-link.ts';
 import { HEART } from '../../lib/favorites/fav-button.ts';
 import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
@@ -35,6 +36,10 @@ const region = regionOf(event);
 const ui = await uiOf(lang);
 const links = eventLinks(event);
 const desc = descriptionOf(lang)(event);
+// The description is light Markdown (lead paragraph + labelled sections). The
+// body renders it as a structured article; meta/SEO gets the plain-text form.
+const descHtml = descriptionArticleHtml(desc);
+const descMeta = descriptionPlain(desc);
 const title = titleOf(lang)(event);
 const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
 const query = mapQuery(event);
@@ -74,7 +79,7 @@ const programme = [...(event.p ?? [])]
   }));
 ---
 
-<Layout lang={lang} region={region} title={title} description={desc === '' ? title : desc} path={eventPath(event.id)} image={heroImage}>
+<Layout lang={lang} region={region} title={title} description={descMeta === '' ? title : descMeta} path={eventPath(event.id)} image={heroImage}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
@@ -178,7 +183,7 @@ const programme = [...(event.p ?? [])]
         </div>
       )}
     </dl>
-    {desc !== '' && <p class="event-desc">{desc}</p>}
+    {desc !== '' && <div class="event-desc" set:html={descHtml} />}
     {
       programme.length > 0 && (
         <section class="event-programme">

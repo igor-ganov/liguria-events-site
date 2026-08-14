@@ -5,6 +5,7 @@ import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { branch } from '../../lib/branch.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
+import { descriptionPlain } from '../events/description-article.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -36,7 +37,7 @@ const renderThumb = (event: CompactEvent): TemplateResult =>
 
 /** The whole mini-card links to the (localized) event page. */
 export const renderMiniCard = (event: CompactEvent, ui: Ui, lang: Locale): TemplateResult => {
-  const desc = descriptionOf(lang)(event);
+  const desc = descriptionPlain(descriptionOf(lang)(event));
   return html`
     <li>
       <a class="mini-card" href=${localizedUrl(lang, eventPath(event.id))}>

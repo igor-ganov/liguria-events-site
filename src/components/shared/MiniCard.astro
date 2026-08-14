@@ -4,6 +4,7 @@ import { eventPath } from '../../lib/event-path.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
+import { descriptionPlain } from '../events/description-article.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import { primaryCategory } from '../../lib/events/primary-category.ts';
 import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
@@ -13,7 +14,7 @@ import type { Ui } from '../../lib/i18n/ui-schema.ts';
 
 type Props = Readonly<{ event: CompactEvent; ui: Ui; lang: Locale }>;
 const { event, ui, lang } = Astro.props;
-const desc = descriptionOf(lang)(event);
+const desc = descriptionPlain(descriptionOf(lang)(event));
 ---
 
 <a class="mini-card" href={localizedUrl(lang, eventPath(event.id))}>

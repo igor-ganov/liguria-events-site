@@ -1072,6 +1072,14 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
    (resolved data-theme, so 'system' follows the OS too). */
 :root[data-theme='dark'] .event-map iframe { filter: invert(0.92) hue-rotate(180deg); }
 .event-desc { font-size: 1.02rem; }
+.event-desc > :first-child { margin-top: 0; }
+.event-desc p { margin: 0 0 0.85rem; line-height: 1.6; }
+.event-desc .desc-h {
+  margin: 1.3rem 0 0.5rem; font-size: 0.82rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent);
+}
+.event-desc ul { margin: 0 0 0.9rem; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.event-desc li { line-height: 1.5; }
 .event-programme { margin-top: 1.3rem; }
 .event-programme h2 {
   font-size: 0.95rem; color: var(--ink-2);
