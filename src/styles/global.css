@@ -1071,16 +1071,55 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 /* Google's embed has no dark mode; invert + hue-rotate to match a dark theme
    (resolved data-theme, so 'system' follows the OS too). */
 :root[data-theme='dark'] .event-map iframe { filter: invert(0.92) hue-rotate(180deg); }
-.event-desc { font-size: 1.02rem; }
-.event-desc > :first-child { margin-top: 0; }
-.event-desc p { margin: 0 0 0.85rem; line-height: 1.6; }
-.event-desc .desc-h {
-  margin: 1.3rem 0 0.5rem; font-size: 0.82rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent);
+/* ── Event description as a designed article ─────────────────────────── */
+.event-article { font-size: 1.02rem; }
+.event-article > :first-child { margin-top: 0; }
+
+/* Lead: the opening paragraph reads a notch larger and calmer than the body. */
+.desc-lead { font-size: 1.1rem; line-height: 1.62; color: var(--ink); }
+.desc-lead p { margin: 0 0 0.7rem; }
+.desc-lead > :last-child { margin-bottom: 0; }
+
+.desc-sec { margin-top: 1.7rem; }
+/* Section header: an accent icon badge, an uppercase label, and a hairline
+   rule that runs to the end of the row — an editorial divider. */
+.desc-h { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.7rem; }
+.desc-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.desc-h-ic {
+  flex: none; display: inline-grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
 }
-.event-desc ul { margin: 0 0 0.9rem; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.3rem; }
-.event-desc li { line-height: 1.5; }
-.event-programme { margin-top: 1.3rem; }
+.desc-h-ic svg { display: block; }
+.desc-h-tx {
+  font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--ink-2); white-space: nowrap;
+}
+.desc-body p { margin: 0 0 0.7rem; line-height: 1.6; color: var(--ink); }
+.desc-body > :last-child { margin-bottom: 0; }
+
+/* Bullet lists with accent dot markers instead of default discs. */
+.desc-list { list-style: none; margin: 0.1rem 0 0.7rem; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
+.desc-list li { position: relative; padding-left: 1.15rem; line-height: 1.5; color: var(--ink); }
+.desc-list li::before {
+  content: ''; position: absolute; left: 0.15rem; top: 0.62em;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+}
+
+/* Practical sections stand out as highlighted callout cards. */
+.desc-sec[data-sec='tickets'] .desc-body,
+.desc-sec[data-sec='getting-there'] .desc-body,
+.desc-sec[data-sec='when'] .desc-body {
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+}
+.desc-sec[data-sec='tickets'] .desc-list,
+.desc-sec[data-sec='getting-there'] .desc-list,
+.desc-sec[data-sec='when'] .desc-list { margin-bottom: 0; }
+
+.event-programme { margin-top: 1.5rem; }
 .event-programme h2 {
   font-size: 0.95rem; color: var(--ink-2);
   text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.5rem;
