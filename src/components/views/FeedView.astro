@@ -91,7 +91,7 @@ const siteJsonLd = JSON.stringify({
     <button class="chip chip--clear" data-feed-clear hidden>✕ {ui.chips.clear}</button>
   </div>
 
-  <div data-feed-list data-city={city ?? ''}>
+  <div data-feed-list data-city={city ?? ''} data-today={today}>
     {groups.map(([day, events]) => (
       <section class="feed-group" data-day={day}>
         <h3>{heading(day)}</h3>
