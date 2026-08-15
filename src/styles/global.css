@@ -965,6 +965,13 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .map-canvas .maplibregl-ctrl-group button:hover { background: var(--surface-2, rgba(127, 127, 127, 0.15)); }
 .feed-group h3 { margin: 1.4rem 0 0.5rem; font-size: 0.95rem; color: var(--ink-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .feed-list { list-style: none; margin: 0; padding: 0; }
+/* The region feed renders every upcoming event (~1000+ cards). content-visibility
+   lets the browser skip layout/paint for off-screen cards — cutting main-thread
+   work and speeding first render — while the nodes stay in the DOM so the
+   client search/filter/sort still see them. contain-intrinsic-size reserves the
+   card's height so the scrollbar and CLS stay stable; `auto` then remembers the
+   real size once a card has rendered. Same technique as .lm-card. */
+.feed-list > li { content-visibility: auto; contain-intrinsic-size: auto 116px; }
 .feed-empty { color: var(--ink-2); }
 
 /* ══ calendar ═══════════════════════════════════════════════════════ */
