@@ -43,7 +43,11 @@ const description = ui.seo.map.replace('{place}', placeName);
       <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
     </div>
   </div>
-  <div class="map-canvas" data-map-canvas>
+  <!-- data-loading starts true in the MARKUP so the loading skeleton shows from
+       first paint — the maplibre bundle (~1.1MB) downloads before the script
+       runs, and without this the canvas sat empty (felt frozen) for that whole
+       time. The script clears it once the map is up (or soft-reveals at 9s). -->
+  <div class="map-canvas" data-map-canvas data-loading="true">
     <div class="map-retry" data-map-retry hidden>
       <p>{ui.map.failed}</p>
       <button type="button" data-map-reload>{ui.map.retry}</button>
