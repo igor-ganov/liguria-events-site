@@ -354,5 +354,8 @@ export const initFeed = (): void => {
 
   apply();
   reorder();
+  // The list was hidden up front on a filtered URL (see Layout.astro) to avoid
+  // flashing the unfiltered static list; it is now filtered, so reveal it.
+  document.documentElement.classList.remove('feed-filtering');
   void augment(page.ui, page.lang, icons, today);
 };

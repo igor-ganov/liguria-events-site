@@ -752,6 +752,12 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
  * controls stripped so the itinerary prints clean on white paper. */
 .route-page-actions { margin: 0 0 1rem; }
 /* Top navigation progress bar (ClientRouter lifecycle drives it from Layout). */
+/* Hide the feed list while a URL filter is pending its first client apply, so
+   the unfiltered static list never flashes before the filter takes effect. The
+   cards keep their layout (visibility, not display), and init-feed reveals the
+   list the moment it has filtered — see the no-flash script in Layout.astro. */
+html.feed-filtering [data-feed-list] { visibility: hidden; }
+
 #nav-progress {
   position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 200;
   background: var(--accent); transform: scaleX(0); transform-origin: 0 50%;
