@@ -63,6 +63,12 @@ const description = ui.seo.map.replace('{place}', placeName);
   import brightStyle from '../../lib/map/styles/bright.json';
   import darkStyle from '../../lib/map/styles/dark.json';
   import { inMapArea } from '../../lib/map/in-map-area.ts';
+  import { escapeAttr as esc } from '../../lib/map/escape-attr.ts';
+  import { clipText } from '../../lib/map/clip-text.ts';
+  import { readView } from '../../lib/map/read-view.ts';
+  import type { MapCameraView } from '../../lib/map/read-view.ts';
+  import { sourceChips as srcChips } from '../../lib/map/source-chips.ts';
+  import { popupThumb } from '../../lib/map/popup-thumb.ts';
   import { mapEvents } from '../../lib/events/map-events.ts';
   import { categoryColor } from '../../lib/events/category-color.ts';
   import { primaryCategory } from '../../lib/events/primary-category.ts';
@@ -96,9 +102,6 @@ const description = ui.seo.map.replace('{place}', placeName);
 
   const ATTR = '© OpenMapTiles © OpenStreetMap contributors';
   const B = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const esc = (s: string): string =>
-    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-
   // 'light' = OSM Bright (colourful, high contrast); 'dark' = retuned Dark Matter.
   const STYLES: Record<string, unknown> = { light: brightStyle, dark: darkStyle };
 
@@ -192,8 +195,7 @@ const description = ui.seo.map.replace('{place}', placeName);
     const events = readEventsIsland();
     const { lang, ui } = readUiIsland();
     const href = (e: CompactEvent): string => localizedUrl(lang, eventPath(e.id));
-    const thumb = (e: CompactEvent): string =>
-      e.img ? `<img src="${e.img}" alt="" loading="lazy" referrerpolicy="no-referrer" />` : '';
+    const thumb = (e: CompactEvent): string => popupThumb(e.img);
 
     // Eagerly warm the popup-sized image of any marker CURRENTLY in the viewport,
     // so its card shows the photo the instant it opens — no fetch-on-click, no
@@ -208,15 +210,7 @@ const description = ui.seo.map.replace('{place}', placeName);
       img.src = url;
     };
     // Trim a blurb to a whole-word boundary for the compact popup card.
-    const clip = (s: string, n: number): string =>
-      s.length > n ? `${s.slice(0, n - 1).replace(/\s+\S*$/, '')}…` : s;
-    type Src = Readonly<{ name: string; url: string }>;
-    const srcChips = (sources: readonly Src[]): string =>
-      sources.length === 0
-        ? ''
-        : `<span class="map-pop-src">${sources
-            .map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`)
-            .join('')}</span>`;
+    const clip = (s: string, n: number): string => clipText(n)(s);
 
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
@@ -235,19 +229,8 @@ const description = ui.seo.map.replace('{place}', placeName);
       showPlaces: lsBool('map-layer-places', false),
     };
 
-    // The view the visitor left: "?z=11.4&c=44.4123,8.9312". It goes in the
-    // QUERY, not the hash — maplibre's own `hash` option writes one, but Astro's
-    // client router drops it on a back navigation, while the query survives.
-    type View = Readonly<{ zoom: number; lat: number; lng: number }>;
-    let saved: View | undefined;
-
-    const readView = (p: URLSearchParams): View | undefined => {
-      const zoom = Number(p.get('z'));
-      const [lat, lng] = (p.get('c') ?? '').split(',').map(Number);
-      const ok =
-        Number.isFinite(zoom) && Number.isFinite(lat) && Number.isFinite(lng) && p.has('z');
-      return ok ? { zoom, lat: lat as number, lng: lng as number } : undefined;
-    };
+    // The camera the visitor left — see readView() for why it lives in the query.
+    let saved: MapCameraView | undefined;
 
     const readUrl = (): void => {
       const p = new URLSearchParams(location.search);

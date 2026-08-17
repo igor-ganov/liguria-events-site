@@ -1,5 +1,6 @@
 // Functional-frontend enforcement (spec AC-5.1): what can be lint, is lint.
 import tseslint from 'typescript-eslint';
+import * as astroParser from 'astro-eslint-parser';
 
 const MAX_LINES = 50;
 
@@ -88,6 +89,68 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
     },
+  },
+  {
+    // `.astro` files were linted by NOTHING — `eslint src` only matched *.ts, so
+    // a 1000-line <script> in a component never met the size or no-branching
+    // rules that the rest of src/ lives by. They are linted here: an .astro file
+    // is a THIN markup shell, its logic belongs in tested pure functions under
+    // src/lib or src/components as .ts.
+    files: ['src/**/*.astro'],
+    languageOptions: {
+      parser: astroParser,
+      // The frontmatter and <script> blocks are TypeScript — hand them to the TS
+      // parser, or every annotated component is a parse error.
+      parserOptions: { parser: tseslint.parser, extraFileExtensions: ['.astro'] },
+    },
+    plugins: { functional: { rules: { 'max-lines-no-imports': maxLinesNoImports } } },
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'IfStatement', message: 'No if — use switch / Match / strategy maps.' },
+        { selector: 'ConditionalExpression', message: 'No ternary — use branch()/Match.' },
+      ],
+      'functional/max-lines-no-imports': 'error',
+    },
+  },
+  {
+    // LEGACY DEBT — files that already violated the rules on the day .astro
+    // linting was switched on (2026-08-17). The rules above apply to every
+    // OTHER .astro file, so nothing new can land; this list exists only so CI
+    // stays green while the backlog is paid down.
+    //
+    // THIS LIST MUST ONLY EVER SHRINK. Never add a file to it — split the file
+    // instead, moving its logic into tested pure functions.
+    files: [
+      'src/components/EventForm.astro',
+      'src/components/LanguageSwitcher.astro',
+      'src/components/MobileMenu.astro',
+      'src/components/RegionPicker.astro',
+      'src/components/shared/MiniCard.astro',
+      'src/components/views/CalendarView.astro',
+      'src/components/views/EventDetail.astro',
+      'src/components/views/FeedView.astro',
+      'src/components/views/LandmarkDetail.astro',
+      // Being decomposed: its popup/URL helpers already moved to tested pure
+      // functions under src/lib/map/. The remaining bulk is one long imperative
+      // setup() — extract it flow by flow (markers, clustering, layers, geo).
+      'src/components/views/MapView.astro',
+      'src/components/views/PlaceDetail.astro',
+      'src/layouts/Layout.astro',
+      // Astro route files carry [param] segments — the brackets are escaped so
+      // minimatch reads them as literals, not character classes.
+      'src/pages/\\[lang\\]/event/\\[id\\].astro',
+      'src/pages/\\[lang\\]/landmark/\\[region\\]/\\[slug\\].astro',
+      'src/pages/\\[lang\\]/place/\\[region\\]/\\[slug\\].astro',
+      'src/pages/admin/index.astro',
+      'src/pages/admin/users.astro',
+      'src/pages/auth/verify.astro',
+      'src/pages/event/\\[id\\].astro',
+      'src/pages/event/\\[id\\]/edit.astro',
+      'src/pages/route/\\[id\\].astro',
+      'src/pages/settings.astro',
+    ],
+    rules: { 'no-restricted-syntax': 'off', 'functional/max-lines-no-imports': 'off' },
   },
   {
     files: ['test/**/*.ts'],
