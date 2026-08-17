@@ -1,5 +1,6 @@
 import { test } from 'bun:test';
 import assert from 'node:assert/strict';
+import { isDefined } from '../src/lib/is-defined.ts';
 import { applyLegCache, enrichDays, fillLegCache, legKey, type Planner, type RoutedLeg } from '../src/lib/favorites/enrich-route.ts';
 import type { Leg, RouteDay, RouteStop } from '../src/lib/favorites/build-route.ts';
 import type { BestLeg } from 'italian-transport-core';
@@ -11,8 +12,8 @@ const stop = (id: string, g?: readonly [number, number], h?: string): RouteStop 
   u: '',
   c: ['other'],
   du: 60,
-  ...(g ? { g } : {}),
-  ...(h ? { h } : {}),
+  ...([g].filter(isDefined).map((coords) => ({ g: coords })).at(0) ?? {}),
+  ...([h].filter(isDefined).map((time) => ({ h: time })).at(0) ?? {}),
 });
 
 const estimate: Leg = { meters: 100, minutes: 2, mapsUrl: 'https://maps', tight: false };

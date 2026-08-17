@@ -5,6 +5,7 @@ import { clipText } from '../src/lib/map/clip-text.ts';
 import { readView } from '../src/lib/map/read-view.ts';
 import { sourceChips } from '../src/lib/map/source-chips.ts';
 import { popupThumb } from '../src/lib/map/popup-thumb.ts';
+import { eventMarkerHtml } from '../src/lib/map/event-marker-html.ts';
 
 describe('escapeAttr', () => {
   test('escapes the characters that break out of an attribute', () => {
@@ -54,6 +55,21 @@ describe('sourceChips', () => {
   });
   test('renders nothing when there are no sources', () => {
     assert.equal(sourceChips([]), '');
+  });
+});
+
+describe('eventMarkerHtml', () => {
+  const render = eventMarkerHtml('<svg id="icon" />');
+  test('shows the photo when the event has one', () => {
+    const html = render('https://img/a.jpg?a=1&b=2');
+    assert.ok(html.includes('src="https://img/a.jpg?a=1&amp;b=2"'));
+    assert.ok(!html.includes('ev-marker-face--icon'));
+  });
+  test('falls back to the category icon when there is no photo', () => {
+    assert.equal(render(undefined), '<div class="ev-marker-face ev-marker-face--icon"><svg id="icon" /></div>');
+  });
+  test('treats an empty image string as no photo', () => {
+    assert.ok(render('').includes('ev-marker-face--icon'));
   });
 });
 

@@ -1,0 +1,31 @@
+---
+import { dateRange } from '../../lib/events/date-range.ts';
+import type { EventRow } from '../../lib/events/list-events.ts';
+
+type Props = Readonly<{ userId: string; events: readonly EventRow[] }>;
+const { userId, events } = Astro.props;
+---
+
+<tr class="submissions" data-for={userId} hidden>
+  <td colspan="5">
+    <ul class="submission-list">
+      {events.map((ev) => (
+        <li data-id={ev.id}>
+          <span class={`badge badge-${ev.status}`}>{ev.status}</span>
+          <a href={`/event/${ev.id}/`}>{ev.title_en}</a>
+          <small>{dateRange(ev.start_date, ev.end_date ?? undefined)}</small>
+          <span class="admin-actions">
+            <button data-action="publish">Publish</button>
+            <button data-action="reject">Reject</button>
+            <button data-action="delete" class="danger">Delete</button>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </td>
+</tr>
+
+<style>
+  .submission-list { list-style: none; margin: 0; padding: 0.5rem 0; display: grid; gap: 0.375rem; }
+  .submission-list li { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+</style>

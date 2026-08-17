@@ -1,0 +1,54 @@
+---
+import { isoToday } from '../../../lib/calendar/iso-today.ts';
+import { monthGrid } from '../../../lib/calendar/month-grid.ts';
+import { dayKindOf } from '../../../lib/calendar/day-kind.ts';
+import { dayHeading } from '../../../lib/calendar/day-heading.ts';
+import { dayCellEvents } from '../../../lib/events/day-cell-events.ts';
+import { primaryCategory } from '../../../lib/events/primary-category.ts';
+import { titleOf } from '../../../lib/events/title-of.ts';
+import { eventPath } from '../../../lib/event-path.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import { DAY_CLASS } from '../../../lib/calendar/day-class.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+type Props = Readonly<{
+  lang: Locale;
+  ui: Ui;
+  monthKey: string;
+  title: string;
+  events: readonly CompactEvent[];
+}>;
+const { lang, ui, monthKey, title, events } = Astro.props;
+const today = isoToday();
+const days = monthGrid(monthKey).flat();
+const kindOf = dayKindOf(monthKey, today);
+const heading = dayHeading(ui);
+---
+
+<div class="cal-grid" role="grid" aria-label={title}>
+  {ui.weekdays.map((name) => <div class="cal-weekday" role="columnheader">{name}</div>)}
+  {days.map((day) => (
+    <div class={DAY_CLASS[kindOf(day)] ?? 'cal-day'} role="gridcell">
+      <span class="cal-num">{Number(day.slice(8, 10))}</span>
+      <span class="cal-day-label">{heading(day)}</span>
+      <ul class="cal-events">
+        {dayCellEvents(day)(events).map((event) => (
+          <li>
+            <a
+              class="cal-pill"
+              data-cat={primaryCategory(event.c)}
+              href={localizedUrl(lang, eventPath(event.id))}
+              title={titleOf(lang)(event)}
+            >
+              <Fragment set:html={iconSvg(primaryCategory(event.c), 12)} />
+              <span>{titleOf(lang)(event)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  ))}
+</div>

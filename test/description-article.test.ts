@@ -1,9 +1,7 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import {
-  descriptionArticleHtml,
-  descriptionPlain,
-} from '../src/components/events/description-article.ts';
+import { descriptionArticleHtml } from '../src/lib/description/description-article-html.ts';
+import { descriptionPlain } from '../src/lib/description/description-plain.ts';
 
 const md = [
   'A candlelit concert at Villa Borzino, worth attending for its rare violin.',

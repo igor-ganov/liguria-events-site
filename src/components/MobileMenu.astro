@@ -2,49 +2,19 @@
 // Flying menu — draggable FAB ported from the blog's MobileMenu: a 56px round
 // button fixed in one of four corners, dragged to snap to the nearest one
 // (persisted in localStorage), opening a popup nav anchored to that corner.
+import FabButton from './menu/FabButton.astro';
+import FabGroups from './menu/FabGroups.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
-import { uiIcon } from '../lib/icons/ui-icon.ts';
-import { regionUrl } from '../lib/region/region-url.ts';
-import { localizedUrl } from '../lib/i18n/localized-url.ts';
-import { HEART } from '../lib/favorites/fav-button.ts';
+import { menuGroups } from '../lib/menu/menu-groups.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; path: string; region?: string }>;
 const { lang, path, region = DEFAULT_REGION } = Astro.props;
 const ui = await uiOf(lang);
-// Grouped into sub-categories so the menu reads as sections instead of one long
-// wall of links (and stays tidy on a small screen). Favourites is a personal
-// destination — it sits at the end of the first group with its heart + count.
-const groups = [
-  {
-    label: ui.menu.events,
-    favourites: true,
-    links: [
-      { href: regionUrl(lang, region), icon: 'feed' as const, label: ui.nav.feed },
-      { href: regionUrl(lang, region, 'calendar/'), icon: 'calendar' as const, label: ui.nav.calendar },
-      { href: regionUrl(lang, region, 'map/'), icon: 'map' as const, label: ui.nav.map },
-    ],
-  },
-  {
-    label: ui.menu.explore,
-    favourites: false,
-    links: [
-      { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin' as const, label: ui.nav.landmarks },
-      { href: regionUrl(lang, region, 'places/'), icon: 'places' as const, label: ui.nav.places },
-    ],
-  },
-  {
-    label: ui.menu.more,
-    favourites: false,
-    links: [
-      { href: 'https://t.me/liguria_events_bot', icon: 'bot' as const, label: ui.nav.bot },
-      { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', icon: 'ical' as const, label: ui.nav.ical },
-    ],
-  },
-];
+const groups = menuGroups(lang, region, ui);
 ---
 
 <div class="fab-menu" data-fab-wrapper data-corner="bottom-right">
@@ -61,41 +31,12 @@ const groups = [
     })();
   </script>
 
-  <button
-    type="button"
-    class="mobile-fab"
-    data-fab-toggle
-    aria-label="Menu"
-    aria-expanded="false"
-    aria-controls="fab-popup"
-  >
-    <span class="fab-line fab-line-1"></span>
-    <span class="fab-line fab-line-2"></span>
-    <span class="fab-line fab-line-3"></span>
-  </button>
+  <FabButton />
 
   <div class="fab-overlay" data-fab-overlay aria-hidden="true"></div>
 
   <nav id="fab-popup" class="fab-popup" data-fab-panel role="dialog" aria-modal="true" aria-label="Menu">
-    {groups.map((group) => (
-      <div class="fab-group">
-        <p class="fab-group-label">{group.label}</p>
-        <ul class="fab-links">
-          {group.links.map(({ href, icon, label }) => (
-            <li>
-              <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
-            </li>
-          ))}
-          {group.favourites && (
-            <li>
-              <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
-                <Fragment set:html={HEART} /> {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
-              </a>
-            </li>
-          )}
-        </ul>
-      </div>
-    ))}
+    <FabGroups groups={groups} lang={lang} favLabel={ui.nav.favorites} />
     <div class="fab-tools">
       <LanguageSwitcher lang={lang} path={path} />
       <ThemeToggle ui={ui} labelled />
@@ -105,75 +46,7 @@ const groups = [
 </div>
 
 <script>
-  type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-  const SIZE = 56, MARGIN = 16, GAP = 8, THRESHOLD = 10, KEY = 'fab-corner';
-
-  const isCorner = (v: string | null): v is Corner =>
-    v === 'top-left' || v === 'top-right' || v === 'bottom-left' || v === 'bottom-right';
-
-  const fabXY = (c: Corner) => {
-    const right = innerWidth - SIZE - MARGIN, bottom = innerHeight - SIZE - MARGIN;
-    return {
-      'top-left': { x: MARGIN, y: MARGIN }, 'top-right': { x: right, y: MARGIN },
-      'bottom-left': { x: MARGIN, y: bottom }, 'bottom-right': { x: right, y: bottom },
-    }[c];
-  };
-
-  const snap = (x: number, y: number): Corner =>
-    `${y > innerHeight / 2 ? 'bottom' : 'top'}-${x > innerWidth / 2 ? 'right' : 'left'}`;
-
-  const setup = () => {
-    const wrap = document.querySelector<HTMLElement>('[data-fab-wrapper]');
-    if (!wrap || wrap.dataset['fabInit'] === 'true') return;
-    wrap.dataset['fabInit'] = 'true';
-    const fab = wrap.querySelector<HTMLButtonElement>('[data-fab-toggle]');
-    const overlay = wrap.querySelector<HTMLElement>('[data-fab-overlay]');
-    const panel = wrap.querySelector<HTMLElement>('[data-fab-panel]');
-    if (!fab || !overlay || !panel) return;
-
-    const stored = localStorage.getItem(KEY);
-    let corner: Corner = isCorner(stored) ? stored : 'bottom-right';
-    let dragging = false, moved = false, sX = 0, sY = 0;
-
-    const placeFab = (x: number, y: number, animate: boolean) => {
-      fab.style.left = `${x}px`; fab.style.top = `${y}px`;
-      fab.style.transition = animate ? 'all var(--speed)' : 'none';
-    };
-    const placePanel = (c: Corner) => {
-      const right = c.endsWith('right'), bottom = c.startsWith('bottom');
-      const off = `${MARGIN + SIZE + GAP}px`;
-      panel.style.left = right ? 'auto' : `${MARGIN}px`;
-      panel.style.right = right ? `${MARGIN}px` : 'auto';
-      panel.style.top = bottom ? 'auto' : off;
-      panel.style.bottom = bottom ? off : 'auto';
-    };
-    const settle = (c: Corner) => {
-      corner = c; wrap.dataset['corner'] = c;
-      const p = fabXY(c); placeFab(p.x, p.y, true); placePanel(c);
-    };
-    settle(corner);
-
-    const open = () => { wrap.classList.add('open'); fab.setAttribute('aria-expanded', 'true'); panel.querySelector('a')?.focus(); };
-    const close = () => { wrap.classList.remove('open'); fab.setAttribute('aria-expanded', 'false'); };
-
-    fab.addEventListener('pointerdown', (e) => { dragging = true; moved = false; sX = e.clientX; sY = e.clientY; fab.setPointerCapture(e.pointerId); });
-    fab.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const dx = e.clientX - sX, dy = e.clientY - sY;
-      if (Math.abs(dx) + Math.abs(dy) > THRESHOLD) moved = true;
-      const b = fabXY(corner); placeFab(b.x + dx, b.y + dy, false);
-    });
-    fab.addEventListener('pointerup', (e) => {
-      dragging = false; fab.releasePointerCapture(e.pointerId);
-      if (moved) { const n = snap(e.clientX, e.clientY); localStorage.setItem(KEY, n); settle(n); return; }
-      wrap.classList.contains('open') ? close() : open();
-    });
-    overlay.addEventListener('click', close);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
-    addEventListener('resize', () => { const p = fabXY(corner); placeFab(p.x, p.y, false); });
-  };
-
-  setup();
-  document.addEventListener('astro:after-swap', setup);
+  import { initMobileMenu } from './menu/init-mobile-menu.ts';
+  initMobileMenu();
+  document.addEventListener('astro:after-swap', initMobileMenu);
 </script>

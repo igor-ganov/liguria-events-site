@@ -11,32 +11,31 @@ import { EVENTS_URL } from '../../data/events-url.ts';
 import { eventForDetail } from '../../lib/events/d1-published.ts';
 import type { EventContacts } from '../../lib/events/d1-published.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
+import { branch } from '../../lib/branch.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
 const { id } = Astro.params;
 const user = Astro.locals.user;
+const eventId = id ?? '';
 const corpus = await cachedEvents(EVENTS_URL);
-let event: CompactEvent | undefined = corpus.events.find((e) => e.id === id);
-let editable = false;
-let status: string | undefined;
-let contacts: EventContacts | undefined;
-if (event === undefined && id) {
-  const found = await eventForDetail(Astro.locals.runtime.env.DB, id, user?.id);
-  if (found) {
-    event = decodeEventList([found.compact])[0];
-    editable = found.owned;
-    status = found.status;
-    contacts = found.contacts;
-  }
-}
-if (event === undefined) Astro.response.status = 404;
+const fromCorpus = corpus.events.find((e) => e.id === eventId);
+// Missing from the build corpus → look it up in D1.
+const row = await branch(fromCorpus === undefined && eventId !== '')(
+  () => eventForDetail(Astro.locals.runtime.env.DB, eventId, user?.id),
+  async () => undefined,
+);
+const rows = [row].filter((r) => r !== undefined);
+const event: CompactEvent | undefined = fromCorpus ?? decodeEventList(rows.map((r) => r.compact))[0];
+const editable = rows.some((r) => r.owned);
+const status: string | undefined = rows[0]?.status;
+const contacts: EventContacts | undefined = rows[0]?.contacts;
+Astro.response.status = branch(event === undefined)(() => 404, () => 200);
 const notFound = 'This event could not be found.';
 ---
 
+{event && <EventDetail lang="en" event={event} editable={editable} status={status} contacts={contacts} />}
 {
-  event ? (
-    <EventDetail lang="en" event={event} editable={editable} status={status} contacts={contacts} />
-  ) : (
+  event === undefined && (
     <Layout lang="en" title="Event not found">
       <p class="feed-empty">{notFound}</p>
     </Layout>

@@ -1,0 +1,21 @@
+---
+import { resized } from '../../lib/img/resized.ts';
+import { branch } from '../../lib/branch.ts';
+
+type Props = Readonly<{ coverImage: string }>;
+const { coverImage } = Astro.props;
+const empty = coverImage === '';
+const src = branch(empty)(() => '', () => resized(coverImage, 480));
+const pickLabel = branch(empty)(() => 'Upload an image', () => 'Replace image');
+---
+
+<div class="form-image" data-image>
+  <span class="form-image-label">Image</span>
+  <img class="form-image-preview" src={src} alt="" data-image-preview hidden={empty} />
+  <label class="form-image-pick">
+    <input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" data-image-input hidden />
+    <span>{pickLabel}</span>
+  </label>
+  <input type="hidden" name="coverImage" value={coverImage} data-cover />
+  <span class="form-image-status" data-image-status role="status" aria-live="polite"></span>
+</div>

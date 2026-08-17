@@ -1,0 +1,24 @@
+---
+import UserRow from './UserRow.astro';
+import UserSubmissions from './UserSubmissions.astro';
+import type { UserRowData } from '../../lib/admin/user-rows.ts';
+
+type Props = Readonly<{ rows: readonly UserRowData[] }>;
+const { rows } = Astro.props;
+---
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Person</th><th>Role</th><th>Submitted</th><th>Joined</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map((row) => (
+      <>
+        <UserRow row={row} />
+        {row.events.length > 0 && <UserSubmissions userId={row.user.id} events={row.events} />}
+      </>
+    ))}
+  </tbody>
+</table>

@@ -1,0 +1,14 @@
+---
+type Props = Readonly<{ src: string; title: string }>;
+const { src, title } = Astro.props;
+---
+
+<figure class="event-map">
+  <iframe
+    title={title}
+    src={src}
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    allowfullscreen
+  />
+</figure>

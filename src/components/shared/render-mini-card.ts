@@ -5,7 +5,7 @@ import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { branch } from '../../lib/branch.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
-import { descriptionPlain } from '../events/description-article.ts';
+import { descriptionPlain } from '../../lib/description/description-plain.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { formatWhen } from '../../lib/events/format-when.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';

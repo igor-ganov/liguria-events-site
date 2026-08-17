@@ -1,48 +1,24 @@
 ---
-import { CATEGORIES } from '../lib/events/categories.ts';
+import ImageField from './events/ImageField.astro';
+import CategoryFields from './events/CategoryFields.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
-import { resized } from '../lib/img/resized.ts';
+import { EMPTY_PREFILL } from '../lib/events/event-prefill.ts';
+import type { Prefill } from '../lib/events/event-prefill.ts';
 
 // Shared create/edit form. `mode` switches the submit target (POST /submit vs
 // PATCH /event/<id>) and the button label; `event` prefills it on edit.
-type Prefill = Readonly<{
-  title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  venue: string;
-  categories: readonly string[];
-  free: boolean;
-  coverImage: string;
-  address: string;
-  phone: string;
-  website: string;
-  lat: string;
-  lng: string;
-}>;
 type Props = Readonly<{ mode: 'create' | 'edit'; eventId?: string | undefined; event?: Prefill | undefined }>;
 const { mode, eventId, event } = Astro.props;
 const ui = await uiOf('en');
-const v: Prefill = event ?? {
-  title: '', description: '', startDate: '', endDate: '', venue: '', categories: [],
-  free: false, coverImage: '', address: '', phone: '', website: '', lat: '', lng: '',
-};
+const v: Prefill = event ?? EMPTY_PREFILL;
+const SUBMIT_LABEL: Record<Props['mode'], string> = { create: 'Submit for review', edit: 'Save changes' };
 ---
 
 <form id="event-form" class="submit-form" data-mode={mode} data-id={eventId}>
   <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
   <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
 
-  <div class="form-image" data-image>
-    <span class="form-image-label">Image</span>
-    <img class="form-image-preview" src={v.coverImage ? resized(v.coverImage, 480) : ''} alt="" data-image-preview hidden={v.coverImage === ''} />
-    <label class="form-image-pick">
-      <input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" data-image-input hidden />
-      <span>{v.coverImage === '' ? 'Upload an image' : 'Replace image'}</span>
-    </label>
-    <input type="hidden" name="coverImage" value={v.coverImage} data-cover />
-    <span class="form-image-status" data-image-status role="status" aria-live="polite"></span>
-  </div>
+  <ImageField coverImage={v.coverImage} />
 
   <div class="row2">
     <label>Starts<input type="date" name="startDate" required value={v.startDate} /></label>
@@ -55,14 +31,7 @@ const v: Prefill = event ?? {
     <label>Website<input name="website" type="url" maxlength="300" value={v.website} placeholder="https://" /></label>
   </div>
 
-  <fieldset class="cats">
-    <legend>Categories</legend>
-    {CATEGORIES.map((c) => (
-      <label class="cat-check">
-        <input type="checkbox" name="category" value={c} checked={v.categories.includes(c)} /> {ui.cat[c]}
-      </label>
-    ))}
-  </fieldset>
+  <CategoryFields ui={ui} selected={v.categories} />
   <label class="inline"><input type="checkbox" name="free" checked={v.free} /> Free entry</label>
 
   <div class="form-loc">
@@ -73,7 +42,7 @@ const v: Prefill = event ?? {
   <input type="hidden" name="lat" value={v.lat} data-lat />
   <input type="hidden" name="lng" value={v.lng} data-lng />
 
-  <button type="submit">{mode === 'edit' ? 'Save changes' : 'Submit for review'}</button>
+  <button type="submit">{SUBMIT_LABEL[mode]}</button>
 </form>
 <p id="submit-status" role="status" aria-live="polite"></p>
 

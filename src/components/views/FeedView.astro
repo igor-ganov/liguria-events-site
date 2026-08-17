@@ -1,19 +1,19 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import MiniCard from '../shared/MiniCard.astro';
+import FeedFilters from './feed/FeedFilters.astro';
+import FeedGroups from './feed/FeedGroups.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
-import { CATEGORIES } from '../../lib/events/categories.ts';
-import { iconSvg } from '../../lib/icons/icon-svg.ts';
+import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { groupByDay } from '../../lib/events/group-by-day.ts';
-import { byUniqueness } from '../../lib/events/by-uniqueness.ts';
-import { expandSessions } from '../../lib/events/expand-sessions.ts';
+import { feedDayGroups } from '../../lib/events/feed-day-groups.ts';
+import { eventsOfCity } from '../../lib/events/events-of-city.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
-import { cityName } from '../../lib/region/city-name.ts';
-import { regionName } from '../../lib/region/region-name.ts';
+import { feedPath } from '../../lib/region/feed-path.ts';
+import { placeLabel } from '../../lib/region/place-label.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
+import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string; city?: string | undefined }>;
@@ -26,98 +26,27 @@ const ui = await uiOf(lang);
 // there is no client-side flash from region → city.
 const payload = await cachedEvents(EVENTS_URL);
 const today = isoToday();
-const regionEvents = eventsOfRegion(payload.events, region);
-const events = city ? regionEvents.filter((event) => event.ct === city) : regionEvents;
-// Within each day, lead with the unique, time-pinned events (short span) and
-// sink the long runs. The server emits this order so the default "By date" sort
-// is a no-op on first load — no reflow — while keeping the curation.
-const groups = [...groupByDay(today)(expandSessions(events, today)).entries()].map(
-  ([day, dayEvents]) => [day, [...dayEvents].sort(byUniqueness)] as const,
-);
+const events = eventsOfCity(eventsOfRegion(payload.events, region), city);
+const groups = feedDayGroups(today)(events);
 const heading = dayHeading(ui);
-const path = city ? `${region}/${city}/` : `${region}/`;
-const placeName = city ? cityName(city) : regionName(region);
+const path = feedPath(region, city);
+const placeName = placeLabel(region, city);
 const description = ui.seo.feed.replace('{place}', placeName);
-const iconsJson = JSON.stringify(
-  Object.fromEntries(CATEGORIES.map((c) => [c, iconSvg(c, 12)])),
-);
-// WebSite (with a sitewide SearchAction) + Organization for the site's home /
-// region feed; `<` escaped so the string is safe inside the ld+json script.
-const siteJsonLd = JSON.stringify({
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebSite',
-      name: 'Dove Go',
-      url: 'https://dovego.it',
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: 'https://dovego.it/liguria/?q={search_term_string}',
-        'query-input': 'required name=search_term_string',
-      },
-    },
-    { '@type': 'Organization', name: 'Dove Go', url: 'https://dovego.it' },
-  ],
-}).replace(/</g, '\\u003c');
 ---
 
 <Layout lang={lang} region={region} city={city} title={`${placeName} — ${ui.nav.feed}`} description={description} path={path}>
-  <script is:inline type="application/ld+json" set:html={siteJsonLd} />
+  <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   <h1 class="visually-hidden">{ui.nav.feed}</h1>
 
-  <div class="feed-search">
-    <input type="search" data-feed-search placeholder={ui.search.placeholder} aria-label={ui.search.placeholder} />
-  </div>
-
-  <div class="feed-dates">
-    <label>{ui.range.from} <input type="date" data-feed-from value={today} /></label>
-    <label>{ui.range.to} <input type="date" data-feed-to /></label>
-  </div>
-
-  <div class="feed-sort" role="group" aria-label={ui.sort.label}>
-    <button class="chip chip--sort" data-feed-sort="date" aria-pressed="true">{ui.sort.date}</button>
-    <button class="chip chip--sort" data-feed-sort="created" aria-pressed="false">{ui.sort.created}</button>
-  </div>
-
-  <div class="chips" role="group" aria-label="Filter by category">
-    {CATEGORIES.map((category) => (
-      <button class="chip" data-cat={category} data-feed-cat={category} aria-pressed="false">
-        <Fragment set:html={iconSvg(category, 14)} />
-        {ui.cat[category]}
-      </button>
-    ))}
-    <button class="chip chip--free" data-feed-free aria-pressed="false">{ui.chips.free}</button>
-    <button class="chip chip--gems" data-feed-gems aria-pressed="false">{ui.chips.gems}</button>
-    <button class="chip chip--clear" data-feed-clear hidden>✕ {ui.chips.clear}</button>
-  </div>
+  <FeedFilters ui={ui} today={today} />
 
   <div data-feed-list data-city={city ?? ''} data-today={today}>
-    {groups.map(([day, events]) => (
-      <section class="feed-group" data-day={day}>
-        <h3>{heading(day)}</h3>
-        <ul class="feed-list">
-          {events.map((event) => (
-            <li
-              data-id={event.id}
-              data-cats={event.c.join(',')}
-              data-start={event.s}
-              data-end={event.e ?? event.s}
-              data-free={event.f === true ? '1' : '0'}
-              data-gem={event.x === true ? '1' : '0'}
-              data-ct={event.ct ?? ''}
-              data-created={event.cr === undefined ? '' : String(event.cr)}
-            >
-              <MiniCard event={event} ui={ui} lang={lang} />
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))}
+    <FeedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
   </div>
   <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
 </Layout>
 
-<script is:inline type="application/json" id="icons-data" set:html={iconsJson} />
+<script is:inline type="application/json" id="icons-data" set:html={categoryIconsJson()} />
 
 <script>
   import { initFeed } from '../../components/feed/init-feed.ts';

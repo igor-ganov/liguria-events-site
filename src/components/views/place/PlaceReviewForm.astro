@@ -1,0 +1,21 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { MyReview } from '../../../lib/places/reviews.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ mine?: MyReview | undefined; ui: Ui }>;
+const { mine, ui } = Astro.props;
+---
+
+<form class="rv-form" data-rv-form>
+  <div class="rv-stars-input" data-rv-stars data-current={mine?.rating ?? 0} aria-label={ui.reviews.rating}>
+    {[1, 2, 3, 4, 5].map((n) => (
+      <button type="button" class="rv-star-btn" data-rv-star={n} aria-label={`${n}`}><Fragment set:html={uiIcon('star', 22)} /></button>
+    ))}
+  </div>
+  <textarea data-rv-comment maxlength="2000" rows="3" placeholder={ui.reviews.comment}>{mine?.comment ?? ''}</textarea>
+  <div class="rv-actions">
+    <button type="submit" class="chip chip--layer" data-rv-submit>{ui.reviews.submit}</button>
+    {mine && <button type="button" class="chip" data-rv-delete>{ui.reviews.remove}</button>}
+  </div>
+</form>

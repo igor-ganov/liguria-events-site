@@ -1,36 +1,35 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import EventOwnerBar from './event/EventOwnerBar.astro';
+import EventHero from './event/EventHero.astro';
+import EventGalleryMore from './event/EventGalleryMore.astro';
+import EventTags from './event/EventTags.astro';
+import EventTickets from './event/EventTickets.astro';
+import EventFacts from './event/EventFacts.astro';
+import EventProgramme from './event/EventProgramme.astro';
+import EventMapEmbed from './event/EventMapEmbed.astro';
+import EventSources from './event/EventSources.astro';
 import { eventLinks } from '../../lib/events/event-links.ts';
-import { formatWhen } from '../../lib/events/format-when.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { mapQuery } from '../../lib/events/map-query.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
-import { iconSvg } from '../../lib/icons/icon-svg.ts';
-import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionOf } from '../../lib/region/region-of.ts';
-import { resized } from '../../lib/img/resized.ts';
+import { absoluteImage } from '../../lib/img/absolute-image.ts';
 import { eventGallery } from '../../lib/events/event-gallery.ts';
-import { descriptionArticleHtml, descriptionPlain } from '../events/description-article.ts';
+import { programmeSessions } from '../../lib/events/programme-sessions.ts';
+import { descriptionArticleHtml } from '../../lib/description/description-article-html.ts';
+import { descriptionPlain } from '../../lib/description/description-plain.ts';
 import { ticketUrl } from '../../lib/events/ticket-link.ts';
-import { HEART } from '../../lib/favorites/fav-button.ts';
 import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import type { EventContacts } from '../../lib/events/d1-published.ts';
 
 type Props = Readonly<{ lang: Locale; event: CompactEvent; editable?: boolean | undefined; status?: string | undefined; contacts?: EventContacts | undefined }>;
 const { lang, event, editable = false, status, contacts } = Astro.props;
-const site = contacts?.website;
-const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
-const statusLabel: Record<string, string> = {
-  pending: 'Pending review',
-  held: 'Under review',
-  rejected: 'Rejected',
-  published: 'Published',
-};
 // An event page belongs to its own region, whichever region you arrived from.
 const region = regionOf(event);
 const ui = await uiOf(lang);
@@ -41,192 +40,34 @@ const desc = descriptionOf(lang)(event);
 const descHtml = descriptionArticleHtml(desc);
 const descMeta = descriptionPlain(desc);
 const title = titleOf(lang)(event);
-const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
 const query = mapQuery(event);
-const mapSearchUrl =
-  query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+const mapSearchUrl = query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
-const heroImage =
-  event.img !== undefined ? new URL(resized(event.img, 1024), Astro.site).toString() : undefined;
+const heroImage = absoluteImage(event.img, Astro.site);
 const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: contacts?.address });
 // Multi-source gallery: the primary cover plus every other source's photo,
 // each attributed. `more` is the strip shown under the hero.
 const gallery = eventGallery(event);
+const cover = gallery[0];
 const more = gallery.slice(1);
 const tickets = ticketUrl(event);
-// The crawler's own address (LLM/Ticketmaster). Owner-submitted `contacts.address`
-// wins when present; otherwise surface the crawler address if it adds detail
-// beyond the venue name already shown.
-const crawlerAddress =
-  contacts?.address === undefined && event.a !== undefined && event.a !== event.v
-    ? event.a
-    : undefined;
-// Dated programme (sessions) of an umbrella event: each concrete occurrence on
-// its own night. Already trimmed to upcoming dates upstream; sort defensively.
-const sessionLocale: Record<Locale, string> = { en: 'en-GB', it: 'it-IT', ru: 'ru-RU' };
-const programmeLabel: Record<Locale, string> = { en: 'Programme', it: 'Programma', ru: 'Программа' };
-const sessionDateFmt = new Intl.DateTimeFormat(sessionLocale[lang], {
-  weekday: 'short',
-  day: '2-digit',
-  month: 'short',
-});
-const programme = [...(event.p ?? [])]
-  .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time ?? '').localeCompare(b.time ?? '')))
-  .map((session) => ({
-    date: sessionDateFmt.format(new Date(`${session.date}T12:00:00`)),
-    time: session.time,
-    title: session.title,
-  }));
+const programme = programmeSessions(event, lang);
 ---
 
-<Layout lang={lang} region={region} title={title} description={descMeta === '' ? title : descMeta} path={eventPath(event.id)} image={heroImage}>
+<Layout lang={lang} region={region} title={title} description={descMeta || title} path={eventPath(event.id)} image={heroImage}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
-    {
-      editable && (
-        <div class="event-owner-bar">
-          <span class="event-status" data-status={status}>{status ? statusLabel[status] ?? status : ''}</span>
-          <a class="account-submit" href={`/event/${event.id}/edit`}>Edit</a>
-        </div>
-      )
-    }
-    {
-      gallery.length > 0 && (
-        <figure class="event-hero">
-          <img src={resized(gallery[0]!.image, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
-          <figcaption>
-            {ui.photoBy}:{' '}
-            <a href={gallery[0]!.href} target="_blank" rel="noopener">{gallery[0]!.name}</a>
-          </figcaption>
-        </figure>
-      )
-    }
-    {
-      more.length > 0 && (
-        <div class="event-gallery-more">
-          {more.map((photo) => (
-            <figure class="gallery-photo">
-              <a href={photo.href} target="_blank" rel="noopener">
-                <img src={resized(photo.image, 400)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-              </a>
-              <figcaption>{ui.photoBy}: {photo.name}</figcaption>
-            </figure>
-          ))}
-        </div>
-      )
-    }
-    <h1>{title}</h1>
-    <div class="event-tags">
-      {
-        event.c.map((category) => (
-          <span class="cat-tag" data-cat={category}>
-            <Fragment set:html={iconSvg(category, 13)} />
-            {ui.cat[category]}
-          </span>
-        ))
-      }
-      {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
-      {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
-    </div>
-    <button type="button" class="event-fav" data-fav-toggle data-fav-id={event.id} aria-pressed="false">
-      <Fragment set:html={HEART} />
-      {ui.nav.favorites}
-    </button>
-    {
-      tickets && (
-        <a class="event-tickets" href={tickets} target="_blank" rel="noopener">
-          <Fragment set:html={uiIcon('external', 16)} />
-          {ui.tickets}
-        </a>
-      )
-    }
-    <dl class="event-facts">
-      <div><dt><Fragment set:html={uiIcon('clock', 17)} /></dt><dd>{formatWhen(eventNoVenue)}</dd></div>
-      {
-        event.v !== undefined && (
-          <div>
-            <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
-            <dd>
-              {event.v}
-              {mapSearchUrl && (
-                <a class="map-link" href={mapSearchUrl} target="_blank" rel="noopener">
-                  ↗ {ui.mapLink}
-                </a>
-              )}
-            </dd>
-          </div>
-        )
-      }
-      {crawlerAddress && (
-        <div>
-          <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
-          <dd>{crawlerAddress}</dd>
-        </div>
-      )}
-      {contacts?.address && (
-        <div>
-          <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
-          <dd>{contacts.address}</dd>
-        </div>
-      )}
-      {contacts?.phone && (
-        <div>
-          <dt title="Phone"><Fragment set:html={uiIcon('phone', 17)} /></dt>
-          <dd><a href={`tel:${contacts.phone.replace(/\s+/g, '')}`}>{contacts.phone}</a></dd>
-        </div>
-      )}
-      {site && (
-        <div>
-          <dt title="Website"><Fragment set:html={uiIcon('external', 17)} /></dt>
-          <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
-        </div>
-      )}
-    </dl>
+    {editable && <EventOwnerBar eventId={event.id} status={status} />}
+    {cover && <EventHero photo={cover} title={title} photoBy={ui.photoBy} />}
+    {more.length > 0 && <EventGalleryMore photos={more} photoBy={ui.photoBy} />}
+    <EventTags event={event} title={title} ui={ui} />
+    {tickets && <EventTickets href={tickets} label={ui.tickets} />}
+    <EventFacts event={event} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
     {desc !== '' && <div class="event-desc" set:html={descHtml} />}
-    {
-      programme.length > 0 && (
-        <section class="event-programme">
-          <h2>{programmeLabel[lang]}</h2>
-          <ul>
-            {programme.map((session) => (
-              <li>
-                <span class="prog-date">{session.date}</span>
-                {session.time && <span class="prog-time">{session.time}</span>}
-                {session.title && <span class="prog-title">{session.title}</span>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
-    {
-      mapEmbedUrl && (
-        <figure class="event-map">
-          <iframe
-            title={`${ui.mapLink}: ${event.v ?? title}`}
-            src={mapEmbedUrl}
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            allowfullscreen
-          />
-        </figure>
-      )
-    }
+    {programme.length > 0 && <EventProgramme sessions={programme} lang={lang} />}
+    {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
-    <section class="event-sources">
-      <h2>{ui.headings.sources}</h2>
-      <ul>
-        {
-          links.map((link) => (
-            <li>
-              <a href={link.url} target="_blank" rel="noopener">
-                ↗ {link.name}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    <EventSources links={links} heading={ui.headings.sources} />
   </article>
 </Layout>

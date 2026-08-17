@@ -9,6 +9,13 @@ const env = Astro.locals.runtime.env;
 const token = Astro.url.searchParams.get('t') ?? '';
 const email = await consumeMagicToken(env.SESSION, token);
 
+// TOOLING EXCEPTION to the no-branching rule, kept deliberately: `astro check`
+// does not analyse the expression of a frontmatter `return`, so anything used
+// only inside one is reported as an unused declaration and fails the type check.
+// Every branch-free shape was tried — a `switch` case, a 0-or-1 `for`, a mapped
+// Promise, a `branch()` redirect target — and each one breaks `bun run typecheck`.
+// Two literal-argument returns guarded by `if` is the only form the checker
+// accepts, so this file stays on the LEGACY DEBT list until Astro fixes that.
 if (email) {
   const nowMs = Date.now();
   const { user, isNew } = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString(), rootAdmins(env));

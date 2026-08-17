@@ -2,15 +2,16 @@
 import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import { regionsAndCitiesOf } from '../lib/region/regions-cities-of.ts';
-import { regionName } from '../lib/region/region-name.ts';
-import { cityName } from '../lib/region/city-name.ts';
+import { placeLabel } from '../lib/region/place-label.ts';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { ariaCurrent } from '../lib/a11y/aria-current.ts';
+import '../styles/region-picker.css';
 import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string; page?: string; city?: string | undefined }>;
 const { lang, region, page = '', city } = Astro.props;
-const label = city ? cityName(city) : regionName(region);
+const label = placeLabel(region, city);
 
 // A combined region+city picker: every region is a bold group header, its
 // cities listed under it, each row carrying its event count. Region headers keep
@@ -39,13 +40,13 @@ const groups = regionsAndCitiesOf(payload.events);
       {groups.map((g) => (
         <Fragment>
           <li class="rp-region" data-name={g.name.toLowerCase()} data-region={g.slug}>
-            <a href={regionUrl(lang, g.slug, page)} aria-current={g.slug === region && city === undefined ? 'true' : undefined}>
+            <a href={regionUrl(lang, g.slug, page)} aria-current={ariaCurrent(g.slug === region && city === undefined)}>
               <span>{g.name}</span><small>{g.count}</small>
             </a>
           </li>
           {g.cities.map((c) => (
             <li class="rp-city" data-name={`${g.name.toLowerCase()} ${c.name.toLowerCase()}`} data-region={g.slug}>
-              <a href={localizedUrl(lang, `${g.slug}/${c.slug}/`)} aria-current={g.slug === region && c.slug === city ? 'true' : undefined}>
+              <a href={localizedUrl(lang, `${g.slug}/${c.slug}/`)} aria-current={ariaCurrent(g.slug === region && c.slug === city)}>
                 <span>{c.name}</span><small>{c.count}</small>
               </a>
             </li>
@@ -61,66 +62,3 @@ const groups = regionsAndCitiesOf(payload.events);
   import { initRegionPicker } from './region/init-region-picker.ts';
   initRegionPicker();
 </script>
-
-<style>
-  .region-picker { position: relative; }
-  .region-current {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
-    padding: 0.35rem 0.6rem; border-radius: var(--radius-sm);
-    font: inherit; font-size: 0.9rem; cursor: pointer;
-  }
-  .region-current:hover { border-color: var(--accent); }
-  /* A <dialog>, so the phone's bottom sheet can escape the header's
-     backdrop-filter — which would otherwise become its containing block and pin
-     the sheet inside the header. Desktop opens it non-modal, where it stays an
-     ordinary absolutely-positioned dropdown. */
-  .region-pop {
-    position: absolute; top: calc(100% + 0.4rem); right: 0; left: auto; z-index: 60;
-    width: 16rem; max-height: 24rem; margin: 0;
-    background: var(--surface); color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm); box-shadow: 0 12px 32px rgb(0 0 0 / 0.25);
-    padding: 0.5rem;
-  }
-  .region-pop[open] { display: flex; flex-direction: column; }
-  .region-pop::backdrop { background: rgb(0 0 0 / 0.45); }
-  .region-pop input {
-    width: 100%; box-sizing: border-box; font: inherit; font-size: 0.9rem;
-    padding: 0.4rem 0.55rem; border: 1px solid var(--line);
-    border-radius: var(--radius-sm); background: var(--bg); color: var(--ink);
-  }
-  .region-pop ul { list-style: none; margin: 0.4rem 0 0; padding: 0; overflow-y: auto; }
-  .region-pop a {
-    display: flex; justify-content: space-between; gap: 0.5rem;
-    padding: 0.35rem 0.5rem; border-radius: var(--radius-sm);
-    text-decoration: none; color: var(--ink); font-size: 0.9rem;
-  }
-  .region-pop a:hover, .region-pop a:focus-visible { background: rgb(128 128 128 / 0.14); }
-  .region-pop a[aria-current] { color: var(--accent); }
-  .region-pop small { color: var(--ink-2); font-variant-numeric: tabular-nums; }
-  /* Region rows are group headers; cities sit indented beneath them. */
-  .region-pop .rp-region a { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
-  .region-pop .rp-region:not(:first-child) a { margin-top: 0.15rem; }
-  .region-pop .rp-city a { padding-left: 1.5rem; font-size: 0.86rem; }
-  .region-pop .rp-city span { color: var(--ink-2); }
-  .region-none { margin: 0.5rem; color: var(--ink-2); font-size: 0.85rem; }
-
-  /* Phone: a bottom sheet, anchored to the viewport, so the search field stays
-     pinned and the list scrolls under it. */
-  @media (max-width: 44rem) {
-    .region-pop[open] {
-      position: fixed;
-      inset: auto 0 0 0;
-      width: auto;
-      max-width: none;
-      max-height: 72vh;
-      padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
-      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-      border-bottom: 0;
-      box-shadow: 0 -12px 32px rgb(0 0 0 / 0.3);
-    }
-    .region-pop input { padding: 0.6rem 0.7rem; font-size: 1rem; }
-    .region-pop a { padding: 0.65rem 0.5rem; }
-  }
-</style>

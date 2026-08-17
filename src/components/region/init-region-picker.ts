@@ -3,94 +3,25 @@
  * The list is server-rendered links — the script only hides the ones that do not
  * match what you typed, so the picker still works without it.
  */
+import { isHtmlElement } from '../../lib/dom/is-html-element.ts';
+import { regionPickerParts } from './region-picker-parts.ts';
+import { wireRegionPicker } from './wire-region-picker.ts';
 
-// @cloudflare/workers-types shadows the DOM Element, so querySelector generics
-// don't line up — narrow through the returned node instead.
-const q = <T>(root: HTMLElement, sel: string): T | null =>
-  (root.querySelector(sel) as unknown as T) ?? null;
-
-const filter = (list: HTMLElement, empty: HTMLElement, term: string): void => {
-  const needle = term.trim().toLowerCase();
-  const rows = Array.from(list.children) as HTMLElement[];
-  const selfHit = new Map<HTMLElement, boolean>();
-  rows.forEach((row) => selfHit.set(row, needle === '' || (row.dataset['name'] ?? '').includes(needle)));
-  // A region header stays visible when any of its cities matched, so a matched
-  // city never floats free of its group.
-  const regionsWithCity = new Set<string>();
-  rows.forEach((row) => {
-    if (row.classList.contains('rp-city') && selfHit.get(row)) regionsWithCity.add(row.dataset['region'] ?? '');
-  });
-  let shown = 0;
-  rows.forEach((row) => {
-    const header = row.classList.contains('rp-region');
-    const hit = (selfHit.get(row) ?? false) || (header && regionsWithCity.has(row.dataset['region'] ?? ''));
-    row.hidden = !hit;
-    if (hit) shown += 1;
-  });
-  empty.hidden = shown > 0;
-};
-
-/** Phone: a modal bottom sheet, so it sits in the top layer and the header's
- *  backdrop-filter cannot become its containing block. Desktop: a plain
- *  non-modal dropdown anchored under the button. */
-const isPhone = (): boolean => window.matchMedia('(max-width: 44rem)').matches;
-
-const open = (pop: HTMLDialogElement, toggle: HTMLElement, search: HTMLInputElement): void => {
-  if (isPhone()) pop.showModal();
-  else pop.show();
-  toggle.setAttribute('aria-expanded', 'true');
-  search.focus();
-};
-
-const close = (pop: HTMLDialogElement, toggle: HTMLElement): void => {
-  pop.close();
-  toggle.setAttribute('aria-expanded', 'false');
-};
-
-const wire = (root: HTMLElement): void => {
-  if (root.dataset['bound'] === 'true') return;
+const bindOne = (root: HTMLElement): void => {
   root.dataset['bound'] = 'true';
-  const toggle = q<HTMLElement>(root, '[data-region-toggle]');
-  const pop = q<HTMLDialogElement>(root, '[data-region-pop]');
-  const search = q<HTMLInputElement>(root, '[data-region-search]');
-  const list = q<HTMLElement>(root, '[data-region-list]');
-  const empty = q<HTMLElement>(root, '[data-region-none]');
-  if (!toggle || !pop || !search || !list || !empty) return;
-
-  toggle.addEventListener('click', () => {
-    if (pop.open) close(pop, toggle);
-    else open(pop, toggle, search);
-  });
-  // Escape and backdrop taps close a dialog on their own — keep the button's
-  // state honest when they do.
-  pop.addEventListener('close', () => toggle.setAttribute('aria-expanded', 'false'));
-  search.addEventListener('input', () => filter(list, empty, search.value));
-  // Enter on the first match goes straight there — "tos" then Enter is the
-  // whole interaction.
-  search.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter') return;
-    const first = Array.from(list.children).find((row) => !(row as HTMLElement).hidden);
-    const link = first ? (first.querySelector('a') as HTMLAnchorElement | null) : null;
-    if (link) window.location.href = link.href;
-  });
-  document.addEventListener('click', (event) => {
-    const target = event.target as Node;
-    if (pop.open && !isPhone() && !root.contains(target)) close(pop, toggle);
-  });
-  // A modal dialog fills the sheet's box only; a tap on the backdrop lands on
-  // the dialog itself, outside its content.
-  pop.addEventListener('click', (event) => {
-    const box = pop.getBoundingClientRect();
-    const { clientX: x, clientY: y } = event as MouseEvent;
-    const outside = x < box.left || x > box.right || y < box.top || y > box.bottom;
-    if (outside) close(pop, toggle);
-  });
+  regionPickerParts(root).forEach(wireRegionPicker);
 };
 
+// An SPA swap brings a fresh, unbound picker; the old one leaves with its DOM.
+const bindAll = (): void => {
+  Array.from<unknown>(document.querySelectorAll('[data-region-picker]'))
+    .filter(isHtmlElement)
+    .filter((root) => root.dataset['bound'] !== 'true')
+    .forEach(bindOne);
+};
+
+/** Wire every picker on the page, now and after each client-side navigation. */
 export const initRegionPicker = (): void => {
-  const bind = (): void => {
-    document.querySelectorAll('[data-region-picker]').forEach((node) => wire(node as HTMLElement));
-  };
-  bind();
-  document.addEventListener('astro:page-load', bind);
+  bindAll();
+  document.addEventListener('astro:page-load', bindAll);
 };

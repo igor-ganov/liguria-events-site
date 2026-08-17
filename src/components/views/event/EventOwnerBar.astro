@@ -1,0 +1,11 @@
+---
+import { statusLabel } from '../../../lib/events/status-label.ts';
+
+type Props = Readonly<{ eventId: string; status?: string | undefined }>;
+const { eventId, status } = Astro.props;
+---
+
+<div class="event-owner-bar">
+  <span class="event-status" data-status={status}>{statusLabel(status)}</span>
+  <a class="account-submit" href={`/event/${eventId}/edit`}>Edit</a>
+</div>

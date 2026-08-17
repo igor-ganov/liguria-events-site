@@ -5,11 +5,20 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import EventForm from '../../../components/EventForm.astro';
 import { editableEventById } from '../../../lib/events/d1-published.ts';
+import { branch } from '../../../lib/branch.ts';
 
 const { id } = Astro.params;
 const user = Astro.locals.user;
-const event = user && id ? await editableEventById(Astro.locals.runtime.env.DB, id, user.id) : undefined;
-if (event === undefined) return Astro.redirect(id ? `/event/${id}` : '/');
+const eventId = id ?? '';
+const userId = user?.id ?? '';
+const event = await branch(eventId !== '' && userId !== '')(
+  () => editableEventById(Astro.locals.runtime.env.DB, eventId, userId),
+  async () => undefined,
+);
+switch (event) {
+  case undefined:
+    return Astro.redirect(branch(eventId !== '')(() => `/event/${eventId}`, () => '/'));
+}
 ---
 
 <Layout lang="en" title="Edit event" path={`event/${id}/edit/`}>

@@ -1,0 +1,19 @@
+---
+import { branch } from '../../lib/branch.ts';
+import type { AdminUserRow } from '../../lib/auth/users.ts';
+
+type Props = Readonly<{ user: AdminUserRow }>;
+const { user } = Astro.props;
+---
+
+<div class="admin-actions">
+  {branch(user.role === 'admin')(
+    () => <button data-user-action="demote">Revoke admin</button>,
+    () => <button data-user-action="promote">Make admin</button>,
+  )}
+  {branch(user.banned)(
+    () => <button data-user-action="unban">Unban</button>,
+    () => <button data-user-action="ban" class="danger">Ban</button>,
+  )}
+  <button data-user-action="delete_events" class="danger">Delete events</button>
+</div>

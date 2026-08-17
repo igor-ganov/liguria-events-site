@@ -1,0 +1,21 @@
+---
+import type { NamedLink } from '../../../lib/events/event-links.ts';
+
+type Props = Readonly<{ links: readonly NamedLink[]; heading: string }>;
+const { links, heading } = Astro.props;
+---
+
+<section class="event-sources">
+  <h2>{heading}</h2>
+  <ul>
+    {
+      links.map((link) => (
+        <li>
+          <a href={link.url} target="_blank" rel="noopener">
+            ↗ {link.name}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>

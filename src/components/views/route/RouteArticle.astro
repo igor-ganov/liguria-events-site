@@ -1,0 +1,38 @@
+---
+import { branch } from '../../../lib/branch.ts';
+import type { SavedRoute } from '../../../lib/favorites/favorites-db.ts';
+import type { RouteAccess } from '../../../lib/favorites/route-access.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{
+  route: SavedRoute;
+  ui: Ui;
+  id?: string | undefined;
+  access: RouteAccess;
+  favorites: readonly string[];
+}>;
+const { route, ui, id, access, favorites } = Astro.props;
+const { owned, anonymous } = access;
+// The client script reads these as data attributes, so they travel as '1'/'0'.
+const flag = (on: boolean): string => branch(on)(() => '1', () => '0');
+---
+
+<h1>{route.name}</h1>
+<div class="route-page-actions no-print">
+  <button class="chip" type="button" data-route-pdf>{ui.route.pdf}</button>
+</div>
+<div class="route-edit-actions no-print" data-route-edit-actions hidden={!owned}>
+  <button class="route-save" type="button" data-route-save-edits>{ui.route.saveChanges}</button>
+  <span class="route-edit-status" data-route-edit-status />
+</div>
+{!owned && !anonymous && <p class="route-by no-print">{ui.route.by}</p>}
+<div class="route-map" data-route-map hidden />
+<div class="route-output" data-route-output />
+<div data-route-root data-owned={flag(owned)} data-anon={flag(anonymous)} data-id={id} hidden />
+<script is:inline type="application/json" id="route-data" set:html={route.data} />
+{owned && <script is:inline type="application/json" id="route-favorites" set:html={JSON.stringify(favorites)} />}
+
+<script>
+  import { initRoutePage } from '../../favorites/init-route-page.ts';
+  initRoutePage();
+</script>

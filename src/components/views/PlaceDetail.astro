@@ -1,17 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PlaceBody from './place/PlaceBody.astro';
+import { branch } from '../../lib/branch.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { placesFor } from '../../lib/places/places-source.ts';
-import { placeIcon } from '../../lib/places/place-icon.ts';
-import { placeColor } from '../../lib/places/place-color.ts';
-import { placeSources } from '../../lib/places/place-sources.ts';
-import { placePath } from '../../lib/places/place-path.ts';
-import { placeReviewSummary, placeReviewList, myPlaceReview } from '../../lib/places/reviews.ts';
-import { commonsImg } from '../../lib/img/commons-img.ts';
+import { placeDetailPath } from '../../lib/places/place-detail-path.ts';
 import { slug } from '../../lib/slug.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
-import { uiIcon } from '../../lib/icons/ui-icon.ts';
-import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 // Worker-SSR'd (prerender = false): the record is looked up server-side from the
@@ -23,134 +18,19 @@ const ui = await uiOf(lang);
 const assets = Astro.locals.runtime.env.ASSETS;
 const all = await placesFor(assets, region, lang);
 const place = all.find((p) => slug.matches(p.id, raw));
-if (place === undefined) Astro.response.status = 404;
-
-const path = place ? placePath(place.region, place.name, place.id) : `${region}/places/`;
-const site = place?.website;
-const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
-const mapUrl = place
-  ? localizedUrl(lang, `${region}/map/?pl=1&z=16&c=${place.lat.toFixed(4)},${place.lng.toFixed(4)}`)
-  : '';
-const embedSrc = place ? `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=15&output=embed` : '';
-const sources = place ? placeSources(place) : [];
-const favHtml = place
-  ? favButtonHtml(place.id, ui.nav.favorites, {
-      id: place.id, kind: 'place', region: place.region, name: place.name,
-      lat: place.lat, lng: place.lng, cat: place.cat, url: localizedUrl(lang, path),
-    })
-  : '';
+Astro.response.status = branch(place === undefined)(
+  () => 404,
+  () => 200,
+);
+const path = placeDetailPath(region, place);
 const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.', ru: 'Место не найдено.' }[lang];
-
-// Our own reviews (D1): summary + recent list, and the caller's own review if
-// signed in. A row of five star icons, the first `n` lit — rendered server-side.
-const db = Astro.locals.runtime.env.DB;
-const user = Astro.locals.user;
-const [summary, reviews, mine] = place
-  ? await Promise.all([placeReviewSummary(db, place.id), placeReviewList(db, place.id), user ? myPlaceReview(db, user.id, place.id) : Promise.resolve(null)])
-  : [{ avg: 0, count: 0 }, [], null];
-const stars = (r: number): string =>
-  Array.from({ length: 5 }, (_, i) => `<span class="rv-star${i < Math.round(r) ? ' on' : ''}">${uiIcon('star', 15)}</span>`).join('');
 ---
 
 <Layout lang={lang} region={region} title={place?.name ?? ui.places.title} description={place?.desc ?? place?.name ?? ui.places.intro} path={path}>
   <article class="event-page lm-detail">
     <a class="back-link" href={localizedUrl(lang, `${region}/places/`)}>← {ui.places.title}</a>
-    {
-      place ? (
-        <Fragment>
-          {place.img && (
-            <figure class="event-hero">
-              <img src={commonsImg(place.img, 1024)} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
-            </figure>
-          )}
-          <div class="detail-head">
-            <h1>{place.name}</h1>
-            <Fragment set:html={favHtml} />
-          </div>
-          <div class="event-tags">
-            <span class="cat-tag lm-tag" style={`--lm:${placeColor(place.cat)}`}>
-              <Fragment set:html={placeIcon(place.cat, 13)} /> {ui.places.categories[place.cat]}
-            </span>
-          </div>
-          <dl class="event-facts">
-            <div>
-              <dt title={ui.places.address}><Fragment set:html={uiIcon('pin', 17)} /></dt>
-              <dd>{place.address ?? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
-            </div>
-            {place?.phone && (
-              <div>
-                <dt title={ui.places.phone}><Fragment set:html={uiIcon('phone', 17)} /></dt>
-                <dd><a href={`tel:${place.phone.replace(/\s+/g, '')}`}>{place.phone}</a></dd>
-              </div>
-            )}
-            {place?.hours && (
-              <div>
-                <dt title={ui.places.hours}><Fragment set:html={uiIcon('clock', 17)} /></dt>
-                <dd class="place-hours">{place.hours}</dd>
-              </div>
-            )}
-            {site && (
-              <div>
-                <dt><Fragment set:html={uiIcon('external', 17)} /></dt>
-                <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
-              </div>
-            )}
-          </dl>
-          {place.desc && <p class="event-desc">{place.desc}</p>}
-
-          <section class="place-reviews" data-rv data-place={place.id} data-region={place.region}>
-            <h2>
-              {ui.reviews.title}
-              {summary.count > 0 && (
-                <span class="rv-summary"><Fragment set:html={stars(summary.avg)} /> {summary.avg} · {summary.count}</span>
-              )}
-            </h2>
-
-            {user ? (
-              <form class="rv-form" data-rv-form>
-                <div class="rv-stars-input" data-rv-stars data-current={mine?.rating ?? 0} aria-label={ui.reviews.rating}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button type="button" class="rv-star-btn" data-rv-star={n} aria-label={`${n}`}><Fragment set:html={uiIcon('star', 22)} /></button>
-                  ))}
-                </div>
-                <textarea data-rv-comment maxlength="2000" rows="3" placeholder={ui.reviews.comment}>{mine?.comment ?? ''}</textarea>
-                <div class="rv-actions">
-                  <button type="submit" class="chip chip--layer" data-rv-submit>{ui.reviews.submit}</button>
-                  {mine && <button type="button" class="chip" data-rv-delete>{ui.reviews.remove}</button>}
-                </div>
-              </form>
-            ) : (
-              <a class="rv-signin chip chip--layer" href="?signin">{ui.reviews.signIn}</a>
-            )}
-
-            {reviews.length > 0 ? (
-              <ul class="rv-list">
-                {reviews.map((r) => (
-                  <li class="rv-item">
-                    <div class="rv-item-head"><Fragment set:html={stars(r.rating)} /> <span class="rv-author">{r.handle}</span> <time>{r.createdAt.slice(0, 10)}</time></div>
-                    {r.comment && <p class="rv-comment">{r.comment}</p>}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p class="rv-none">{ui.reviews.none}</p>
-            )}
-          </section>
-
-          <figure class="event-map">
-            <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
-          </figure>
-          {sources.length > 0 && (
-            <section class="event-sources">
-              <h2>{ui.headings.sources}</h2>
-              <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
-            </section>
-          )}
-        </Fragment>
-      ) : (
-        <p class="feed-empty">{notFound}</p>
-      )
-    }
+    {place && <PlaceBody place={place} lang={lang} region={region} ui={ui} />}
+    {place === undefined && <p class="feed-empty">{notFound}</p>}
   </article>
 </Layout>
 

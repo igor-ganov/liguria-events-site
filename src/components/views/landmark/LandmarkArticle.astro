@@ -1,0 +1,50 @@
+---
+import { landmarkIcon } from '../../../lib/landmarks/landmark-icon.ts';
+import { landmarkColor } from '../../../lib/landmarks/landmark-color.ts';
+import { landmarkSources } from '../../../lib/landmarks/landmark-sources.ts';
+import { landmarkFavHtml } from '../../../lib/landmarks/landmark-fav-html.ts';
+import { commonsImg } from '../../../lib/img/commons-img.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { Landmark } from '../../../lib/landmarks/landmark-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ item: Landmark; ui: Ui; lang: Locale; region: string }>;
+const { item, ui, lang, region } = Astro.props;
+const mapUrl = localizedUrl(lang, `${region}/map/?le=1&z=16&c=${item.lat.toFixed(4)},${item.lng.toFixed(4)}`);
+const embedSrc = `https://maps.google.com/maps?q=${item.lat},${item.lng}&z=15&output=embed`;
+const sources = landmarkSources(item);
+const favHtml = landmarkFavHtml(lang, ui.nav.favorites)(item);
+---
+
+{item.img && (
+  <figure class="event-hero">
+    <img src={commonsImg(item.img, 1024)} alt={item.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+  </figure>
+)}
+<div class="detail-head">
+  <h1>{item.name}</h1>
+  <Fragment set:html={favHtml} />
+</div>
+<div class="event-tags">
+  <span class="cat-tag lm-tag" style={`--lm:${landmarkColor(item.kind)}`}>
+    <Fragment set:html={landmarkIcon(item.kind, 13)} /> {ui.landmarks.kinds[item.kind]}
+  </span>
+</div>
+<dl class="event-facts">
+  <div>
+    <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
+    <dd>{item.lat.toFixed(5)}, {item.lng.toFixed(5)} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+  </div>
+</dl>
+{item.desc && <p class="event-desc">{item.desc}</p>}
+<figure class="event-map">
+  <iframe title={`${ui.mapLink}: ${item.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
+</figure>
+{sources.length > 0 && (
+  <section class="event-sources">
+    <h2>{ui.headings.sources}</h2>
+    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+  </section>
+)}

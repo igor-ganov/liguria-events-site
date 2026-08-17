@@ -1,0 +1,22 @@
+---
+import type { ProgrammeSession } from '../../../lib/events/programme-sessions.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+const PROGRAMME_LABEL: Record<Locale, string> = { en: 'Programme', it: 'Programma', ru: 'Программа' };
+
+type Props = Readonly<{ sessions: readonly ProgrammeSession[]; lang: Locale }>;
+const { sessions, lang } = Astro.props;
+---
+
+<section class="event-programme">
+  <h2>{PROGRAMME_LABEL[lang]}</h2>
+  <ul>
+    {sessions.map((session) => (
+      <li>
+        <span class="prog-date">{session.date}</span>
+        {session.time && <span class="prog-time">{session.time}</span>}
+        {session.title && <span class="prog-title">{session.title}</span>}
+      </li>
+    ))}
+  </ul>
+</section>

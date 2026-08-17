@@ -1,31 +1,26 @@
-import { PLACE_CATEGORIES } from './place-categories.ts';
-import type { PlaceCategory } from './place-categories.ts';
+import { isValidPlaceRow } from './place-row.ts';
+import { placeExtras } from './place-extras.ts';
+import type { PlaceRow } from './place-row.ts';
 import type { Place } from './place-schema.ts';
-import { isJunkImage } from '../img/is-junk-image.ts';
 
-// The asset is compact rows (short keys, absent fields omitted) — see
-// scripts/build-places.ts. Expand into readable Place objects; region is always
-// liguria, so it is not carried per-row.
-type Row = { i: string; n: string; c: string; a: number; o: number; w?: string; d?: string; h?: string; p?: string; so?: readonly string[]; ad?: string; k?: string; q?: string; m?: string };
-const CATS = new Set<string>(PLACE_CATEGORIES);
+const isRows = (value: unknown): value is readonly Partial<PlaceRow>[] => Array.isArray(value);
 
-const toPlace = (region: string) => (r: Row): Place[] =>
-  typeof r?.i === 'string' && typeof r.n === 'string' && CATS.has(r.c) && typeof r.a === 'number' && typeof r.o === 'number'
-    ? [{
-        id: r.i, name: r.n, cat: r.c as PlaceCategory, lat: r.a, lng: r.o, region,
-        ...(r.w ? { website: r.w } : {}),
-        ...(r.d ? { desc: r.d } : {}),
-        ...(r.h ? { hours: r.h } : {}),
-        ...(r.p ? { phone: r.p } : {}),
-        ...(Array.isArray(r.so) && r.so.length > 0 ? { socials: r.so } : {}),
-        ...(r.ad ? { address: r.ad } : {}),
-        ...(r.k ? { wiki: r.k } : {}),
-        ...(r.q ? { wd: r.q } : {}),
-        ...(r.m && !isJunkImage(r.m) ? { img: r.m } : {}),
-      }]
-    : [];
+const toPlace =
+  (region: string) =>
+  (r: Partial<PlaceRow>): readonly Place[] =>
+    [r]
+      .filter(isValidPlaceRow)
+      .map((row) => ({
+        id: row.i,
+        name: row.n,
+        cat: row.c,
+        lat: row.a,
+        lng: row.o,
+        region,
+        ...placeExtras(row),
+      }));
 
 /** Decode a region's compact shard into Place objects; malformed → dropped.
  *  Rows omit `region` (it IS the shard filename), so it is supplied here. */
 export const decodePlaces = (value: unknown, region: string): readonly Place[] =>
-  Array.isArray(value) ? (value as Row[]).flatMap(toPlace(region)) : [];
+  [value].filter(isRows).flatMap((rows) => rows.flatMap(toPlace(region)));

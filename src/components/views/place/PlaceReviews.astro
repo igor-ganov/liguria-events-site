@@ -1,0 +1,47 @@
+---
+import PlaceReviewForm from './PlaceReviewForm.astro';
+import { branch } from '../../../lib/branch.ts';
+import { placeReviewSummary, placeReviewList } from '../../../lib/places/reviews.ts';
+import { myReviewOf } from '../../../lib/places/my-review-of.ts';
+import { reviewStars } from '../../../lib/places/review-stars.ts';
+import type { Place } from '../../../lib/places/place-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// Our own reviews (D1): summary + recent list, and the caller's own review if
+// signed in. A row of five star icons, the first `n` lit — rendered server-side.
+type Props = Readonly<{ place: Place; ui: Ui }>;
+const { place, ui } = Astro.props;
+const db = Astro.locals.runtime.env.DB;
+const user = Astro.locals.user;
+const [summary, reviews, mine] = await Promise.all([
+  placeReviewSummary(db, place.id),
+  placeReviewList(db, place.id),
+  myReviewOf(db, place.id, user?.id),
+]);
+---
+
+<section class="place-reviews" data-rv data-place={place.id} data-region={place.region}>
+  <h2>
+    {ui.reviews.title}
+    {summary.count > 0 && (
+      <span class="rv-summary"><Fragment set:html={reviewStars(summary.avg)} /> {summary.avg} · {summary.count}</span>
+    )}
+  </h2>
+
+  {user && <PlaceReviewForm mine={mine} ui={ui} />}
+  {!user && <a class="rv-signin chip chip--layer" href="?signin">{ui.reviews.signIn}</a>}
+
+  {branch(reviews.length > 0)(
+    () => (
+      <ul class="rv-list">
+        {reviews.map((r) => (
+          <li class="rv-item">
+            <div class="rv-item-head"><Fragment set:html={reviewStars(r.rating)} /> <span class="rv-author">{r.handle}</span> <time>{r.createdAt.slice(0, 10)}</time></div>
+            {r.comment && <p class="rv-comment">{r.comment}</p>}
+          </li>
+        ))}
+      </ul>
+    ),
+    () => <p class="rv-none">{ui.reviews.none}</p>,
+  )}
+</section>

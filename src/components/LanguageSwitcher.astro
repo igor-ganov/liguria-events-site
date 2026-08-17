@@ -1,6 +1,7 @@
 ---
 import { LOCALES } from '../lib/i18n/locales.ts';
 import { localizedUrl } from '../lib/i18n/localized-url.ts';
+import { branch } from '../lib/branch.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; path: string }>;
@@ -14,7 +15,7 @@ const LABEL: Readonly<Record<Locale, string>> = { en: 'EN', it: 'IT', ru: 'RU' }
       <a
         href={localizedUrl(loc, path)}
         hreflang={loc}
-        aria-current={loc === lang ? 'true' : 'false'}
+        aria-current={branch(loc === lang)<'true' | 'false'>(() => 'true', () => 'false')}
       >
         {LABEL[loc]}
       </a>

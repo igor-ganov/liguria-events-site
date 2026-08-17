@@ -1,0 +1,34 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+
+type Props = Readonly<{ crawlerAddress?: string | undefined; contacts?: EventContacts | undefined }>;
+const { crawlerAddress, contacts } = Astro.props;
+const site = contacts?.website;
+const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+{crawlerAddress && (
+  <div>
+    <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
+    <dd>{crawlerAddress}</dd>
+  </div>
+)}
+{contacts?.address && (
+  <div>
+    <dt title="Address"><Fragment set:html={uiIcon('pin', 17)} /></dt>
+    <dd>{contacts.address}</dd>
+  </div>
+)}
+{contacts?.phone && (
+  <div>
+    <dt title="Phone"><Fragment set:html={uiIcon('phone', 17)} /></dt>
+    <dd><a href={`tel:${contacts.phone.replace(/\s+/g, '')}`}>{contacts.phone}</a></dd>
+  </div>
+)}
+{site && (
+  <div>
+    <dt title="Website"><Fragment set:html={uiIcon('external', 17)} /></dt>
+    <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
+  </div>
+)}

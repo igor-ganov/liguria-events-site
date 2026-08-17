@@ -1,0 +1,27 @@
+---
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import { HEART } from '../../../lib/favorites/fav-button.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ event: CompactEvent; title: string; ui: Ui }>;
+const { event, title, ui } = Astro.props;
+---
+
+<h1>{title}</h1>
+<div class="event-tags">
+  {
+    event.c.map((category) => (
+      <span class="cat-tag" data-cat={category}>
+        <Fragment set:html={iconSvg(category, 13)} />
+        {ui.cat[category]}
+      </span>
+    ))
+  }
+  {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+  {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+</div>
+<button type="button" class="event-fav" data-fav-toggle data-fav-id={event.id} aria-pressed="false">
+  <Fragment set:html={HEART} />
+  {ui.nav.favorites}
+</button>

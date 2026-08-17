@@ -1,0 +1,21 @@
+---
+import { dateRange } from '../../lib/events/date-range.ts';
+import type { EventRow } from '../../lib/events/list-events.ts';
+
+type Props = Readonly<{ event: EventRow }>;
+const { event: ev } = Astro.props;
+---
+
+<tr data-id={ev.id}>
+  <td><span class={`badge badge-${ev.status}`}>{ev.status}</span></td>
+  <td>{ev.title_en}</td>
+  <td>{dateRange(ev.start_date, ev.end_date ?? undefined)}</td>
+  <td>{ev.origin}</td>
+  <td>
+    <div class="admin-actions">
+      <button data-action="publish">Publish</button>
+      <button data-action="reject">Reject</button>
+      <button data-action="delete" class="danger">Delete</button>
+    </div>
+  </td>
+</tr>

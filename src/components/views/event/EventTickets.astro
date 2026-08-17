@@ -1,0 +1,11 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+
+type Props = Readonly<{ href: string; label: string }>;
+const { href, label } = Astro.props;
+---
+
+<a class="event-tickets" href={href} target="_blank" rel="noopener">
+  <Fragment set:html={uiIcon('external', 16)} />
+  {label}
+</a>

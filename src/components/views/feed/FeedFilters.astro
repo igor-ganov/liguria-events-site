@@ -1,0 +1,34 @@
+---
+import { CATEGORIES } from '../../../lib/events/categories.ts';
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ ui: Ui; today: string }>;
+const { ui, today } = Astro.props;
+---
+
+<div class="feed-search">
+  <input type="search" data-feed-search placeholder={ui.search.placeholder} aria-label={ui.search.placeholder} />
+</div>
+
+<div class="feed-dates">
+  <label>{ui.range.from} <input type="date" data-feed-from value={today} /></label>
+  <label>{ui.range.to} <input type="date" data-feed-to /></label>
+</div>
+
+<div class="feed-sort" role="group" aria-label={ui.sort.label}>
+  <button class="chip chip--sort" data-feed-sort="date" aria-pressed="true">{ui.sort.date}</button>
+  <button class="chip chip--sort" data-feed-sort="created" aria-pressed="false">{ui.sort.created}</button>
+</div>
+
+<div class="chips" role="group" aria-label="Filter by category">
+  {CATEGORIES.map((category) => (
+    <button class="chip" data-cat={category} data-feed-cat={category} aria-pressed="false">
+      <Fragment set:html={iconSvg(category, 14)} />
+      {ui.cat[category]}
+    </button>
+  ))}
+  <button class="chip chip--free" data-feed-free aria-pressed="false">{ui.chips.free}</button>
+  <button class="chip chip--gems" data-feed-gems aria-pressed="false">{ui.chips.gems}</button>
+  <button class="chip chip--clear" data-feed-clear hidden>✕ {ui.chips.clear}</button>
+</div>

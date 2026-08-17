@@ -1,0 +1,38 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import type { Place } from '../../../lib/places/place-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ place: Place; lang: Locale; region: string; ui: Ui }>;
+const { place, lang, region, ui } = Astro.props;
+const mapUrl = localizedUrl(lang, `${region}/map/?pl=1&z=16&c=${place.lat.toFixed(4)},${place.lng.toFixed(4)}`);
+const site = place.website;
+const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+<dl class="event-facts">
+  <div>
+    <dt title={ui.places.address}><Fragment set:html={uiIcon('pin', 17)} /></dt>
+    <dd>{place.address ?? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+  </div>
+  {place.phone && (
+    <div>
+      <dt title={ui.places.phone}><Fragment set:html={uiIcon('phone', 17)} /></dt>
+      <dd><a href={`tel:${place.phone.replace(/\s+/g, '')}`}>{place.phone}</a></dd>
+    </div>
+  )}
+  {place.hours && (
+    <div>
+      <dt title={ui.places.hours}><Fragment set:html={uiIcon('clock', 17)} /></dt>
+      <dd class="place-hours">{place.hours}</dd>
+    </div>
+  )}
+  {site && (
+    <div>
+      <dt><Fragment set:html={uiIcon('external', 17)} /></dt>
+      <dd><a href={site} target="_blank" rel="noopener">{siteText}</a></dd>
+    </div>
+  )}
+</dl>

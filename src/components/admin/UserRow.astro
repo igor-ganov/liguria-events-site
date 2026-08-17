@@ -1,0 +1,41 @@
+---
+import UserActions from './UserActions.astro';
+import { branch } from '../../lib/branch.ts';
+import type { UserRowData } from '../../lib/admin/user-rows.ts';
+
+type Props = Readonly<{ row: UserRowData }>;
+const { row } = Astro.props;
+const { user: u, root, mine, events } = row;
+---
+
+<tr data-user={u.id} class={branch(u.banned)(() => 'row-banned', () => '')}>
+  <td>
+    <strong>{u.handle}</strong>{root && <span class="badge badge-root">root</span>}
+    <br /><small>{u.email}</small>
+    {u.banned && <><br /><span class="badge badge-rejected">banned</span> <small>{u.banned_reason}</small></>}
+  </td>
+  <td><span class={`badge badge-${u.role}`}>{u.role}</span></td>
+  <td>
+    {branch(events.length === 0)(
+      () => <small>—</small>,
+      () => (
+        <button class="link-btn" data-toggle={u.id} aria-expanded="false">
+          {u.published} published · {u.pending} pending · {u.rejected} hidden
+        </button>
+      ),
+    )}
+  </td>
+  <td><small>{u.created_at.slice(0, 10)}</small></td>
+  <td>
+    {branch(mine || root)(
+      () => <small>—</small>,
+      () => <UserActions user={u} />,
+    )}
+  </td>
+</tr>
+
+<style>
+  .row-banned { opacity: 0.55; }
+  .link-btn { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; }
+  .badge-root { margin-left: 0.375rem; font-size: 0.7em; }
+</style>

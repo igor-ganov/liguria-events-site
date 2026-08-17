@@ -1,0 +1,15 @@
+---
+import { resized } from '../../../lib/img/resized.ts';
+import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
+
+type Props = Readonly<{ photo: GalleryPhoto; title: string; photoBy: string }>;
+const { photo, title, photoBy } = Astro.props;
+---
+
+<figure class="event-hero">
+  <img src={resized(photo.image, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+  <figcaption>
+    {photoBy}:{' '}
+    <a href={photo.href} target="_blank" rel="noopener">{photo.name}</a>
+  </figcaption>
+</figure>

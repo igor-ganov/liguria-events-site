@@ -1,0 +1,53 @@
+---
+import PlaceFacts from './PlaceFacts.astro';
+import PlaceReviews from './PlaceReviews.astro';
+import { commonsImg } from '../../../lib/img/commons-img.ts';
+import { placeIcon } from '../../../lib/places/place-icon.ts';
+import { placeColor } from '../../../lib/places/place-color.ts';
+import { placeSources } from '../../../lib/places/place-sources.ts';
+import { placePath } from '../../../lib/places/place-path.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { favButtonHtml } from '../../../lib/favorites/fav-button.ts';
+import type { Place } from '../../../lib/places/place-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ place: Place; lang: Locale; region: string; ui: Ui }>;
+const { place, lang, region, ui } = Astro.props;
+const favHtml = favButtonHtml(place.id, ui.nav.favorites, {
+  id: place.id, kind: 'place', region: place.region, name: place.name,
+  lat: place.lat, lng: place.lng, cat: place.cat,
+  url: localizedUrl(lang, placePath(place.region, place.name, place.id)),
+});
+const embedSrc = `https://maps.google.com/maps?q=${place.lat},${place.lng}&z=15&output=embed`;
+const sources = placeSources(place);
+---
+
+{place.img && (
+  <figure class="event-hero">
+    <img src={commonsImg(place.img, 1024)} alt={place.name} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+  </figure>
+)}
+<div class="detail-head">
+  <h1>{place.name}</h1>
+  <Fragment set:html={favHtml} />
+</div>
+<div class="event-tags">
+  <span class="cat-tag lm-tag" style={`--lm:${placeColor(place.cat)}`}>
+    <Fragment set:html={placeIcon(place.cat, 13)} /> {ui.places.categories[place.cat]}
+  </span>
+</div>
+<PlaceFacts place={place} lang={lang} region={region} ui={ui} />
+{place.desc && <p class="event-desc">{place.desc}</p>}
+
+<PlaceReviews place={place} ui={ui} />
+
+<figure class="event-map">
+  <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
+</figure>
+{sources.length > 0 && (
+  <section class="event-sources">
+    <h2>{ui.headings.sources}</h2>
+    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+  </section>
+)}

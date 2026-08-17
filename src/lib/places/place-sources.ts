@@ -1,34 +1,33 @@
+import { reviewLinks } from './review-links.ts';
+import { socialName } from './social-name.ts';
+import type { PlaceSource } from './place-source.ts';
 import type { Place } from './place-schema.ts';
 
-/** A named outbound link shown on the place card / detail page. */
-export type PlaceSource = Readonly<{ name: string; url: string }>;
+export type { PlaceSource } from './place-source.ts';
 
-const osmUrl = (id: string): string | undefined =>
-  id.startsWith('osm:') ? `https://www.openstreetmap.org/${id.slice(4)}` : undefined;
+// A link is a 0-or-1 element list: an absent field contributes nothing, which
+// the concatenation below drops without a filter pass.
+const link = (name: string, url: string | undefined): readonly PlaceSource[] =>
+  [url].filter((value): value is string => Boolean(value)).map((value) => ({ name, url: value }));
 
-const socialName = (url: string): string =>
-  /instagram\.com/i.test(url) ? 'Instagram' : /facebook\.com|fb\.com/i.test(url) ? 'Facebook' : 'Social';
+// OSM ids are `osm:node/123` / `osm:way/45` → the element's page on osm.org.
+const osm = (id: string): readonly PlaceSource[] =>
+  [id]
+    .filter((value) => value.startsWith('osm:'))
+    .map((value) => ({ name: 'OpenStreetMap', url: `https://www.openstreetmap.org/${value.slice(4)}` }));
 
-// We can't store third-party ratings (Google/Tripadvisor licenses forbid it), so
-// instead we LINK to their search for this place — reviews open there, nothing is
-// cached. Both, since coverage differs by venue.
-const reviewLinks = (p: Place): readonly PlaceSource[] => {
-  const q = encodeURIComponent(`${p.name} ${p.lat},${p.lng}`);
-  return [
-    { name: 'Reviews · Maps', url: `https://www.google.com/maps/search/?api=1&query=${q}` },
-    { name: 'Tripadvisor', url: `https://www.tripadvisor.com/Search?q=${encodeURIComponent(p.name)}` },
-  ];
-};
+// Overture-built places carry no per-record page — credit the project itself.
+const overture = (id: string): readonly PlaceSource[] =>
+  [id].filter((value) => value.startsWith('ovt:')).map(() => ({ name: 'Overture Maps', url: 'https://overturemaps.org/' }));
 
 /** Actionable links + provenance for a place: its own site & socials first, then
  *  where to read reviews, then the open records it was built from. */
-export const placeSources = (p: Place): readonly PlaceSource[] =>
-  [
-    p.website ? { name: 'Website', url: p.website } : undefined,
-    ...(p.socials ?? []).map((url) => ({ name: socialName(url), url })),
-    ...reviewLinks(p),
-    p.wiki ? { name: 'Wikipedia', url: p.wiki } : undefined,
-    p.wd ? { name: 'Wikidata', url: p.wd } : undefined,
-    osmUrl(p.id) ? { name: 'OpenStreetMap', url: osmUrl(p.id) as string } : undefined,
-    p.id.startsWith('ovt:') ? { name: 'Overture Maps', url: 'https://overturemaps.org/' } : undefined,
-  ].filter((s): s is PlaceSource => s !== undefined);
+export const placeSources = (p: Place): readonly PlaceSource[] => [
+  ...link('Website', p.website),
+  ...(p.socials ?? []).map((url) => ({ name: socialName(url), url })),
+  ...reviewLinks(p),
+  ...link('Wikipedia', p.wiki),
+  ...link('Wikidata', p.wd),
+  ...osm(p.id),
+  ...overture(p.id),
+];

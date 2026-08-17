@@ -63,12 +63,17 @@ const description = ui.seo.map.replace('{place}', placeName);
   import brightStyle from '../../lib/map/styles/bright.json';
   import darkStyle from '../../lib/map/styles/dark.json';
   import { inMapArea } from '../../lib/map/in-map-area.ts';
-  import { escapeAttr as esc } from '../../lib/map/escape-attr.ts';
-  import { clipText } from '../../lib/map/clip-text.ts';
   import { readView } from '../../lib/map/read-view.ts';
   import type { MapCameraView } from '../../lib/map/read-view.ts';
-  import { sourceChips as srcChips } from '../../lib/map/source-chips.ts';
-  import { popupThumb } from '../../lib/map/popup-thumb.ts';
+  import { eventPopupHtml } from '../../lib/map/event-popup-html.ts';
+  import { clusterPopupHtml } from '../../lib/map/cluster-popup-html.ts';
+  import { landmarkPopupHtml } from '../../lib/map/landmark-popup-html.ts';
+  import { placePopupHtml } from '../../lib/map/place-popup-html.ts';
+  import { withoutPoiLayers } from '../../lib/map/without-poi-layers.ts';
+  import { withDetailSource } from '../../lib/map/with-detail-source.ts';
+  import { withSingleGlyphFont } from '../../lib/map/with-single-glyph-font.ts';
+  import { withRoadHighlight } from '../../lib/map/with-road-highlight.ts';
+  import { eventMarkerHtml } from '../../lib/map/event-marker-html.ts';
   import { mapEvents } from '../../lib/events/map-events.ts';
   import { categoryColor } from '../../lib/events/category-color.ts';
   import { primaryCategory } from '../../lib/events/primary-category.ts';
@@ -116,8 +121,6 @@ const description = ui.seo.map.replace('{place}', placeName);
   // the rest of Italy stays pannable (context only) off the z12 base.
   const DETAIL_URL =
     import.meta.env.PUBLIC_PMTILES_DETAIL_URL ?? `${location.origin}${B}/tiles/liguria.pmtiles`;
-  // Geometry that only exists at z13+ (absent from the z12 country base).
-  const DETAIL_LAYERS = new Set(['building']);
 
   const buildStyle = (key: string): maplibregl.StyleSpecification => {
     const dark = key === 'dark';
@@ -126,56 +129,18 @@ const description = ui.seo.map.replace('{place}', placeName);
       openmaptiles: { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution: ATTR },
       detail: { type: 'vector', url: `pmtiles://${DETAIL_URL}` },
     };
-    // Drop the basemap's own POI symbols entirely: our curated events / landmarks
-    // / places markers ARE the POI layer, and the raw OSM icons duplicated and
-    // cluttered them (a church showing as both our photo pin and a basemap icon).
-    style.layers = style.layers.filter((l) => (l as { 'source-layer'?: string })['source-layer'] !== 'poi');
-    // Repoint the high-zoom building layer at the Liguria detail source.
-    for (const layer of style.layers) {
-      const sl = (layer as { 'source-layer'?: string })['source-layer'];
-      if (sl && DETAIL_LAYERS.has(sl)) (layer as { source?: string }).source = 'detail';
-    }
     style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
     // Light uses OSM Bright's sprite (dark Maki POI icons read on a light map);
     // dark uses a white-recoloured copy of it (poi-dark) so the same standard
     // icons stay legible on the dark basemap.
     // maplibre-gl 5 requires an ABSOLUTE sprite URL (root-relative fails).
     style.sprite = `${location.origin}${B}/sprite/poi-color/sprite`;
-    // Point every label at our self-hosted glyph folders (hyphenated, no spaces
-    // — GitHub Pages 404s spaced paths). Known Noto faces map to their folder;
-    // anything else (Dark Matter's maptiler fonts) falls back to Regular.
-    const glyphFont = (font: string): string =>
-      /^noto sans (regular|bold|italic)$/i.test(font)
-        ? font.toLowerCase().replace(/\s+/g, '-')
-        : 'noto-sans-regular';
-    for (const layer of style.layers) {
-      const layout = (layer as { layout?: { 'text-font'?: readonly string[] } }).layout;
-      if (layout && Array.isArray(layout['text-font'])) {
-        // A self-hosted glyph folder is a SINGLE face — collapse the stack to
-        // one font (comma-joined stacks like "a,b" 404 against a one-face dir).
-        layout['text-font'] = [glyphFont(layout['text-font'][0] ?? 'Noto Sans Regular')];
-      }
-    }
-    const layers = style.layers as unknown as Array<Record<string, unknown>>;
-    // Dark Matter's roads stay subtle even after retuning; add a brighter
-    // major-road overlay so highways read clearly. (Light/OSM Bright is fine.)
-    if (dark) {
-      const roadHi = {
-        id: 'road-highlight',
-        type: 'line',
-        source: 'openmaptiles',
-        'source-layer': 'transportation',
-        filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']]],
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': '#c0c6cf',
-          'line-width': ['interpolate', ['linear'], ['zoom'], 7, 0.6, 11, 2, 15, 4.6],
-          'line-opacity': 0.9,
-        },
-      };
-      const symAt = layers.findIndex((l) => l['type'] === 'symbol');
-      layers.splice(symAt >= 0 ? symAt : layers.length, 0, roadHi);
-    }
+    // Layer rewrites, each a tested pure function in src/lib/map/: drop the
+    // basemap POIs, read buildings from the z14 detail source, collapse label
+    // font stacks to one self-hosted face, and (dark only) brighten major roads.
+    const base = withSingleGlyphFont(withDetailSource('detail')(withoutPoiLayers(style.layers)));
+    const layers = dark ? withRoadHighlight(base) : base;
+    style.layers = layers as unknown as maplibregl.StyleSpecification['layers'];
     return style;
   };
 
@@ -195,7 +160,13 @@ const description = ui.seo.map.replace('{place}', placeName);
     const events = readEventsIsland();
     const { lang, ui } = readUiIsland();
     const href = (e: CompactEvent): string => localizedUrl(lang, eventPath(e.id));
-    const thumb = (e: CompactEvent): string => popupThumb(e.img);
+    // The data every event popup (single card or cluster row) is built from.
+    const popupOf = (e: CompactEvent) => ({
+      href: href(e),
+      image: e.img,
+      title: titleOf(lang)(e),
+      when: formatWhen(e),
+    });
 
     // Eagerly warm the popup-sized image of any marker CURRENTLY in the viewport,
     // so its card shows the photo the instant it opens — no fetch-on-click, no
@@ -209,9 +180,6 @@ const description = ui.seo.map.replace('{place}', placeName);
       img.referrerPolicy = 'no-referrer';
       img.src = url;
     };
-    // Trim a blurb to a whole-word boundary for the compact popup card.
-    const clip = (s: string, n: number): string => clipText(n)(s);
-
     const today = isoToday();
     const sorted = [today, ...events.map((e) => e.e ?? e.s)].sort();
     const maxDate = sorted[sorted.length - 1] ?? today;
@@ -393,25 +361,13 @@ const description = ui.seo.map.replace('{place}', placeName);
     const openEvent = (e: CompactEvent, at: [number, number]): void => {
       new maplibregl.Popup({ closeButton: false, maxWidth: '260px', anchor: 'bottom', offset: 26 })
         .setLngLat(at)
-        .setHTML(
-          `<a class="map-pop" href="${href(e)}"><span class="map-pop-thumb">${thumb(e)}</span>` +
-            `<span class="map-pop-title">${esc(titleOf(lang)(e))}</span>` +
-            `<span class="map-pop-when">${esc(formatWhen(e))}</span></a>`,
-        )
+        .setHTML(eventPopupHtml(popupOf(e)))
         .addTo(map);
     };
     const openCluster = (leaves: readonly CompactEvent[], at: [number, number]): void => {
-      const rows = leaves
-        .map(
-          (e) =>
-            `<a class="map-clus-row" href="${href(e)}"><span class="map-clus-thumb">${thumb(e)}</span>` +
-            `<span class="map-clus-text"><span class="map-clus-title">${esc(titleOf(lang)(e))}</span>` +
-            `<span class="map-pop-when">${esc(formatWhen(e))}</span></span></a>`,
-        )
-        .join('');
       new maplibregl.Popup({ closeButton: true, maxWidth: '300px', anchor: 'bottom', offset: 26, className: 'map-clus-popup' })
         .setLngLat(at)
-        .setHTML(`<div class="map-clus-card"><div class="map-clus-head">${leaves.length}</div><div class="map-clus-list">${rows}</div></div>`)
+        .setHTML(clusterPopupHtml(leaves.map(popupOf)))
         .addTo(map);
     };
 
@@ -420,20 +376,7 @@ const description = ui.seo.map.replace('{place}', placeName);
       const el = document.createElement('div');
       el.className = 'ev-marker';
       el.style.setProperty('--c', categoryColor(primaryCategory(e.c)));
-      const face = document.createElement('div');
-      face.className = 'ev-marker-face';
-      if (e.img) {
-        const img = document.createElement('img');
-        img.src = e.img;
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.alt = '';
-        face.appendChild(img);
-      } else {
-        face.classList.add('ev-marker-face--icon');
-        face.innerHTML = iconSvg(primaryCategory(e.c), 22);
-      }
-      el.appendChild(face);
+      el.innerHTML = eventMarkerHtml(iconSvg(primaryCategory(e.c), 22))(e.img);
       return el;
     };
     const clusterMarkerEl = (count: number): HTMLElement => {
@@ -658,23 +601,19 @@ const description = ui.seo.map.replace('{place}', placeName);
       return el;
     };
     const openLandmarkPopup = (l: Landmark, at: [number, number]): void => {
-      const kindLabel = ui.landmarks.kinds[l.kind] ?? l.kind;
-      const img = l.img
-        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(l.img, 240))}" alt="" referrerpolicy="no-referrer" /></span>`
-        : '';
-      const desc = l.desc ? `<p class="map-pop-desc">${esc(clip(l.desc, 150))}</p>` : '';
       new maplibregl.Popup({ closeButton: false, maxWidth: '264px', anchor: 'bottom', offset: 24, className: 'lm-popup' })
         .setLngLat(at)
         .setHTML(
-          `<div class="map-pop map-pop--rich">` +
-            `<a class="map-pop-main" href="${esc(landmarkHref(l))}">${img}` +
-              `<span class="map-pop-body">` +
-                `<span class="lm-pop-kind" style="--lm:${landmarkColor(l.kind)}">${landmarkIcon(l.kind, 13)} ${esc(kindLabel)}</span>` +
-                `<span class="map-pop-title">${esc(l.name)}</span>` +
-              `</span></a>` +
-            desc +
-            srcChips(landmarkSources(l)) +
-          `</div>`,
+          landmarkPopupHtml({
+            href: landmarkHref(l),
+            image: l.img && thumbUrl(l.img, 240),
+            kindColor: landmarkColor(l.kind),
+            kindIcon: landmarkIcon(l.kind, 13),
+            kindLabel: ui.landmarks.kinds[l.kind] ?? l.kind,
+            title: l.name,
+            desc: l.desc,
+            sources: landmarkSources(l),
+          }),
         )
         .addTo(map);
     };
@@ -798,39 +737,30 @@ const description = ui.seo.map.replace('{place}', placeName);
       el.innerHTML = `<div class="pl-cluster-face"><span>${count}</span></div>`;
       return el;
     };
-    // Compact facts under a place card: opening hours (OSM) + phone (Overture/OSM,
-    // far better covered). Empty string when the place has neither.
-    const placeFacts = (p: Place): string => {
-      const rows = [
-        p.hours
-          ? `<span class="map-pop-fact map-pop-hours" title="${esc(ui.places.hours)}">${uiIcon('clock', 13)}<span>${esc(clip(p.hours, 64))}</span></span>`
-          : '',
-        p.phone
-          ? `<span class="map-pop-fact" title="${esc(ui.places.phone)}">${uiIcon('phone', 13)}${esc(p.phone)}</span>`
-          : '',
-      ].filter(Boolean).join('');
-      return rows ? `<div class="map-pop-facts">${rows}</div>` : '';
-    };
     const openPlacePopup = (p: Place, at: [number, number]): void => {
-      const catLabel = ui.places.categories[p.cat] ?? p.cat;
-      const img = p.img
-        ? `<span class="map-pop-thumb"><img src="${esc(thumbUrl(p.img, 240))}" alt="" referrerpolicy="no-referrer" /></span>`
-        : '';
-      const desc = p.desc ? `<p class="map-pop-desc">${esc(clip(p.desc, 150))}</p>` : '';
       new maplibregl.Popup({ closeButton: false, maxWidth: '264px', anchor: 'bottom', offset: 22, className: 'lm-popup' })
         .setLngLat(at)
         .setHTML(
-          `<div class="map-pop map-pop--rich">` +
-            `<a class="map-pop-main" href="${esc(placeHref(p))}">${img}` +
-              `<span class="map-pop-body">` +
-                `<span class="lm-pop-kind" style="--lm:${placeColor(p.cat)}">${placeIcon(p.cat, 13)} ${esc(catLabel)}</span>` +
-                `<span class="map-pop-title">${esc(p.name)}</span>` +
-              `</span></a>` +
-            desc +
-            placeFacts(p) +
+          placePopupHtml({
+            href: placeHref(p),
+            image: p.img && thumbUrl(p.img, 240),
+            kindColor: placeColor(p.cat),
+            kindIcon: placeIcon(p.cat, 13),
+            kindLabel: ui.places.categories[p.cat] ?? p.cat,
+            title: p.name,
+            desc: p.desc,
+            // Opening hours (OSM) + phone (Overture/OSM, far better covered).
+            facts: {
+              hours: p.hours,
+              hoursLabel: ui.places.hours,
+              hoursIcon: uiIcon('clock', 13),
+              phone: p.phone,
+              phoneLabel: ui.places.phone,
+              phoneIcon: uiIcon('phone', 13),
+            },
             // Compact teaser — a few key chips; the detail page has the full set.
-            srcChips(placeSources(p).slice(0, 3)) +
-          `</div>`,
+            sources: placeSources(p).slice(0, 3),
+          }),
         )
         .addTo(map);
     };

@@ -1,0 +1,19 @@
+---
+// The strip under the hero: every other source's photo, each attributed.
+import { resized } from '../../../lib/img/resized.ts';
+import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
+
+type Props = Readonly<{ photos: readonly GalleryPhoto[]; photoBy: string }>;
+const { photos, photoBy } = Astro.props;
+---
+
+<div class="event-gallery-more">
+  {photos.map((photo) => (
+    <figure class="gallery-photo">
+      <a href={photo.href} target="_blank" rel="noopener">
+        <img src={resized(photo.image, 400)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+      </a>
+      <figcaption>{photoBy}: {photo.name}</figcaption>
+    </figure>
+  ))}
+</div>

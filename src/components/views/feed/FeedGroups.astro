@@ -1,0 +1,28 @@
+---
+import MiniCard from '../../shared/MiniCard.astro';
+import { feedItemAttrs } from '../../../lib/events/feed-item-attrs.ts';
+import type { DayGroup } from '../../../lib/events/feed-day-groups.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+type Props = Readonly<{
+  groups: readonly DayGroup[];
+  heading: (day: string) => string;
+  ui: Ui;
+  lang: Locale;
+}>;
+const { groups, heading, ui, lang } = Astro.props;
+---
+
+{groups.map(([day, events]) => (
+  <section class="feed-group" data-day={day}>
+    <h3>{heading(day)}</h3>
+    <ul class="feed-list">
+      {events.map((event) => (
+        <li {...feedItemAttrs(event)}>
+          <MiniCard event={event} ui={ui} lang={lang} />
+        </li>
+      ))}
+    </ul>
+  </section>
+))}

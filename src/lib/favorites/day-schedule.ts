@@ -1,101 +1,11 @@
-// Lay a day's stops onto a minute-of-day axis for the timeline view. Pure and
-// unit-tested. The stops are a strict SEQUENCE (their list order): the first
-// starts at the day's opening, each next one after the previous plus travel.
-// There are no overlaps and no lanes — dragging reorders the sequence, which
-// reflows the times. A stop with a fixed official time turns "off-schedule"
-// when the sequence places its block outside the event's real window.
-import { eventDuration } from './event-duration.ts';
-import { travelMinutesBetween } from './build-route.ts';
-import type { Mode, RouteStop } from './build-route.ts';
-
-export type Durations = Readonly<Record<string, number>>;
-// Kept for the payload schema (legacy routes carry per-stop start times); the
-// sequence model no longer uses them for positioning.
-export type Times = Readonly<Record<string, string>>;
-
-export type ScheduledStop = Readonly<{
-  id: string;
-  startMin: number;
-  endMin: number;
-  /** Estimated travel minutes from the previous stop (0 for the first). */
-  travelMin: number;
-  /** The scheduled block falls outside the event's official window — placed
-   *  before it opens, or running past its close. Stops without a fixed time
-   *  (POIs/landmarks) are flexible and never off-schedule. */
-  offSchedule: boolean;
-}>;
-
-const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
-
-export const minutesOfTime = (t: string | undefined): number | undefined =>
-  t !== undefined && TIME_RE.test(t) ? Number(t.slice(0, 2)) * 60 + Number(t.slice(3)) : undefined;
-
-export const timeOfMinutes = (m: number): string => {
-  const clamped = ((Math.round(m) % 1440) + 1440) % 1440;
-  return `${String(Math.floor(clamped / 60)).padStart(2, '0')}:${String(clamped % 60).padStart(2, '0')}`;
-};
-
-export const snapMinutes = (m: number, step = 15): number => Math.round(m / step) * step;
-
-const coord = (event: RouteStop): readonly [number, number] | undefined => event.g;
-
-// The event's official window: when it actually runs. Start from the corpus
-// time; length is the source-stated duration or the category default — NOT the
-// visitor's override, since an over-long visit is exactly what may overrun the
-// close. Undefined for stops with no fixed time (they are always flexible).
-export const officialWindow = (event: RouteStop): Readonly<{ start: number; end: number }> | undefined => {
-  const start = minutesOfTime(event.h);
-  return start === undefined ? undefined : { start, end: start + eventDuration(event) };
-};
-
-/** Place a day's stops on the minute axis. A stop pinned to a time (via `times`)
- *  sits there; an unpinned one flows after the previous stop plus travel and any
- *  manual pause. `offSchedule` flags a stop whose block sticks out of the event's
- *  official window. */
-export const buildDaySchedule = (
-  stops: readonly RouteStop[],
-  mode: Mode,
-  times: Times,
-  durations: Durations,
-  pauses: Durations,
-  dayStartMin: number,
-): readonly ScheduledStop[] => {
-  const placed: ScheduledStop[] = [];
-  let prev: RouteStop | undefined;
-  let prevEnd = dayStartMin;
-  // Travel is measured from the last stop that HAS a location, so a stop with no
-  // coordinates (a break) doesn't zero out the journey — the next real stop still
-  // pays the walk/ride from where you actually were.
-  let lastCoord: readonly [number, number] | undefined;
-  for (const event of stops) {
-    const to = coord(event);
-    const travelMin = lastCoord && to ? travelMinutesBetween(lastCoord, to, mode) : 0;
-    const pauseMin = prev ? (pauses[prev.id] ?? 0) : 0; // a break waited AFTER the previous stop
-    const flow = prev ? prevEnd + travelMin + pauseMin : dayStartMin;
-    const pinned = minutesOfTime(times[event.id]);
-    // A pin is a MINIMUM start, not an absolute one: an event can be pushed later
-    // (a gap opens before it) but never earlier than it can be reached — so it can
-    // never land on top of the previous stop. No overlaps, ever.
-    const startMin = pinned !== undefined ? Math.max(pinned, flow) : flow;
-    const endMin = startMin + eventDuration(event, durations[event.id]);
-    const win = officialWindow(event);
-    const offSchedule = win !== undefined && (startMin < win.start || endMin > win.end);
-    placed.push({ id: event.id, startMin, endMin, travelMin, offSchedule });
-    prev = event;
-    prevEnd = endMin;
-    if (to) lastCoord = to;
-  }
-  return placed;
-};
-
-/** The visible time window: whole hours spanning the day start and every block,
- *  at least an hour tall. */
-export const axisRange = (
-  items: readonly ScheduledStop[],
-  dayStartMin: number,
-): Readonly<{ start: number; end: number }> => {
-  if (items.length === 0) return { start: dayStartMin, end: dayStartMin + 120 };
-  const start = Math.floor(Math.min(dayStartMin, ...items.map((i) => i.startMin)) / 60) * 60;
-  const end = Math.ceil(Math.max(...items.map((i) => i.endMin)) / 60) * 60;
-  return { start, end: Math.max(end, start + 60) };
-};
+// The day timeline, split one function per file. This module is the entry point
+// the route UI imports; each part lives next to it and is unit-tested on its own.
+// A stop with a fixed official time turns "off-schedule" when the sequence
+// places its block outside the event's real window.
+export type { Durations, ScheduledStop, Times } from './day-schedule-types.ts';
+export { buildDaySchedule } from './build-day-schedule.ts';
+export { minutesOfTime } from './minutes-of-time.ts';
+export { timeOfMinutes } from './time-of-minutes.ts';
+export { snapMinutes } from './snap-minutes.ts';
+export { officialWindow } from './official-window.ts';
+export { axisRange } from './axis-range.ts';

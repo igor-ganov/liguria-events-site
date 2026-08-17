@@ -2,10 +2,10 @@
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { uiIcon } from '../lib/icons/ui-icon.ts';
-import { listUserPasskeys } from '../lib/auth/credentials.ts';
+import { passkeysOf } from '../lib/auth/passkeys-of.ts';
 
 const user = Astro.locals.user;
-const passkeys = user ? await listUserPasskeys(Astro.locals.runtime.env.DB, user.id) : [];
+const passkeys = await passkeysOf(Astro.locals.runtime.env.DB)(user);
 ---
 
 <Layout lang="en" title="Settings" path="settings/">
@@ -33,45 +33,6 @@ const passkeys = user ? await listUserPasskeys(Astro.locals.runtime.env.DB, user
 </Layout>
 
 <script>
-  import { startRegistration } from '@simplewebauthn/browser';
-  const btn = document.getElementById('passkey-register');
-  const status = document.getElementById('passkey-status');
-  if (btn && globalThis.PublicKeyCredential) {
-    btn.hidden = false;
-    btn.addEventListener('click', async () => {
-      if (status) status.textContent = 'Follow your device prompt…';
-      try {
-        const opt = (await (await fetch('/api/passkey/register-options', { method: 'POST' })).json()) as {
-          challengeId: string;
-          options: import('@simplewebauthn/browser').PublicKeyCredentialCreationOptionsJSON;
-        };
-        const response = await startRegistration({ optionsJSON: opt.options });
-        const res = await fetch('/api/passkey/register-verify', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ challengeId: opt.challengeId, response }),
-        });
-        if (res.ok) location.reload();
-        else if (status) status.textContent = 'Could not add the passkey.';
-      } catch {
-        if (status) status.textContent = 'Passkey setup was cancelled.';
-      }
-    });
-  }
-  document.querySelectorAll('[data-del]').forEach((b) =>
-    b.addEventListener('click', async () => {
-      const id = b.closest('li')?.getAttribute('data-id');
-      if (!id) return;
-      await fetch('/api/passkey/delete', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      location.reload();
-    }),
-  );
-  document.querySelector('[data-signout]')?.addEventListener('click', async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    location.href = '/';
-  });
+  import { initSettings } from '../components/auth/init-settings.ts';
+  initSettings();
 </script>

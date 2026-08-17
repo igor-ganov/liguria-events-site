@@ -1,7 +1,9 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { axisRange, buildDaySchedule, minutesOfTime, snapMinutes, timeOfMinutes } from '../src/lib/favorites/day-schedule.ts';
+import { axisRange, buildDaySchedule, minutesOfTime, officialWindow, snapMinutes, timeOfMinutes } from '../src/lib/favorites/day-schedule.ts';
 import type { ScheduledStop } from '../src/lib/favorites/day-schedule.ts';
+import { placeStop } from '../src/lib/favorites/place-stop.ts';
+import type { Plan } from '../src/lib/favorites/place-stop.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const ev = (o: Partial<CompactEvent> & Pick<CompactEvent, 'id' | 't' | 's'>): CompactEvent => ({
@@ -103,5 +105,82 @@ describe('timeline layout', () => {
   test('axisRange snaps to whole hours around the stops and the day start', () => {
     const items = [stop('a', 635, 700)];
     assert.deepEqual(axisRange(items, 9 * 60), { start: 9 * 60, end: 12 * 60 });
+  });
+
+  test('axisRange spans two hours around an empty day', () => {
+    assert.deepEqual(axisRange([], 9 * 60), { start: 9 * 60, end: 11 * 60 });
+  });
+
+  test('axisRange reaches back to a stop that starts before the day does', () => {
+    assert.deepEqual(axisRange([stop('a', 8 * 60 + 10, 8 * 60 + 30)], 9 * 60), {
+      start: 8 * 60,
+      end: 9 * 60,
+    });
+  });
+});
+
+describe('minutesOfTime / timeOfMinutes edges', () => {
+  test('midnight is zero minutes, not "no time"', () => {
+    assert.equal(minutesOfTime('00:00'), 0);
+    assert.equal(timeOfMinutes(0), '00:00');
+  });
+
+  test('an out-of-range or malformed clock is no time at all', () => {
+    assert.equal(minutesOfTime('24:00'), undefined);
+    assert.equal(minutesOfTime('9:30'), undefined);
+    assert.equal(minutesOfTime('10:60'), undefined);
+    assert.equal(minutesOfTime(undefined), undefined);
+  });
+
+  test('minutes outside the day wrap into it', () => {
+    assert.equal(timeOfMinutes(1440), '00:00');
+    assert.equal(timeOfMinutes(-30), '23:30');
+    assert.equal(timeOfMinutes(1439.6), '00:00');
+  });
+
+  test('snapMinutes takes the step it is given', () => {
+    assert.equal(snapMinutes(632, 30), 630);
+    assert.equal(snapMinutes(646, 30), 660);
+  });
+});
+
+describe('officialWindow', () => {
+  test('a timed event runs from its clock time for its stated duration', () => {
+    const concert = ev({ id: 'c', t: 'C', s: '2026-07-10', h: '20:00', du: 90 });
+    assert.deepEqual(officialWindow(concert), { start: 20 * 60, end: 20 * 60 + 90 });
+  });
+
+  test('without a stated duration the category default applies', () => {
+    const other = ev({ id: 'c', t: 'C', s: '2026-07-10', h: '20:00' });
+    assert.deepEqual(officialWindow(other), { start: 20 * 60, end: 20 * 60 + 90 });
+  });
+
+  test('a stop with no fixed time has no window — it is always flexible', () => {
+    assert.equal(officialWindow(ev({ id: 'p', t: 'P', s: '2026-07-10' })), undefined);
+    assert.equal(officialWindow(ev({ id: 'p', t: 'P', s: '2026-07-10', h: 'noon' })), undefined);
+  });
+});
+
+describe('placeStop', () => {
+  const plan: Plan = { mode: 'walking', times: {}, durations: { a: 60 }, pauses: {} };
+
+  test('the first stop opens the day and pays no travel', () => {
+    const a = ev({ id: 'a', t: 'A', s: '2026-07-10', g: [44.3, 8.5] });
+    const next = placeStop(plan)({ placed: [], prevEnd: DAY_START }, a);
+    assert.deepEqual(next.placed, [
+      { id: 'a', startMin: DAY_START, endMin: DAY_START + 60, travelMin: 0, offSchedule: false },
+    ]);
+    assert.equal(next.prevEnd, DAY_START + 60);
+    assert.deepEqual(next.lastCoord, [44.3, 8.5]);
+  });
+
+  test('a stop with no coordinates keeps the last located one for the next leg', () => {
+    const brk = ev({ id: 'n', t: 'Break', s: '2026-07-10' });
+    const next = placeStop(plan)(
+      { placed: [], prevEnd: DAY_START, lastCoord: [44.3, 8.5] },
+      brk,
+    );
+    assert.equal(next.placed[0]!.travelMin, 0);
+    assert.deepEqual(next.lastCoord, [44.3, 8.5]);
   });
 });

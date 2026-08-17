@@ -122,33 +122,17 @@ export default tseslint.config(
     // THIS LIST MUST ONLY EVER SHRINK. Never add a file to it — split the file
     // instead, moving its logic into tested pure functions.
     files: [
-      'src/components/EventForm.astro',
-      'src/components/LanguageSwitcher.astro',
-      'src/components/MobileMenu.astro',
-      'src/components/RegionPicker.astro',
-      'src/components/shared/MiniCard.astro',
-      'src/components/views/CalendarView.astro',
-      'src/components/views/EventDetail.astro',
-      'src/components/views/FeedView.astro',
-      'src/components/views/LandmarkDetail.astro',
-      // Being decomposed: its popup/URL helpers already moved to tested pure
-      // functions under src/lib/map/. The remaining bulk is one long imperative
-      // setup() — extract it flow by flow (markers, clustering, layers, geo).
+      // Being decomposed: its style transforms, marker markup and every popup
+      // builder already moved to tested pure functions under src/lib/map/. The
+      // remaining bulk is one long imperative setup() — extract it flow by flow
+      // (clustering, layer toggles, geolocation, URL state).
       'src/components/views/MapView.astro',
-      'src/components/views/PlaceDetail.astro',
       'src/layouts/Layout.astro',
-      // Astro route files carry [param] segments — the brackets are escaped so
-      // minimatch reads them as literals, not character classes.
-      'src/pages/\\[lang\\]/event/\\[id\\].astro',
-      'src/pages/\\[lang\\]/landmark/\\[region\\]/\\[slug\\].astro',
-      'src/pages/\\[lang\\]/place/\\[region\\]/\\[slug\\].astro',
-      'src/pages/admin/index.astro',
-      'src/pages/admin/users.astro',
+      // TOOLING EXCEPTION, not laziness: `astro check` does not analyse the
+      // expression of a frontmatter `return`, so every branch-free form of this
+      // page's sign-in redirect fails the type check. See the comment in the
+      // file. Revisit when Astro fixes that.
       'src/pages/auth/verify.astro',
-      'src/pages/event/\\[id\\].astro',
-      'src/pages/event/\\[id\\]/edit.astro',
-      'src/pages/route/\\[id\\].astro',
-      'src/pages/settings.astro',
     ],
     rules: { 'no-restricted-syntax': 'off', 'functional/max-lines-no-imports': 'off' },
   },

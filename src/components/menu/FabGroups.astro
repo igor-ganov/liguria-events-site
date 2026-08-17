@@ -1,0 +1,30 @@
+---
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { HEART } from '../../lib/favorites/fav-button.ts';
+import type { MenuGroup } from '../../lib/menu/menu-groups.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ groups: readonly MenuGroup[]; lang: Locale; favLabel: string }>;
+const { groups, lang, favLabel } = Astro.props;
+---
+
+{groups.map((group) => (
+  <div class="fab-group">
+    <p class="fab-group-label">{group.label}</p>
+    <ul class="fab-links">
+      {group.links.map(({ href, icon, label }) => (
+        <li>
+          <a href={href}><Fragment set:html={uiIcon(icon, 18)} /> {label}</a>
+        </li>
+      ))}
+      {group.favourites && (
+        <li>
+          <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
+            <Fragment set:html={HEART} /> {favLabel}<span class="fav-badge" data-fav-count hidden></span>
+          </a>
+        </li>
+      )}
+    </ul>
+  </div>
+))}

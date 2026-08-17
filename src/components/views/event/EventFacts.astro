@@ -1,0 +1,38 @@
+---
+import EventContactRows from './EventContactRows.astro';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import { formatWhen } from '../../../lib/events/format-when.ts';
+import { crawlerAddress } from '../../../lib/events/crawler-address.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{
+  event: CompactEvent;
+  contacts?: EventContacts | undefined;
+  mapSearchUrl?: string | undefined;
+  ui: Ui;
+}>;
+const { event, contacts, mapSearchUrl, ui } = Astro.props;
+const { v: _venue, ...eventNoVenue } = event; // formatWhen appends venue; shown separately
+---
+
+<dl class="event-facts">
+  <div><dt><Fragment set:html={uiIcon('clock', 17)} /></dt><dd>{formatWhen(eventNoVenue)}</dd></div>
+  {
+    event.v !== undefined && (
+      <div>
+        <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
+        <dd>
+          {event.v}
+          {mapSearchUrl && (
+            <a class="map-link" href={mapSearchUrl} target="_blank" rel="noopener">
+              ↗ {ui.mapLink}
+            </a>
+          )}
+        </dd>
+      </div>
+    )
+  }
+  <EventContactRows crawlerAddress={crawlerAddress(event, contacts?.address)} contacts={contacts} />
+</dl>

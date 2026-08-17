@@ -1,10 +1,15 @@
 ---
 export const prerender = false;
 import LandmarkDetail from '../../../../components/views/LandmarkDetail.astro';
-import { isLocale } from '../../../../lib/i18n/is-locale.ts';
+import { LOCALES } from '../../../../lib/i18n/locales.ts';
 
 const { lang, region, slug } = Astro.params;
-if (!isLocale(lang) || lang === 'en') return new Response('Not found', { status: 404 });
+// Only the non-default locales own a /[lang]/ route; anything else 404s.
+const locale = LOCALES.find((l) => l === lang && l !== 'en');
+switch (locale) {
+  case undefined:
+    return new Response('Not found', { status: 404 });
+}
 ---
 
-<LandmarkDetail lang={lang} region={region ?? ''} slug={slug ?? ''} />
+<LandmarkDetail lang={locale} region={region ?? ''} slug={slug ?? ''} />

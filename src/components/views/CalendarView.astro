@@ -1,25 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import MiniCard from '../shared/MiniCard.astro';
+import MonthGrid from './calendar/MonthGrid.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
-import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { monthGrid } from '../../lib/calendar/month-grid.ts';
 import { monthTitle } from '../../lib/calendar/month-title.ts';
 import { addMonths } from '../../lib/calendar/add-months.ts';
-import { dayKindOf } from '../../lib/calendar/day-kind.ts';
-import { dayHeading } from '../../lib/calendar/day-heading.ts';
-import { dayCellEvents } from '../../lib/events/day-cell-events.ts';
 import { ongoingInMonth } from '../../lib/events/ongoing-in-month.ts';
-import { primaryCategory } from '../../lib/events/primary-category.ts';
-import { titleOf } from '../../lib/events/title-of.ts';
-import { eventPath } from '../../lib/event-path.ts';
-import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionName } from '../../lib/region/region-name.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
-import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string; monthKey: string }>;
@@ -32,21 +23,11 @@ const ui = await uiOf(lang);
 const payload = await cachedEvents(EVENTS_URL);
 // One region at a time: the calendar is a local guide, not a national index.
 const events = eventsOfRegion(payload.events, region);
-const today = isoToday();
 const title = monthTitle(ui)(monthKey);
-const days = monthGrid(monthKey).flat();
-const kindOf = dayKindOf(monthKey, today);
-const heading = dayHeading(ui);
 const ongoing = ongoingInMonth(monthKey)(events);
 const monthUrl = (m: string): string => regionUrl(lang, region, `calendar/${m}/`);
 const placeName = regionName(region);
 const description = ui.seo.calendar.replace('{place}', placeName);
-
-const DAY_CLASS: Record<string, string> = {
-  out: 'cal-day cal-day--out',
-  today: 'cal-day cal-day--today',
-  in: 'cal-day',
-};
 ---
 
 <Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.calendar}`} description={description} path={`${region}/calendar/${monthKey}/`}>
@@ -58,30 +39,7 @@ const DAY_CLASS: Record<string, string> = {
     <a class="nav-btn" href={monthUrl(addMonths(monthKey, 1))} aria-label={ui.calNav.next}>›</a>
   </header>
 
-  <div class="cal-grid" role="grid" aria-label={title}>
-    {ui.weekdays.map((name) => <div class="cal-weekday" role="columnheader">{name}</div>)}
-    {days.map((day) => (
-      <div class={DAY_CLASS[kindOf(day)] ?? 'cal-day'} role="gridcell">
-        <span class="cal-num">{Number(day.slice(8, 10))}</span>
-        <span class="cal-day-label">{heading(day)}</span>
-        <ul class="cal-events">
-          {dayCellEvents(day)(events).map((event) => (
-            <li>
-              <a
-                class="cal-pill"
-                data-cat={primaryCategory(event.c)}
-                href={localizedUrl(lang, eventPath(event.id))}
-                title={titleOf(lang)(event)}
-              >
-                <Fragment set:html={iconSvg(primaryCategory(event.c), 12)} />
-                <span>{titleOf(lang)(event)}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
-  </div>
+  <MonthGrid lang={lang} ui={ui} monthKey={monthKey} title={title} events={events} />
 
   {ongoing.length > 0 && (
     <section class="ongoing">
