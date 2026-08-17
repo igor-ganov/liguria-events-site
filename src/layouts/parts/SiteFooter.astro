@@ -1,0 +1,19 @@
+---
+import { dataStamp } from '../../lib/seo/data-stamp.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ ui: Ui; generatedAt: string | undefined }>;
+const { ui, generatedAt } = Astro.props;
+---
+
+<footer class="site-foot">
+  <p>
+    {ui.footer}{dataStamp(generatedAt)} ·
+    <a href="https://github.com/igor-ganov/liguria-events-site" rel="noopener">source</a>
+  </p>
+  <p class="foot-legal">
+    <a href="/content-policy">Content policy</a> ·
+    <a href="/terms">Terms</a> ·
+    <a href="/privacy">Privacy</a>
+  </p>
+</footer>

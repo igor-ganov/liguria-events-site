@@ -74,6 +74,23 @@ const description = ui.seo.map.replace('{place}', placeName);
   import { withSingleGlyphFont } from '../../lib/map/with-single-glyph-font.ts';
   import { withRoadHighlight } from '../../lib/map/with-road-highlight.ts';
   import { eventMarkerHtml } from '../../lib/map/event-marker-html.ts';
+  import { photoMarkerHtml } from '../../lib/map/photo-marker-html.ts';
+  import { clusterFaceHtml } from '../../lib/map/cluster-face-html.ts';
+  import { pointFeatures } from '../../lib/map/point-features.ts';
+  import { eventPoint } from '../../lib/map/event-point.ts';
+  import { geoPoint } from '../../lib/map/geo-point.ts';
+  import { boundsBbox } from '../../lib/map/bounds-bbox.ts';
+  import { homeRegionEvents } from '../../lib/map/home-region-events.ts';
+  import { corePoints } from '../../lib/map/core-points.ts';
+  import { civicCollection } from '../../lib/map/civic-collection.ts';
+  import { civicLayerSpec } from '../../lib/map/civic-layer-spec.ts';
+  import { CIVIC_MIN_ZOOM } from '../../lib/map/civic-min-zoom.ts';
+  import { freshTiles } from '../../lib/map/fresh-tiles.ts';
+  import { newById } from '../../lib/map/new-by-id.ts';
+  import { wantedRegions } from '../../lib/map/wanted-regions.ts';
+  import { isDefined } from '../../lib/is-defined.ts';
+  import { parseMapFilters } from '../../lib/map/parse-map-filters.ts';
+  import { mapFiltersQuery } from '../../lib/map/map-filters-query.ts';
   import { mapEvents } from '../../lib/events/map-events.ts';
   import { categoryColor } from '../../lib/events/category-color.ts';
   import { primaryCategory } from '../../lib/events/primary-category.ts';
@@ -200,28 +217,23 @@ const description = ui.seo.map.replace('{place}', placeName);
     // The camera the visitor left — see readView() for why it lives in the query.
     let saved: MapCameraView | undefined;
 
+    // URL <-> filter state is two tested pure functions; this shell only moves
+    // the result into the mutable `state` and appends the live camera.
     const readUrl = (): void => {
       const p = new URLSearchParams(location.search);
-      (p.get('cat') ?? '').split(',').filter(Boolean).forEach((c) => state.selected.add(c as Category));
-      state.freeOnly = p.get('free') === '1';
-      state.gemsOnly = p.get('gems') === '1';
-      state.from = p.get('from') ?? today;
-      state.to = p.get('to') ?? '';
-      if (p.has('ev')) state.showEvents = p.get('ev') !== '0';
-      if (p.has('le')) state.showLandmarks = p.get('le') === '1';
-      if (p.has('pl')) state.showPlaces = p.get('pl') === '1';
+      const parsed = parseMapFilters(state)(p, today);
+      parsed.selected.forEach((c) => state.selected.add(c as Category));
+      state.freeOnly = parsed.freeOnly;
+      state.gemsOnly = parsed.gemsOnly;
+      state.from = parsed.from;
+      state.to = parsed.to;
+      state.showEvents = parsed.showEvents;
+      state.showLandmarks = parsed.showLandmarks;
+      state.showPlaces = parsed.showPlaces;
       saved = readView(p);
     };
     const writeUrl = (): void => {
-      const p = new URLSearchParams();
-      if (state.selected.size > 0) p.set('cat', [...state.selected].join(','));
-      if (state.freeOnly) p.set('free', '1');
-      if (state.gemsOnly) p.set('gems', '1');
-      if (state.from !== today) p.set('from', state.from);
-      if (state.to !== '') p.set('to', state.to);
-      if (!state.showEvents) p.set('ev', '0');
-      if (state.showLandmarks) p.set('le', '1');
-      if (state.showPlaces) p.set('pl', '1');
+      const p = mapFiltersQuery({ ...state, selected: [...state.selected] }, today);
       localStorage.setItem('map-layer-events', state.showEvents ? '1' : '0');
       localStorage.setItem('map-layer-landmarks', state.showLandmarks ? '1' : '0');
       localStorage.setItem('map-layer-places', state.showPlaces ? '1' : '0');
@@ -382,7 +394,7 @@ const description = ui.seo.map.replace('{place}', placeName);
     const clusterMarkerEl = (count: number): HTMLElement => {
       const el = document.createElement('div');
       el.className = 'ev-marker ev-cluster';
-      el.innerHTML = `<div class="ev-cluster-face"><span>${count}</span></div>`;
+      el.innerHTML = clusterFaceHtml('ev')(count);
       return el;
     };
 
@@ -390,15 +402,7 @@ const description = ui.seo.map.replace('{place}', placeName);
     const rebuildIndex = (): void => {
       const shown = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events);
       index = new Supercluster<EvProps>({ radius: 60, maxZoom: 15 });
-      index.load(
-        shown
-          .filter((e) => e.g !== undefined)
-          .map((e) => ({
-            type: 'Feature',
-            properties: { ev: e },
-            geometry: { type: 'Point', coordinates: [e.g![1], e.g![0]] },
-          })),
-      );
+      index.load(pointFeatures<CompactEvent>(eventPoint)<EvProps>((ev) => ({ ev }))(shown));
     };
 
     const markers: maplibregl.Marker[] = [];
@@ -406,11 +410,7 @@ const description = ui.seo.map.replace('{place}', placeName);
       markers.forEach((m) => m.remove());
       markers.length = 0;
       if (!index || !state.showEvents) return;
-      const b = map.getBounds();
-      const clusters = index.getClusters(
-        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
-        Math.round(map.getZoom()),
-      );
+      const clusters = index.getClusters(boundsBbox(map.getBounds()), Math.round(map.getZoom()));
       clusters.forEach((c) => {
         const at = c.geometry.coordinates as [number, number];
         const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & EvProps;
@@ -440,24 +440,16 @@ const description = ui.seo.map.replace('{place}', placeName);
     let fitted = false;
     const fitAll = (): void => {
       const visible = mapEvents(state.from, state.to, [...state.selected], state.freeOnly, state.gemsOnly)(events).filter(
-        (e) => e.g !== undefined,
+        (e) => eventPoint(e) !== undefined,
       );
-      const home = visible.filter((e) => (e.rg ?? 'liguria') === REGION);
-      const located = home.length > 0 ? home : visible;
+      const located = homeRegionEvents(REGION)(visible).map(eventPoint).filter(isDefined);
       // A view carried in from the URL is the one the visitor left; fitting the
       // region's events over it would throw it away.
       if (fitted || saved !== undefined || located.length === 0) return;
-      // One mis-geocoded event used to drag the opening view across half the
-      // country. Fit to the body of the region's events, not to their extremes.
-      const median = (xs: readonly number[]): number =>
-        xs.toSorted((a, b) => a - b)[Math.floor(xs.length / 2)] ?? 0;
-      const mLat = median(located.map((e) => e.g![0]));
-      const mLng = median(located.map((e) => e.g![1]));
-      const core = located.filter(
-        (e) => Math.abs(e.g![0] - mLat) < 1.2 && Math.abs(e.g![1] - mLng) < 1.6,
-      );
       const bounds = new maplibregl.LngLatBounds();
-      (core.length > 0 ? core : located).forEach((e) => bounds.extend([e.g![1], e.g![0]]));
+      // corePoints() drops the mis-geocoded outliers that used to drag the
+      // opening view across half the country.
+      corePoints(located).forEach((p) => bounds.extend([p[0], p[1]]));
       map.fitBounds(bounds, { padding: 60, maxZoom: 13, duration: 0 });
       fitted = true;
     };
@@ -498,43 +490,17 @@ const description = ui.seo.map.replace('{place}', placeName);
     // ── civici: Genoa comune WFS address numbers (cadastre) at street zoom ──
     // Commercial (COLORE=R) get a shop icon + red number; residential a marker
     // + neutral number. Streamed per viewport tile with a session cache.
-    const CIVIC_MINZOOM = 16.5;
     const civicFeatures: GeoJSON.Feature[] = [];
     const civicSeen = new Set<string>();
-    const civicData = (): GeoJSON.FeatureCollection => ({ type: 'FeatureCollection', features: civicFeatures });
     const restoreCivics = (): void => {
       if (map.getSource('civics')) return;
-      map.addSource('civics', { type: 'geojson', data: civicData() });
-      map.addLayer({
-        id: 'civics',
-        type: 'symbol',
-        source: 'civics',
-        minzoom: CIVIC_MINZOOM,
-        layout: {
-          'icon-image': ['case', ['==', ['get', 'COLORE'], 'R'], 'shop_11', 'marker_11'],
-          'icon-size': 0.9,
-          'icon-optional': true,
-          'text-field': ['get', 'TESTO'],
-          'text-font': ['noto-sans-bold'],
-          'text-size': 10,
-          'text-offset': [0, 0.9],
-          'text-anchor': 'top',
-          'text-optional': true,
-        },
-        paint: {
-          'text-color': ['case', ['==', ['get', 'COLORE'], 'R'], '#d1483f', isDark() ? '#c6ccd6' : '#33404f'],
-          'text-halo-color': isDark() ? '#12151c' : '#ffffff',
-          'text-halo-width': 1.1,
-        },
-      } as maplibregl.LayerSpecification);
+      map.addSource('civics', { type: 'geojson', data: civicCollection(civicFeatures) });
+      map.addLayer(civicLayerSpec(isDark()) as unknown as maplibregl.LayerSpecification);
     };
     const loadCivics = async (): Promise<void> => {
-      if (map.getZoom() < CIVIC_MINZOOM) return;
+      if (map.getZoom() < CIVIC_MIN_ZOOM) return;
       restoreCivics();
-      const b = map.getBounds();
-      const fresh = tilesInBbox(b.getWest(), b.getSouth(), b.getEast(), b.getNorth())
-        .filter(([key]) => !civicSeen.has(key))
-        .slice(0, 12);
+      const fresh = freshTiles(civicSeen)(tilesInBbox(...boundsBbox(map.getBounds())));
       await Promise.all(
         fresh.map(async ([key, bbox]) => {
           civicSeen.add(key);
@@ -548,7 +514,7 @@ const description = ui.seo.map.replace('{place}', placeName);
         }),
       );
       const src = map.getSource('civics') as maplibregl.GeoJSONSource | undefined;
-      if (src) src.setData(civicData());
+      if (src) src.setData(civicCollection(civicFeatures));
     };
     map.on('load', () => void loadCivics());
     map.on('moveend', () => void loadCivics());
@@ -578,26 +544,13 @@ const description = ui.seo.map.replace('{place}', placeName);
       const el = document.createElement('div');
       el.className = 'lm-marker';
       el.style.setProperty('--lm', landmarkColor(l.kind));
-      const face = document.createElement('div');
-      face.className = 'lm-marker-face';
-      if (l.img) {
-        const img = document.createElement('img');
-        img.src = thumbUrl(l.img, 96);
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.alt = '';
-        face.appendChild(img);
-      } else {
-        face.classList.add('lm-marker-face--icon');
-        face.innerHTML = landmarkIcon(l.kind, 20);
-      }
-      el.appendChild(face);
+      el.innerHTML = photoMarkerHtml('lm')(landmarkIcon(l.kind, 20))(l.img && thumbUrl(l.img, 96));
       return el;
     };
     const lmClusterEl = (count: number): HTMLElement => {
       const el = document.createElement('div');
       el.className = 'lm-marker lm-cluster';
-      el.innerHTML = `<div class="lm-cluster-face"><span>${count}</span></div>`;
+      el.innerHTML = clusterFaceHtml('lm')(count);
       return el;
     };
     const openLandmarkPopup = (l: Landmark, at: [number, number]): void => {
@@ -621,23 +574,13 @@ const description = ui.seo.map.replace('{place}', placeName);
     const rebuildLmIndex = (): void => {
       if (landmarkData.length === 0) { lmIndex = undefined; return; }
       lmIndex = new Supercluster<LmProps>({ radius: 60, maxZoom: 16 });
-      lmIndex.load(
-        landmarkData.map((l) => ({
-          type: 'Feature',
-          properties: { l },
-          geometry: { type: 'Point', coordinates: [l.lng, l.lat] },
-        })),
-      );
+      lmIndex.load(pointFeatures<Landmark>(geoPoint)<LmProps>((l) => ({ l }))(landmarkData));
     };
     const renderLandmarks = (): void => {
       lmMarkers.forEach((m) => m.remove());
       lmMarkers.length = 0;
       if (!lmIndex || !state.showLandmarks) return;
-      const b = map.getBounds();
-      const clusters = lmIndex.getClusters(
-        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
-        Math.round(map.getZoom()),
-      );
+      const clusters = lmIndex.getClusters(boundsBbox(map.getBounds()), Math.round(map.getZoom()));
       clusters.forEach((c) => {
         const at = c.geometry.coordinates as [number, number];
         const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & Partial<LmProps>;
@@ -672,28 +615,19 @@ const description = ui.seo.map.replace('{place}', placeName);
     // map; the ceiling is a region COUNT, not a raw zoom (so a single southern
     // region loads its places exactly like a northern one does).
     const PLACE_MAX_REGIONS = 5;
-    const inViewRegions = (): readonly string[] => {
-      const b = map.getBounds();
-      return regionsInView(b.getWest(), b.getSouth(), b.getEast(), b.getNorth());
-    };
+    const inViewRegions = (): readonly string[] => regionsInView(...boundsBbox(map.getBounds()));
     // Load the shard of every in-view region (once each), merge it in, re-index
-    // and re-render.
+    // and re-render. Landmarks take every in-view region at any zoom (Infinity).
     const ensureLandmarkShards = async (): Promise<void> => {
       if (!state.showLandmarks) return;
-      // Always include the page's own region, so /<region>/map shows it even if
-      // the opening view didn't land on it; plus every other in-view region.
-      const want = new Set(inViewRegions());
-      if (REGION) want.add(REGION);
-      const need = [...want].filter((r) => !lmLoaded.has(r));
+      const need = wantedRegions(Infinity)(REGION)(inViewRegions()).filter((r) => !lmLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => lmLoaded.add(r));
-      const added = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat().filter((l) => {
-        if (lmIds.has(l.id)) return false;
-        lmIds.add(l.id);
-        return true;
-      });
+      const loaded = (await Promise.all(need.map((r) => loadLandmarks(r, lang)))).flat();
+      const added = newById(lmIds)(loaded);
+      added.forEach((l) => lmIds.add(l.id));
       if (added.length === 0) return;
-      landmarkData = landmarkData.concat(added);
+      landmarkData = [...landmarkData, ...added];
       rebuildLmIndex();
       renderLandmarks();
     };
@@ -715,26 +649,13 @@ const description = ui.seo.map.replace('{place}', placeName);
       const el = document.createElement('div');
       el.className = 'pl-marker';
       el.style.setProperty('--pl', placeColor(p.cat));
-      const face = document.createElement('div');
-      face.className = 'pl-marker-face';
-      if (p.img) {
-        const img = document.createElement('img');
-        img.src = thumbUrl(p.img, 96);
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.alt = '';
-        face.appendChild(img);
-      } else {
-        face.classList.add('pl-marker-face--icon');
-        face.innerHTML = placeIcon(p.cat, 18);
-      }
-      el.appendChild(face);
+      el.innerHTML = photoMarkerHtml('pl')(placeIcon(p.cat, 18))(p.img && thumbUrl(p.img, 96));
       return el;
     };
     const plClusterEl = (count: number): HTMLElement => {
       const el = document.createElement('div');
       el.className = 'pl-marker pl-cluster';
-      el.innerHTML = `<div class="pl-cluster-face"><span>${count}</span></div>`;
+      el.innerHTML = clusterFaceHtml('pl')(count);
       return el;
     };
     const openPlacePopup = (p: Place, at: [number, number]): void => {
@@ -767,9 +688,7 @@ const description = ui.seo.map.replace('{place}', placeName);
     const rebuildPlIndex = (): void => {
       if (placeData.length === 0) { plIndex = undefined; return; }
       plIndex = new Supercluster<PlProps>({ radius: 58, maxZoom: 17 });
-      plIndex.load(
-        placeData.map((p) => ({ type: 'Feature', properties: { p }, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } })),
-      );
+      plIndex.load(pointFeatures<Place>(geoPoint)<PlProps>((p) => ({ p }))(placeData));
     };
     const renderPlaces = (): void => {
       plMarkers.forEach((m) => m.remove());
@@ -777,8 +696,7 @@ const description = ui.seo.map.replace('{place}', placeName);
       // Render whatever places are loaded — supercluster clusters them at low
       // zoom, so a home-region-only view is a tidy cluster, not a scatter.
       if (!plIndex || !state.showPlaces) return;
-      const b = map.getBounds();
-      const clusters = plIndex.getClusters([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], Math.round(map.getZoom()));
+      const clusters = plIndex.getClusters(boundsBbox(map.getBounds()), Math.round(map.getZoom()));
       clusters.forEach((c) => {
         const at = c.geometry.coordinates as [number, number];
         const props = c.properties as { cluster?: boolean; cluster_id?: number; point_count?: number } & Partial<PlProps>;
@@ -812,19 +730,14 @@ const description = ui.seo.map.replace('{place}', placeName);
       if (!state.showPlaces) return;
       // The page's own region always loads (one shard); additional in-view
       // regions load only while the viewport is focused (else all-Italy is huge).
-      const view = inViewRegions();
-      const want = new Set(view.length <= PLACE_MAX_REGIONS ? view : []);
-      if (REGION) want.add(REGION);
-      const need = [...want].filter((r) => !plLoaded.has(r));
+      const need = wantedRegions(PLACE_MAX_REGIONS)(REGION)(inViewRegions()).filter((r) => !plLoaded.has(r));
       if (need.length === 0) return;
       need.forEach((r) => plLoaded.add(r));
-      const added = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat().filter((p) => {
-        if (plIds.has(p.id)) return false;
-        plIds.add(p.id);
-        return true;
-      });
+      const loaded = (await Promise.all(need.map((r) => loadPlaces(r, lang)))).flat();
+      const added = newById(plIds)(loaded);
+      added.forEach((p) => plIds.add(p.id));
       if (added.length === 0) return;
-      placeData = placeData.concat(added);
+      placeData = [...placeData, ...added];
       rebuildPlIndex();
       renderPlaces();
     };

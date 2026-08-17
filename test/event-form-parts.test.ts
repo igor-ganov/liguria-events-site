@@ -7,6 +7,7 @@ import { eventFormValues } from '../src/components/events/event-form-values.ts';
 import { eventSubmitTarget } from '../src/components/events/event-submit-target.ts';
 import { eventRedirectPath } from '../src/components/events/event-redirect-path.ts';
 import { uploadedImageUrl } from '../src/components/events/uploaded-image-url.ts';
+import { jsonField } from '../src/lib/json-field.ts';
 
 describe('eventFormMode', () => {
   test('an explicit edit mode edits', () => {
@@ -104,6 +105,27 @@ describe('eventRedirectPath', () => {
   });
   test('an answer with no id still leaves the form', () => {
     assert.equal(eventRedirectPath('create', '', ''), '/event/');
+  });
+});
+
+describe('jsonField', () => {
+  test('reads a string field', () => {
+    assert.equal(jsonField({ id: 'ev1' }, 'id'), 'ev1');
+    assert.equal(jsonField({ id: '' }, 'id'), '');
+  });
+  test('a field of another shape reads as nothing', () => {
+    assert.equal(jsonField({ id: 42 }, 'id'), undefined);
+    assert.equal(jsonField({ id: { nested: 'x' } }, 'id'), undefined);
+  });
+  test('a missing field, or no object at all, reads as nothing', () => {
+    assert.equal(jsonField({}, 'id'), undefined);
+    assert.equal(jsonField(undefined, 'id'), undefined);
+    assert.equal(jsonField('a string', 'id'), undefined);
+    assert.equal(jsonField([], 'id'), undefined);
+  });
+  test('an inherited member is not a field', () => {
+    assert.equal(jsonField({}, 'constructor'), undefined);
+    assert.equal(jsonField({}, 'toString'), undefined);
   });
 });
 

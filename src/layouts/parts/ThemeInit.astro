@@ -1,0 +1,28 @@
+<script is:inline>
+  // No-flash theme init: preference is 'light' | 'dark' | 'system'
+  // (default). 'system' resolves to the OS scheme. data-theme carries the
+  // RESOLVED scheme (drives colours + the map filter); data-theme-pref
+  // carries the user's choice (drives the toggle icon). The localStorage
+  // key is shared across the user's project pages — pages that only accept
+  // 'dark'/'light' treat 'system' as unknown and fall back to OS, which is
+  // exactly what 'system' means, so behaviour stays consistent.
+  (function () {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var pref = function () {
+      var s = localStorage.getItem('theme');
+      return s === 'dark' || s === 'light' || s === 'system' ? s : 'system';
+    };
+    var resolve = function (p) {
+      return p === 'system' ? (mq.matches ? 'dark' : 'light') : p;
+    };
+    var apply = function (doc) {
+      var p = pref();
+      doc.documentElement.dataset['theme'] = resolve(p);
+      doc.documentElement.dataset['themePref'] = p;
+    };
+    apply(document);
+    document.addEventListener('astro:before-swap', function (e) {
+      apply(e.newDocument);
+    });
+  })();
+</script>

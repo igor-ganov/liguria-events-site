@@ -1,0 +1,37 @@
+---
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ ui: Ui }>;
+const { ui } = Astro.props;
+---
+
+<dialog id="signin-dialog" class="signin-dialog" aria-label={ui.auth.signIn}>
+  <form method="dialog" class="signin-x-row">
+    <button class="signin-x" value="close" aria-label="Close">✕</button>
+  </form>
+  <h2>{ui.auth.title}</h2>
+
+  <div data-step="email">
+    <p>{ui.auth.emailPrompt}</p>
+    <form id="signin-form">
+      <input type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+      <button type="submit">{ui.auth.sendCode}</button>
+    </form>
+    <!-- Passkey retry: the modal auto-runs on open, but if it's dismissed the
+         viewer can re-trigger it here — this ceremony offers a local passkey
+         AND "use a passkey on another device" over QR. -->
+    <button type="button" class="link-btn passkey-link" data-passkey-retry hidden>{ui.auth.passkey}</button>
+  </div>
+
+  <div data-step="code" hidden>
+    <p>{ui.auth.codePre} <strong data-code-email></strong> {ui.auth.codePost}</p>
+    <form id="code-form">
+      <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code"
+        pattern="[0-9]{6}" maxlength="6" placeholder="123456" />
+      <button type="submit">{ui.auth.verify}</button>
+    </form>
+    <button type="button" class="link-btn" data-code-back>← {ui.auth.back}</button>
+  </div>
+
+  <p id="signin-status" role="status" aria-live="polite"></p>
+</dialog>

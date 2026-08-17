@@ -1,0 +1,37 @@
+---
+// A thin top progress bar: appears the instant a navigation starts
+// (astro:before-preparation) and completes on page-load — immediate feedback so
+// a slow ClientRouter navigation reads as "loading", not a frozen tap.
+// transition:persist keeps it through the view-transition swap; it drives
+// forward AND back navigation (both fire the same events).
+---
+
+<div id="nav-progress" transition:persist aria-hidden="true"></div>
+<script is:inline>
+  (function () {
+    if (window.__navProgressBound) return;
+    window.__navProgressBound = true;
+    var bar = function () { return document.getElementById('nav-progress'); };
+    var start = function () {
+      var el = bar();
+      if (!el) return;
+      // Reset instantly, then creep toward 90% so the motion reads as progress.
+      el.style.transition = 'none';
+      el.style.opacity = '1';
+      el.style.transform = 'scaleX(0)';
+      void el.offsetWidth;
+      el.style.transition = 'transform 8s cubic-bezier(0.1, 0.7, 0.1, 1)';
+      el.style.transform = 'scaleX(0.9)';
+    };
+    var done = function () {
+      var el = bar();
+      if (!el || el.style.opacity === '0') return;
+      el.style.transition = 'transform 0.2s ease, opacity 0.4s ease 0.15s';
+      el.style.transform = 'scaleX(1)';
+      el.style.opacity = '0';
+    };
+    document.addEventListener('astro:before-preparation', start);
+    document.addEventListener('astro:after-swap', done);
+    document.addEventListener('astro:page-load', done);
+  })();
+</script>

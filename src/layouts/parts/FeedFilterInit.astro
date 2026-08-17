@@ -1,0 +1,30 @@
+<script is:inline>
+  // No-flash feed filter: a filtered feed URL (a chosen day, category, free
+  // toggle, search…) is still served as the FULL static list, so without
+  // this the unfiltered list paints and only then does the client hide the
+  // non-matching cards — the "unfiltered order arrives, then the filter
+  // kicks in" flash. Hide the list up front whenever the URL carries a feed
+  // filter; init-feed reveals it the instant it has applied the filter. The
+  // default view (no filter params) is never hidden, so it stays instant.
+  (function () {
+    var KEYS = ['from', 'to', 'cats', 'free', 'gems', 'q'];
+    var isFiltered = function (search) {
+      var p = new URLSearchParams(search);
+      return KEYS.some(function (k) { return p.has(k); });
+    };
+    var mark = function (search) {
+      document.documentElement.classList.toggle('feed-filtering', isFiltered(search));
+    };
+    mark(location.search);
+    // SPA navigation: mark from the target URL before the swap paints.
+    document.addEventListener('astro:before-preparation', function (e) {
+      try { mark(new URL(e.to).search); } catch (_) {}
+    });
+    // Safety net: never leave the list hidden if init-feed does not run.
+    document.addEventListener('astro:page-load', function () {
+      setTimeout(function () {
+        document.documentElement.classList.remove('feed-filtering');
+      }, 1500);
+    });
+  })();
+</script>

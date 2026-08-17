@@ -3,9 +3,10 @@ import { setText } from '../../lib/dom/set-text.ts';
 import { eventFormValues } from './event-form-values.ts';
 import { eventRedirectPath } from './event-redirect-path.ts';
 import { eventSubmitTarget } from './event-submit-target.ts';
+import { jsonField } from '../../lib/json-field.ts';
 import type { EventFormMode } from './event-form-mode.ts';
 
-type SubmitResult = { readonly id?: string; readonly detail?: string };
+type SubmitResult = { readonly id: string | undefined; readonly detail: string | undefined };
 
 type FormParts = {
   readonly form: HTMLFormElement;
@@ -30,8 +31,8 @@ const send = async (parts: FormParts): Promise<void> => {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(eventFormValues(new FormData(parts.form))),
   });
-  const data: SubmitResult = await res.json().catch(() => ({}));
-  settle(parts, res.ok, data);
+  const data: unknown = await res.json().catch(() => ({}));
+  settle(parts, res.ok, { id: jsonField(data, 'id'), detail: jsonField(data, 'detail') });
 };
 
 /** Send the form to the API in JSON, then navigate to the event's own page. */

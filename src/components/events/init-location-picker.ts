@@ -1,66 +1,65 @@
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
-import brightStyle from '../../lib/map/styles/bright.json';
+import { brightStyle } from '../../lib/map/styles/bright-typed.ts';
+import { isDefined } from '../../lib/is-defined.ts';
+import { pickerStyle } from '../../lib/map/picker-style.ts';
+import { setValue } from '../../lib/dom/set-value.ts';
+import { startCoords } from './start-coords.ts';
 
 // A self-contained location picker for the event form: click/drag a pin on the
 // basemap and it writes lng/lat into the form's hidden inputs. It carries its
-// OWN minimal copy of the PMTiles style (a trimmed version of MapView's
-// buildStyle) so it can never affect the live map.
+// OWN minimal copy of the PMTiles style (see pickerStyle) so it can never
+// affect the live map.
 
 const B = import.meta.env.BASE_URL.replace(/\/$/, '');
-const PMTILES_URL = import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
+const PMTILES_URL =
+  import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
 const GENOA: [number, number] = [9.19, 44.4056];
 
-const glyphFont = (font: string): string =>
-  /^noto sans (regular|bold|italic)$/i.test(font) ? font.toLowerCase().replace(/\s+/g, '-') : 'noto-sans-regular';
+const input = (selector: string): HTMLInputElement | undefined =>
+  document.querySelector<HTMLInputElement>(selector) ?? undefined;
 
-const pickerStyle = (): maplibregl.StyleSpecification => {
-  const style = structuredClone(brightStyle) as unknown as maplibregl.StyleSpecification;
-  style.sources = { openmaptiles: { type: 'vector', url: `pmtiles://${PMTILES_URL}` } };
-  style.layers = style.layers.filter((l) => (l as { 'source-layer'?: string })['source-layer'] !== 'poi');
-  style.glyphs = `${B}/font/{fontstack}/{range}.pbf`;
-  style.sprite = `${location.origin}${B}/sprite/poi-color/sprite`;
-  for (const layer of style.layers) {
-    const layout = (layer as { layout?: { 'text-font'?: readonly string[] } }).layout;
-    if (layout && Array.isArray(layout['text-font'])) {
-      layout['text-font'] = [glyphFont(layout['text-font'][0] ?? 'Noto Sans Regular')];
-    }
-  }
-  return style;
-};
-
-export const initLocationPicker = (): void => {
-  const el = document.querySelector<HTMLElement>('[data-loc-map]');
-  if (!el || el.dataset['ready'] === 'true') return;
+const start = (el: HTMLElement): void => {
   el.dataset['ready'] = 'true';
-  const latIn = document.querySelector<HTMLInputElement>('[data-lat]');
-  const lngIn = document.querySelector<HTMLInputElement>('[data-lng]');
+  const latIn = input('[data-lat]');
+  const lngIn = input('[data-lng]');
   maplibregl.addProtocol('pmtiles', new Protocol().tile);
-
-  const startLat = Number.parseFloat(latIn?.value ?? '');
-  const startLng = Number.parseFloat(lngIn?.value ?? '');
-  const hasStart = Number.isFinite(startLat) && Number.isFinite(startLng);
+  const from = startCoords(latIn?.value, lngIn?.value);
   const map = new maplibregl.Map({
     container: el,
-    style: pickerStyle(),
-    center: hasStart ? [startLng, startLat] : GENOA,
-    zoom: hasStart ? 14 : 8,
+    style: pickerStyle(brightStyle, { pmtiles: PMTILES_URL, base: B, origin: location.origin }),
+    center: from[0] ?? GENOA,
+    zoom: from.map(() => 14)[0] ?? 8,
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
   let marker: maplibregl.Marker | undefined;
   const write = (at: maplibregl.LngLat): void => {
-    if (latIn) latIn.value = at.lat.toFixed(6);
-    if (lngIn) lngIn.value = at.lng.toFixed(6);
+    setValue(latIn, at.lat.toFixed(6));
+    setValue(lngIn, at.lng.toFixed(6));
+  };
+  const create = (at: maplibregl.LngLat): maplibregl.Marker => {
+    const pin = new maplibregl.Marker({ color: '#e8590c', draggable: true })
+      .setLngLat(at)
+      .addTo(map);
+    pin.on('dragend', () => write(pin.getLngLat()));
+    return pin;
   };
   const place = (at: maplibregl.LngLat): void => {
-    const m = marker ?? new maplibregl.Marker({ color: '#e8590c', draggable: true }).setLngLat(at).addTo(map);
-    m.setLngLat(at);
-    if (!marker) m.on('dragend', () => write(m.getLngLat()));
-    marker = m;
+    const pin = marker ?? create(at);
+    pin.setLngLat(at);
+    marker = pin;
     write(at);
   };
-  if (hasStart) place(new maplibregl.LngLat(startLng, startLat));
-  map.on('click', (e) => place(e.lngLat));
+  from.forEach(([lng, lat]) => place(new maplibregl.LngLat(lng, lat)));
+  map.on('click', (event) => place(event.lngLat));
+};
+
+/** Wire the event form's map, once per page. */
+export const initLocationPicker = (): void => {
+  [document.querySelector<HTMLElement>('[data-loc-map]') ?? undefined]
+    .filter(isDefined)
+    .filter((el) => el.dataset['ready'] !== 'true')
+    .forEach(start);
 };

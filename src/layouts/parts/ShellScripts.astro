@@ -1,0 +1,28 @@
+<script>
+  // Three-way theme cycle (light → dark → system) with circular reveal;
+  // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
+  // = user choice.
+  import { initThemeToggle } from '../../components/shell/init-theme-toggle.ts';
+  initThemeToggle();
+</script>
+
+<script>
+  // Swap dead event covers (expired source URLs) for the category tile.
+  import { initImageFallback } from '../../components/shared/image-fallback.ts';
+  initImageFallback();
+  document.addEventListener('astro:page-load', initImageFallback);
+</script>
+
+<script>
+  // Favourites (localStorage + D1 sync on sign-in), star toggles + count.
+  import { initFavorites } from '../../components/favorites/init-favorites.ts';
+  initFavorites();
+  document.addEventListener('astro:page-load', initFavorites);
+</script>
+
+<script>
+  // Sign-in dialog + header account state, re-run after every SPA swap.
+  import { initAuthUi } from '../../components/shell/init-auth-ui.ts';
+  void initAuthUi();
+  document.addEventListener('astro:after-swap', () => void initAuthUi());
+</script>

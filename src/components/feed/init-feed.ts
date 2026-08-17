@@ -1,361 +1,52 @@
-import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { dayHeading } from '../../lib/calendar/day-heading.ts';
-import { decodeEventList } from '../../lib/events/decode-event-list.ts';
-import { eventPath } from '../../lib/event-path.ts';
-import { localizedUrl } from '../../lib/i18n/localized-url.ts';
-import { titleOf } from '../../lib/events/title-of.ts';
-import { descriptionOf } from '../../lib/events/description-of.ts';
-import { formatWhen } from '../../lib/events/format-when.ts';
-import { primaryCategory } from '../../lib/events/primary-category.ts';
-import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
-import { prepare, search } from '../../lib/search/index.ts';
-import type { PreparedIndex, SearchDoc } from '../../lib/search/index.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
-import type { Locale } from '../../lib/i18n/locales.ts';
-import type { Ui } from '../../lib/i18n/ui-schema.ts';
-
 // The feed is server-rendered; this only filters (show/hide — no re-render) and
 // appends events published since the build (from D1).
+import { applyFeedFilter } from './apply-feed-filter.ts';
+import { augmentFeed } from './augment-feed.ts';
+import { buildFeedIndex } from './build-feed-index.ts';
+import { DEFAULT_PAGE_DATA } from '../shared/default-page-data.ts';
+import { feedToday } from './feed-today.ts';
+import { readFeedParams } from './read-feed-params.ts';
+import { readJsonIsland } from './read-json-island.ts';
+import { reorderFeed } from './reorder-feed.ts';
+import { runFeedSearch } from './run-feed-search.ts';
+import { stampFeedOrder } from './stamp-feed-order.ts';
+import { syncFeedUrl } from './sync-feed-url.ts';
+import { wireFeedChips } from './wire-feed-chips.ts';
+import { wireFeedDates } from './wire-feed-dates.ts';
+import { wireFeedSearch } from './wire-feed-search.ts';
+import { wireFeedSort } from './wire-feed-sort.ts';
+import type { FeedContext } from './feed-context.ts';
+import type { PageData } from '../../lib/i18n/ui-schema.ts';
 
-const readJson = <T>(id: string, fallback: T): T => {
-  try {
-    return JSON.parse(document.getElementById(id)?.textContent ?? '') as T;
-  } catch {
-    return fallback;
-  }
+const context = (): FeedContext => {
+  const page = readJsonIsland<PageData>('ui-data', DEFAULT_PAGE_DATA);
+  return {
+    lang: page.lang,
+    ui: page.ui,
+    icons: readJsonIsland<Record<string, string>>('icons-data', {}),
+    today: feedToday(),
+  };
 };
-
-type FeedSort = 'date' | 'created';
-const state: {
-  from: string; to: string; cats: Set<string>; free: boolean; gems: boolean;
-  query: string; city: string; hits: ReadonlySet<string> | undefined; sort: FeedSort;
-} = {
-  from: '', to: '', cats: new Set<string>(), free: false, gems: false,
-  query: '', city: '', hits: undefined,
-  sort: 'date',
-};
-
-// Filters live in the URL so a filtered view is shareable, bookmarkable and
-// survives a reload. `from` is omitted while it equals today (the default), so a
-// pristine feed keeps a clean URL.
-const syncUrl = (today: string): void => {
-  const p = new URLSearchParams();
-  if (state.query.trim() !== '') p.set('q', state.query.trim());
-  if (state.cats.size > 0) p.set('cats', [...state.cats].join(','));
-  if (state.from !== '' && state.from !== today) p.set('from', state.from);
-  if (state.to !== '') p.set('to', state.to);
-  if (state.free) p.set('free', '1');
-  if (state.gems) p.set('gems', '1');
-  if (state.sort === 'created') p.set('sort', 'created');
-  const qs = p.toString();
-  // Preserve history.state — the ClientRouter keeps its navigation index there,
-  // and wiping it to null breaks back/forward (the swipe-back gesture needs
-  // several tries and then jumps past pages).
-  history.replaceState(history.state, '', qs === '' ? location.pathname : `${location.pathname}?${qs}`);
-};
-
-// Restore filters from the URL. State is module-level and persists across SPA
-// swaps, so reset it first to avoid a previous view leaking in.
-const readParams = (today: string): void => {
-  state.cats.clear();
-  state.query = '';
-  state.free = false;
-  state.gems = false;
-  state.city = '';
-  const p = new URLSearchParams(location.search);
-  state.query = p.get('q') ?? '';
-  (p.get('cats') ?? '').split(',').filter((c) => c !== '').forEach((c) => state.cats.add(c));
-  state.from = p.get('from') ?? today;
-  state.to = p.get('to') ?? '';
-  state.free = p.get('free') === '1';
-  state.gems = p.get('gems') === '1';
-  state.sort = p.get('sort') === 'created' ? 'created' : 'date';
-  // The city is a path segment (/<region>/<city>/), server-rendered onto the
-  // list — not a query filter. It stays fixed for the page; reading it keeps the
-  // ct filter (which also drops late D1 events that carry no city) honest.
-  state.city = document.querySelector('[data-feed-list]')?.getAttribute('data-city') ?? '';
-};
-
-const matches = (li: HTMLElement): boolean => {
-  const start = li.dataset['start'] ?? '';
-  const end = li.dataset['end'] ?? start;
-  if (state.hits && !state.hits.has(li.dataset['id'] ?? '')) return false;
-  if (state.to !== '' && start > state.to) return false;
-  if (state.from !== '' && end < state.from) return false;
-  if (state.free && li.dataset['free'] !== '1') return false;
-  if (state.gems && li.dataset['gem'] !== '1') return false;
-  if (state.city !== '' && (li.dataset['ct'] ?? '') !== state.city) return false;
-  if (state.cats.size === 0) return true;
-  return (li.dataset['cats'] ?? '').split(',').some((c) => state.cats.has(c));
-};
-
-// The fuzzy index is built from the RENDERED cards — title + description + tag
-// text are already in the DOM, so search costs zero extra payload and covers
-// late-published (D1) cards the moment they are inserted.
-const text = (li: HTMLElement, sel: string): string =>
-  [...li.querySelectorAll(sel)].map((n) => n.textContent ?? '').join(' ');
-
-const liDoc = (lang: Locale) => (li: HTMLElement): SearchDoc => ({
-  id: li.dataset['id'] ?? '',
-  lang,
-  section: 'event',
-  url: '',
-  title: text(li, '.mini-title'),
-  description: '',
-  body: `${text(li, '.mini-desc')} ${text(li, '.cat-tag')}`,
-});
-
-let index: PreparedIndex | undefined;
-const buildIndex = (lang: Locale): void => {
-  const docs = [...document.querySelectorAll<HTMLElement>('[data-feed-list] li')].map(liDoc(lang));
-  index = prepare({ lang, docs });
-};
-const runSearch = (): void => {
-  const query = state.query.trim();
-  state.hits = query === '' || !index ? undefined : new Set(search(index, query, 500).map((h) => h.doc.id));
-};
-
-const apply = (): void => {
-  let visible = 0;
-  document.querySelectorAll<HTMLElement>('.feed-group').forEach((group) => {
-    let shown = 0;
-    group.querySelectorAll<HTMLElement>('li').forEach((li) => {
-      const ok = matches(li);
-      li.hidden = !ok;
-      if (ok) shown += 1;
-    });
-    group.hidden = shown === 0;
-    visible += shown;
-  });
-  const empty = document.querySelector<HTMLElement>('[data-feed-empty]');
-  if (empty) empty.hidden = visible > 0;
-  const clear = document.querySelector<HTMLElement>('[data-feed-clear]');
-  if (clear) clear.hidden = state.cats.size === 0 && !state.free && !state.gems;
-};
-
-// The server renders each day's events unique-first (short span leads); that
-// order is stamped onto every card so the default sort restores it exactly and
-// "Newest first" can fall back to it as a tie-break.
-const stampOrder = (): void => {
-  document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
-    ul.querySelectorAll<HTMLElement>(':scope > li').forEach((li, i) => {
-      li.dataset['ord'] = String(i);
-    });
-  });
-};
-
-// Whole-day span (end − start) in days: 0 for a one-day event. Shorter = more
-// "unique" — it pins to a moment instead of running through the window, so it
-// leads. This is the curation that makes the feed useful, not a date dump.
-const spanDays = (li: HTMLElement): number => {
-  const start = li.dataset['start'] ?? '';
-  const end = li.dataset['end'] || start;
-  return (Date.parse(end) - Date.parse(start)) / 86_400_000;
-};
-
-// Reorder cards WITHIN each day group. "By date" (default) lifts the short,
-// time-pinned events above the long multi-week runs — the exact order the server
-// already emits, so the first load never reflows; "Newest first" orders by
-// first-seen time (data-created) descending. Grouping (day headings) is untouched.
-const reorder = (): void => {
-  document.querySelectorAll<HTMLElement>('.feed-list').forEach((ul) => {
-    const cards = [...ul.querySelectorAll<HTMLElement>(':scope > li')];
-    const ord = (li: HTMLElement): number => Number(li.dataset['ord'] ?? '9999');
-    const created = (li: HTMLElement): number => Number(li.dataset['created'] ?? '0');
-    const sorted =
-      state.sort === 'created'
-        ? cards.toSorted((a, b) => created(b) - created(a) || ord(a) - ord(b))
-        : cards.toSorted((a, b) => spanDays(a) - spanDays(b) || ord(a) - ord(b));
-    sorted.forEach((li) => ul.appendChild(li));
-  });
-};
-
-const esc = (s: string): string =>
-  s.replace(/[<>&"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c] ?? c);
-
-/** Build a card matching the server-rendered markup, for a D1 event. */
-const cardHtml = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<string, string>): string => {
-  const desc = descriptionOf(lang)(event);
-  const thumb =
-    event.img === undefined
-      ? `<div class="mini-thumb--empty" data-cat="${primaryCategory(event.c)}">${icons[primaryCategory(event.c)] ?? ''}</div>`
-      : `<img class="mini-thumb" src="${esc(event.img)}" alt="" data-cat="${primaryCategory(event.c)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`;
-  const tags = event.c
-    .map((c) => `<span class="cat-tag" data-cat="${c}">${icons[c] ?? ''} ${esc(ui.cat[c] ?? c)}</span>`)
-    .join('');
-  const free = event.f === true ? `<span class="badge-free">${esc(ui.badges.free)}</span>` : '';
-  const gem = event.x === true ? `<span class="badge-gem">${esc(ui.badges.gem)}</span>` : '';
-  return (
-    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event.id))}">` +
-    favButtonHtml(event.id, ui.nav.favorites) +
-    thumb +
-    `<div class="mini-body"><h4 class="mini-title">${esc(titleOf(lang)(event))}</h4>` +
-    `<span class="mini-when">${esc(formatWhen(event))}</span>` +
-    (desc === '' ? '' : `<p class="mini-desc">${esc(desc)}</p>`) +
-    `<div class="mini-tags">${tags}${free}${gem}</div></div></a>`
-  );
-};
-
-const insertEvent = (event: CompactEvent, ui: Ui, lang: Locale, icons: Record<string, string>, today: string): void => {
-  const list = document.querySelector('[data-feed-list]');
-  if (!list) return;
-  const day = event.s < today ? today : event.s;
-  const li = document.createElement('li');
-  li.dataset['id'] = event.id;
-  li.dataset['cats'] = event.c.join(',');
-  li.dataset['start'] = event.s;
-  li.dataset['end'] = event.e ?? event.s;
-  li.dataset['free'] = event.f === true ? '1' : '0';
-  li.dataset['gem'] = event.x === true ? '1' : '0';
-  li.dataset['created'] = event.cr === undefined ? '' : String(event.cr);
-  li.innerHTML = cardHtml(event, ui, lang, icons);
-
-  const existing = list.querySelector<HTMLElement>(`.feed-group[data-day="${day}"] .feed-list`);
-  if (existing) {
-    // Late events land after the server-rendered ones in "by date"; reorder()
-    // re-places them by span in "by uniqueness".
-    li.dataset['ord'] = String(existing.children.length);
-    existing.appendChild(li);
-    return;
-  }
-  li.dataset['ord'] = '0';
-  const section = document.createElement('section');
-  section.className = 'feed-group';
-  section.dataset['day'] = day;
-  section.innerHTML = `<h3>${esc(dayHeading(ui)(day))}</h3><ul class="feed-list"></ul>`;
-  section.querySelector("ul")?.appendChild(li);
-  // Keep day groups in ascending date order.
-  const after = [...list.querySelectorAll<HTMLElement>('.feed-group')].find(
-    (g) => (g.dataset['day'] ?? '') > day,
-  );
-  if (after) list.insertBefore(section, after);
-  else list.appendChild(section);
-};
-
-const augment = async (ui: Ui, lang: Locale, icons: Record<string, string>, today: string): Promise<void> => {
-  try {
-    const res = await fetch('/api/events/published.json', { headers: { accept: 'application/json' } });
-    const extra = decodeEventList(await res.json());
-    const seen = new Set(
-      [...document.querySelectorAll<HTMLElement>('[data-feed-list] li')].map((li) => li.dataset['id']),
-    );
-    extra.filter((e) => !seen.has(e.id)).forEach((e) => insertEvent(e, ui, lang, icons, today));
-    buildIndex(lang);
-    runSearch();
-    apply();
-    reorder();
-  } catch {
-    /* keep the server-rendered set */
-  }
-};
-
-/** The feed's "today" is the one the STATIC page was built with (stamped on the
- *  list as data-today), not the browser's clock. On a build that is a day old
- *  the two differ, and using the browser date made `apply()` hide the whole
- *  first day-group the server had rendered — the events flashed in, then
- *  vanished on load ("the order arrives one way, then changes"). Reading the
- *  server's today keeps the initial client view identical to the SSR, so there
- *  is no reflow; a genuinely stale build is a content-freshness concern, handled
- *  by rebuild cadence, not a per-load flicker. Falls back to the clock when the
- *  attribute is absent (e.g. a client-only feed). */
-const feedToday = (): string =>
-  document.querySelector('[data-feed-list]')?.getAttribute('data-today') || isoToday();
 
 /** Wire the server-rendered feed: filters + late-published events. */
 export const initFeed = (): void => {
-  const page = readJson<{ lang: Locale; ui: Ui }>('ui-data', { lang: 'en' as Locale, ui: {} as Ui });
-  const icons = readJson<Record<string, string>>('icons-data', {});
-  const today = feedToday();
-  readParams(today);
-  stampOrder();
-
-  buildIndex(page.lang);
-  runSearch();
-
-  const searchEl = document.querySelector<HTMLInputElement>('[data-feed-search]');
-  if (searchEl) {
-    searchEl.value = state.query;
-    searchEl.addEventListener('input', () => {
-      state.query = searchEl.value;
-      runSearch();
-      apply();
-      syncUrl(today);
-    });
-  }
-
-  const fromEl = document.querySelector<HTMLInputElement>('[data-feed-from]');
-  const toEl = document.querySelector<HTMLInputElement>('[data-feed-to]');
-  if (fromEl) {
-    fromEl.value = state.from;
-    fromEl.addEventListener('change', () => {
-      state.from = fromEl.value;
-      apply();
-      syncUrl(today);
-    });
-  }
-  if (toEl) {
-    toEl.value = state.to;
-    toEl.addEventListener('change', () => {
-      state.to = toEl.value;
-      apply();
-      syncUrl(today);
-    });
-  }
-
-  document.querySelectorAll<HTMLButtonElement>('[data-feed-cat]').forEach((chip) => {
-    const cat = chip.dataset['feedCat'] ?? '';
-    chip.setAttribute('aria-pressed', String(state.cats.has(cat)));
-    chip.addEventListener('click', () => {
-      const on = !state.cats.has(cat);
-      if (on) state.cats.add(cat);
-      else state.cats.delete(cat);
-      chip.setAttribute('aria-pressed', String(on));
-      apply();
-      syncUrl(today);
-    });
-  });
-  const toggle = (sel: string, key: 'free' | 'gems'): void => {
-    const btn = document.querySelector<HTMLButtonElement>(sel);
-    if (!btn) return;
-    btn.setAttribute('aria-pressed', String(state[key]));
-    btn.addEventListener('click', () => {
-      state[key] = !state[key];
-      btn.setAttribute('aria-pressed', String(state[key]));
-      apply();
-      syncUrl(today);
-    });
+  const feed = context();
+  readFeedParams(feed.today);
+  stampFeedOrder();
+  buildFeedIndex(feed.lang);
+  runFeedSearch();
+  const refresh = (): void => {
+    applyFeedFilter();
+    syncFeedUrl(feed.today);
   };
-  toggle('[data-feed-free]', 'free');
-  toggle('[data-feed-gems]', 'gems');
-
-  document.querySelector('[data-feed-clear]')?.addEventListener('click', () => {
-    state.cats.clear();
-    state.free = false;
-    state.gems = false;
-    document
-      .querySelectorAll('[data-feed-cat], [data-feed-free], [data-feed-gems]')
-      .forEach((b) => b.setAttribute('aria-pressed', 'false'));
-    apply();
-    syncUrl(today);
-  });
-
-  const sortButtons = document.querySelectorAll<HTMLButtonElement>('[data-feed-sort]');
-  sortButtons.forEach((btn) => {
-    const mode: FeedSort = btn.dataset['feedSort'] === 'created' ? 'created' : 'date';
-    btn.setAttribute('aria-pressed', String(state.sort === mode));
-    btn.addEventListener('click', () => {
-      if (state.sort === mode) return;
-      state.sort = mode;
-      sortButtons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
-      reorder();
-      syncUrl(today);
-    });
-  });
-
-  apply();
-  reorder();
+  wireFeedSearch(refresh);
+  wireFeedDates(refresh);
+  wireFeedChips(refresh);
+  wireFeedSort(feed.today);
+  applyFeedFilter();
+  reorderFeed();
   // The list was hidden up front on a filtered URL (see Layout.astro) to avoid
   // flashing the unfiltered static list; it is now filtered, so reveal it.
   document.documentElement.classList.remove('feed-filtering');
-  void augment(page.ui, page.lang, icons, today);
+  void augmentFeed(feed);
 };

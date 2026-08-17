@@ -3,7 +3,7 @@
  * The list is server-rendered links — the script only hides the ones that do not
  * match what you typed, so the picker still works without it.
  */
-import { isHtmlElement } from '../../lib/dom/is-html-element.ts';
+import { queryAll } from '../../lib/dom/query-all.ts';
 import { regionPickerParts } from './region-picker-parts.ts';
 import { wireRegionPicker } from './wire-region-picker.ts';
 
@@ -14,8 +14,7 @@ const bindOne = (root: HTMLElement): void => {
 
 // An SPA swap brings a fresh, unbound picker; the old one leaves with its DOM.
 const bindAll = (): void => {
-  Array.from<unknown>(document.querySelectorAll('[data-region-picker]'))
-    .filter(isHtmlElement)
+  queryAll(document, '[data-region-picker]')
     .filter((root) => root.dataset['bound'] !== 'true')
     .forEach(bindOne);
 };

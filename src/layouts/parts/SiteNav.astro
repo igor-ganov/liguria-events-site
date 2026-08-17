@@ -1,0 +1,30 @@
+---
+import LanguageSwitcher from '../../components/LanguageSwitcher.astro';
+import ThemeToggle from '../../components/ThemeToggle.astro';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ lang: Locale; region: string; path: string; ui: Ui }>;
+const { lang, region, path, ui } = Astro.props;
+---
+
+<nav aria-label="Site">
+  <a href={regionUrl(lang, region)}>{ui.nav.feed}</a>
+  <a href={regionUrl(lang, region, 'calendar/')}>{ui.nav.calendar}</a>
+  <a href={regionUrl(lang, region, 'map/')}>{ui.nav.map}</a>
+  <a href={regionUrl(lang, region, 'landmarks/')}>{ui.nav.landmarks}</a>
+  <a href={regionUrl(lang, region, 'places/')}>{ui.nav.places}</a>
+  <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
+    {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
+  </a>
+  <a href="https://t.me/liguria_events_bot" rel="noopener">{ui.nav.bot}</a>
+  <a
+    href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
+    rel="noopener">{ui.nav.ical}</a
+  >
+  <LanguageSwitcher lang={lang} path={path} />
+  <ThemeToggle ui={ui} />
+  <span class="account" data-account><span class="acct-skeleton" aria-hidden="true"></span></span>
+</nav>

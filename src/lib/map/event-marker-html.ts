@@ -1,17 +1,8 @@
-import { branch } from '../branch.ts';
-import { escapeAttr } from './escape-attr.ts';
+import { photoMarkerHtml } from './photo-marker-html.ts';
 
 /**
  * The inner markup of an event's map marker: its photo when it has one, and the
- * category icon otherwise (the icon face carries its own modifier class so the
- * two read differently). The marker's colour and outer element live in the DOM
- * shell that mounts this — only the markup decision is here, so it is testable.
+ * category icon otherwise. The square event face is the `ev` flavour of the
+ * shared photo-marker template.
  */
-export const eventMarkerHtml =
-  (icon: string) =>
-  (image: string | undefined): string =>
-    branch((image ?? '') === '')(
-      () => `<div class="ev-marker-face ev-marker-face--icon">${icon}</div>`,
-      () =>
-        `<div class="ev-marker-face"><img src="${escapeAttr(image ?? '')}" loading="lazy" referrerpolicy="no-referrer" alt="" /></div>`,
-    );
+export const eventMarkerHtml = photoMarkerHtml('ev');

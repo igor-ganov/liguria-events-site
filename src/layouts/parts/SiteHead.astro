@@ -1,0 +1,53 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import FeedFilterInit from './FeedFilterInit.astro';
+import ThemeInit from './ThemeInit.astro';
+import { alternateLinks } from '../../lib/seo/alternate-links.ts';
+import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
+import { ogLocale } from '../../lib/seo/og-locale.ts';
+import { tilesOrigin } from '../../lib/seo/tiles-origin.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{
+  lang: Locale;
+  title: string;
+  description: string;
+  path: string;
+  needsMap: boolean;
+  image: string | undefined;
+  site: URL | undefined;
+}>;
+const { lang, title, description, path, needsMap, image, site } = Astro.props;
+const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
+const canonical = canonicalUrl(lang, path, site);
+const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content={description} />
+<meta name="theme-color" content="hsl(28 92% 52%)" />
+<link rel="icon" type="image/svg+xml" href={icon} />
+<title>{title} · Dove Go</title>
+{needsMap && tiles && <link rel="preconnect" href={tiles} crossorigin />}
+{needsMap && tiles && <link rel="dns-prefetch" href={tiles} />}
+<link rel="canonical" href={canonical} />
+{
+  alternateLinks(path, site).map(({ hreflang, href }) => (
+    <link rel="alternate" hreflang={hreflang} href={href} />
+  ))
+}
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content="Dove Go" />
+<meta property="og:locale" content={ogLocale(lang)} />
+{image && <meta property="og:image" content={image} />}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{image && <meta name="twitter:image" content={image} />}
+<ClientRouter />
+<ThemeInit />
+<FeedFilterInit />
