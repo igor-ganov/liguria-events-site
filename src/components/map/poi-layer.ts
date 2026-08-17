@@ -44,9 +44,11 @@ export const poiLayer = <T extends Readonly<{ id: string; lat: number; lng: numb
   return {
     draw,
     hide: () => markers.splice(0).forEach((marker) => marker.remove()),
+    // `visible` gates the fetch here too: switching a layer on from a camera it
+    // does not serve (see places-visible.ts) must not pull its shards.
     show: () => {
       spec.onShow();
-      ensure();
+      [0].filter(spec.face.visible).forEach(ensure);
     },
     onLoad: () => [0].filter(spec.face.visible).forEach(ensure),
     onMove: () =>

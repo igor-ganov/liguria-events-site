@@ -7,6 +7,7 @@ import { placeCard } from './place-card.ts';
 import { placeColor } from '../../lib/places/place-color.ts';
 import { placeIcon } from '../../lib/places/place-icon.ts';
 import { placePopupHtml } from '../../lib/map/place-popup-html.ts';
+import { placesVisible } from '../../lib/map/places-visible.ts';
 import { poiLayer } from './poi-layer.ts';
 import { poiMarkerEl } from './poi-marker-el.ts';
 import { warmImage } from './warm-image.ts';
@@ -50,7 +51,9 @@ export const placesLayer = (context: MapContext): PoiLayer => {
       map: context.map,
       prefix: 'pl',
       anchor: 'center',
-      visible: () => mapState.showPlaces,
+      // Gates the draw AND, through poiLayer, the shard fetch — see
+      // places-visible.ts for why the region cap alone was not enough.
+      visible: () => placesVisible(mapState.showPlaces, context.map.getZoom()),
       markerEl,
       openPoint: (place, at) => popup(POPUP)(placePopupHtml(card(place)), at),
     },
@@ -60,11 +63,16 @@ export const placesLayer = (context: MapContext): PoiLayer => {
     home: context.region,
     inView: () => inViewRegions(context.map),
     load: (region) => loadPlaces(region, context.lang),
-    // Switched on over half the country, only the home region's shard will
-    // load — say so rather than leave the map looking broken.
+    // Switched on too far out — either below the zoom threshold or over half
+    // the country, where only the home region's shard would load — say so
+    // rather than leave the map looking broken.
     onShow: () =>
       [0]
-        .filter(() => inViewRegions(context.map).length > MAX_REGIONS)
+        .filter(
+          () =>
+            !placesVisible(true, context.map.getZoom()) ||
+            inViewRegions(context.map).length > MAX_REGIONS,
+        )
         .forEach(() => context.say('zoomIn')),
   });
 };
