@@ -1,4 +1,5 @@
 import { setHidden } from '../../lib/dom/set-hidden.ts';
+import { whenMapReady } from './when-map-ready.ts';
 import type { MapContext } from './map-context.ts';
 
 // On a slow link, reveal the map after a few seconds — the DOM markers are
@@ -26,7 +27,10 @@ export const wireMapLoading = (context: MapContext): void => {
   canvas.dataset['loading'] = 'true';
   const soft = setTimeout(reveal(false), SOFT_REVEAL);
   const hard = setTimeout(reveal(true), HARD_FAIL);
-  context.map.on('load', () => {
+  // whenMapReady, not map.on('load'): this runs after the corpus fetch, so the
+  // style may already have loaded — otherwise the skeleton stayed up until the
+  // soft-reveal timer even though the map was live. See when-map-ready.ts.
+  whenMapReady(context.map, () => {
     loaded = true;
     clearTimeout(soft);
     clearTimeout(hard);

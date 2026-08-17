@@ -5,6 +5,7 @@ import { syncLayerChips } from './sync-layer-chips.ts';
 import { syncMapControls } from './sync-map-controls.ts';
 import { wireLayerToggles } from './wire-layer-toggles.ts';
 import { wireMapFilters } from './wire-map-filters.ts';
+import { whenMapReady } from './when-map-ready.ts';
 import { writeMapUrl } from './write-map-url.ts';
 import type { MapCameraView } from '../../lib/map/read-view.ts';
 import type { MapContext } from './map-context.ts';
@@ -22,7 +23,9 @@ export const wireMapFlows = (
 ): void => {
   const { map } = context;
   const maxDate = maxEventDate(mapState.today)(context.events);
-  map.on('load', () => {
+  // whenMapReady, not map.on('load'): these flows are wired after the corpus
+  // fetch, so the style may already have loaded — see when-map-ready.ts.
+  whenMapReady(map, () => {
     layers.events.rebuild();
     fitAll(context, saved);
     layers.events.draw();
@@ -31,11 +34,11 @@ export const wireMapFlows = (
     layers.events.draw();
     writeMapUrl();
   });
-  map.on('load', () => void layers.civics.load());
+  whenMapReady(map, () => void layers.civics.load());
   map.on('moveend', () => void layers.civics.load());
-  map.on('load', layers.landmarks.onLoad);
+  whenMapReady(map, layers.landmarks.onLoad);
   map.on('moveend', layers.landmarks.onMove);
-  map.on('load', layers.places.onLoad);
+  whenMapReady(map, layers.places.onLoad);
   map.on('moveend', layers.places.onMove);
   wireMapFilters(() => {
     writeMapUrl();
