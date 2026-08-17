@@ -1,30 +1,11 @@
 ---
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import { consumeMagicToken } from '../../lib/auth/magic.ts';
-import { findOrCreateUser, rootAdmins } from '../../lib/auth/users.ts';
-import { signSession, SESSION_COOKIE, sessionCookie } from '../../lib/auth/session.ts';
 
-const env = Astro.locals.runtime.env;
-const token = Astro.url.searchParams.get('t') ?? '';
-const email = await consumeMagicToken(env.SESSION, token);
-
-// TOOLING EXCEPTION to the no-branching rule, kept deliberately: `astro check`
-// does not analyse the expression of a frontmatter `return`, so anything used
-// only inside one is reported as an unused declaration and fails the type check.
-// Every branch-free shape was tried — a `switch` case, a 0-or-1 `for`, a mapped
-// Promise, a `branch()` redirect target — and each one breaks `bun run typecheck`.
-// Two literal-argument returns guarded by `if` is the only form the checker
-// accepts, so this file stays on the LEGACY DEBT list until Astro fixes that.
-if (email) {
-  const nowMs = Date.now();
-  const { user, isNew } = await findOrCreateUser(env.DB, email, new Date(nowMs).toISOString(), rootAdmins(env));
-  const session = await signSession(env.SESSION_SECRET, user.id, nowMs);
-  Astro.cookies.set(SESSION_COOKIE, session, { ...sessionCookie(env.ENVIRONMENT === 'production'), maxAge: 7 * 24 * 3600 });
-  // Land on the home page; first-time users get offered a passkey.
-  if (isNew) return Astro.redirect('/?setup=passkey');
-  return Astro.redirect('/');
-}
+// Pure markup: reaching this page means the link did NOT sign anyone in.
+// A usable magic-link token is spent by the middleware, which sets the session
+// cookie and redirects before rendering ever starts — so the only case left
+// here is a spent, expired or unknown token.
 ---
 
 <Layout lang="en" title="Sign-in link" path="auth/verify/">

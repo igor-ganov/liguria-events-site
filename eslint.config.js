@@ -127,11 +127,6 @@ export default tseslint.config(
       // remaining bulk is one long imperative setup() — extract it flow by flow
       // (clustering, layer toggles, geolocation, URL state).
       'src/components/views/MapView.astro',
-      // TOOLING EXCEPTION, not laziness: `astro check` does not analyse the
-      // expression of a frontmatter `return`, so every branch-free form of this
-      // page's sign-in redirect fails the type check. See the comment in the
-      // file. Revisit when Astro fixes that.
-      'src/pages/auth/verify.astro',
     ],
     rules: { 'no-restricted-syntax': 'off', 'functional/max-lines-no-imports': 'off' },
   },
