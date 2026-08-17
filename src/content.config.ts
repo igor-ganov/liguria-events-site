@@ -1,63 +1,26 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-
-const cat = z.object({
-  music: z.string(), theatre: z.string(), art: z.string(), food: z.string(),
-  sport: z.string(), family: z.string(), market: z.string(), nightlife: z.string(),
-  culture: z.string(), workshop: z.string(), other: z.string(),
-});
-
-const landmarkKinds = z.object({
-  castle: z.string(), church: z.string(), museum: z.string(), palace: z.string(),
-  monument: z.string(), tower: z.string(), lighthouse: z.string(), square: z.string(),
-  park: z.string(), heritage: z.string(), beach: z.string(), attraction: z.string(),
-});
-
-const placeCats = z.object({
-  restaurant: z.string(), cafe: z.string(), bar: z.string(), fastfood: z.string(),
-  icecream: z.string(), nightlife: z.string(), fitness: z.string(), climbing: z.string(),
-  sport: z.string(), cinema: z.string(), entertainment: z.string(), museum: z.string(),
-  gallery: z.string(), wellness: z.string(), kids: z.string(), shopping: z.string(),
-});
+import { accountUi } from './content/schema/account-ui.ts';
+import { categoryLabels } from './content/schema/category-labels.ts';
+import { chromeUi } from './content/schema/chrome-ui.ts';
+import { landmarksUi } from './content/schema/landmarks-ui.ts';
+import { placesUi } from './content/schema/places-ui.ts';
+import { reviewsUi } from './content/schema/reviews-ui.ts';
+import { routeUi } from './content/schema/route-ui.ts';
 
 // UI chrome copy per locale (i18n design §3). Every field is required, so a
-// missing key in any language file fails the build (AC-2.2).
+// missing key in any language file fails the build (AC-2.2). The field groups
+// live in ./content/schema/* — one module per area of the interface.
 const ui = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/ui' }),
   schema: z.object({
-    nav: z.object({ calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(), places: z.string(), favorites: z.string(), bot: z.string(), ical: z.string() }),
-    search: z.object({ placeholder: z.string(), none: z.string() }),
-    mapLayers: z.object({ events: z.string(), landmarks: z.string(), places: z.string() }),
-    landmarks: z.object({
-      title: z.string(), intro: z.string(), more: z.string(), empty: z.string(),
-      search: z.string(), kinds: landmarkKinds,
-    }),
-    places: z.object({
-      title: z.string(), intro: z.string(), empty: z.string(),
-      search: z.string(), hours: z.string(), rating: z.string(),
-      phone: z.string(), address: z.string(), categories: placeCats,
-    }),
-    reviews: z.object({
-      title: z.string(), none: z.string(), rating: z.string(), comment: z.string(),
-      submit: z.string(), signIn: z.string(), remove: z.string(), yours: z.string(),
-    }),
-    map: z.object({ retry: z.string(), failed: z.string(), locate: z.string() }),
-    auth: z.object({
-      signIn: z.string(), title: z.string(), emailPrompt: z.string(), sendCode: z.string(),
-      or: z.string(), passkey: z.string(), codePre: z.string(), codePost: z.string(),
-      verify: z.string(), back: z.string(), signOut: z.string(), addEvent: z.string(),
-      moderation: z.string(), users: z.string(), addPasskey: z.string(),
-      sending: z.string(), invalidEmail: z.string(), verifying: z.string(), badCode: z.string(),
-      lookingPasskey: z.string(), waitingPasskey: z.string(), passkeyFailed: z.string(),
-    }),
-    chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
-    theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
-    range: z.object({ from: z.string(), to: z.string() }),
-    sort: z.object({ label: z.string(), date: z.string(), created: z.string() }),
-    route: z.object({ walk: z.string(), drive: z.string(), transit: z.string(), generate: z.string(), save: z.string(), saved: z.string(), tight: z.string(), min: z.string(), empty: z.string(), link: z.string(), saveFailed: z.string(), mine: z.string(), open: z.string(), private: z.string(), public: z.string(), makePrivate: z.string(), makePublic: z.string(), remove: z.string(), title: z.string(), by: z.string(), moveDay: z.string(), moveUp: z.string(), moveDown: z.string(), addFav: z.string(), saveChanges: z.string(), viewList: z.string(), viewTimeline: z.string(), pdf: z.string(), day: z.string(), setDefault: z.string(), setBase: z.string(), setBaseDefault: z.string(), clearBase: z.string(), clickMap: z.string(), dayBase: z.string(), dayFinal: z.string(), fromBase: z.string(), toBase: z.string() }),
-    menu: z.object({ events: z.string(), explore: z.string(), more: z.string() }),
-    seo: z.object({ feed: z.string(), calendar: z.string(), map: z.string() }),
-    cat,
+    ...chromeUi,
+    landmarks: landmarksUi,
+    places: placesUi,
+    reviews: reviewsUi,
+    auth: accountUi,
+    route: routeUi,
+    cat: categoryLabels,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string() }),

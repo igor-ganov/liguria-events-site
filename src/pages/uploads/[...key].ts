@@ -1,4 +1,6 @@
 import type { APIRoute } from 'astro';
+import { isDefined } from '../../lib/is-defined.ts';
+import { uploadHeaders } from '../../lib/img/upload-headers.ts';
 
 export const prerender = false;
 
@@ -7,10 +9,10 @@ export const prerender = false;
 export const GET: APIRoute = async ({ params, locals }) => {
   const key = params.key ?? '';
   const object = await locals.runtime.env.UPLOADS.get(key);
-  if (object === null) return new Response('Not found', { status: 404 });
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set('etag', object.httpEtag);
-  headers.set('cache-control', 'public, max-age=31536000, immutable');
-  return new Response(object.body, { headers });
+  return (
+    [object ?? undefined]
+      .filter(isDefined)
+      .map((found) => new Response(found.body, { headers: uploadHeaders(found) }))
+      .at(0) ?? new Response('Not found', { status: 404 })
+  );
 };

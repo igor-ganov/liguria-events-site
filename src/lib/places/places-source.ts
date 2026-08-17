@@ -1,4 +1,4 @@
-import { decodePlaces } from './decode-places.ts';
+import { decodedShard } from './decoded-shard.ts';
 import type { Place } from './place-schema.ts';
 import type { Locale } from '../i18n/locales.ts';
 
@@ -13,9 +13,13 @@ const cache = new Map<string, readonly Place[]>();
 export const placesFor = async (assets: Assets, region: string, lang: Locale): Promise<readonly Place[]> => {
   const key = `${region}.${lang}`;
   const hit = cache.get(key);
-  if (hit) return hit;
-  const res = await assets.fetch(`https://assets.local/data/places/${region}.${lang}.json`);
-  const data = res.ok ? decodePlaces(await res.json(), region) : [];
-  cache.set(key, data);
-  return data;
+  // A 0-or-1 array: a warm cache maps over nothing, so nothing is fetched.
+  const loaded = await Promise.all(
+    [hit].filter((cached) => cached === undefined).map(async () => {
+      const data = await decodedShard(await assets.fetch(`https://assets.local/data/places/${region}.${lang}.json`), region);
+      cache.set(key, data);
+      return data;
+    }),
+  );
+  return hit ?? loaded.at(0) ?? [];
 };

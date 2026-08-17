@@ -1,31 +1,24 @@
 import { defineMiddleware } from 'astro:middleware';
-import { readSession, SESSION_COOKIE } from './lib/auth/session.ts';
-import { getUserById } from './lib/auth/users.ts';
-
-const PROTECTED = ['/submit', '/admin', '/settings'];
-
-const needsAuth = (path: string): boolean =>
-  PROTECTED.some((p) => path === p || path.startsWith(`${p}/`));
+import { SESSION_COOKIE } from './lib/auth/session.ts';
+import { authGate } from './lib/auth/auth-gate.ts';
+import { isDefined } from './lib/is-defined.ts';
+import { sessionUser } from './lib/auth/session-user.ts';
 
 /** Resolve the session cookie into locals.user, and gate protected paths. */
 export const onRequest = defineMiddleware(async (ctx, next) => {
-  const env = ctx.locals.runtime?.env;
-  const token = ctx.cookies.get(SESSION_COOKIE)?.value;
-  if (env && token) {
-    const subject = await readSession(token, env.SESSION_SECRET, Date.now());
-    const user = subject ? await getUserById(env.DB, subject) : null;
-    if (user) ctx.locals.user = user;
-  }
+  const user = await sessionUser(
+    ctx.locals.runtime?.env,
+    ctx.cookies.get(SESSION_COOKIE)?.value,
+    Date.now(),
+  );
+  // Assigned only when there IS a user, so an anonymous request leaves the
+  // local untouched (rather than set to undefined) exactly as before.
+  [user].filter(isDefined).forEach((found) => {
+    ctx.locals.user = found;
+  });
 
-  // A banned person stays signed in (so they can see why) but may not reach
-  // anything that writes: submitting, settings, moderation.
-  if (needsAuth(ctx.url.pathname) && ctx.locals.user?.banned) {
-    return ctx.redirect('/?banned=1');
-  }
-
-  // No login page — bounce to home and let the sign-in dialog open there.
-  if (needsAuth(ctx.url.pathname) && !ctx.locals.user) {
-    return ctx.redirect(`/?signin=1&next=${encodeURIComponent(ctx.url.pathname)}`);
-  }
-  return next();
+  const bounce = [authGate(ctx.url.pathname, ctx.locals.user)]
+    .filter(isDefined)
+    .map((target) => ctx.redirect(target));
+  return bounce.at(0) ?? next();
 });

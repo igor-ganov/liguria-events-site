@@ -11,8 +11,12 @@
 const JUNK =
   /(?<![a-z])(?:location[ _-]?map|locator|relief[ _]?location|topographic[ _]?map|blank|flag[ _]of|bandiera|coat[ _]of[ _]arms|stemma)(?![a-z])/i;
 
-export const isJunkImage = (url: string | undefined): boolean => {
-  if (!url) return false;
-  const file = decodeURIComponent((url.split('/').pop() ?? '').split('?')[0] ?? '');
-  return JUNK.test(file);
-};
+const fileNameOf = (url: string): string =>
+  decodeURIComponent((url.split('/').pop() ?? '').split('?')[0] ?? '');
+
+/** A missing or empty URL is not junk — it is simply no image. */
+export const isJunkImage = (url: string | undefined): boolean =>
+  [url ?? '']
+    .filter((raw) => raw !== '')
+    .map(fileNameOf)
+    .some((file) => JUNK.test(file));

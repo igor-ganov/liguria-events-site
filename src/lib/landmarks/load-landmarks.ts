@@ -1,4 +1,4 @@
-import { decodeLandmarks } from './decode-landmarks.ts';
+import { landmarksFromResponse } from './landmarks-from-response.ts';
 import type { Landmark } from './landmark-schema.ts';
 import type { Locale } from '../i18n/locales.ts';
 
@@ -11,5 +11,5 @@ export const loadLandmarks = async (region: string, lang: Locale): Promise<reado
   const res = await fetch(`${base}/data/landmarks/${region}.${lang}.json`, {
     headers: { accept: 'application/json' },
   });
-  return res.ok ? decodeLandmarks(await res.json(), region) : [];
+  return landmarksFromResponse(res, region);
 };

@@ -1,6 +1,7 @@
 /* Vendored from @prometheus/search-core (MIT). See doc.ts for provenance. */
 import type { SearchDoc, SearchIndex } from './doc.ts';
-import { normalize, tokenize } from './normalize.ts';
+import { normalize } from './normalize.ts';
+import { tokenize } from './tokenize.ts';
 
 /**
  * A document with everything the scorer needs precomputed. `tokens` is the set

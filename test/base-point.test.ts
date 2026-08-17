@@ -1,6 +1,6 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { effectiveBase, legTo } from '../src/lib/favorites/base-point.ts';
+import { asPoint, effectiveBase, legTo, resolveDayBase } from '../src/lib/favorites/base-point.ts';
 
 const g = { lat: 44.0, lng: 8.0, label: 'global hotel' };
 const r = { lat: 44.4, lng: 8.9, label: 'route hotel' };
@@ -18,6 +18,51 @@ describe('effectiveBase precedence: day > route > global', () => {
   });
   test('undefined when nothing set', () => {
     assert.equal(effectiveBase('2026-07-10', {}, undefined, undefined), undefined);
+  });
+});
+
+describe('resolveDayBase', () => {
+  test('resolves the base by precedence and picks up the day-specific final point', () => {
+    const f = { lat: 44.5, lng: 9.1, label: 'station' };
+    assert.deepEqual(resolveDayBase('2026-07-10', { '2026-07-10': d }, r, g, { '2026-07-10': f }), {
+      base: d,
+      final: f,
+    });
+  });
+
+  test('a day with no final point ends back at its base', () => {
+    assert.deepEqual(resolveDayBase('2026-07-10', {}, r, g, {}), { base: r, final: undefined });
+  });
+
+  test('another day’s final point is not borrowed', () => {
+    const out = resolveDayBase('2026-07-11', {}, r, g, { '2026-07-10': d });
+    assert.equal(out.final, undefined);
+  });
+});
+
+describe('asPoint', () => {
+  test('reads bare coordinates, leaving the label absent rather than empty', () => {
+    assert.deepEqual(asPoint({ lat: 44.4, lng: 8.93 }), { lat: 44.4, lng: 8.93 });
+  });
+
+  test('keeps a string label', () => {
+    assert.deepEqual(asPoint({ lat: 44.4, lng: 8.93, label: 'hotel' }), { lat: 44.4, lng: 8.93, label: 'hotel' });
+  });
+
+  test('drops a label that is not a string', () => {
+    assert.deepEqual(asPoint({ lat: 1, lng: 2, label: 7 }), { lat: 1, lng: 2 });
+  });
+
+  test('a missing or unusable coordinate means no point at all', () => {
+    assert.equal(asPoint({ lat: 44.4 }), undefined);
+    assert.equal(asPoint({ lat: '44.4', lng: '8.93' }), undefined);
+    assert.equal(asPoint({ lat: Number.NaN, lng: 8.93 }), undefined);
+  });
+
+  test('survives values that are not objects at all', () => {
+    assert.equal(asPoint(undefined), undefined);
+    assert.equal(asPoint(0), undefined);
+    assert.equal(asPoint('hotel'), undefined);
   });
 });
 

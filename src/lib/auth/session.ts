@@ -1,54 +1,8 @@
-// Stateless signed-cookie sessions: `subject.expiry.hmac` (HMAC-SHA256).
-// The subject is the user id; no server-side session store needed.
-const encoder = new TextEncoder();
-const TTL_MS = 7 * 24 * 60 * 60 * 1000;
-
-const importKey = (secret: string): Promise<CryptoKey> =>
-  crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [
-    'sign',
-    'verify',
-  ]);
-
-const toB64Url = (bytes: ArrayBuffer): string =>
-  btoa(String.fromCharCode(...new Uint8Array(bytes)))
-    .replaceAll('+', '-')
-    .replaceAll('/', '_')
-    .replaceAll('=', '');
-
-const hmac = async (secret: string, data: string): Promise<string> =>
-  toB64Url(await crypto.subtle.sign('HMAC', await importKey(secret), encoder.encode(data)));
-
-/** Cookie name for the session token. */
-export const SESSION_COOKIE = 'dg_session';
-
-/** Cookie options for the session. In production the domain is widened to
- *  `.dovego.it` so the session is shared with subdomains (e.g. the admin app at
- *  admin.dovego.it); dev keeps a host-only cookie so dev.dovego.it stays
- *  isolated. Used for both set and delete (delete must match the domain). */
-export const sessionCookie = (production: boolean) => ({
-  httpOnly: true as const,
-  secure: true as const,
-  sameSite: 'lax' as const,
-  path: '/',
-  ...(production ? { domain: '.dovego.it' } : {}),
-});
-
-/** Mint a signed session token for a user id, valid 7 days. */
-export const signSession = async (secret: string, subject: string, nowMs: number): Promise<string> => {
-  const payload = `${subject}.${nowMs + TTL_MS}`;
-  return `${payload}.${await hmac(secret, payload)}`;
-};
-
-/** Return the subject (user id) if the token is well-formed, unexpired and authentic. */
-export const readSession = async (token: string, secret: string, nowMs: number): Promise<string | null> => {
-  const parts = token.split('.');
-  const [subject, expiry, sig] = parts;
-  if (subject === undefined || expiry === undefined || sig === undefined) return null;
-  const expected = await hmac(secret, `${subject}.${expiry}`);
-  if (sig.length !== expected.length) return null;
-  let diff = 0;
-  for (let i = 0; i < sig.length; i += 1) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
-  if (diff !== 0) return null;
-  if (Number(expiry) < nowMs) return null;
-  return subject;
-};
+// Stateless signed-cookie sessions: `subject.expiry.hmac` (HMAC-SHA256). The
+// subject is the user id; no server-side session store needed. Every value now
+// lives in its own module; this file stays the import surface the middleware and
+// the API endpoints already use.
+export { SESSION_COOKIE } from './session-cookie-name.ts';
+export { sessionCookie } from './session-cookie.ts';
+export { signSession } from './sign-session.ts';
+export { readSession } from './read-session.ts';

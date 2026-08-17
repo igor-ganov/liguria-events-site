@@ -1,15 +1,15 @@
 import { moderateEvent } from './moderate.ts';
 import { sendModerationEmail } from './notify.ts';
+import { statusFor } from './status-for.ts';
+import type { AiRun } from './verdict-types.ts';
 
 // Post-write moderation (runs via waitUntil, after the response): AI screens the
 // event, sets its status + gem flag, logs, and emails the submitter the result.
 // Shared by event creation (POST) and edits (PATCH), which both re-screen.
 
-type AiRun = { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
 type Env = { AI: unknown; DB: D1Database; RESEND_API_KEY: string; MAIL_FROM: string };
 
-const statusFor = (verdict: 'allow' | 'hold' | 'reject'): string =>
-  verdict === 'allow' ? 'published' : verdict === 'reject' ? 'rejected' : 'held';
+const LOG_SQL = 'INSERT INTO moderation_log (event_id, action, actor, reason, created_at) VALUES (?, ?, ?, ?, ?)';
 
 export const moderateAndNotify = async (
   env: Env,
@@ -19,12 +19,8 @@ export const moderateAndNotify = async (
   const status = statusFor(verdict.verdict);
   const now = new Date().toISOString();
   await env.DB.prepare('UPDATE events SET status = ?, gem = ?, updated_at = ? WHERE id = ?')
-    .bind(status, verdict.gem ? 1 : 0, now, ev.id)
+    .bind(status, Number(verdict.gem), now, ev.id)
     .run();
-  await env.DB.prepare(
-    'INSERT INTO moderation_log (event_id, action, actor, reason, created_at) VALUES (?, ?, ?, ?, ?)',
-  )
-    .bind(ev.id, `ai_${verdict.verdict}`, 'ai', verdict.reason, now)
-    .run();
+  await env.DB.prepare(LOG_SQL).bind(ev.id, `ai_${verdict.verdict}`, 'ai', verdict.reason, now).run();
   await sendModerationEmail(env.RESEND_API_KEY, env.MAIL_FROM, ev.submitterEmail, ev.title, status, verdict.reason);
 };

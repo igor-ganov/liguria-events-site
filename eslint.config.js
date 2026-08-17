@@ -145,41 +145,11 @@ export default tseslint.config(
     rules: { 'functional/one-value-export': 'off' },
   },
   {
-    // Auth, API endpoints and middleware are guard-clause / validation heavy —
-    // early returns and cohesive multi-export modules read safer here than the
-    // branch()/one-export style used across the rest of the app.
-    files: [
-      'src/lib/auth/**/*.ts',
-      'src/lib/moderation/**/*.ts',
-      'src/lib/search/**/*.ts',
-      'src/lib/landmarks/**/*.ts',
-      'src/lib/places/**/*.ts',
-      'src/lib/favorites/**/*.ts',
-      'src/components/favorites/**/*.ts',
-      'src/lib/region/region-bounds.ts',
-      'src/lib/region/regions-cities-of.ts',
-      'src/lib/img/**/*.ts',
-      'src/lib/events/d1-published.ts',
-      'src/lib/events/event-input.ts',
-      'src/components/feed/**/*.ts',
-      'src/components/events/**/*.ts',
-      'src/components/landmarks/**/*.ts',
-      'src/components/places/**/*.ts',
-      'src/components/admin/**/*.ts',
-      'src/components/region/**/*.ts',
-      'src/components/shared/default-page-data.ts',
-      'src/components/shared/image-fallback.ts',
-      'src/lib/i18n/ui-schema.ts',
-      'src/content.config.ts',
-      'src/pages/api/**/*.ts',
-      'src/pages/uploads/**/*.ts',
-      'src/middleware.ts',
-    ],
-    rules: {
-      'no-restricted-syntax': 'off',
-      'functional/one-value-export': 'off',
-      'functional/max-lines-no-imports': 'off',
-    },
+    // Astro's content collections put every locale's copy through one Zod schema;
+    // the per-area schema modules under src/content/schema/ are field lists, not
+    // logic, so the one-export rule buys nothing there.
+    files: ['src/content/schema/*.ts'],
+    rules: { 'functional/one-value-export': 'off' },
   },
   {
     // Declaration files use ambient idioms (empty extending interfaces, import()).

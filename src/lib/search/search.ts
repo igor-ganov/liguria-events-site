@@ -1,6 +1,7 @@
 /* Vendored from @prometheus/search-core (MIT). See doc.ts for provenance. */
+import { branch } from '../branch.ts';
 import type { SearchDoc } from './doc.ts';
-import { tokenize } from './normalize.ts';
+import { tokenize } from './tokenize.ts';
 import type { PreparedIndex } from './prepared.ts';
 import { scoreDoc } from './score.ts';
 import { buildSnippet, type Snippet } from './snippet.ts';
@@ -13,6 +14,18 @@ export interface SearchHit {
 }
 
 const DEFAULT_LIMIT = 20;
+
+const ranked = (index: PreparedIndex, terms: readonly string[], limit: number): readonly SearchHit[] =>
+  index.docs
+    .map(doc => ({ doc, score: scoreDoc(doc, terms) }))
+    .filter(scored => scored.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(scored => ({
+      doc: scored.doc.doc,
+      score: scored.score,
+      snippet: buildSnippet(scored.doc, terms),
+    }));
 
 /**
  * Rank a prepared index against a query. A blank query returns nothing rather
@@ -28,16 +41,8 @@ export const search = (
   limit: number = DEFAULT_LIMIT,
 ): readonly SearchHit[] => {
   const terms = tokenize(query);
-  if (terms.length === 0) return [];
-
-  return index.docs
-    .map(doc => ({ doc, score: scoreDoc(doc, terms) }))
-    .filter(scored => scored.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(scored => ({
-      doc: scored.doc.doc,
-      score: scored.score,
-      snippet: buildSnippet(scored.doc, terms),
-    }));
+  return branch(terms.length === 0)<readonly SearchHit[]>(
+    () => [],
+    () => ranked(index, terms, limit),
+  );
 };

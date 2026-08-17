@@ -1,4 +1,4 @@
-import { decodePlaces } from './decode-places.ts';
+import { decodedShard } from './decoded-shard.ts';
 import type { Place } from './place-schema.ts';
 import type { Locale } from '../i18n/locales.ts';
 
@@ -11,5 +11,5 @@ export const loadPlaces = async (region: string, lang: Locale): Promise<readonly
   const res = await fetch(`${base}/data/places/${region}.${lang}.json`, {
     headers: { accept: 'application/json' },
   });
-  return res.ok ? decodePlaces(await res.json(), region) : [];
+  return decodedShard(res, region);
 };

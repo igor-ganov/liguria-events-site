@@ -1,4 +1,4 @@
-import { placeIconPath } from './place-icon-paths.ts';
+import { placeIconPath } from './place-icon-path.ts';
 import type { PlaceCategory } from './place-categories.ts';
 
 /** Full inline `<svg>` string for a place category — matches iconSvg's feather

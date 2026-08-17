@@ -1,71 +1,37 @@
-import { iconSvg } from '../../lib/icons/icon-svg.ts';
-import { CATEGORIES } from '../../lib/events/categories.ts';
-import type { Category } from '../../lib/events/categories.ts';
+import { degradeImage } from './degrade-image.ts';
+import { isEventImage } from './is-event-image.ts';
 
 // Event covers are raw third-party URLs (visitgenoa `?itok=` derivatives that
 // expire, WordPress uploads behind hotlink rules, signed CDN links). When one
-// dies the browser paints its broken-image glyph. The feed already has a clean
-// category tile for events with no image at all (`mini-thumb--empty`); this
-// degrades a *failed* image to that same tile, and drops a broken detail-page
-// hero entirely — so a dead URL never shows as a broken picture.
+// dies the browser paints its broken-image glyph. This degrades a *failed*
+// image to the clean category tile an image-less event already gets, and drops a
+// broken detail-page hero entirely — so a dead URL never shows as a broken
+// picture. See degrade-image.ts for the per-case rules.
 
-const FALLEN = 'imgFallback';
-
-const toCategory = (value: string | undefined): Category =>
-  CATEGORIES.find((category) => category === value) ?? 'other';
-
-const isEventImage = (target: unknown): target is HTMLImageElement =>
-  target instanceof HTMLImageElement &&
-  (target.classList.contains('mini-thumb') ||
-    Boolean(target.closest('.event-hero')) ||
-    Boolean(target.closest('.gallery-photo')));
-
-const degrade = (img: HTMLImageElement): void => {
-  if (img.dataset[FALLEN] === '1') return;
-  img.dataset[FALLEN] = '1';
-  // A dead gallery thumbnail drops itself, leaving the rest of the strip.
-  const photo = img.closest('.gallery-photo');
-  if (photo) {
-    photo.remove();
-    return;
-  }
-  // Detail hero: no cover is better than a broken one — drop the whole figure.
-  const hero = img.closest('.event-hero');
-  if (hero) {
-    hero.remove();
-    return;
-  }
-  const category = toCategory(img.dataset['cat']);
-  const tile = document.createElement('div');
-  tile.className = 'mini-thumb--empty';
-  tile.dataset['cat'] = category;
-  tile.innerHTML = iconSvg(category, 26);
-  img.replaceWith(tile);
-};
-
-// An image can fail before this module runs (already-complete with zero
-// natural size) or after (error event — which does not bubble, so listen in
-// the capture phase). Re-scan on every SPA navigation; wire the listener once.
+// An image can fail BEFORE this module runs (already complete, zero natural
+// width) as well as after, so a scan complements the listener.
 const scan = (): void => {
   document
     .querySelectorAll<HTMLImageElement>('img.mini-thumb, .event-hero img')
     .forEach((img) => {
-      if (img.complete && img.naturalWidth === 0) degrade(img);
+      [img].filter((el) => el.complete && el.naturalWidth === 0).forEach(degradeImage);
     });
 };
 
-let wired = false;
+// The `error` event does not bubble, hence the capture-phase document listener;
+// it is wired once while the scan re-runs on every SPA navigation.
+const wired = { done: false };
 
 export const initImageFallback = (): void => {
-  if (!wired) {
-    wired = true;
+  [wired].filter((flag) => !flag.done).forEach((flag) => {
+    flag.done = true;
     document.addEventListener(
       'error',
       (event) => {
-        if (isEventImage(event.target)) degrade(event.target);
+        [event.target].filter(isEventImage).forEach(degradeImage);
       },
       true,
     );
-  }
+  });
   scan();
 };

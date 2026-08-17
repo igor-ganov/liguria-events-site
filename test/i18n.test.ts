@@ -1,6 +1,7 @@
 // i18n Phase S — locale helpers (AC-1.x, AC-3.1, AC-5.1).
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
+import { isDefined } from '../src/lib/is-defined.ts';
 import { isLocale } from '../src/lib/i18n/is-locale.ts';
 import { localizedUrl } from '../src/lib/i18n/localized-url.ts';
 import { descriptionOf } from '../src/lib/events/description-of.ts';
@@ -29,7 +30,9 @@ describe('localizedUrl', () => {
 
 describe('descriptionOf', () => {
   const event = (d?: CompactEvent['d']): CompactEvent => ({
-    id: 'a', t: 'T', s: '2026-07-04', c: ['music'], u: 'https://x', ...(d === undefined ? {} : { d }),
+    id: 'a', t: 'T', s: '2026-07-04', c: ['music'], u: 'https://x',
+    // A 0-or-1 array so an absent description leaves the key off entirely.
+    ...([d].filter(isDefined).map((value) => ({ d: value })).at(0) ?? {}),
   });
   test('picks the locale, falls back to en, then empty', () => {
     const e = event({ en: 'English', it: 'Italiano', ru: 'Русский' });

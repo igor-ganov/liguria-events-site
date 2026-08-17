@@ -5,4 +5,5 @@ export { prepare } from './prepared.ts';
 export type { Mark, Snippet } from './snippet.ts';
 export type { SearchHit } from './search.ts';
 export { search } from './search.ts';
-export { normalize, tokenize } from './normalize.ts';
+export { normalize } from './normalize.ts';
+export { tokenize } from './tokenize.ts';

@@ -1,65 +1,44 @@
-import { html, render } from 'lit';
-import { renderMiniCard } from '../shared/render-mini-card.ts';
-import { renderPoiCard } from '../shared/render-poi-card.ts';
-import { readUiIsland } from '../shared/read-ui-island.ts';
-import { decodeEventList } from '../../lib/events/decode-event-list.ts';
-import { readFavorites } from './init-favorites.ts';
-import { readFavPois } from '../../lib/favorites/fav-pois.ts';
-import { EVENTS_URL } from '../../data/events-url.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
-
 // The favourites page renders the user's favourited events client-side from the
 // full corpus (favourites are a client concern). Re-renders on `favchange`, so
-// un-hearting a card here removes it and the sign-in D1 sync fills it in.
+// un-hearting a card here removes it and the sign-in D1 sync fills it in. The
+// corpus cache, the list renderer and the comparator live one per file next to
+// this shell and are unit-tested on their own.
+import { byStart } from './by-start.ts';
+import { cachedCorpus } from './cached-corpus.ts';
+import { favPageState } from './fav-page-state.ts';
+import { readFavPois } from '../../lib/favorites/fav-pois.ts';
+import { readFavorites } from './read-favorites.ts';
+import { readUiIsland } from '../shared/read-ui-island.ts';
+import { renderFavList } from './render-fav-list.ts';
+import { setHidden } from '../../lib/dom/set-hidden.ts';
 
-let corpus: readonly CompactEvent[] | undefined;
-
-const fetchCorpus = async (): Promise<readonly CompactEvent[]> => {
-  if (corpus) return corpus;
-  try {
-    const json: unknown = await (await fetch(EVENTS_URL)).json();
-    const list = json && typeof json === 'object' && 'events' in json ? json.events : json;
-    corpus = decodeEventList(list);
-  } catch {
-    corpus = [];
-  }
-  return corpus;
-};
+const el = (selector: string): HTMLElement | undefined =>
+  document.querySelector<HTMLElement>(selector) ?? undefined;
 
 const paint = async (): Promise<void> => {
   const island = readUiIsland();
-  const listEl = document.querySelector<HTMLElement>('[data-fav-list]');
-  const emptyEl = document.querySelector<HTMLElement>('[data-fav-empty]');
-  const toolsEl = document.querySelector<HTMLElement>('[data-fav-tools]');
   const ids = readFavorites();
   // Gate the route tools on whether the user HAS favourites, not on whether the
   // corpus currently resolves them. Otherwise a slow/failed corpus fetch, or
   // favourites whose events have rolled off it, hides the whole toolbar — the
   // "Generate route button disappeared" bug. The list below still shows only
   // the events that resolve.
-  if (emptyEl) emptyEl.hidden = ids.size > 0;
-  if (toolsEl) toolsEl.hidden = ids.size === 0;
+  setHidden(el('[data-fav-empty]'), ids.size > 0);
+  setHidden(el('[data-fav-tools]'), ids.size === 0);
   // Favourited landmarks/places render from the local fav-pois store (their id
   // doesn't encode a region, so we can't look them up in the corpus).
-  const pois = Object.values(readFavPois()).filter((p) => ids.has(p.id));
-  const events = await fetchCorpus();
-  const favs = events
-    .filter((event) => ids.has(event.id))
-    .toSorted((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : 0));
-  if (listEl) {
-    render(
-      html`${pois.map((poi) => renderPoiCard(poi, island.ui))}${favs.map((event) => renderMiniCard(event, island.ui, island.lang))}`,
-      listEl,
-    );
-  }
+  const pois = Object.values(readFavPois()).filter((poi) => ids.has(poi.id));
+  const events = await cachedCorpus();
+  const favs = events.filter((event) => ids.has(event.id)).toSorted(byStart);
+  renderFavList(el('[data-fav-list]'), pois, favs, island);
 };
-
-let listening = false;
 
 export const initFavoritesPage = (): void => {
   void paint();
-  if (!listening) {
-    listening = true;
-    document.addEventListener('favchange', () => void paint());
-  }
+  [favPageState]
+    .filter((state) => !state.listening)
+    .forEach((state) => {
+      state.listening = true;
+      document.addEventListener('favchange', () => void paint());
+    });
 };

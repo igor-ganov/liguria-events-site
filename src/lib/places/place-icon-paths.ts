@@ -37,4 +37,3 @@ export const PLACE_ICON_PATHS: Readonly<Record<PlaceCategory, string>> = {
     '<path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
 };
 
-export const placeIconPath = (cat: PlaceCategory): string => PLACE_ICON_PATHS[cat] ?? PLACE_ICON_PATHS.restaurant;

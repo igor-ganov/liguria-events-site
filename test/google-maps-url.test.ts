@@ -1,7 +1,15 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { googleMapsUrl } from '../src/lib/favorites/google-maps.ts';
+import { isDefined } from '../src/lib/is-defined.ts';
 import type { RouteDay, RouteStop } from '../src/lib/favorites/build-route.ts';
+
+// A coordless stop must carry no `g` key at all, not `g: undefined`.
+const coords = (g?: readonly [number, number]): Readonly<{ g?: readonly [number, number] }> =>
+  [g]
+    .filter(isDefined)
+    .map((located) => ({ g: located }))
+    .at(0) ?? {};
 
 const stop = (id: string, g?: readonly [number, number]): RouteStop => ({
   id,
@@ -9,7 +17,7 @@ const stop = (id: string, g?: readonly [number, number]): RouteStop => ({
   s: '2026-07-10',
   c: ['other'],
   u: 'https://x',
-  ...(g === undefined ? {} : { g }),
+  ...coords(g),
 });
 const day = (stops: readonly RouteStop[]): RouteDay => ({ day: '2026-07-10', stops, legs: [] });
 
@@ -42,5 +50,33 @@ describe('googleMapsUrl', () => {
 
   test('coordless stops are skipped; fewer than two points → undefined', () => {
     assert.equal(googleMapsUrl(day([stop('a'), stop('b', [2, 2])]), 'walking'), undefined);
+  });
+
+  test('a base with no stops draws no route — the final point is not appended', () => {
+    assert.equal(googleMapsUrl(day([]), 'walking', { base: { lat: 1, lng: 1 }, final: { lat: 3, lng: 3 } }), undefined);
+  });
+
+  test('a base and no separate final point closes the loop back to the base', () => {
+    const params = new URL(
+      googleMapsUrl(day([stop('a', [2, 2])]), 'walking', { base: { lat: 1, lng: 1 } }) ?? '',
+    ).searchParams;
+    assert.equal(params.get('origin'), '1,1');
+    assert.equal(params.get('destination'), '1,1');
+    assert.equal(params.get('waypoints'), '2,2');
+  });
+
+  test('a stop sitting on the base is not repeated', () => {
+    const params = new URL(
+      googleMapsUrl(day([stop('a', [1, 1]), stop('b', [2, 2])]), 'walking', { base: { lat: 1, lng: 1 } }) ?? '',
+    ).searchParams;
+    assert.equal(params.get('origin'), '1,1');
+    assert.equal(params.get('destination'), '1,1');
+    assert.equal(params.get('waypoints'), '2,2');
+  });
+
+  test('Google’s nine-waypoint cap trims a very long day', () => {
+    const stops = Array.from({ length: 14 }, (_, i) => stop(`s${i}`, [i, i]));
+    const params = new URL(googleMapsUrl(day(stops), 'driving') ?? '').searchParams;
+    assert.equal(params.get('waypoints')?.split('|').length, 9);
   });
 });
