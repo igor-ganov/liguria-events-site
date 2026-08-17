@@ -59,3 +59,30 @@ test('map: renders under Fast-3G without layout shift', async ({ page }) => {
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible({ timeout: 30_000 });
   expect(await clsOf(page)).toBeLessThan(0.1);
 });
+
+// Two regressions this page has already suffered, both invisible to a
+// "does it render" check because the page renders correctly either way — it just
+// takes 20+ seconds on a real connection. Budgets, so they cannot come back.
+test('map: the corpus is not inlined and the engine is not on the critical path', async ({ page }) => {
+  const response = await page.goto('/liguria/map/');
+  const html = (await response?.text()) ?? '';
+
+  // The corpus used to be inlined here: 2.6 MB of JSON ahead of first paint.
+  expect(html).not.toContain('id="events-data"');
+  expect(html.length).toBeLessThan(200 * 1024);
+
+  // maplibre + pmtiles + the basemap style (~1.1 MB) must stay behind the
+  // dynamic import in init-map.ts, so no eager <script src> may pull them in.
+  const eager = await page
+    .locator('head script[src], body script[src]')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('src') ?? ''));
+  const eagerBytes = await page.evaluate(
+    (sources) =>
+      performance
+        .getEntriesByType('resource')
+        .filter((entry) => sources.some((src) => src !== '' && entry.name.endsWith(src)))
+        .reduce((sum, entry) => sum + Number(Reflect.get(entry, 'encodedBodySize') ?? 0), 0),
+    eager,
+  );
+  expect(Math.round(eagerBytes / 1024)).toBeLessThan(150);
+});

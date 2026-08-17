@@ -13,7 +13,9 @@ const placeName = regionName(region);
 const description = ui.seo.map.replace('{place}', placeName);
 ---
 
-<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.map}`} description={description} path={`${region}/map/`} needsEvents needsMap>
+<!-- No `needsEvents`: the corpus is ~2.6 MB of JSON, so it is fetched as a cached
+     asset (/data/events.json) after first paint instead of being inlined here. -->
+<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.map}`} description={description} path={`${region}/map/`} needsMap>
   <!-- The map carries every event in the country and merely opens on the region:
        pan or zoom out and the rest are already there. -->
   <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
