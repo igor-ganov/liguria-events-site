@@ -1,0 +1,34 @@
+---
+import { CATEGORIES } from '../../../lib/events/categories.ts';
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+type Props = Readonly<{ ui: Ui }>;
+const { ui } = Astro.props;
+---
+
+<div class="map-filters">
+  <div class="map-layers" role="group" aria-label="Map layers">
+    <button class="chip chip--layer" data-map-events aria-pressed="true"><Fragment set:html={uiIcon('ticket', 15)} /> {ui.mapLayers.events}</button>
+    <button class="chip chip--layer" data-map-landmarks aria-pressed="false"><Fragment set:html={uiIcon('pin', 15)} /> {ui.mapLayers.landmarks}</button>
+    <button class="chip chip--layer" data-map-places aria-pressed="false"><Fragment set:html={uiIcon('places', 15)} /> {ui.mapLayers.places}</button>
+  </div>
+  <div class="map-dates" data-map-event-filters>
+    <label>{ui.range.from} <input type="date" data-map-from /></label>
+    <label>{ui.range.to} <input type="date" data-map-to /></label>
+  </div>
+  <div class="chips" role="group" aria-label="Filter by category" data-map-event-chips>
+    {
+      CATEGORIES.map((category) => (
+        <button class="chip" data-cat={category} data-map-cat={category} aria-pressed="false">
+          <Fragment set:html={iconSvg(category, 14)} />
+          {ui.cat[category]}
+        </button>
+      ))
+    }
+    <button class="chip chip--free" data-map-free aria-pressed="false">{ui.chips.free}</button>
+    <button class="chip chip--gems" data-map-gems aria-pressed="false">{ui.chips.gems}</button>
+    <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
+  </div>
+</div>

@@ -114,23 +114,6 @@ export default tseslint.config(
     },
   },
   {
-    // LEGACY DEBT — files that already violated the rules on the day .astro
-    // linting was switched on (2026-08-17). The rules above apply to every
-    // OTHER .astro file, so nothing new can land; this list exists only so CI
-    // stays green while the backlog is paid down.
-    //
-    // THIS LIST MUST ONLY EVER SHRINK. Never add a file to it — split the file
-    // instead, moving its logic into tested pure functions.
-    files: [
-      // Being decomposed: its style transforms, marker markup and every popup
-      // builder already moved to tested pure functions under src/lib/map/. The
-      // remaining bulk is one long imperative setup() — extract it flow by flow
-      // (clustering, layer toggles, geolocation, URL state).
-      'src/components/views/MapView.astro',
-    ],
-    rules: { 'no-restricted-syntax': 'off', 'functional/max-lines-no-imports': 'off' },
-  },
-  {
     files: ['test/**/*.ts'],
     rules: { 'functional/one-value-export': 'off', 'functional/max-lines-no-imports': 'off' },
   },
