@@ -24,7 +24,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
+      # Retried: one dependency (italian-transport-core) is a git dep, so every
+      # install pulls a tarball from GitHub — which has failed the deploy twice
+      # on transient 429/504 while the code was fine. A fix sitting undeployed
+      # because of someone else's rate limit is worse than a slow retry.
+      - name: Install dependencies (retry transient registry failures)
+        run: |
+          for attempt in 1 2 3; do
+            bun install --frozen-lockfile && exit 0
+            echo "install attempt $attempt failed; retrying in $((attempt * 15))s"
+            sleep $((attempt * 15))
+          done
+          echo "dependency install failed three times" >&2
+          exit 1
       - run: bun run lint
       - run: bun run typecheck
       # Scoped to ./test: a bare `bun test` also picks up the Playwright specs in
