@@ -28,9 +28,22 @@ test('switching Places on from an overview camera downloads nothing', async ({ p
   await expect(page.locator('.map-toast, [data-map-toast]').first()).toBeVisible({ timeout: 5_000 });
 });
 
-// The other half — that a close camera DOES load and draw places — is verified
-// by hand (z=13 over Genoa: 62 markers, liguria + piemonte shards) but is not
-// asserted here on purpose. Decoding a region's venues blocks the main thread
-// long enough that Playwright cannot even evaluate in the page, so any such test
-// would be timing-flaky. That block is a real defect, tracked separately; it
-// deserves a fix, not a test tuned to tolerate it.
+test('a close camera past the threshold loads the places and draws them', async ({ page }) => {
+  await page.goto('/liguria/map/?pl=1&z=13&c=44.4072,8.9340');
+  await expect(page.locator('.pl-marker').first()).toBeVisible({ timeout: 30_000 });
+
+  const shards = await shardRequests(page);
+  expect(shards.length).toBeGreaterThan(0);
+  // Only the regions the close camera touches — not a swathe of them.
+  expect(shards.length).toBeLessThanOrEqual(2);
+
+  // The layer must not wedge the main thread while it indexes those venues —
+  // this is what the quadratic dedupe used to do, for minutes at a time.
+  const responsive = await page.evaluate(() => {
+    const started = performance.now();
+    return new Promise<number>((resolve) => {
+      requestAnimationFrame(() => resolve(performance.now() - started));
+    });
+  });
+  expect(responsive).toBeLessThan(2_000);
+});
