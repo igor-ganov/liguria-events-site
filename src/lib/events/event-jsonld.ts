@@ -1,4 +1,5 @@
 import { eventDateTime } from '../seo/event-datetime.ts';
+import { eventStartLd } from './event-start-ld.ts';
 import { eventOffersLd } from './event-offers-ld.ts';
 import { eventPlaceLd } from './event-place-ld.ts';
 import { eventSubEventsLd } from './event-subevents-ld.ts';
@@ -34,7 +35,7 @@ export const eventJsonLd = (params: Params): string => {
       '@type': 'Event',
       name: title,
       url,
-      startDate: eventDateTime(event.s, event.h),
+      startDate: eventStartLd(event),
       endDate: eventDateTime(event.e ?? event.s, undefined),
       // Both are required for the search-results treatment, and both are simply
       // true of everything we list: a real place, on the day it says.

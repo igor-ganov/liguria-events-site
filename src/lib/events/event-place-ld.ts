@@ -1,4 +1,5 @@
 import { cityName } from '../region/city-name.ts';
+import { streetLine } from './street-line.ts';
 import type { CompactEvent } from './event-schema.ts';
 
 type Json = Record<string, unknown>;
@@ -9,13 +10,15 @@ const drop = (obj: Json): Json =>
 // A street line when the source gave one, the city otherwise. Google requires an
 // address on the place: a Place with only a venue name is rejected, and being
 // rejected means the event never reaches the search results at all.
-const addressOf = (event: CompactEvent, address: string | undefined): Json =>
-  drop({
+const addressOf = (event: CompactEvent, address: string | undefined): Json => {
+  const locality = cityName(event.ct ?? '');
+  return drop({
     '@type': 'PostalAddress',
-    streetAddress: address,
-    addressLocality: cityName(event.ct ?? ''),
+    streetAddress: streetLine(address, locality),
+    addressLocality: locality,
     addressCountry: 'IT',
   });
+};
 
 /**
  * Where the event happens, as schema.org expects it. Always present: an event

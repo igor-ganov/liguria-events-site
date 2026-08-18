@@ -76,6 +76,19 @@ describe('eventJsonLd: what Google requires before it will show an event', () =>
     });
   });
 
+  test('an address that only repeats the city is not published as a street', () => {
+    // Live data: the crawler's address for a Genoa venue was "Genova, GE".
+    const json = ld(ev({ id: 'abc' }), 'Genova, GE');
+    assert.deepEqual(json['location'], {
+      '@type': 'Place',
+      name: 'Genova',
+      address: { '@type': 'PostalAddress', addressLocality: 'Genova', addressCountry: 'IT' },
+    });
+    // A real street line survives untouched.
+    const real = ld(ev({ id: 'abc' }), 'Via Garibaldi 12, Genova');
+    assert.equal(node(node(real['location'])['address'])['streetAddress'], 'Via Garibaldi 12, Genova');
+  });
+
   test('the start time reaches the markup, offset and all', () => {
     assert.equal(ld(ev({ id: 'abc', h: '21:00' }))['startDate'], '2026-08-20T21:00:00+02:00');
   });
@@ -124,6 +137,19 @@ describe('eventJsonLd: containers', () => {
     assert.equal(subs[1]?.['startDate'], '2026-08-12T19:30:00+02:00');
     assert.equal(subs[1]?.['name'], 'Serata jazz');
     assert.deepEqual(subs[0]?.['location'], ld(festival)['location']);
+  });
+
+  test("the container's own start is its first evening, not the umbrella's hour", () => {
+    // Live data: a market whose umbrella said 18:30 while every morning of its
+    // programme opens at 08:30.
+    const market = ev({
+      id: 'abc',
+      s: '2026-01-25',
+      h: '18:30',
+      k: true,
+      p: [{ date: '2026-02-22', time: '08:30' }, { date: '2026-01-25', time: '08:30' }],
+    });
+    assert.equal(ld(market)['startDate'], '2026-01-25T08:30:00+01:00');
   });
 
   test('a standalone event carries no sub-events at all', () => {
