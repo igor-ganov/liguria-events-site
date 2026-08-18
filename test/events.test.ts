@@ -108,6 +108,34 @@ describe('long-running split (AC-2.3 revised)', () => {
     assert.deepEqual(ongoingInMonth('2026-07')([short, long, single]).map((event) => event.id), ['long']);
     assert.deepEqual(ongoingInMonth('2027-01')([long]), []);
   });
+
+  // A container spreads over months but runs on none of the days between its
+  // evenings, so it belongs in each of those day cells — never in a list of
+  // things going on all month.
+  const series = make({
+    id: 'series',
+    s: '2026-07-04',
+    e: '2026-09-05',
+    k: true,
+    p: [{ date: '2026-07-04' }, { date: '2026-08-01' }, { date: '2026-09-05' }],
+  });
+
+  test('a container is never long-running, however wide its programme spreads', async () => {
+    const { isLongRunning } = await import('../src/lib/events/is-long-running.ts');
+    assert.equal(isLongRunning(series), false);
+  });
+
+  test('a container fills the cell of every evening it plays, and no other', async () => {
+    const { dayCellEvents } = await import('../src/lib/events/day-cell-events.ts');
+    assert.deepEqual(dayCellEvents('2026-08-01')([series]).map((event) => event.id), ['series']);
+    assert.deepEqual(dayCellEvents('2026-09-05')([series]).map((event) => event.id), ['series']);
+    assert.deepEqual(dayCellEvents('2026-08-02')([series]), []);
+  });
+
+  test('a container stays out of the ongoing list — nothing runs in between', async () => {
+    const { ongoingInMonth } = await import('../src/lib/events/ongoing-in-month.ts');
+    assert.deepEqual(ongoingInMonth('2026-08')([series, long]).map((event) => event.id), ['long']);
+  });
 });
 
 describe('filterGemsOnly (AC-2.6)', () => {
