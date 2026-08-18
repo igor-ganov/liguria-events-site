@@ -1,0 +1,34 @@
+import { test, expect } from '@playwright/test';
+
+// Two things stand between an event and a Google search result: the page has to
+// be discoverable, and its markup has to satisfy the Event rich result. Neither
+// was true — the event pages are server-rendered, so the generated sitemap could
+// not see a single one of them.
+
+test('robots.txt announces the events sitemap alongside the generated index', async ({ request }) => {
+  const robots = await (await request.get('/robots.txt')).text();
+  expect(robots).toContain('Sitemap: https://dovego.it/sitemap-index.xml');
+  expect(robots).toContain('Sitemap: https://dovego.it/sitemap-events.xml');
+});
+
+test('the events sitemap lists event pages, with hreflang for all three locales', async ({ request }) => {
+  const res = await request.get('/sitemap-events.xml');
+  expect(res.status()).toBe(200);
+  expect(res.headers()['content-type']).toContain('xml');
+  const xml = await res.text();
+
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? '');
+  expect(locs.length).toBeGreaterThan(0);
+  expect(locs.every((loc) => loc.includes('/event/'))).toBe(true);
+  // One entry per locale, each declaring the other two and the x-default.
+  expect(locs.some((loc) => /\/it\/event\//.test(loc))).toBe(true);
+  expect(locs.some((loc) => /\/ru\/event\//.test(loc))).toBe(true);
+  expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+  expect(xml).toContain('hreflang="x-default"');
+  expect(xml).toContain('<lastmod>');
+});
+
+test('the generated sitemap no longer spends itself on map views', async ({ request }) => {
+  const xml = await (await request.get('/sitemap-0.xml')).text();
+  expect(xml).not.toContain('/map/');
+});

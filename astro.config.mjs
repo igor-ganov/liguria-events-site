@@ -15,7 +15,9 @@ export default defineConfig({
   adapter: cloudflare({ platformProxy: { enabled: false }, imageService: 'compile' }),
   // Emits sitemap-index.xml + sitemap-0.xml over the prerendered routes. SSR
   // event detail pages (prerender = false) are intentionally excluded.
-  integrations: [sitemap()],
+  // The map is an application view, not a page anybody should land on from a
+  // search result — 60 near-identical entries would be the bulk of the file.
+  integrations: [sitemap({ filter: (page) => !page.endsWith('/map/') })],
   i18n: {
     locales: ['en', 'it', 'ru'],
     defaultLocale: 'en',

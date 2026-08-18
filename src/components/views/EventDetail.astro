@@ -23,6 +23,7 @@ import { descriptionArticleHtml } from '../../lib/description/description-articl
 import { descriptionPlain } from '../../lib/description/description-plain.ts';
 import { ticketUrl } from '../../lib/events/ticket-link.ts';
 import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
+import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -44,7 +45,18 @@ const query = mapQuery(event);
 const mapSearchUrl = query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
 const heroImage = absoluteImage(event.img, Astro.site);
-const jsonLd = eventJsonLd({ event, title, desc, image: heroImage, address: contacts?.address });
+// The address a crawler event carries lives on the event itself; only a
+// user-submitted one has a contact block. Structured data needs whichever is
+// there — an event with no address at all is rejected outright by Google.
+const canonical = canonicalUrl(lang, eventPath(event.id), Astro.site);
+const jsonLd = eventJsonLd({
+  event,
+  title,
+  desc: descMeta,
+  image: heroImage,
+  address: contacts?.address ?? event.a,
+  url: canonical,
+});
 // Multi-source gallery: the primary cover plus every other source's photo,
 // each attributed. `more` is the strip shown under the hero.
 const gallery = eventGallery(event);

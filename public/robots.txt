@@ -2,3 +2,5 @@ User-agent: *
 Allow: /
 
 Sitemap: https://dovego.it/sitemap-index.xml
+# Event pages are server-rendered, so the generated index above cannot see them.
+Sitemap: https://dovego.it/sitemap-events.xml

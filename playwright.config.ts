@@ -9,6 +9,12 @@ import { defineConfig, devices } from '@playwright/test';
 // globalSetup builds once and seeds the local D1 the worker binds to.
 const OWNER_URL = 'http://127.0.0.1:4410';
 
+// ONE ceiling for every event wait, not per-spec overrides: a spec that needs
+// its own number is hiding whether it is slow or broken. The specs that throttle
+// the network on purpose run alongside everything else, so the default has to
+// clear a loaded machine — CI raises it through the environment.
+const MAX_WAIT_MS = Number(process.env.E2E_MAX_WAIT_MS ?? 10_000);
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -16,6 +22,7 @@ export default defineConfig({
   reporter: 'list',
   globalSetup: './e2e/global-setup.ts',
   use: { trace: 'on-first-retry' },
+  expect: { timeout: MAX_WAIT_MS },
   projects: [
     { name: 'chromium', testIgnore: /owner-/, use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4399' } },
     { name: 'owner', testMatch: /owner-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: OWNER_URL } },

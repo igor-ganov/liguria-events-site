@@ -1,4 +1,7 @@
-import { branch } from '../branch.ts';
+import { eventDateTime } from '../seo/event-datetime.ts';
+import { eventOffersLd } from './event-offers-ld.ts';
+import { eventPlaceLd } from './event-place-ld.ts';
+import { eventSubEventsLd } from './event-subevents-ld.ts';
 import type { CompactEvent } from './event-schema.ts';
 
 type Params = Readonly<{
@@ -7,37 +10,41 @@ type Params = Readonly<{
   desc: string;
   image: string | undefined;
   address: string | undefined;
+  url: string;
 }>;
 
 type Json = Record<string, unknown>;
 
-/** Drop undefined / empty-string members so optional fields are simply absent. */
+/** Drop undefined / empty members so optional fields are simply absent. */
 const clean = (obj: Json): Json =>
-  Object.fromEntries(Object.entries(obj).filter(([, value]) => value !== undefined && value !== ''));
-
-const OFFER: Json = {
-  '@type': 'Offer',
-  price: '0',
-  priceCurrency: 'EUR',
-  availability: 'https://schema.org/InStock',
-};
+  Object.fromEntries(
+    Object.entries(obj).filter(
+      ([, value]) => value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0),
+    ),
+  );
 
 /** schema.org Event JSON-LD; `<` is escaped so the string is safe in a
  *  `<script type="application/ld+json">` body. */
 export const eventJsonLd = (params: Params): string => {
-  const { event, title, desc, image, address } = params;
-  const place = clean({ '@type': 'Place', name: event.v, address });
-  const hasPlace = event.v !== undefined || (address !== undefined && address !== '');
-  const graph = clean({
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: title,
-    startDate: event.s,
-    endDate: event.e ?? event.s,
-    image,
-    description: desc,
-    location: branch(hasPlace)(() => place, () => undefined),
-    offers: branch(event.f === true)(() => OFFER, () => undefined),
-  });
-  return JSON.stringify(graph).replace(/</g, '\\u003c');
+  const { event, title, desc, image, address, url } = params;
+  const place = eventPlaceLd(event, address);
+  return JSON.stringify(
+    clean({
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: title,
+      url,
+      startDate: eventDateTime(event.s, event.h),
+      endDate: eventDateTime(event.e ?? event.s, undefined),
+      // Both are required for the search-results treatment, and both are simply
+      // true of everything we list: a real place, on the day it says.
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      image,
+      description: desc,
+      location: place,
+      offers: eventOffersLd(event, url),
+      subEvent: eventSubEventsLd(event, title, place),
+    }),
+  ).replace(/</g, '\\u003c');
 };
