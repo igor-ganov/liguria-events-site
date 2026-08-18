@@ -1,6 +1,7 @@
 import { branch } from '../../lib/branch.ts';
 import { setText } from '../../lib/dom/set-text.ts';
 import { eventFormValues } from './event-form-values.ts';
+import { readProgramme } from './read-programme.ts';
 import { eventRedirectPath } from './event-redirect-path.ts';
 import { eventSubmitTarget } from './event-submit-target.ts';
 import { jsonField } from '../../lib/json-field.ts';
@@ -29,7 +30,7 @@ const send = async (parts: FormParts): Promise<void> => {
   const res = await fetch(target.url, {
     method: target.method,
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(eventFormValues(new FormData(parts.form))),
+    body: JSON.stringify(eventFormValues(new FormData(parts.form), readProgramme(parts.form))),
   });
   const data: unknown = await res.json().catch(() => ({}));
   settle(parts, res.ok, { id: jsonField(data, 'id'), detail: jsonField(data, 'detail') });

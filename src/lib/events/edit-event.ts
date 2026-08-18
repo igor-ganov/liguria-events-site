@@ -9,7 +9,7 @@ const OWNER = 'SELECT submitter_id FROM events WHERE id = ?';
 
 const UPDATE = `UPDATE events SET title_en = ?, desc_en = ?, start_date = ?, end_date = ?, categories = ?,
        venue = ?, address = ?, phone = ?, website = ?, cover_image = ?, lat = ?, lng = ?, free = ?,
-       status = 'pending', updated_at = ? WHERE id = ? AND submitter_id = ?`;
+       sessions = ?, kind = ?, status = 'pending', updated_at = ? WHERE id = ? AND submitter_id = ?`;
 
 const LOG_SQL = 'INSERT INTO moderation_log (event_id, action, actor, reason, created_at) VALUES (?, ?, ?, ?, ?)';
 
@@ -26,7 +26,7 @@ const applyEdit = async (
   const edited = await Promise.all(
     accepted.map(async (e) => {
       await env.DB.prepare(UPDATE)
-        .bind(e.title, e.description, e.startDate, e.endDate, e.categoriesJson, e.venue, e.address, e.phone, e.website, e.cover, e.lat, e.lng, e.free, now, id, user.id)
+        .bind(e.title, e.description, e.startDate, e.endDate, e.categoriesJson, e.venue, e.address, e.phone, e.website, e.cover, e.lat, e.lng, e.free, e.sessionsJson, e.kind, now, id, user.id)
         .run();
       await env.DB.prepare(LOG_SQL).bind(id, 'edited', `user:${user.handle}`, '', now).run();
       ctx.waitUntil(

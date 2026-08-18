@@ -48,6 +48,10 @@ export const EventSchema = Schema.Struct({
   /** Programme: the dated occurrences inside an umbrella event, so the feed can
    *  show the specific one on each day rather than the whole run. */
   p: Schema.optional(Schema.Array(SessionSchema)),
+  /** Container: the event happens ONLY on its programmed dates, so it must not
+   *  appear on the empty days in between. Absent means standalone — the event
+   *  owns its whole span. */
+  k: Schema.optional(Schema.Boolean),
   d: Schema.optional(LocalizedTextSchema),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
   x: Schema.optional(Schema.Boolean),

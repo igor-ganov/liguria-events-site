@@ -23,6 +23,8 @@ const draft = (over: Partial<EventDraft> = {}): EventDraft => ({
   cover: '',
   lat: '',
   lng: '',
+  container: false,
+  sessions: [],
   categories: [],
   free: false,
   ...over,

@@ -53,6 +53,20 @@ describe('eventFormValues', () => {
     assert.deepEqual(values['categories'], []);
   });
 
+  test('the kind and the programme travel with the form', () => {
+    const data = filled();
+    data.set('container', 'on');
+    const values = eventFormValues(data, [{ date: '2026-08-05', time: '21:00', title: '' }]);
+    assert.equal(values['kind'], 'container');
+    assert.deepEqual(values['sessions'], [{ date: '2026-08-05', time: '21:00', title: '' }]);
+  });
+
+  test('an unticked box sends a standalone event with no programme', () => {
+    const values = eventFormValues(filled());
+    assert.equal(values['kind'], 'standalone');
+    assert.deepEqual(values['sessions'], []);
+  });
+
   test('the free flag is on only for the checkbox value', () => {
     const data = new FormData();
     data.set('free', 'off');
@@ -75,6 +89,8 @@ describe('eventFormValues', () => {
       'lng',
       'categories',
       'free',
+      'kind',
+      'sessions',
     ]);
   });
 });

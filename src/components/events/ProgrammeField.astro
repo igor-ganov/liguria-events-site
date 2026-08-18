@@ -1,0 +1,51 @@
+---
+import { branch } from '../../lib/branch.ts';
+import type { Session } from '../../lib/events/event-schema.ts';
+
+// The when of an event. A standalone event runs from one date to another and is
+// on every day in between; a multi-date event happens only on the evenings its
+// author lists, so those evenings ARE its dates and the run is derived.
+type Props = Readonly<{
+  container: boolean;
+  sessions: readonly Session[];
+  startDate: string;
+  endDate: string;
+}>;
+const { container, sessions, startDate, endDate } = Astro.props;
+// Always one empty row to type into, so the editor is never a dead end.
+const rows: readonly Session[] = branch(sessions.length > 0)(
+  (): readonly Session[] => sessions,
+  (): readonly Session[] => [{ date: '' }],
+);
+---
+
+<fieldset class="form-when" data-when data-container={String(container)}>
+  <legend>When</legend>
+  <label class="inline">
+    <input type="checkbox" name="container" checked={container} data-container-toggle />
+    Happens on specific dates only (festival, concert series)
+  </label>
+
+  <div class="row2" data-span>
+    <label>Starts<input type="date" name="startDate" value={startDate} /></label>
+    <label>Ends (optional)<input type="date" name="endDate" value={endDate} /></label>
+  </div>
+
+  <div class="form-programme" data-programme>
+    <p class="form-loc-hint">
+      List every date it plays. The run is worked out from them, and the event
+      stays out of the days in between.
+    </p>
+    <ol class="programme-rows" data-programme-rows>
+      {rows.map((session) => (
+        <li class="programme-row" data-programme-row>
+          <input type="date" data-session-date value={session.date} aria-label="Date" />
+          <input type="time" data-session-time value={session.time ?? ''} aria-label="Start time" />
+          <input type="text" data-session-title maxlength="200" value={session.title ?? ''} aria-label="What is on that day" placeholder="What is on (optional)" />
+          <button type="button" data-programme-remove aria-label="Remove this date">×</button>
+        </li>
+      ))}
+    </ol>
+    <button type="button" data-programme-add>Add a date</button>
+  </div>
+</fieldset>

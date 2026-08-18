@@ -1,6 +1,7 @@
 import type { EditableRow, EventFormValues } from './event-row-types.ts';
 import { numberText } from './number-text.ts';
 import { parseCategories } from './parse-categories.ts';
+import { storedSessions } from './stored-sessions.ts';
 
 /** An event row as the values the edit form is populated with — every field a
  *  string the input can hold, never an empty database marker. */
@@ -18,4 +19,6 @@ export const eventFormValues = (row: EditableRow): EventFormValues => ({
   website: row.website ?? '',
   lat: numberText(row.lat),
   lng: numberText(row.lng),
+  container: row.kind === 'container',
+  sessions: storedSessions(row.sessions),
 });

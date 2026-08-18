@@ -22,7 +22,8 @@ const full: CompactEvent = {
   d: { en: 'a very long article', it: 'un articolo', ru: 'статья' },
   a: 'Via Trieste, Busalla',
   l: [{ source: 'mentelocale', url: 'https://x' }],
-  p: [{ date: '2026-08-20', time: '21:00' }],
+  k: true,
+  p: [{ date: '2026-08-20', time: '21:00', title: 'Serata inaugurale' }],
   du: 90,
   cr: 1_700_000_000,
 };
@@ -46,12 +47,16 @@ describe('mapEventFields', () => {
       x: true,
       ct: 'genova',
       rg: 'liguria',
+      k: true,
+      // The programme ships stripped to its dates — the map filter asks WHEN,
+      // the popup card never shows a session's name.
+      p: [{ date: '2026-08-20' }],
     });
   });
 
   test('drops the detail-page-only fields, descriptions above all', () => {
     const drawn = mapEventFields(full);
-    for (const key of ['d', 'a', 'l', 'p', 'du', 'cr']) {
+    for (const key of ['d', 'a', 'l', 'du', 'cr']) {
       assert.equal(key in drawn, false, `${key} must not ship to the map`);
     }
   });
@@ -61,6 +66,12 @@ describe('mapEventFields', () => {
     for (const key of ['id', 't', 's', 'c', 'u']) {
       assert.equal(key in drawn, true, `${key} is required`);
     }
+  });
+
+  test('a container keeps its dates so the map filter can skip its empty days', () => {
+    const drawn = mapEventFields(full);
+    assert.equal(drawn['k'], true);
+    assert.deepEqual(drawn['p'], [{ date: '2026-08-20' }]);
   });
 
   test('a minimal event survives untouched', () => {

@@ -1,5 +1,6 @@
 // The event form payload at its three stages: raw strings off the request, the
 // first validation verdict, and the values bound to SQL.
+import type { Session } from './event-schema.ts';
 
 /** The submitted fields, trimmed and bounded, before any rule is applied. */
 export type EventDraft = Readonly<{
@@ -16,6 +17,10 @@ export type EventDraft = Readonly<{
   lng: string;
   categories: readonly string[];
   free: boolean;
+  /** Set when the event happens only on its programmed dates. */
+  container: boolean;
+  /** The programme, ascending; empty for a standalone event. */
+  sessions: readonly Session[];
 }>;
 
 /** The validated, normalized payload. The empty values are the database's own
@@ -34,6 +39,10 @@ export type EventInput = {
   lng: number | null;
   categoriesJson: string;
   free: 0 | 1;
+  /** The programme as stored JSON, or the database's empty marker. */
+  sessionsJson: string | null;
+  /** 'container', or the empty marker for a standalone event. */
+  kind: string | null;
 };
 
 export type EventInputResult =

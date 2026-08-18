@@ -8,27 +8,31 @@ type Props = Readonly<{ ui: Ui }>;
 const { ui } = Astro.props;
 ---
 
-<div class="map-filters">
+<!-- The controls only mean anything once the map engine has been wired to them
+     (it arrives behind a dynamic import), so they ship disabled and are armed
+     by arm-map-controls.ts. A chip that silently does nothing is worse than one
+     that shows it is not ready yet. -->
+<div class="map-filters" data-map-filters data-armed="false">
   <div class="map-layers" role="group" aria-label="Map layers">
-    <button class="chip chip--layer" data-map-events aria-pressed="true"><Fragment set:html={uiIcon('ticket', 15)} /> {ui.mapLayers.events}</button>
-    <button class="chip chip--layer" data-map-landmarks aria-pressed="false"><Fragment set:html={uiIcon('pin', 15)} /> {ui.mapLayers.landmarks}</button>
-    <button class="chip chip--layer" data-map-places aria-pressed="false"><Fragment set:html={uiIcon('places', 15)} /> {ui.mapLayers.places}</button>
+    <button class="chip chip--layer" data-map-events aria-pressed="true" disabled><Fragment set:html={uiIcon('ticket', 15)} /> {ui.mapLayers.events}</button>
+    <button class="chip chip--layer" data-map-landmarks aria-pressed="false" disabled><Fragment set:html={uiIcon('pin', 15)} /> {ui.mapLayers.landmarks}</button>
+    <button class="chip chip--layer" data-map-places aria-pressed="false" disabled><Fragment set:html={uiIcon('places', 15)} /> {ui.mapLayers.places}</button>
   </div>
   <div class="map-dates" data-map-event-filters>
-    <label>{ui.range.from} <input type="date" data-map-from /></label>
-    <label>{ui.range.to} <input type="date" data-map-to /></label>
+    <label>{ui.range.from} <input type="date" data-map-from disabled /></label>
+    <label>{ui.range.to} <input type="date" data-map-to disabled /></label>
   </div>
   <div class="chips" role="group" aria-label="Filter by category" data-map-event-chips>
     {
       CATEGORIES.map((category) => (
-        <button class="chip" data-cat={category} data-map-cat={category} aria-pressed="false">
+        <button class="chip" data-cat={category} data-map-cat={category} aria-pressed="false" disabled>
           <Fragment set:html={iconSvg(category, 14)} />
           {ui.cat[category]}
         </button>
       ))
     }
-    <button class="chip chip--free" data-map-free aria-pressed="false">{ui.chips.free}</button>
-    <button class="chip chip--gems" data-map-gems aria-pressed="false">{ui.chips.gems}</button>
-    <button class="chip chip--clear" data-map-clear hidden>✕ {ui.chips.clear}</button>
+    <button class="chip chip--free" data-map-free aria-pressed="false" disabled>{ui.chips.free}</button>
+    <button class="chip chip--gems" data-map-gems aria-pressed="false" disabled>{ui.chips.gems}</button>
+    <button class="chip chip--clear" data-map-clear hidden disabled>✕ {ui.chips.clear}</button>
   </div>
 </div>

@@ -1,4 +1,5 @@
 import type { EventDraft } from './event-input-types.ts';
+import { draftSpan } from './draft-span.ts';
 import { jsonValue } from '../json-value.ts';
 import { stringList } from '../string-list.ts';
 import { trimmedString } from '../trimmed-string.ts';
@@ -12,8 +13,7 @@ const MAX_CATEGORIES = 6;
 export const eventDraft = (body: unknown): EventDraft => ({
   title: trimmedString(jsonValue(body, 'title'), 200),
   description: trimmedString(jsonValue(body, 'description'), 4000),
-  startDate: trimmedString(jsonValue(body, 'startDate'), 10),
-  endDate: trimmedString(jsonValue(body, 'endDate'), 10),
+  ...draftSpan(body),
   venue: trimmedString(jsonValue(body, 'venue'), 200),
   address: trimmedString(jsonValue(body, 'address'), 300),
   phone: trimmedString(jsonValue(body, 'phone'), 40),

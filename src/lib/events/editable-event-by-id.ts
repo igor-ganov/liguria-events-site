@@ -4,7 +4,7 @@ import { isDefined } from '../is-defined.ts';
 
 const SELECT =
   'SELECT title_en, desc_en, start_date, end_date, venue, categories, free, cover_image, ' +
-  'address, phone, website, lat, lng, submitter_id FROM events WHERE id = ?';
+  'address, phone, website, lat, lng, sessions, kind, submitter_id FROM events WHERE id = ?';
 
 /** The author's own event as editable form values, or nothing if not theirs. */
 export const editableEventById = async (

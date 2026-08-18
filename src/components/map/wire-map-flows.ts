@@ -1,3 +1,4 @@
+import { armMapControls } from './arm-map-controls.ts';
 import { fitAll } from './fit-all.ts';
 import { mapState } from './map-state.ts';
 import { maxEventDate } from '../../lib/map/max-event-date.ts';
@@ -55,4 +56,6 @@ export const wireMapFlows = (
   });
   syncMapControls(maxDate);
   syncLayerChips();
+  // Last: the toolbar only becomes clickable once every handler above is on it.
+  armMapControls();
 };

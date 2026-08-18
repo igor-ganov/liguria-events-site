@@ -31,6 +31,8 @@ const row = (over: Partial<EventRow> = {}): EventRow => ({
   cover_image: EMPTY,
   free: 0,
   gem: 0,
+  sessions: EMPTY,
+  kind: EMPTY,
   ...over,
 });
 
@@ -43,6 +45,8 @@ const editable = (over: Partial<EditableRow> = {}): EditableRow => ({
   categories: EMPTY,
   free: 0,
   cover_image: EMPTY,
+  sessions: EMPTY,
+  kind: EMPTY,
   address: EMPTY,
   phone: EMPTY,
   website: EMPTY,
@@ -207,7 +211,22 @@ describe('eventFormValues', () => {
       website: '',
       lat: '',
       lng: '',
+      container: false,
+      sessions: [],
     });
+  });
+
+  test("a container's programme comes back as form values", () => {
+    const values = eventFormValues(
+      editable({ kind: 'container', sessions: '[{"date":"2026-08-20","time":"21:00"}]' }),
+    );
+    assert.equal(values.container, true);
+    assert.deepEqual(values.sessions, [{ date: '2026-08-20', time: '21:00' }]);
+  });
+
+  test('an unreadable programme leaves the event with a plain run', () => {
+    const values = eventFormValues(editable({ kind: 'container', sessions: 'not json' }));
+    assert.deepEqual(values.sessions, []);
   });
 
   test('stored values come back verbatim', () => {

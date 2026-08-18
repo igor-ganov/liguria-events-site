@@ -1,6 +1,7 @@
 ---
 import ImageField from './events/ImageField.astro';
 import CategoryFields from './events/CategoryFields.astro';
+import ProgrammeField from './events/ProgrammeField.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { EMPTY_PREFILL } from '../lib/events/event-prefill.ts';
 import type { Prefill } from '../lib/events/event-prefill.ts';
@@ -20,10 +21,12 @@ const SUBMIT_LABEL: Record<Props['mode'], string> = { create: 'Submit for review
 
   <ImageField coverImage={v.coverImage} />
 
-  <div class="row2">
-    <label>Starts<input type="date" name="startDate" required value={v.startDate} /></label>
-    <label>Ends (optional)<input type="date" name="endDate" value={v.endDate} /></label>
-  </div>
+  <ProgrammeField
+    container={v.container}
+    sessions={v.sessions}
+    startDate={v.startDate}
+    endDate={v.endDate}
+  />
   <label>Venue<input name="venue" maxlength="200" value={v.venue} /></label>
   <label>Address<input name="address" maxlength="300" value={v.address} placeholder="Street, city" /></label>
   <div class="row2">

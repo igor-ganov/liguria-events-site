@@ -8,6 +8,10 @@ import { sqlText } from '../sql-text.ts';
 const isHttpUrl = (value: string): boolean => /^https?:\/\//.test(value);
 const isUploadPath = (value: string): boolean => value.startsWith('/uploads/');
 
+// The programme as stored JSON, empty unless this is a container with dates.
+const programmeJson = (draft: EventDraft): string =>
+  [draft.sessions].filter(() => draft.container).filter((s) => s.length > 0).map((s) => JSON.stringify(s)).at(0) ?? '';
+
 /** A validated draft as the row the endpoints bind to SQL. */
 export const eventInputValue = (draft: EventDraft): EventInput => ({
   title: draft.title,
@@ -22,4 +26,8 @@ export const eventInputValue = (draft: EventDraft): EventInput => ({
   ...coordinatesOf(draft.lat, draft.lng),
   categoriesJson: JSON.stringify(draft.categories),
   free: sqlFlag(draft.free),
+  // Only a container stores a programme and a kind: a standalone event that
+  // happened to carry rows in the form keeps its plain run.
+  sessionsJson: sqlText(programmeJson(draft)),
+  kind: sqlText([draft.container].filter(Boolean).map(() => 'container').at(0) ?? ''),
 });

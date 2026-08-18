@@ -2,6 +2,7 @@ import type { EventRow } from './event-row-types.ts';
 import { coordsOf } from './coords-of.ts';
 import { eventCategories } from './event-categories.ts';
 import { localizedText } from './localized-text.ts';
+import { storedSessions } from './stored-sessions.ts';
 import { truthy } from '../truthy.ts';
 
 /** One D1 row → a CompactEvent-shaped object (decode-event-list validates it).
@@ -21,4 +22,8 @@ export const toCompact = (r: EventRow): Record<string, unknown> => ({
   ...truthy(r.cover_image).map((img) => ({ img })).at(0),
   ...coordsOf(r.lat, r.lng),
   ...truthy(r.desc_en).map(() => ({ d: localizedText(r.desc_en, r.desc_it, r.desc_ru) })).at(0),
+  // The programme, and the container flag that tells the feed and the map to
+  // honour it instead of the run.
+  ...[storedSessions(r.sessions)].filter((p) => p.length > 0).map((p) => ({ p })).at(0),
+  ...truthy(r.kind === 'container').map(() => ({ k: true })).at(0),
 });

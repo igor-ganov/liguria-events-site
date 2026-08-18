@@ -5,6 +5,7 @@ import { isDefined } from '../../lib/is-defined.ts';
 import { eventFormMode } from './event-form-mode.ts';
 import { wireEventSubmit } from './wire-event-submit.ts';
 import { wireImageUpload } from './wire-image-upload.ts';
+import { wireProgramme } from './wire-programme.ts';
 
 // A build pinned to a fixed "today" (the dev/preview builds) must not date the
 // form from the visitor's clock, or the two disagree.
@@ -25,6 +26,7 @@ const setup = (form: HTMLFormElement): void => {
   form.dataset['ready'] = 'true';
   fillStart(form);
   wireImageUpload(form);
+  wireProgramme(form);
   wireEventSubmit({
     form,
     status: document.getElementById('submit-status') ?? undefined,

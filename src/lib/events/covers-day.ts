@@ -1,7 +1,9 @@
+import { occursBetween } from './occurs-between.ts';
 import type { CompactEvent } from './event-schema.ts';
 
-/** An event covers a day when s ≤ day ≤ (e ?? s) (AC-2.3). */
+/** An event covers a day when it happens on it (AC-2.3): inside the span for a
+ *  standalone event, on a programmed date for a container. */
 export const coversDay =
   (day: string) =>
   (event: CompactEvent): boolean =>
-    event.s <= day && day <= (event.e ?? event.s);
+    occursBetween(day, day)(event);

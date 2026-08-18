@@ -1,4 +1,5 @@
 import { branch } from '../branch.ts';
+import { isContainer } from './is-container.ts';
 import type { CompactEvent, Session } from './event-schema.ts';
 
 // One occurrence: a one-day event on the session's date. The run (`e`) and the
@@ -8,6 +9,7 @@ const occurrenceOf = (event: CompactEvent, session: Session): CompactEvent => ({
   ...event,
   e: undefined,
   p: undefined,
+  k: undefined,
   s: session.date,
   ...branch(session.time === undefined)(
     () => ({}),
@@ -34,18 +36,21 @@ const occurrencesOf = (
 };
 
 /**
- * Turn an umbrella event that carries a dated programme (`p`) into one occurrence
- * per upcoming session, so the feed and calendar show the specific concert on its
- * night instead of the whole June–October run keyed to today. Events without a
- * programme pass through unchanged.
+ * Turn a container into one occurrence per upcoming session, so the feed and the
+ * calendar show the specific concert on its night instead of the whole
+ * June–October run keyed to today.
+ *
+ * Standalone events pass through even when they list a programme: a museum that
+ * runs guided tours on Saturdays is still open the rest of the week, and
+ * expanding it would erase it from those days.
  */
 export const expandSessions = (
   events: readonly CompactEvent[],
   today: string,
 ): readonly CompactEvent[] =>
   events.flatMap((event) =>
-    branch(event.p === undefined || event.p.length === 0)(
-      () => [event],
+    branch(isContainer(event))(
       () => occurrencesOf(event, event.p ?? [], today),
+      () => [event],
     ),
   );

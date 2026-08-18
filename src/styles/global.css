@@ -321,6 +321,26 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .submit-form .cats legend { font-size: 0.85rem; color: var(--ink-2); }
 .submit-form .cat-check, .submit-form .inline { flex-direction: row; align-items: center; gap: 0.4rem; }
+/* When: the run and the programme are alternatives, never both at once. */
+.form-when {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 0.6rem 0.8rem 0.8rem; display: flex; flex-direction: column; gap: 0.7rem;
+}
+.form-when legend { font-size: 0.85rem; color: var(--ink-2); }
+.form-when[data-container='false'] .form-programme,
+.form-when[data-container='true'] [data-span] { display: none; }
+.form-programme { display: flex; flex-direction: column; gap: 0.5rem; }
+.programme-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.programme-row { display: grid; grid-template-columns: minmax(8rem, 1fr) 6.5rem minmax(6rem, 1.4fr) 2rem; gap: 0.4rem; }
+.programme-row button, .form-programme > button {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; padding: 0.4rem;
+}
+.form-programme > button { align-self: flex-start; padding: 0.45rem 0.9rem; font-size: 0.9rem; }
+@media (max-width: 30rem) {
+  .programme-row { grid-template-columns: 1fr 1fr; }
+  .programme-row [data-session-title] { grid-column: 1 / -1; }
+}
 .submit-form button[type='submit'] {
   padding: 0.75rem; border: none; border-radius: var(--radius-sm);
   background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer;
@@ -457,6 +477,8 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 [data-cat='workshop'] { --hue: var(--cat-workshop); }
 
 .chip { padding: 0.38rem 0.85rem; font-size: 0.85rem; cursor: pointer; transition: transform var(--speed), box-shadow var(--speed); }
+/* Not yet wired to the map engine — shown as pending rather than silently inert. */
+.map-filters[data-armed='false'] .chip, .map-filters[data-armed='false'] input { opacity: 0.55; cursor: progress; }
 .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .chip[aria-pressed='true'] {
   color: var(--on-accent);

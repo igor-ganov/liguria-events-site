@@ -12,6 +12,12 @@ const MAP = '/liguria/map/';
  *  canvas container, so their presence proves style load + clustering ran. */
 const markers = (page: import('@playwright/test').Page) => page.locator('.ev-marker');
 
+/** The toolbar is wired to the (dynamically imported) map engine — until then its
+ *  controls ship disabled, so a click would be swallowed. Waiting on the armed
+ *  state is waiting on the app's own readiness, not on a duration. */
+const armed = (page: import('@playwright/test').Page) =>
+  expect(page.locator('[data-map-filters]')).toHaveAttribute('data-armed', 'true', { timeout: 30_000 });
+
 test('event markers render and one opens a popup', async ({ page }) => {
   await page.goto(MAP);
   await expect(markers(page).first()).toBeVisible({ timeout: 30_000 });
@@ -25,6 +31,7 @@ test('event markers render and one opens a popup', async ({ page }) => {
 
 test('the landmarks layer is opt-in, draws its own markers, and is remembered', async ({ page }) => {
   await page.goto(MAP);
+  await armed(page);
   const toggle = page.locator('[data-map-landmarks]');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 
@@ -42,6 +49,7 @@ test('a category chip filters the event markers and lands in the URL', async ({ 
   await page.goto(MAP);
   await expect(markers(page).first()).toBeVisible({ timeout: 30_000 });
 
+  await armed(page);
   await page.locator('[data-map-cat="music"]').click();
   await expect(page.locator('[data-map-cat="music"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(page).toHaveURL(/[?&]cat=music\b/);
