@@ -83,9 +83,12 @@ test.describe('here shortcuts', () => {
     await page.locator('[data-region-here="city"]').first().click();
     await expect(page.locator('[data-geo-help]').first()).toBeVisible();
     expect(page.url()).toBe(url); // the selection is left exactly as it was
+    // "pick a place from the list" is only true if the list is still there.
+    await expect(page.locator('[data-region-pop]').first()).toBeVisible();
 
     await page.locator('[data-geo-help] button[type=submit]').first().click();
     await expect(page.locator('[data-geo-help]').first()).toBeHidden();
+    await expect(page.locator('[data-region-pop]').first()).toBeVisible();
     expect(page.url()).toBe(url);
   });
 });
