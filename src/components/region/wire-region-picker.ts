@@ -2,6 +2,7 @@ import { applyRegionFilter } from './apply-region-filter.ts';
 import { firstVisibleLink } from './first-visible-link.ts';
 import { isOutsideBox } from './is-outside-box.ts';
 import { regionPopup } from './region-popup.ts';
+import { wireRegionHere } from './wire-region-here.ts';
 import type { RegionPickerParts } from './region-picker-parts.ts';
 import type { RegionPopup } from './region-popup.ts';
 
@@ -38,6 +39,7 @@ const onSheetClick = (parts: RegionPickerParts, popup: RegionPopup, event: Mouse
 /** Wire one picker's elements: open/close, filter-as-you-type and Enter. */
 export const wireRegionPicker = (parts: RegionPickerParts): void => {
   const popup = regionPopup(parts);
+  wireRegionHere(parts);
   parts.toggle.addEventListener('click', () => popup.flip());
   // Escape and backdrop taps close a dialog on their own — keep the button's
   // state truthful when they do.

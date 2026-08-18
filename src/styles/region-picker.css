@@ -28,7 +28,31 @@
   padding: 0.4rem 0.55rem; border: 1px solid var(--line);
   border-radius: var(--radius-sm); background: var(--bg); color: var(--ink);
 }
-.region-pop ul { list-style: none; margin: 0.4rem 0 0; padding: 0; overflow-y: auto; }
+.region-pop ul { list-style: none; margin: 0.4rem 0 0; padding: 0; overflow-y: auto; min-height: 0; }
+/* "Here" shortcuts: the two rows that ask the browser where the visitor is. */
+.rp-here { display: flex; gap: 0.4rem; margin-top: 0.4rem; }
+.rp-here button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; flex: 1;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--ink); font: inherit; font-size: 0.85rem;
+  padding: 0.4rem 0.5rem; cursor: pointer;
+}
+.rp-here button:hover, .rp-here button:focus-visible { border-color: var(--accent); }
+.rp-here button[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+/* Location refused or unavailable: the selection is left alone and this says
+   what the visitor can do about it. */
+.geo-help {
+  max-width: 22rem; margin: auto; padding: 1rem 1.1rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+}
+.geo-help::backdrop { background: rgb(0 0 0 / 0.45); }
+.geo-help h2 { margin: 0 0 0.5rem; font-size: 1rem; }
+.geo-help p { margin: 0 0 0.9rem; font-size: 0.9rem; color: var(--ink-2); line-height: 1.5; }
+.geo-help button {
+  border: none; border-radius: var(--radius-sm); padding: 0.55rem 0.9rem;
+  background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; cursor: pointer;
+}
 .region-pop a {
   display: flex; justify-content: space-between; gap: 0.5rem;
   padding: 0.35rem 0.5rem; border-radius: var(--radius-sm);
@@ -49,10 +73,14 @@
 @media (max-width: 44rem) {
   .region-pop[open] {
     position: fixed;
-    inset: auto 0 0 0;
+    /* Lifted clear of the on-screen keyboard: a fixed element is anchored to the
+       LAYOUT viewport, which the keyboard does not shrink, so `bottom: 0` used
+       to put the whole list behind it. --kb-inset / --vv-height come from
+       track-keyboard-inset.ts and are 0 / unset until it runs. */
+    inset: auto 0 var(--kb-inset, 0px) 0;
     width: auto;
     max-width: none;
-    max-height: 72vh;
+    max-height: min(72vh, calc(var(--vv-height, 100dvh) - 4.5rem));
     padding: 0.75rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     border-bottom: 0;

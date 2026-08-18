@@ -5,7 +5,7 @@ import { bothCoords } from '../src/lib/favorites/both-coords.ts';
 import { dayOfStop } from '../src/lib/favorites/day-of-stop.ts';
 import { dayWithLegs } from '../src/lib/favorites/day-with-legs.ts';
 import { groupStopsByDay } from '../src/lib/favorites/group-stops-by-day.ts';
-import { haversineMeters } from '../src/lib/favorites/haversine-meters.ts';
+import { haversineMeters } from '../src/lib/geo/haversine-meters.ts';
 import { isTight } from '../src/lib/favorites/is-tight.ts';
 import { legBetween } from '../src/lib/favorites/leg-between.ts';
 import { minutesForMeters } from '../src/lib/favorites/minutes-for-meters.ts';

@@ -1,6 +1,6 @@
 import { branch } from '../branch.ts';
 import { isDefined } from '../is-defined.ts';
-import { haversineMeters } from './haversine-meters.ts';
+import { haversineMeters } from '../geo/haversine-meters.ts';
 import { minutesOf } from './minutes-of.ts';
 import type { Coords, RouteStop } from './route-types.ts';
 

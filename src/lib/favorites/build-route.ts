@@ -9,7 +9,7 @@ import type { DateRange, Mode, RouteDay, RouteStop } from './route-types.ts';
 
 export type { Coords, DateRange, DayGroup, Leg, LegSegment, Mode, RouteDay, RouteStop } from './route-types.ts';
 export { eventAvailableOn } from './event-available-on.ts';
-export { haversineMeters } from './haversine-meters.ts';
+export { haversineMeters } from '../geo/haversine-meters.ts';
 export { mapsDirUrl } from './maps-dir-url.ts';
 export { minutesOf } from './minutes-of.ts';
 export { poiToStop } from './poi-to-stop.ts';

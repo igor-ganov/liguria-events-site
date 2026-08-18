@@ -5,6 +5,7 @@
  */
 import { queryAll } from '../../lib/dom/query-all.ts';
 import { regionPickerParts } from './region-picker-parts.ts';
+import { trackKeyboardInset } from './track-keyboard-inset.ts';
 import { wireRegionPicker } from './wire-region-picker.ts';
 
 const bindOne = (root: HTMLElement): void => {
@@ -21,6 +22,9 @@ const bindAll = (): void => {
 
 /** Wire every picker on the page, now and after each client-side navigation. */
 export const initRegionPicker = (): void => {
+  // The sheet is anchored to the bottom of the screen, which the on-screen
+  // keyboard covers; this is what lets it sit above the keyboard instead.
+  trackKeyboardInset();
   bindAll();
   document.addEventListener('astro:page-load', bindAll);
 };

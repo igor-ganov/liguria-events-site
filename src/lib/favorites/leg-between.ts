@@ -1,5 +1,5 @@
 import { bothCoords } from './both-coords.ts';
-import { haversineMeters } from './haversine-meters.ts';
+import { haversineMeters } from '../geo/haversine-meters.ts';
 import { isTight } from './is-tight.ts';
 import { mapsDirUrl } from './maps-dir-url.ts';
 import { minutesForMeters } from './minutes-for-meters.ts';

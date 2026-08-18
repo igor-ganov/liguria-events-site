@@ -1,0 +1,17 @@
+---
+// Shown when the browser will not say where the visitor is. The picker's
+// selection is deliberately left untouched behind it — a refused lookup must not
+// move anyone somewhere they did not choose.
+---
+
+<dialog class="geo-help" data-geo-help>
+  <h2>We could not read your location</h2>
+  <p>
+    Your browser did not share it — the permission was refused, or it is switched
+    off for this site. Allow location for dovego.it in your browser settings, or
+    just pick a place from the list.
+  </p>
+  <form method="dialog">
+    <button type="submit">Pick from the list</button>
+  </form>
+</dialog>

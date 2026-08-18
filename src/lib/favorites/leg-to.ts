@@ -1,4 +1,4 @@
-import { haversineMeters } from './haversine-meters.ts';
+import { haversineMeters } from '../geo/haversine-meters.ts';
 import { mapsDirUrl } from './maps-dir-url.ts';
 import { travelMinutesBetween } from './travel-minutes-between.ts';
 import type { Leg, Mode } from './route-types.ts';

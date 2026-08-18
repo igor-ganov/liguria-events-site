@@ -1,4 +1,4 @@
-import { haversineMeters } from './haversine-meters.ts';
+import { haversineMeters } from '../geo/haversine-meters.ts';
 import { minutesForMeters } from './minutes-for-meters.ts';
 import type { Coords, Mode } from './route-types.ts';
 

@@ -1,0 +1,42 @@
+---
+import { placeKey } from '../../lib/region/place-key.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { ariaCurrent } from '../../lib/a11y/aria-current.ts';
+import type { Centroid } from '../../lib/region/city-centroids.ts';
+import type { RegionGroup } from '../../lib/region/regions-cities-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// One region group: the bold header row, then its cities. A city carries the
+// point its events average out to, so "my city" can measure the visitor against
+// the rows themselves rather than against a second, drift-prone table.
+type Props = Readonly<{
+  lang: Locale;
+  group: RegionGroup;
+  region: string;
+  city?: string | undefined;
+  page: string;
+  points: ReadonlyMap<string, Centroid>;
+}>;
+const { lang, group, region, city, page, points } = Astro.props;
+---
+
+<li class="rp-region" data-name={group.name.toLowerCase()} data-region={group.slug}>
+  <a href={regionUrl(lang, group.slug, page)} aria-current={ariaCurrent(group.slug === region && city === undefined)}>
+    <span>{group.name}</span><small>{group.count}</small>
+  </a>
+</li>
+{group.cities.map((c) => (
+  <li
+    class="rp-city"
+    data-name={`${group.name.toLowerCase()} ${c.name.toLowerCase()}`}
+    data-region={group.slug}
+    data-city={c.slug}
+    data-lat={points.get(placeKey(group.slug, c.slug))?.lat}
+    data-lng={points.get(placeKey(group.slug, c.slug))?.lng}
+  >
+    <a href={localizedUrl(lang, `${group.slug}/${c.slug}/`)} aria-current={ariaCurrent(group.slug === region && c.slug === city)}>
+      <span>{c.name}</span><small>{c.count}</small>
+    </a>
+  </li>
+))}

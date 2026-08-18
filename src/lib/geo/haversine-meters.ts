@@ -1,11 +1,12 @@
-import type { Coords } from './route-types.ts';
+/** A point as [latitude, longitude] in degrees. */
+export type LatLng = readonly [number, number];
 
 const EARTH_R = 6371000;
 
 const rad = (d: number): number => (d * Math.PI) / 180;
 
 /** Great-circle distance in metres between two [lat, lng] points. */
-export const haversineMeters = (a: Coords, b: Coords): number => {
+export const haversineMeters = (a: LatLng, b: LatLng): number => {
   const dLat = rad(b[0] - a[0]);
   const dLng = rad(b[1] - a[1]);
   const h =

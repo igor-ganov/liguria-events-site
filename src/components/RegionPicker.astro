@@ -1,11 +1,12 @@
 ---
+import GeoHelp from './region/GeoHelp.astro';
+import HereButtons from './region/HereButtons.astro';
+import RegionRows from './region/RegionRows.astro';
 import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
+import { cityCentroids } from '../lib/region/city-centroids.ts';
 import { regionsAndCitiesOf } from '../lib/region/regions-cities-of.ts';
 import { placeLabel } from '../lib/region/place-label.ts';
-import { regionUrl } from '../lib/region/region-url.ts';
-import { localizedUrl } from '../lib/i18n/localized-url.ts';
-import { ariaCurrent } from '../lib/a11y/aria-current.ts';
 import '../styles/region-picker.css';
 import type { Locale } from '../lib/i18n/locales.ts';
 
@@ -19,6 +20,7 @@ const label = placeLabel(region, city);
 // it (?city=). Server-rendered links, so it works before the script does.
 const payload = await cachedEvents(EVENTS_URL);
 const groups = regionsAndCitiesOf(payload.events);
+const points = cityCentroids(payload.events);
 ---
 
 <div class="region-picker" data-region-picker>
@@ -36,26 +38,16 @@ const groups = regionsAndCitiesOf(payload.events);
       <span class="visually-hidden">Search region</span>
       <input type="search" data-region-search placeholder="Type a region…" autocomplete="off" />
     </label>
+    <HereButtons />
     <ul data-region-list>
-      {groups.map((g) => (
-        <Fragment>
-          <li class="rp-region" data-name={g.name.toLowerCase()} data-region={g.slug}>
-            <a href={regionUrl(lang, g.slug, page)} aria-current={ariaCurrent(g.slug === region && city === undefined)}>
-              <span>{g.name}</span><small>{g.count}</small>
-            </a>
-          </li>
-          {g.cities.map((c) => (
-            <li class="rp-city" data-name={`${g.name.toLowerCase()} ${c.name.toLowerCase()}`} data-region={g.slug}>
-              <a href={localizedUrl(lang, `${g.slug}/${c.slug}/`)} aria-current={ariaCurrent(g.slug === region && c.slug === city)}>
-                <span>{c.name}</span><small>{c.count}</small>
-              </a>
-            </li>
-          ))}
-        </Fragment>
+      {groups.map((group) => (
+        <RegionRows lang={lang} group={group} region={region} city={city} page={page} points={points} />
       ))}
     </ul>
     <p class="region-none" data-region-none hidden>No match.</p>
   </dialog>
+
+  <GeoHelp />
 </div>
 
 <script>

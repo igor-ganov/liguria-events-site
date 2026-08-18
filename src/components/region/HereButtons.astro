@@ -1,0 +1,22 @@
+---
+// The two shortcuts that ask the browser where the visitor is. They are buttons,
+// not links: without a position there is nowhere to go, and a refused lookup
+// must leave the current place selected — see wire-region-here.ts.
+---
+
+<div class="rp-here">
+  <button type="button" data-region-here="city">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3.2"></circle>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+    </svg>
+    My city
+  </button>
+  <button type="button" data-region-here="region">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M3 12h18M12 3c3 3.4 3 14.6 0 18M12 3c-3 3.4-3 14.6 0 18"></path>
+    </svg>
+    My region
+  </button>
+</div>
