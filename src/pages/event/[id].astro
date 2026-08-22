@@ -2,42 +2,25 @@
 // SSR (not prerendered): an event page must resolve BOTH crawler events (the
 // build corpus) and user-submitted events, which live only in D1 and therefore
 // never had a static page — the cause of "published event, link 404s". A
-// not-yet-published event is shown only to its author (post-submit preview).
+// not-yet-published event is shown only to its author (post-submit preview),
+// and an event that has already happened comes from the collector's archive.
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
-import { archivedEvent } from '../../lib/events/archived-event.ts';
-import { eventForDetail } from '../../lib/events/d1-published.ts';
-import type { EventContacts } from '../../lib/events/d1-published.ts';
-import { decodeEventList } from '../../lib/events/decode-event-list.ts';
+import { resolveEvent } from '../../lib/events/resolve-event.ts';
 import { branch } from '../../lib/branch.ts';
-import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
 const { id } = Astro.params;
-const user = Astro.locals.user;
-const eventId = id ?? '';
 const corpus = await cachedEvents(EVENTS_URL);
-const fromCorpus = corpus.events.find((e) => e.id === eventId);
-// Missing from the build corpus → look it up in D1.
-const row = await branch(fromCorpus === undefined && eventId !== '')(
-  () => eventForDetail(Astro.locals.runtime.env.DB, eventId, user?.id),
-  async () => undefined,
-);
-const rows = [row].filter((r) => r !== undefined);
-const fromDb: CompactEvent | undefined = decodeEventList(rows.map((r) => r.compact))[0];
-// Last resort: the collector's archive. The build corpus carries only what is
-// still to come, so without this every link to a past event — every link anyone
-// ever shared — answers 404.
-const fromArchive = await branch(fromCorpus === undefined && fromDb === undefined && eventId !== '')(
-  () => archivedEvent(EVENTS_URL, eventId),
-  async () => undefined,
-);
-const event: CompactEvent | undefined = fromCorpus ?? fromDb ?? fromArchive;
-const editable = rows.some((r) => r.owned);
-const status: string | undefined = rows[0]?.status;
-const contacts: EventContacts | undefined = rows[0]?.contacts;
+const { event, editable, status, contacts } = await resolveEvent({
+  id: id ?? '',
+  corpus: corpus.events,
+  db: Astro.locals.runtime.env.DB,
+  userId: Astro.locals.user?.id,
+  eventsUrl: EVENTS_URL,
+});
 Astro.response.status = branch(event === undefined)(() => 404, () => 200);
 const notFound = 'This event could not be found.';
 ---

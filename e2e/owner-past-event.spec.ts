@@ -50,6 +50,26 @@ test('an upcoming event carries no such banner', async ({ page, context }) => {
   await expect(page.locator('.event-passed')).toHaveCount(0);
 });
 
+test('every locale of a past event resolves, since the sitemap lists all three', async ({ page, context }) => {
+  await signInAsOwner(page, context);
+  const created = await page.request.post('/api/events/submit', {
+    data: {
+      title: 'Serata Multilingue 2020',
+      description: 'An evening that has already happened.',
+      startDate: '2020-08-05',
+      categories: ['music'],
+    },
+  });
+  const id = (await created.json()).id;
+  // The archive step was once added to /event and forgotten in /{lang}/event,
+  // which left two thirds of every sitemap entry answering 404.
+  for (const path of [`/event/${id}/`, `/it/event/${id}/`, `/ru/event/${id}/`]) {
+    const response = await page.goto(path);
+    expect(response?.status(), path).toBe(200);
+    await expect(page.locator('.event-passed p')).not.toBeEmpty();
+  }
+});
+
 test('an id that never existed is still a 404 — nothing is a catch-all', async ({ page }) => {
   const response = await page.goto('/event/nosucheventatall/');
   expect(response?.status()).toBe(404);
