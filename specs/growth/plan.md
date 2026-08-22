@@ -1,6 +1,6 @@
 # Growth plan — dovego.it
 
-Baseline measured 2026-08-22. Every number here came from the live site, the
+Baseline measured 2026-08-22; Search Console read 2026-08-23. Every number here came from the live site, the
 Cloudflare API or the corpus; none of it is estimated. Revisit the baseline
 before arguing about what to do next.
 
@@ -20,11 +20,45 @@ zoom in. Far fewer requests per visit is the point. The *unique IP* decline
 (≈2 800 → ≈1 100) is the number that is not explained by that, and August in
 Italy is a holiday month — so it is a signal to watch, not yet a conclusion.
 
-**We cannot see acquisition at all.** No Search Console property, and this
-Cloudflare plan does not expose referrer data (`clientRefererHost` is refused).
-So today we cannot answer: how many visits come from search, on which queries,
-whether the sitemap is being read, or whether any event has ever appeared as a
-rich result. Everything below is a hypothesis until that is fixed.
+**What Search Console says** (checked 2026-08-23 — the property
+`sc-domain:dovego.it` exists and is verified; an earlier draft of this document
+claimed it did not, which was wrong):
+
+| | |
+| --- | ---: |
+| Clicks, last 90 days | **1** |
+| Impressions | 374 |
+| Average position | **59.7** |
+| Pages indexed | 3 082 |
+| Pages NOT indexed | **17 196** |
+| Event rich results valid / errors | 52 / 0 |
+
+Two numbers explain the site's whole search situation.
+
+**15 806 of the non-indexed pages are 404s** — 92% of them. They are
+`/event/<id>/` pages of events that have happened. The cause is a one-line
+policy in the collector: every event record is written to KV with a TTL of
+three days past its end date, so three days after an event the record
+evaporates and its page dies. Every link ever shared to a dovego event is now
+dead, and Google has crawled 15 806 of those corpses. A site that is mostly
+404 does not look like a site worth ranking.
+
+**Average position 59.7** — page six. We are indexed and not competitive.
+
+The queries we do surface for are worth reading closely, because they are not
+what this document previously assumed:
+
+    acquario di genova ferragosto      45 impressions
+    acquario genova ferragosto         40
+    acquario eventi genova             18
+    museo delle illusioni genova       12
+    la pelota eventi milano             9
+    mostra delle illusioni genova       6
+
+Not "cosa fare a Genova questo weekend". **Venue plus time**, and **venue plus
+"eventi"**. People search for a place they already have in mind and want to know
+what is on there. We hold a venue on almost every event and have never built a
+page for one.
 
 **Content**: 1 233 events, 20 regions, 85 cities, 3 languages. 1 175 have
 coordinates, 974 have an image, 173 are free, 71 are marked hidden gems.
@@ -51,35 +85,44 @@ Done (2026-08-22):
 - `Google-Extended` no longer disallowed, so the site can appear in AI Overviews
   and Gemini's grounded answers.
 
-Still to do:
+Still to do, in order:
 
-- **Search Console and Bing Webmaster Tools** — needs the owner's Google
-  account. Until then we are guessing. Submit both sitemaps, watch coverage and
-  the rich-result report.
-- **Past events must stop 404-ing.** When the corpus prunes an event its page
-  dies, and every link ever shared to it dies with it. A past event should
-  resolve to a page that says it has passed and points at what is on now.
-- Feed and city pages carry no `ItemList` markup; event listings can carry it.
+- **Stop the link rot — this is now the first thing on the list.** Past events
+  must keep their pages. The records already carry everything needed; they are
+  simply thrown away after three days. Extend the retention, add a
+  fetch-one-event endpoint to the collector, and let the event page fall back to
+  it and render "this event has passed" with what is on now. The feed and the
+  map keep showing only upcoming events, exactly as today. This converts 15 806
+  dead URLs into pages that keep their links.
+- **`sitemap-events.xml` submitted** to Search Console on 2026-08-23; the index
+  sitemap had been submitted since 6 August and reports 1 469 pages found.
+- **Fix the hreflang we are wrong about.** `/terms/` advertises
+  `hreflang="it" href="/it/terms/"`, which 404s — the legal and utility pages
+  exist only at the root locale. We are handing Google broken URLs in our own
+  markup.
+- **Fill the rich-result warnings** Search Console lists against the 52 valid
+  events: `performer` and `organizer` missing on all 52, and `price` /
+  `priceCurrency` / `validFrom` missing on 18. The collector already stores the
+  raw price text (`priceInfo`); parsing a number out of it would complete the
+  offer. Warnings do not block the rich result, but they narrow which queries it
+  can answer.
 
-### 2. Landing pages that match how people actually search
+### 2. Landing pages, aimed at the demand we can actually see
 
-The highest-volume queries for this category are time-bound and city-bound:
-*cosa fare a Genova questo weekend*, *eventi gratis a Milano oggi*, *cosa fare
-stasera a Torino*. We have region, city and calendar-month pages, and nothing
-for any of those.
+The queries above say the demand is venue-anchored. Build order revised:
 
-Proposed, in build order:
+1. **Venue pages** — `/{region}/{city}/{venue}/`: everything on at the Acquario
+   di Genova, the Museo delle Illusioni, Palazzo Ducale. This is the query we
+   already brush against at position 59, with content we already hold.
+2. `/{region}/{city}/questo-weekend/`, `/oggi/`, `/domani/` — the time-bound
+   pages. Still worth building; just not first, since nothing in the data yet
+   shows us reaching those searchers.
+3. `/{region}/{city}/gratis/` — 173 events qualify.
+4. Category × city: `/concerti/`, `/mostre/`, `/mercatini/`.
 
-1. `/{region}/{city}/questo-weekend/` — this weekend, prerendered per city,
-   regenerated every build.
-2. `/{region}/{city}/oggi/` and `/domani/`.
-3. `/{region}/{city}/gratis/` — free events; 173 events already qualify.
-4. Category × city: `/{region}/{city}/concerti/`, `/mostre/`, `/mercatini/`.
-
-Each is a real page with its own title, description, `ItemList` markup and an
-honest empty state. 85 cities × 4 templates is a lot of pages, so they must be
-generated, and thin ones (fewer than N events) must not be generated at all —
-an empty page ranking for a city is worse than no page.
+Each needs its own title, description, `ItemList` markup and an honest empty
+state — and must not be generated at all when it would be thin. An empty page
+ranking for a city is worse than no page.
 
 ### 3. Distribution we already half-own
 
@@ -107,9 +150,10 @@ slow payoff — worth starting only once 1–3 are running.
 
 ## What needs the owner, not me
 
-1. **Search Console + Bing Webmaster**: verify `dovego.it`. I can add the DNS TXT
-   record through the Cloudflare API the moment you paste the verification
-   string; I cannot log into your Google account.
+1. **Bing Webmaster Tools**: nothing exists there. Google's property is verified
+   and now has both sitemaps; Bing is a second, cheap source of the same
+   long-tail traffic. I can add the DNS TXT through the Cloudflare API once you
+   paste the verification string.
 2. **Telegram channel**: create it and add the bot as an admin.
 3. **Analytics decision**: Cloudflare Web Analytics is free, privacy-preserving
    and would give us referrers, which the current plan does not.
@@ -118,18 +162,21 @@ slow payoff — worth starting only once 1–3 are running.
 
 Not by traffic alone — August distorts everything. The measurements that matter:
 
-| Question | Where it is answered | Today |
+| Question | Where it is answered | 2026-08-23 |
 | --- | --- | --- |
-| Is Google reading the sitemap? | Search Console → Sitemaps | unknown |
-| How many event pages are indexed? | Search Console → Pages | unknown |
-| Do events show as rich results? | Search Console → Events report | unknown |
-| Which queries reach us? | Search Console → Performance | unknown |
-| How many visits come from search? | Web Analytics referrers | unknown |
+| Is Google reading the sitemaps? | Search Console → Sitemaps | index: yes, 1 469 found. events: submitted today |
+| How many pages are indexed? | Search Console → Pages | 3 082 indexed, 17 196 not |
+| How many of those are dead? | Search Console → Pages | **15 806 are 404** |
+| Do events show as rich results? | Search Console → Events | 52 valid, 0 errors |
+| Which queries reach us? | Search Console → Performance | 374 impressions, position 59.7 |
+| How many visits come from search? | Web Analytics referrers | still unknown |
 | Are people coming back? | ICS subscribers, Telegram members | 0 |
 
-Every row of "unknown" is the argument for doing step 1's remaining item first.
+The first number to move is 15 806. Everything else in this document competes
+for attention with a site that answers most of its own URLs with "gone".
 
-A 90-day target worth committing to, once measurement exists: event pages
-indexed in the four figures, a non-trivial share of visits arriving from search
-rather than direct, and a first cohort of calendar subscribers. Setting a
-traffic number before we can see where traffic comes from would be theatre.
+A 90-day target worth committing to: 404s down to the low hundreds, indexed
+pages up rather than down as the events sitemap is read, average position out of
+the fifties on at least the venue queries we already appear for, and a first
+cohort of calendar subscribers. A traffic number is not yet worth setting —
+we still cannot see how much of the traffic we have comes from search.
