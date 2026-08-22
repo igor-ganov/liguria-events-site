@@ -1,5 +1,69 @@
+# Robots policy for dovego.it.
+#
+# Served from the repository, not from Cloudflare's zone-level injection, so the
+# one exception below is visible in review and in version control. Cloudflare's
+# managed block is coarse: it is a single "allow AI crawlers or block them all"
+# switch, and we want exactly one of them allowed.
+#
+# Google-Extended is deliberately NOT blocked: it governs whether Google may use
+# the site in AI Overviews and Gemini's grounded answers, which is a growing
+# share of how people find events. Note it does not separate that use from
+# training — allowing it permits both.
+
+# As a condition of accessing this website, you agree to abide by the following
+# content signals:
+
+# (a)  If a Content-Signal = yes, you may collect content for the corresponding
+#      use.
+# (b)  If a Content-Signal = no, you may not collect content for the
+#      corresponding use.
+# (c)  If the website operator does not include a Content-Signal for a
+#      corresponding use, the website operator neither grants nor restricts
+#      permission via Content-Signal with respect to the corresponding use.
+
+# The content signals and their meanings are:
+
+# search:   building a search index and providing search results (e.g., returning
+#           hyperlinks and short excerpts from your website's contents). Search does not
+#           include providing AI-generated search summaries.
+# ai-input: inputting content into one or more AI models (e.g., retrieval
+#           augmented generation, grounding, or other real-time taking of content for
+#           generative AI search answers).
+# ai-train: training or fine-tuning AI models.
+# use:      how AI systems may consume the content (immediate, reference, or full).
+
+# ANY RESTRICTIONS EXPRESSED VIA CONTENT SIGNALS ARE EXPRESS RESERVATIONS OF
+# RIGHTS UNDER ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE 2019/790 ON COPYRIGHT
+# AND RELATED RIGHTS IN THE DIGITAL SINGLE MARKET.
+
+
 User-agent: *
+Content-Signal: search=yes,ai-train=no,use=reference
 Allow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CloudflareBrowserRenderingCrawler
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
 
 Sitemap: https://dovego.it/sitemap-index.xml
 # Event pages are server-rendered, so the generated index above cannot see them.

@@ -11,6 +11,20 @@ test('robots.txt announces the events sitemap alongside the generated index', as
   expect(robots).toContain('Sitemap: https://dovego.it/sitemap-events.xml');
 });
 
+test('Google may use the site in its AI answers; the other scrapers may not', async ({ request }) => {
+  const robots = await (await request.get('/robots.txt')).text();
+  const stanzas = robots.split(/\n(?=User-agent:)/);
+  const disallowed = stanzas
+    .filter((block) => /^\s*Disallow:\s*\/\s*$/m.test(block))
+    .map((block) => (block.match(/User-agent:\s*(\S+)/)?.[1] ?? ''));
+  // The one exception we make, and the reason robots.txt lives in the repo
+  // rather than in Cloudflare's all-or-nothing zone switch.
+  expect(disallowed).not.toContain('Google-Extended');
+  expect(disallowed).toContain('GPTBot');
+  expect(disallowed).toContain('CCBot');
+  expect(robots).toMatch(/User-agent: \*[\s\S]*?Allow: \//);
+});
+
 test('the events sitemap lists event pages, with hreflang for all three locales', async ({ request }) => {
   const res = await request.get('/sitemap-events.xml');
   expect(res.status()).toBe(200);
