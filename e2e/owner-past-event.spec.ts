@@ -26,7 +26,10 @@ test('an event that has happened keeps its page, and says it is over', async ({ 
   expect(response?.status()).toBe(200);
   await expect(page.locator('h1')).toContainText('Concerto d’Estate 2020');
 
-  // The banner, and somewhere to go instead of a dead end.
+  // The banner must SAY something: asserting only that the element is there let
+  // a silently-dropped UI string ship — the content collection has its own
+  // schema and strips keys it does not know about.
+  await expect(page.locator('.event-passed p')).not.toBeEmpty();
   await expect(page.locator('.event-passed')).toBeVisible();
   await expect(page.locator('.event-passed a[data-passed-onward]')).toHaveAttribute('href', /\//);
 });

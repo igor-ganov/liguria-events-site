@@ -29,6 +29,7 @@ const ui = defineCollection({
     empty: z.string(),
     footer: z.string(),
     photoBy: z.string(),
+    passedNote: z.string(),
     summaryNote: z.string(),
     mapLink: z.string(),
     tickets: z.string(),
