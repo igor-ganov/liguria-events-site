@@ -1,0 +1,26 @@
+---
+import { branch } from '../../lib/branch.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// Shown at the top of an event that has already happened. The page stays — the
+// link somebody shared has to keep working — but it must say so at a glance
+// instead of quietly reading as an invitation to something that is over.
+type Props = Readonly<{ lang: Locale; region: string; city?: string | undefined; label: string; allLabel: string }>;
+const { lang, region, city, label, allLabel } = Astro.props;
+const onward = regionUrl(lang, region, '');
+const suffix = branch(city === undefined || city === '')(
+  () => '',
+  () => ` · ${city ?? ''}`,
+);
+---
+
+<aside class="event-passed" role="status">
+  <span class="event-passed-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>
+    </svg>
+  </span>
+  <p>{label}</p>
+  <a href={onward} data-passed-onward>{allLabel}{suffix}</a>
+</aside>

@@ -33,6 +33,7 @@ export const UiDictSchema = Schema.Struct({
   empty: Schema.String,
   footer: Schema.String,
   photoBy: Schema.String,
+  passedNote: Schema.String,
   summaryNote: Schema.String,
   mapLink: Schema.String,
   tickets: Schema.String,

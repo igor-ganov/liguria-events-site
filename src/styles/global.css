@@ -349,6 +349,17 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer;
 }
 
+/* An event that has already happened: the page survives so its link does. */
+.event-passed {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  margin: 0 0 1rem; padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line); border-left: 3px solid var(--ink-2);
+  border-radius: var(--radius-sm); background: var(--surface);
+}
+.event-passed p { margin: 0; font-size: 0.9rem; color: var(--ink-2); flex: 1 1 14rem; }
+.event-passed-mark { display: inline-flex; color: var(--ink-2); }
+.event-passed a { font-size: 0.9rem; font-weight: 700; color: var(--accent); }
+
 /* Admin moderation table */
 .admin { max-width: 60rem; margin: 2rem auto; padding: 0 1.25rem; }
 .admin-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }

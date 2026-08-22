@@ -81,6 +81,7 @@ badges: { free: 'free', gem: 'gem' }
 empty: 'Nothing matches these filters yet.'
 footer: 'Collected automatically from visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'photo'
+passedNote: 'This event has already taken place. The page is kept so the link keeps working.'
 summaryNote: 'Summary generated automatically from the sources below.'
 mapLink: 'View on map'
 tickets: 'Buy tickets'

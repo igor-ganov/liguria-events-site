@@ -81,6 +81,7 @@ badges: { free: 'бесплатно', gem: 'необычное' }
 empty: 'Ничего не подходит под эти фильтры.'
 footer: 'Собрано автоматически с visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'фото'
+passedNote: 'Событие уже прошло. Страница сохранена, чтобы ссылка продолжала работать.'
 summaryNote: 'Описание сгенерировано автоматически на основе источников ниже.'
 mapLink: 'Открыть на карте'
 tickets: 'Купить билеты'

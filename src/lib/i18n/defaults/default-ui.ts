@@ -39,6 +39,7 @@ export const DEFAULT_UI: Ui = {
   empty: 'Nothing matches these filters yet.',
   footer: '',
   photoBy: 'photo',
+  passedNote: 'This event has already taken place. The page is kept so the link keeps working.',
   summaryNote: '',
   mapLink: 'View on map',
   tickets: 'Buy tickets',

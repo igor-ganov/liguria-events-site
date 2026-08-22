@@ -3,27 +3,19 @@ import Layout from '../../layouts/Layout.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventHero from './event/EventHero.astro';
 import EventGalleryMore from './event/EventGalleryMore.astro';
+import EventPassed from '../events/EventPassed.astro';
 import EventTags from './event/EventTags.astro';
 import EventTickets from './event/EventTickets.astro';
 import EventFacts from './event/EventFacts.astro';
 import EventProgramme from './event/EventProgramme.astro';
 import EventMapEmbed from './event/EventMapEmbed.astro';
 import EventSources from './event/EventSources.astro';
-import { eventLinks } from '../../lib/events/event-links.ts';
-import { descriptionOf } from '../../lib/events/description-of.ts';
-import { titleOf } from '../../lib/events/title-of.ts';
-import { mapQuery } from '../../lib/events/map-query.ts';
+import { cityName } from '../../lib/region/city-name.ts';
+import { eventDetailView } from '../../lib/events/event-detail-view.ts';
 import { eventPath } from '../../lib/event-path.ts';
-import { regionUrl } from '../../lib/region/region-url.ts';
-import { regionOf } from '../../lib/region/region-of.ts';
-import { absoluteImage } from '../../lib/img/absolute-image.ts';
-import { eventGallery } from '../../lib/events/event-gallery.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { programmeSessions } from '../../lib/events/programme-sessions.ts';
-import { descriptionArticleHtml } from '../../lib/description/description-article-html.ts';
-import { descriptionPlain } from '../../lib/description/description-plain.ts';
-import { ticketUrl } from '../../lib/events/ticket-link.ts';
-import { eventJsonLd } from '../../lib/events/event-jsonld.ts';
-import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -31,38 +23,18 @@ import type { EventContacts } from '../../lib/events/d1-published.ts';
 
 type Props = Readonly<{ lang: Locale; event: CompactEvent; editable?: boolean | undefined; status?: string | undefined; contacts?: EventContacts | undefined }>;
 const { lang, event, editable = false, status, contacts } = Astro.props;
-// An event page belongs to its own region, whichever region you arrived from.
-const region = regionOf(event);
 const ui = await uiOf(lang);
-const links = eventLinks(event);
-const desc = descriptionOf(lang)(event);
-// The description is light Markdown (lead paragraph + labelled sections). The
-// body renders it as a structured article; meta/SEO gets the plain-text form.
-const descHtml = descriptionArticleHtml(desc);
-const descMeta = descriptionPlain(desc);
-const title = titleOf(lang)(event);
-const query = mapQuery(event);
-const mapSearchUrl = query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-const mapEmbedUrl = query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
-const heroImage = absoluteImage(event.img, Astro.site);
 // The address a crawler event carries lives on the event itself; only a
 // user-submitted one has a contact block. Structured data needs whichever is
 // there — an event with no address at all is rejected outright by Google.
-const canonical = canonicalUrl(lang, eventPath(event.id), Astro.site);
-const jsonLd = eventJsonLd({
+const view = eventDetailView({
+  lang,
   event,
-  title,
-  desc: descMeta,
-  image: heroImage,
   address: contacts?.address ?? event.a,
-  url: canonical,
+  site: Astro.site,
+  today: isoToday(),
 });
-// Multi-source gallery: the primary cover plus every other source's photo,
-// each attributed. `more` is the strip shown under the hero.
-const gallery = eventGallery(event);
-const cover = gallery[0];
-const more = gallery.slice(1);
-const tickets = ticketUrl(event);
+const { region, title, desc, descHtml, descMeta, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
 const programme = programmeSessions(event, lang);
 ---
 
@@ -71,6 +43,15 @@ const programme = programmeSessions(event, lang);
   <article class="event-page">
     <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
+    {passed && (
+      <EventPassed
+        lang={lang}
+        region={region}
+        city={cityName(event.ct ?? '')}
+        label={ui.passedNote}
+        allLabel={ui.headings.allEvents}
+      />
+    )}
     {cover && <EventHero photo={cover} title={title} photoBy={ui.photoBy} />}
     {more.length > 0 && <EventGalleryMore photos={more} photoBy={ui.photoBy} />}
     <EventTags event={event} title={title} ui={ui} />

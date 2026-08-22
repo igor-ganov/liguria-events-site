@@ -8,6 +8,7 @@ import Layout from '../../layouts/Layout.astro';
 import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
+import { archivedEvent } from '../../lib/events/archived-event.ts';
 import { eventForDetail } from '../../lib/events/d1-published.ts';
 import type { EventContacts } from '../../lib/events/d1-published.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
@@ -25,7 +26,15 @@ const row = await branch(fromCorpus === undefined && eventId !== '')(
   async () => undefined,
 );
 const rows = [row].filter((r) => r !== undefined);
-const event: CompactEvent | undefined = fromCorpus ?? decodeEventList(rows.map((r) => r.compact))[0];
+const fromDb: CompactEvent | undefined = decodeEventList(rows.map((r) => r.compact))[0];
+// Last resort: the collector's archive. The build corpus carries only what is
+// still to come, so without this every link to a past event — every link anyone
+// ever shared — answers 404.
+const fromArchive = await branch(fromCorpus === undefined && fromDb === undefined && eventId !== '')(
+  () => archivedEvent(EVENTS_URL, eventId),
+  async () => undefined,
+);
+const event: CompactEvent | undefined = fromCorpus ?? fromDb ?? fromArchive;
 const editable = rows.some((r) => r.owned);
 const status: string | undefined = rows[0]?.status;
 const contacts: EventContacts | undefined = rows[0]?.contacts;
