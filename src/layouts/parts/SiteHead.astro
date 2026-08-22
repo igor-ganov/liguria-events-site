@@ -15,9 +15,10 @@ type Props = Readonly<{
   path: string;
   needsMap: boolean;
   image: string | undefined;
+  locales: readonly Locale[];
   site: URL | undefined;
 }>;
-const { lang, title, description, path, needsMap, image, site } = Astro.props;
+const { lang, title, description, path, needsMap, image, locales, site } = Astro.props;
 const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
 const canonical = canonicalUrl(lang, path, site);
 const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
@@ -33,7 +34,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 {needsMap && tiles && <link rel="dns-prefetch" href={tiles} />}
 <link rel="canonical" href={canonical} />
 {
-  alternateLinks(path, site).map(({ hreflang, href }) => (
+  alternateLinks(path, site, locales).map(({ hreflang, href }) => (
     <link rel="alternate" hreflang={hreflang} href={href} />
   ))
 }

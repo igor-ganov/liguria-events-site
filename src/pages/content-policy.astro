@@ -1,9 +1,10 @@
 ---
+import { ROOT_ONLY } from '../lib/i18n/root-only-locales.ts';
 import Layout from '../layouts/Layout.astro';
 import { PROHIBITED, POLICY_VERSION } from '../lib/moderation/policy.ts';
 ---
 
-<Layout lang="en" title="Content policy" path="content-policy/">
+<Layout lang="en" title="Content policy" path="content-policy/" locales={ROOT_ONLY}>
   <article class="legal">
     <h1>Content Policy</h1>
     <p class="legal-meta">Version {POLICY_VERSION}</p>

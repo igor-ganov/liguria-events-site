@@ -9,6 +9,7 @@ import SiteHeader from './parts/SiteHeader.astro';
 import { pageEvents } from './page-events.ts';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
+import { LOCALES } from '../lib/i18n/locales.ts';
 import type { LayoutProps } from './layout-props.ts';
 import '../styles/global.css';
 
@@ -23,6 +24,7 @@ const {
   needsEvents = false,
   needsMap = false,
   image,
+  locales = LOCALES,
 } = Astro.props;
 const payload = await pageEvents(needsEvents);
 const ui = await uiOf(lang);
@@ -39,6 +41,7 @@ const uiData = JSON.stringify({ lang, ui });
       path={path}
       needsMap={needsMap}
       image={image}
+      locales={locales}
       site={Astro.site}
     />
   </head>

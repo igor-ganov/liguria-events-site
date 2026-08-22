@@ -1,8 +1,9 @@
 ---
+import { ROOT_ONLY } from '../lib/i18n/root-only-locales.ts';
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout lang="en" title="Privacy" path="privacy/">
+<Layout lang="en" title="Privacy" path="privacy/" locales={ROOT_ONLY}>
   <article class="legal">
     <h1>Privacy Policy</h1>
     <p class="legal-meta">Last updated 6 July 2026</p>

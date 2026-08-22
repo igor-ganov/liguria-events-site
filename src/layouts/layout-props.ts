@@ -11,4 +11,8 @@ export type LayoutProps = Readonly<{
   needsEvents?: boolean;
   needsMap?: boolean;
   image?: string | undefined;
+  /** The locales this page is actually built in; defaults to all of them. A
+   *  page that exists only at the root must say so, or its hreflang points at
+   *  pages that were never built. */
+  locales?: readonly Locale[];
 }>;

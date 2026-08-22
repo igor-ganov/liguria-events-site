@@ -1,4 +1,5 @@
 ---
+import { ROOT_ONLY } from '../lib/i18n/root-only-locales.ts';
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { uiIcon } from '../lib/icons/ui-icon.ts';
@@ -8,7 +9,7 @@ const user = Astro.locals.user;
 const passkeys = await passkeysOf(Astro.locals.runtime.env.DB)(user);
 ---
 
-<Layout lang="en" title="Settings" path="settings/">
+<Layout lang="en" title="Settings" path="settings/" locales={ROOT_ONLY}>
   <main class="auth-card settings-card">
     <h1>Settings</h1>
     <p>Signed in as <strong>{user?.email}</strong> (@{user?.handle}).</p>

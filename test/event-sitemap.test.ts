@@ -73,3 +73,23 @@ describe('sitemapXml', () => {
     assert.ok(sitemapXml([]).endsWith('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml"></urlset>'));
   });
 });
+
+describe('alternateLinks', () => {
+  test('a page built in every language declares every language', async () => {
+    const { alternateLinks } = await import('../src/lib/seo/alternate-links.ts');
+    assert.deepEqual(alternateLinks('liguria/', SITE).map((link) => link.hreflang), [
+      'en', 'it', 'ru', 'x-default',
+    ]);
+  });
+
+  test('a page built at the root only declares only that', async () => {
+    // /terms/ advertised /it/terms/ and /ru/terms/, neither of which was ever
+    // built: four 404s handed to Google in our own markup.
+    const { alternateLinks } = await import('../src/lib/seo/alternate-links.ts');
+    const { ROOT_ONLY } = await import('../src/lib/i18n/root-only-locales.ts');
+    assert.deepEqual(alternateLinks('terms/', SITE, ROOT_ONLY), [
+      { hreflang: 'en', href: 'https://dovego.it/terms/' },
+      { hreflang: 'x-default', href: 'https://dovego.it/terms/' },
+    ]);
+  });
+});
