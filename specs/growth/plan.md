@@ -85,21 +85,24 @@ Done (2026-08-22):
 - `Google-Extended` no longer disallowed, so the site can appear in AI Overviews
   and Gemini's grounded answers.
 
-Still to do, in order:
+Also done (2026-08-23):
 
-- **Stop the link rot — this is now the first thing on the list.** Past events
-  must keep their pages. The records already carry everything needed; they are
-  simply thrown away after three days. Extend the retention, add a
-  fetch-one-event endpoint to the collector, and let the event page fall back to
-  it and render "this event has passed" with what is on now. The feed and the
-  map keep showing only upcoming events, exactly as today. This converts 15 806
-  dead URLs into pages that keep their links.
-- **`sitemap-events.xml` submitted** to Search Console on 2026-08-23; the index
-  sitemap had been submitted since 6 August and reports 1 469 pages found.
-- **Fix the hreflang we are wrong about.** `/terms/` advertises
-  `hreflang="it" href="/it/terms/"`, which 404s — the legal and utility pages
-  exist only at the root locale. We are handing Google broken URLs in our own
-  markup.
+- **The link rot is stopped.** Every event record was written to KV with a TTL
+  of three days past the event, so its page died and took every shared link with
+  it. An archived copy now lives 400 days, the collector serves it at
+  `GET /event/<id>`, and the page renders "this event has passed" with a way
+  through to what is on now — in all three locales, through one shared resolver.
+- **`sitemap-events.xml` submitted** to Search Console; the index sitemap had
+  been submitted since 6 August and reports 1 469 pages found.
+- **The hreflang we were wrong about is fixed.** A page now declares only the
+  languages it is actually built in.
+- **Health checks and monitoring**, so none of the above rots quietly: 13 checks
+  at `GET /health` on the collector, rendered worst-first at the top of
+  admin.dovego.it, with a Telegram message when the verdict changes. It found
+  the broken hreflang on its first run.
+
+Still to do:
+
 - **Fill the rich-result warnings** Search Console lists against the 52 valid
   events: `performer` and `organizer` missing on all 52, and `price` /
   `priceCurrency` / `validFrom` missing on 18. The collector already stores the
@@ -111,9 +114,12 @@ Still to do, in order:
 
 The queries above say the demand is venue-anchored. Build order revised:
 
-1. **Venue pages** — `/{region}/{city}/{venue}/`: everything on at the Acquario
-   di Genova, the Museo delle Illusioni, Palazzo Ducale. This is the query we
-   already brush against at position 59, with content we already hold.
+1. ~~**Venue pages**~~ — **done 2026-08-23**: `/{region}/{city}/{venue}/` in all
+   three languages, 133 venues with at least three events each, titled "What's
+   on at <venue>" and opening with the venue rather than a filter bar. Venues
+   below the threshold get no page, two spellings of one theatre become one, and
+   names that are not places (the city's own name, "luoghi vari in città") are
+   dropped.
 2. `/{region}/{city}/questo-weekend/`, `/oggi/`, `/domani/` — the time-bound
    pages. Still worth building; just not first, since nothing in the data yet
    shows us reaching those searchers.
