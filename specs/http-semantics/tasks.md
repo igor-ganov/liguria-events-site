@@ -35,4 +35,16 @@ Ordered. One at a time, tree green between them.
 - [x] **T8 — Health checks for all three codes.**
       *Satisfies* R4.1 · *Design* §6 · *Test* collector `test/health.test.ts`
 
-- [ ] **T9 — Verify on production** and record the codes observed.
+- [x] **T9 — Verified on production**, 2026-08-24:
+
+      | URL | Was | Now |
+      | --- | --- | --- |
+      | `/liguria/savona/` (real city, nothing on) | 404 | **200** |
+      | `/it/liguria/savona/` | 404 | **200** |
+      | `/liguria/genova/teatro-inesistente/` (venue, nothing on) | 404 | **200** |
+      | `/liguria/non-una-citta/teatro/` (not a city) | 404 | 404 |
+      | `/event/1e6b4b74d225/` (existed, gone) | 404 | **410** |
+      | `/it/event/1e6b4b74d225/` | 404 | **410** |
+      | `/event/zzz/` (never ours) | 404 | 404 |
+      | `/event/4d15a917f0f4/` (archived, resolvable) | 200 | 200 |
+      | `/liguria/genova/teatro-carlo-felice/` (venue with events) | 200 | 200 |
