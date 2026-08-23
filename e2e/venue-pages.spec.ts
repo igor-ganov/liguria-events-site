@@ -21,6 +21,12 @@ test('a venue page lists that venue’s events and titles itself after it', asyn
 
   // The title is the question people type, not "<venue> — Feed".
   await expect(page).toHaveTitle(/What.s on at /);
+  // Somebody arriving from a search for the venue must see the venue first,
+  // not a filter bar above an unexplained list.
+  await expect(page.locator('.venue-head h1')).toBeVisible();
+  await expect(page.locator('.venue-head h1')).not.toBeEmpty();
+  await expect(page.locator('.venue-sub')).toContainText(/\d+/);
+  await expect(page.locator('.venue-crumbs a')).toHaveCount(2);
   const cards = page.locator('.feed-list > li');
   expect(await cards.count()).toBeGreaterThan(0);
 

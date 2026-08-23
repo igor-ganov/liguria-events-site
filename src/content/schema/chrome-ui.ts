@@ -14,5 +14,5 @@ export const chromeUi = {
   range: z.object({ from: z.string(), to: z.string() }),
   sort: z.object({ label: z.string(), date: z.string(), created: z.string() }),
   menu: z.object({ events: z.string(), explore: z.string(), more: z.string() }),
-  seo: z.object({ venueTitle: z.string(), venue: z.string(), feed: z.string(), calendar: z.string(), map: z.string() }),
+  seo: z.object({ venueCount: z.string(), venueTitle: z.string(), venue: z.string(), feed: z.string(), calendar: z.string(), map: z.string() }),
 };

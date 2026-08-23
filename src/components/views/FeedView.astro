@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedGroups from './feed/FeedGroups.astro';
+import VenueHeader from './feed/VenueHeader.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
@@ -49,7 +50,17 @@ const description = seo.description.replace('{place}', placeName);
 
 <Layout lang={lang} region={region} city={city} title={seo.title} description={description} path={path}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
-  <h1 class="visually-hidden">{ui.nav.feed}</h1>
+  {venue === undefined && <h1 class="visually-hidden">{ui.nav.feed}</h1>}
+  {venue !== undefined && (
+    <VenueHeader
+      lang={lang}
+      region={region}
+      city={city ?? ''}
+      name={venue.name}
+      count={events.length}
+      label={ui.seo.venueCount}
+    />
+  )}
 
   <FeedFilters ui={ui} today={today} />
 
