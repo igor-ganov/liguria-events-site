@@ -45,6 +45,8 @@ export const EventSchema = Schema.Struct({
   img: Schema.optional(Schema.String),
   /** Attendance length in minutes, when the source stated one (AC-duration). */
   du: Schema.optional(Schema.Number),
+  /** Cheapest ticket price in euro, when a source stated one. */
+  pr: Schema.optional(Schema.Number),
   /** Programme: the dated occurrences inside an umbrella event, so the feed can
    *  show the specific one on each day rather than the whole run. */
   p: Schema.optional(Schema.Array(SessionSchema)),

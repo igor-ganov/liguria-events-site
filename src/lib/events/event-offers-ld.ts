@@ -18,11 +18,17 @@ const freeOffer = (event: CompactEvent, pageUrl: string): Json => ({
 
 // A paid event whose price we never captured still needs an offer, or it drops
 // out of the search results as "no ticket information". Naming the vendor
-// without inventing a number is the truthful half we can state.
+// without inventing a number is the truthful half we can state — and when the
+// source did give a figure, it is the cheapest one, which is what "from €25"
+// means to a reader.
 const paidOffer = (event: CompactEvent, pageUrl: string): Json => ({
   '@type': 'Offer',
   availability: 'https://schema.org/InStock',
   url: buyAt(event, pageUrl),
+  ...[event.pr]
+    .filter((price): price is number => price !== undefined)
+    .map((price) => ({ price: String(price), priceCurrency: 'EUR' }))
+    .at(0),
 });
 
 /** The ticket offer: free when the source said so, otherwise where to buy. */

@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import FeedFilterInit from './FeedFilterInit.astro';
 import ThemeInit from './ThemeInit.astro';
 import { alternateLinks } from '../../lib/seo/alternate-links.ts';
+import SiteFeeds from './SiteFeeds.astro';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { ogLocale } from '../../lib/seo/og-locale.ts';
 import { tilesOrigin } from '../../lib/seo/tiles-origin.ts';
@@ -16,9 +17,11 @@ type Props = Readonly<{
   needsMap: boolean;
   image: string | undefined;
   locales: readonly Locale[];
+  /** The region whose feeds this page can be subscribed to, when it has one. */
+  region?: string | undefined;
   site: URL | undefined;
 }>;
-const { lang, title, description, path, needsMap, image, locales, site } = Astro.props;
+const { lang, title, description, path, needsMap, image, locales, region, site } = Astro.props;
 const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
 const canonical = canonicalUrl(lang, path, site);
 const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
@@ -38,6 +41,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     <link rel="alternate" hreflang={hreflang} href={href} />
   ))
 }
+<SiteFeeds region={region} site={site} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />

@@ -158,3 +158,16 @@ describe('eventJsonLd: containers', () => {
     assert.equal('subEvent' in ld(ev({ id: 'abc', p: [{ date: '2026-08-05' }] })), false);
   });
 });
+
+describe('eventJsonLd: a captured price', () => {
+  test('when the source gave a figure, the offer carries it', () => {
+    const offers = node(ld(ev({ id: 'abc', pr: 25 }))['offers']);
+    assert.equal(offers['price'], '25');
+    assert.equal(offers['priceCurrency'], 'EUR');
+  });
+
+  test('without a figure the offer stays truthful rather than guessing', () => {
+    const offers = node(ld(ev({ id: 'abc' }))['offers']);
+    assert.equal('price' in offers, false);
+  });
+});
