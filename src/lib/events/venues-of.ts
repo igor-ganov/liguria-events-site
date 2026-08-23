@@ -12,10 +12,11 @@ export type VenueEntry = Readonly<{
   count: number;
 }>;
 
-// Below this a venue page is a stub, and a stub that ranks for a city is worse
-// than no page. The search demand we already brush against is venue-shaped
-// ("acquario di genova ferragosto"), which is why these exist at all.
-const MIN_EVENTS = 3;
+// One event is a real answer to "what's on at X", so it earns a place in the
+// sitemap. The old threshold of three was an arbitrary gate that turned real
+// venues into 404s; the page itself now exists for any venue under a
+// recognised city, and this only decides what gets advertised.
+const MIN_EVENTS = 1;
 
 // Phrases the sources use in place of a venue when there is not one. A page for
 // "various places in the city" is a page about nothing, and it would compete

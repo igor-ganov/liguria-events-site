@@ -4,8 +4,10 @@ import { test, expect } from '@playwright/test';
 // venue-shaped: "acquario di genova ferragosto", "acquario eventi genova".
 // They are prerendered, so they are checked against the built site.
 
+// Venue pages are server-rendered, so they are advertised through the events
+// sitemap rather than the generated one.
 const aVenue = async (request: import('@playwright/test').APIRequestContext): Promise<string> => {
-  const xml = await (await request.get('/sitemap-0.xml')).text();
+  const xml = await (await request.get('/sitemap-events.xml')).text();
   const paths = [...xml.matchAll(/<loc>https:\/\/dovego\.it(\/[^<]+)<\/loc>/g)]
     .map((m) => m[1] ?? '')
     .filter((path) => path.split('/').filter(Boolean).length === 3)
@@ -48,7 +50,9 @@ test('a venue page declares itself canonical, in all three languages', async ({ 
   expect(alternates).toEqual(['en', 'it', 'ru', 'x-default']);
 });
 
-test('a venue nobody plays at has no page — a stub must not rank for a city', async ({ page }) => {
+test('a venue nobody plays at still has a page, it just says nothing is on', async ({ page }) => {
+  // It used to 404, which is the site claiming the place is not real.
   const response = await page.goto('/liguria/genova/bar-sotto-casa-che-non-esiste/');
-  expect(response?.status()).toBe(404);
+  expect(response?.status()).toBe(200);
+  await expect(page.locator('[data-empty-state]')).toBeVisible();
 });

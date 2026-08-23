@@ -33,6 +33,8 @@ export const UiDictSchema = Schema.Struct({
   headings: Schema.Struct({ ongoing: Schema.String, sources: Schema.String, allEvents: Schema.String }),
   calNav: Schema.Struct({ prev: Schema.String, next: Schema.String }),
   badges: Schema.Struct({ free: Schema.String, gem: Schema.String }),
+  gone: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
+  nothingHere: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
   empty: Schema.String,
   footer: Schema.String,
   photoBy: Schema.String,

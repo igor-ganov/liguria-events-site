@@ -2,22 +2,18 @@
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedGroups from './feed/FeedGroups.astro';
+import EmptyState from './feed/EmptyState.astro';
 import VenueHeader from './feed/VenueHeader.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
-import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
-import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { feedDayGroups } from '../../lib/events/feed-day-groups.ts';
-import { branch } from '../../lib/branch.ts';
-import { feedEvents } from '../../lib/events/feed-events.ts';
-import { venuePath } from '../../lib/events/venue-path.ts';
-import type { VenueView } from '../../lib/events/feed-events.ts';
-import { feedPath } from '../../lib/region/feed-path.ts';
-import { placeLabel } from '../../lib/region/place-label.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
+import { feedViewModel } from '../../lib/events/feed-view-model.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
+import type { VenueView } from '../../lib/events/feed-events.ts';
 
 type Props = Readonly<{ lang: Locale; region: string; city?: string | undefined; venue?: VenueView | undefined }>;
 const { lang, region, city, venue } = Astro.props;
@@ -25,30 +21,16 @@ const ui = await uiOf(lang);
 
 // Server-rendered feed: the cards ship in the HTML (fast LCP, crawlable, no
 // layout shift). Filtering is show/hide on the client — no re-render, and no
-// Lit/Effect runtime on this page. A city page pre-filters to that city here, so
+// Lit/Effect runtime on this page. A city or venue page pre-filters here, so
 // there is no client-side flash from region → city.
 const payload = await cachedEvents(EVENTS_URL);
 const today = isoToday();
-// A venue page is the same feed narrowed one step further — the search demand
-// we already appear for is venue-shaped, and this is the page that answers it.
-const events = feedEvents(payload.events, { region, city, venue });
-const groups = feedDayGroups(today)(events);
+const view = feedViewModel({ lang, scope: { region, city, venue }, events: payload.events, today, ui });
+const { events, groups, placeName, title, description, path, onward } = view;
 const heading = dayHeading(ui);
-const path = branch(venue === undefined)(
-  () => feedPath(region, city),
-  () => venuePath(region, city ?? '', venue?.slug ?? ''),
-);
-const placeName = venue?.name ?? placeLabel(region, city);
-// A venue page answers a different question from a city feed, and its title is
-// the question people actually type: "what's on at <venue>".
-const seo = branch(venue === undefined)(
-  () => ({ title: `${placeName} — ${ui.nav.feed}`, description: ui.seo.feed }),
-  () => ({ title: ui.seo.venueTitle.replace('{place}', placeName), description: ui.seo.venue }),
-);
-const description = seo.description.replace('{place}', placeName);
 ---
 
-<Layout lang={lang} region={region} city={city} title={seo.title} description={description} path={path}>
+<Layout lang={lang} region={region} city={city} title={title} description={description} path={path}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   {venue === undefined && <h1 class="visually-hidden">{ui.nav.feed}</h1>}
   {venue !== undefined && (
@@ -62,11 +44,19 @@ const description = seo.description.replace('{place}', placeName);
     />
   )}
 
-  <FeedFilters ui={ui} today={today} />
+  {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
   <div data-feed-list data-city={city ?? ''} data-today={today}>
     <FeedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
   </div>
+  {groups.length === 0 && (
+    <EmptyState
+      heading={ui.nothingHere.heading}
+      note={ui.nothingHere.note.replace('{place}', placeName)}
+      href={onward}
+      label={ui.nothingHere.onward}
+    />
+  )}
   <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
 </Layout>
 

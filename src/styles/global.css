@@ -1302,3 +1302,14 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .venue-crumbs a:hover { color: var(--accent); text-decoration: underline; }
 .venue-head h1 { margin: 0; font-size: 1.6rem; line-height: 1.2; text-wrap: balance; }
 .venue-sub { margin: 0.25rem 0 0; font-size: 0.9rem; color: var(--ink-2); }
+
+/* "Nothing here" is an answer and gets a page, not a 404. */
+.empty-state {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.45rem;
+  margin: 1.2rem 0; padding: 1.4rem 1.2rem;
+  border: 1px dashed var(--line); border-radius: var(--radius-sm); background: var(--surface);
+}
+.empty-mark { margin: 0; color: var(--ink-2); line-height: 0; }
+.empty-state h2 { margin: 0; font-size: 1.1rem; }
+.empty-note { margin: 0; color: var(--ink-2); font-size: 0.92rem; max-width: 42rem; }
+.empty-onward { margin-top: 0.3rem; font-weight: 700; color: var(--accent); }

@@ -1,17 +1,22 @@
 ---
 import FeedView from '../../../../components/views/FeedView.astro';
 import { cachedEvents } from '../../../../data/cached-events.ts';
+import { cachedPlaces } from '../../../../data/cached-places.ts';
 import { EVENTS_URL } from '../../../../data/events-url.ts';
-import { regionsAndCitiesOf } from '../../../../lib/region/regions-cities-of.ts';
+import { PLACES_URL } from '../../../../data/places-url.ts';
 import { LOCALES } from '../../../../lib/i18n/locales.ts';
 
-// Localized twin of /[region]/[city]/ for it/ru (en lives at the unprefixed path).
+// Localized twin of /[region]/[city]/ for it/ru (en lives at the unprefixed
+// path), built from the same canonical place list.
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
-  const groups = regionsAndCitiesOf(payload.events);
+  const places = await cachedPlaces(PLACES_URL, payload.events);
   return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
-    groups.flatMap((group) =>
-      group.cities.map((c) => ({ params: { lang, region: group.slug, city: c.slug }, props: { lang, region: group.slug, city: c.slug } })),
+    Object.entries(places).flatMap(([region, cities]) =>
+      cities.map((city) => ({
+        params: { lang, region, city },
+        props: { lang, region, city },
+      })),
     ),
   );
 };

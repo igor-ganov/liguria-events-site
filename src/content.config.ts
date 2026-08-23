@@ -26,6 +26,8 @@ const ui = defineCollection({
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string() }),
+    gone: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),
+    nothingHere: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),
     empty: z.string(),
     footer: z.string(),
     photoBy: z.string(),

@@ -33,7 +33,10 @@ test('the events sitemap lists event pages, with hreflang for all three locales'
 
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? '');
   expect(locs.length).toBeGreaterThan(0);
-  expect(locs.every((loc) => loc.includes('/event/'))).toBe(true);
+  // Event pages and venue pages are both server-rendered — a venue with nothing
+  // on is still a venue — so the generated sitemap cannot see either of them.
+  expect(locs.some((loc) => loc.includes('/event/'))).toBe(true);
+  expect(locs.some((loc) => !loc.includes('/event/'))).toBe(true);
   // One entry per locale, each declaring the other two and the x-default.
   expect(locs.some((loc) => /\/it\/event\//.test(loc))).toBe(true);
   expect(locs.some((loc) => /\/ru\/event\//.test(loc))).toBe(true);

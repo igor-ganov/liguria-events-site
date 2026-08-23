@@ -1,22 +1,32 @@
 ---
+// Server-rendered, not prerendered: a venue with nothing on right now is still
+// a venue, and a build-time route can only answer for slugs that had events at
+// build time. That is how a venue page turned into a 404 the week its last
+// event passed — the link rot this project has just spent a day removing.
+export const prerender = false;
 import FeedView from '../../../../components/views/FeedView.astro';
+import Layout from '../../../../layouts/Layout.astro';
 import { cachedEvents } from '../../../../data/cached-events.ts';
+import { cachedPlaces } from '../../../../data/cached-places.ts';
 import { EVENTS_URL } from '../../../../data/events-url.ts';
-import { venuesOf } from '../../../../lib/events/venues-of.ts';
+import { PLACES_URL } from '../../../../data/places-url.ts';
+import { branch } from '../../../../lib/branch.ts';
+import { isVenueSlug } from '../../../../lib/events/is-venue-slug.ts';
+import { venueView } from '../../../../lib/events/venue-view.ts';
 
-// A venue is a real sub-path of its city: /liguria/genova/teatro-carlo-felice/.
-// The demand we already surface for is venue-shaped — "acquario di genova
-// ferragosto", "acquario eventi genova" — and this is the page that answers it.
-// Only venues with enough events get one; see venuesOf.
-export const getStaticPaths = async () => {
-  const payload = await cachedEvents(EVENTS_URL);
-  return venuesOf(payload.events).map((venue) => ({
-    params: { region: venue.region, city: venue.city, venue: venue.slug },
-    props: { region: venue.region, city: venue.city, venue: { slug: venue.slug, name: venue.name } },
-  }));
-};
-
-const { region, city, venue } = Astro.props;
+const { region = '', city = '', venue: slug = '' } = Astro.params;
+const payload = await cachedEvents(EVENTS_URL);
+const places = await cachedPlaces(PLACES_URL, payload.events);
+// The city must be one we recognise, and the slug shaped like one we mint —
+// anything else genuinely never existed and keeps its 404.
+const known = (places[region] ?? []).includes(city) && isVenueSlug(slug);
+const venue = venueView(payload.events, region, city, slug);
+Astro.response.status = branch(known)(() => 200, () => 404);
 ---
 
-<FeedView lang="en" region={region} city={city} venue={venue} />
+{known && <FeedView lang="en" region={region} city={city} venue={venue} />}
+{!known && (
+  <Layout lang="en" title="Not found">
+    <p class="feed-empty">This page could not be found.</p>
+  </Layout>
+)}

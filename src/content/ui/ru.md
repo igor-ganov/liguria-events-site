@@ -78,6 +78,8 @@ months: [Январь, Февраль, Март, Апрель, Май, Июнь,
 headings: { ongoing: 'Идёт в этом месяце', sources: 'Источники', allEvents: 'Все события' }
 calNav: { prev: 'Предыдущий месяц', next: 'Следующий месяц' }
 badges: { free: 'бесплатно', gem: 'необычное' }
+gone: { heading: "Это событие больше недоступно", note: "Оно завершилось, и его детали больше не хранятся. Вот что идёт сейчас.", onward: "Посмотреть, что идёт" }
+nothingHere: { heading: "Здесь сейчас ничего не идёт", note: "Для {place} пока нет событий в расписании. Новые появляются, как только их объявляют.", onward: "Посмотреть, что рядом" }
 empty: 'Ничего не подходит под эти фильтры.'
 footer: 'Собрано автоматически с visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'фото'

@@ -1,23 +1,35 @@
 ---
+// Localized twin of /[region]/[city]/[venue] — same resolution, so a venue
+// cannot answer 200 in one language and 404 in another.
+export const prerender = false;
 import FeedView from '../../../../../components/views/FeedView.astro';
+import Layout from '../../../../../layouts/Layout.astro';
 import { cachedEvents } from '../../../../../data/cached-events.ts';
+import { cachedPlaces } from '../../../../../data/cached-places.ts';
 import { EVENTS_URL } from '../../../../../data/events-url.ts';
-import { venuesOf } from '../../../../../lib/events/venues-of.ts';
+import { PLACES_URL } from '../../../../../data/places-url.ts';
+import { branch } from '../../../../../lib/branch.ts';
+import { isVenueSlug } from '../../../../../lib/events/is-venue-slug.ts';
+import { venueView } from '../../../../../lib/events/venue-view.ts';
 import { LOCALES } from '../../../../../lib/i18n/locales.ts';
 
-// Localized twin of /[region]/[city]/[venue].
-export const getStaticPaths = async () => {
-  const payload = await cachedEvents(EVENTS_URL);
-  const venues = venuesOf(payload.events);
-  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
-    venues.map((venue) => ({
-      params: { lang, region: venue.region, city: venue.city, venue: venue.slug },
-      props: { lang, region: venue.region, city: venue.city, venue: { slug: venue.slug, name: venue.name } },
-    })),
-  );
-};
+const { lang: langParam, region = '', city = '', venue: slug = '' } = Astro.params;
+const lang = LOCALES.find((l) => l === langParam && l !== 'en');
+switch (lang) {
+  case undefined:
+    return new Response(null, { status: 404 });
+}
 
-const { lang, region, city, venue } = Astro.props;
+const payload = await cachedEvents(EVENTS_URL);
+const places = await cachedPlaces(PLACES_URL, payload.events);
+const known = (places[region] ?? []).includes(city) && isVenueSlug(slug);
+const venue = venueView(payload.events, region, city, slug);
+Astro.response.status = branch(known)(() => 200, () => 404);
 ---
 
-<FeedView lang={lang} region={region} city={city} venue={venue} />
+{known && <FeedView lang={lang} region={region} city={city} venue={venue} />}
+{!known && (
+  <Layout lang={lang} title="Not found">
+    <p class="feed-empty">This page could not be found.</p>
+  </Layout>
+)}

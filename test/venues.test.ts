@@ -23,11 +23,15 @@ const many = (count: number, over: Partial<CompactEvent> = {}): CompactEvent[] =
   Array.from({ length: count }, () => ev(over));
 
 describe('venuesOf', () => {
-  test('a venue with enough events earns a page; a one-off does not', () => {
-    // A stub page that ranks for a city is worse than no page.
+  test('one event is enough to be worth advertising', () => {
+    // The old threshold of three was an arbitrary gate that turned real venues
+    // into 404s. The page exists for any venue under a recognised city now;
+    // this list only decides what goes in the sitemap.
     const venues = venuesOf([...many(3), ...many(1, { v: 'Bar Sotto Casa' })]);
-    assert.deepEqual(venues.map((venue) => venue.slug), ['teatro-carlo-felice']);
-    assert.equal(venues[0]?.count, 3);
+    assert.deepEqual(
+      venues.map((venue) => venue.slug).sort(),
+      ['bar-sotto-casa', 'teatro-carlo-felice'],
+    );
   });
 
   test('two spellings of one theatre are one page, not two', () => {

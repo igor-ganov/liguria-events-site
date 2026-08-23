@@ -1,16 +1,19 @@
 ---
 import FeedView from '../../../components/views/FeedView.astro';
 import { cachedEvents } from '../../../data/cached-events.ts';
+import { cachedPlaces } from '../../../data/cached-places.ts';
 import { EVENTS_URL } from '../../../data/events-url.ts';
-import { regionsAndCitiesOf } from '../../../lib/region/regions-cities-of.ts';
+import { PLACES_URL } from '../../../data/places-url.ts';
 
-// A city is a real sub-path of its region: /liguria/genova/. One page per
-// (region, city) with events, server-filtered to the city — no client flash.
-// Static "calendar"/"map"/… segments win over [city], so they never collide.
+// A city is a real sub-path of its region: /liguria/genova/. Every province
+// capital gets one whether or not anything is on in it — deriving the list from
+// the events instead meant Savona, a real Ligurian capital with a quiet week,
+// answered 404. Static "calendar"/"map"/… segments win over [city].
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
-  return regionsAndCitiesOf(payload.events).flatMap((group) =>
-    group.cities.map((c) => ({ params: { region: group.slug, city: c.slug }, props: { region: group.slug, city: c.slug } })),
+  const places = await cachedPlaces(PLACES_URL, payload.events);
+  return Object.entries(places).flatMap(([region, cities]) =>
+    cities.map((city) => ({ params: { region, city }, props: { region, city } })),
   );
 };
 

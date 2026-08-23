@@ -3,6 +3,8 @@ import { canonicalUrl } from './canonical-url.ts';
 import { eventPath } from '../event-path.ts';
 import { isUpcoming } from '../events/is-upcoming.ts';
 import { LOCALES } from '../i18n/locales.ts';
+import { venuePath } from '../events/venue-path.ts';
+import { venuesOf } from '../events/venues-of.ts';
 import type { AlternateLink } from './alternate-links.ts';
 import type { CompactEvent } from '../events/event-schema.ts';
 
@@ -34,11 +36,24 @@ export const eventSitemapUrls = (
   events: readonly CompactEvent[],
   today: string,
   site: URL | undefined,
-): readonly SitemapUrl[] =>
-  events.filter(isUpcoming(today)).flatMap((event) =>
+): readonly SitemapUrl[] => [
+  ...events.filter(isUpcoming(today)).flatMap((event) =>
     LOCALES.map((lang) => ({
       loc: canonicalUrl(lang, eventPath(event.id), site),
       lastmod: stampOf(event, today),
       alternates: alternateLinks(eventPath(event.id), site),
     })),
-  );
+  ),
+  // Venue pages are server-rendered too, for the same reason — a venue with
+  // nothing on right now is still a venue — so they are invisible to the
+  // generated sitemap and belong here. Only venues that currently have events
+  // are listed: an empty page should be reachable, not advertised.
+  ...venuesOf(events).flatMap((venue) => {
+    const path = venuePath(venue.region, venue.city, venue.slug);
+    return LOCALES.map((lang) => ({
+      loc: canonicalUrl(lang, path, site),
+      lastmod: today,
+      alternates: alternateLinks(path, site),
+    }));
+  }),
+];

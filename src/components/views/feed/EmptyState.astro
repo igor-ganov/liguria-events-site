@@ -1,0 +1,17 @@
+---
+// "Nothing here" is an answer, and it deserves a page. The site used to give a
+// 404 instead — telling a visitor, and Google, that a real place did not exist.
+type Props = Readonly<{ heading: string; note: string; href: string; label: string }>;
+const { heading, note, href, label } = Astro.props;
+---
+
+<section class="empty-state" data-empty-state>
+  <p class="empty-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6">
+      <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+    </svg>
+  </p>
+  <h2>{heading}</h2>
+  <p class="empty-note">{note}</p>
+  <a class="empty-onward" href={href}>{label}</a>
+</section>

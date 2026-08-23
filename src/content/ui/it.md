@@ -78,6 +78,8 @@ months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Sette
 headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca' }
+gone: { heading: "Questo evento non è più disponibile", note: "È terminato e i suoi dettagli non sono più conservati. Ecco cosa c’è in programma ora.", onward: "Guarda cosa c’è" }
+nothingHere: { heading: "Al momento non c’è nulla in programma", note: "Non ci sono eventi in programma a {place}. Ne compaiono di nuovi appena vengono annunciati.", onward: "Guarda cosa c’è nei dintorni" }
 empty: 'Nessun evento corrisponde a questi filtri.'
 footer: 'Raccolti automaticamente da visitgenoa.it, mentelocale.it, genovateatro.it, palazzoducale.genova.it, portoantico.it, Teatro Carlo Felice'
 photoBy: 'foto'

@@ -7,11 +7,15 @@ import Layout from '../../../layouts/Layout.astro';
 import EventDetail from '../../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../../data/cached-events.ts';
 import { EVENTS_URL } from '../../../data/events-url.ts';
+import EmptyState from '../../../components/views/feed/EmptyState.astro';
+import { eventStatusCode } from '../../../lib/events/event-status-code.ts';
 import { resolveEvent } from '../../../lib/events/resolve-event.ts';
+import { DEFAULT_REGION } from '../../../lib/region/default-region.ts';
+import { regionUrl } from '../../../lib/region/region-url.ts';
+import { uiOf } from '../../../lib/i18n/ui-of.ts';
 import { LOCALES } from '../../../lib/i18n/locales.ts';
-import { branch } from '../../../lib/branch.ts';
 
-const { lang: langParam, id } = Astro.params;
+const { lang: langParam, id = '' } = Astro.params;
 const lang = LOCALES.find((l) => l === langParam && l !== 'en');
 switch (lang) {
   case undefined:
@@ -20,21 +24,26 @@ switch (lang) {
 
 const corpus = await cachedEvents(EVENTS_URL);
 const { event, editable, status, contacts } = await resolveEvent({
-  id: id ?? '',
+  id,
   corpus: corpus.events,
   db: Astro.locals.runtime.env.DB,
   userId: Astro.locals.user?.id,
   eventsUrl: EVENTS_URL,
 });
-Astro.response.status = branch(event === undefined)(() => 404, () => 200);
-const notFound = 'This event could not be found.';
+Astro.response.status = eventStatusCode(id, event !== undefined);
+const ui = await uiOf(lang);
 ---
 
 {event && <EventDetail lang={lang} event={event} editable={editable} status={status} contacts={contacts} />}
 {
   event === undefined && (
-    <Layout lang={lang} title="Event not found">
-      <p class="feed-empty">{notFound}</p>
+    <Layout lang={lang} title={ui.gone.heading}>
+      <EmptyState
+        heading={ui.gone.heading}
+        note={ui.gone.note}
+        href={regionUrl(lang, DEFAULT_REGION)}
+        label={ui.gone.onward}
+      />
     </Layout>
   )
 }

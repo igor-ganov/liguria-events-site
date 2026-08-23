@@ -1,35 +1,45 @@
 ---
 // SSR (not prerendered): an event page must resolve BOTH crawler events (the
 // build corpus) and user-submitted events, which live only in D1 and therefore
-// never had a static page — the cause of "published event, link 404s". A
-// not-yet-published event is shown only to its author (post-submit preview),
-// and an event that has already happened comes from the collector's archive.
+// never had a static page. A not-yet-published event is shown only to its
+// author, and one that has already happened comes from the collector's archive.
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
+import EmptyState from '../../components/views/feed/EmptyState.astro';
 import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
+import { eventStatusCode } from '../../lib/events/event-status-code.ts';
 import { resolveEvent } from '../../lib/events/resolve-event.ts';
-import { branch } from '../../lib/branch.ts';
+import { DEFAULT_REGION } from '../../lib/region/default-region.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
 
-const { id } = Astro.params;
+const { id = '' } = Astro.params;
 const corpus = await cachedEvents(EVENTS_URL);
 const { event, editable, status, contacts } = await resolveEvent({
-  id: id ?? '',
+  id,
   corpus: corpus.events,
   db: Astro.locals.runtime.env.DB,
   userId: Astro.locals.user?.id,
   eventsUrl: EVENTS_URL,
 });
-Astro.response.status = branch(event === undefined)(() => 404, () => 200);
-const notFound = 'This event could not be found.';
+// 410 when one of our ids resolves to nothing: it existed and is permanently
+// over, which is what a search engine acts on. 404 stays for what never was.
+Astro.response.status = eventStatusCode(id, event !== undefined);
+const ui = await uiOf('en');
 ---
 
 {event && <EventDetail lang="en" event={event} editable={editable} status={status} contacts={contacts} />}
 {
   event === undefined && (
-    <Layout lang="en" title="Event not found">
-      <p class="feed-empty">{notFound}</p>
+    <Layout lang="en" title={ui.gone.heading}>
+      <EmptyState
+        heading={ui.gone.heading}
+        note={ui.gone.note}
+        href={regionUrl('en', DEFAULT_REGION)}
+        label={ui.gone.onward}
+      />
     </Layout>
   )
 }
