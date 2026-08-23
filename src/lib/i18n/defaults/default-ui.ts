@@ -28,6 +28,8 @@ export const DEFAULT_UI: Ui = {
   route: DEFAULT_ROUTE_UI,
   menu: { events: "What's on", explore: 'Explore', more: 'More' },
   seo: {
+    venueTitle: '',
+    venue: '',
     feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.",
     calendar: "Event calendar for {place} — what's on, day by day.",
     map: "Map of events in {place} — find what's on near you.",

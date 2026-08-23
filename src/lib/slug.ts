@@ -4,14 +4,7 @@
 // it is unique and identical across locales — matching is done on the token, so
 // a link keeps working when the language (and thus the readable name) changes.
 
-const slugify = (name: string): string =>
-  name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/\p{M}+/gu, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60) || 'x';
+import { slugify } from './slugify.ts';
 
 // FNV-1a → base36, ~6 chars. Stable for a given internal id across builds/locales.
 const token = (id: string): string => {

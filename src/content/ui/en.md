@@ -60,7 +60,7 @@ range: { from: 'From', to: 'To' }
 sort: { label: 'Sort', date: 'By date', created: 'Newest first' }
 route: { walk: 'Walking', drive: 'Driving', transit: 'Transit', generate: 'Generate route', save: 'Save route', saved: 'Saved', tight: 'Tight connection', min: 'min', empty: 'No favourites yet — tap the heart on an event to add it.', link: 'Shareable link', saveFailed: 'Could not save the route — try again.', mine: 'My routes', open: 'Open', private: 'Private', public: 'Public', makePrivate: 'Make private', makePublic: 'Make public', remove: 'Delete', title: 'Route', by: 'A shared itinerary', moveDay: 'Move to day', moveUp: 'Move up', moveDown: 'Move down', addFav: 'Add from favourites…', saveChanges: 'Save changes', viewList: 'List', viewTimeline: 'Timeline', pdf: 'Download PDF', day: 'Day', setDefault: 'Set as default', setBase: 'Set base', setBaseDefault: 'Default base', clearBase: 'Clear', clickMap: 'Click the map to set the point…', dayBase: 'Base', dayFinal: 'End', fromBase: 'From base', toBase: 'Back to base' }
 menu: { events: "What's on", explore: 'Explore', more: 'More' }
-seo: { feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.", calendar: "Event calendar for {place} — what's on, day by day.", map: "Map of events in {place} — find what's on near you." }
+seo: { venueTitle: "What's on at {place}", venue: "What's on at {place} — dates, times and tickets.", feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.", calendar: "Event calendar for {place} — what's on, day by day.", map: "Map of events in {place} — find what's on near you." }
 cat:
   music: Music
   theatre: Theatre

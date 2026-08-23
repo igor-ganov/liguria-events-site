@@ -23,7 +23,9 @@ export const UiDictSchema = Schema.Struct({
   sort: Schema.Struct({ label: Schema.String, date: Schema.String, created: Schema.String }),
   route: RouteUiSchema,
   menu: Schema.Struct({ events: Schema.String, explore: Schema.String, more: Schema.String }),
-  seo: Schema.Struct({ feed: Schema.String, calendar: Schema.String, map: Schema.String }),
+  seo: Schema.Struct({
+    venueTitle: Schema.String,
+    venue: Schema.String, feed: Schema.String, calendar: Schema.String, map: Schema.String }),
   cat: CatUiSchema,
   weekdays: Schema.Array(Schema.String),
   months: Schema.Array(Schema.String),
