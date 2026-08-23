@@ -103,12 +103,19 @@ Also done (2026-08-23):
 
 Still to do:
 
-- **Fill the rich-result warnings** Search Console lists against the 52 valid
-  events: `performer` and `organizer` missing on all 52, and `price` /
-  `priceCurrency` / `validFrom` missing on 18. The collector already stores the
-  raw price text (`priceInfo`); parsing a number out of it would complete the
-  offer. Warnings do not block the rich result, but they narrow which queries it
-  can answer.
+- ~~**Fill the rich-result warnings**~~ — attempted 2026-08-23, and the data is
+  not there. The price line is now parsed (the cheapest figure, and the cheap
+  end of a range like Ticketmaster's "25–80 EUR") and carried into the offer,
+  but exactly **1 event of 1 197** has a price at all: the sources almost never
+  give one. This is plumbing waiting for data, not a fix. `performer` and
+  `organizer` we simply do not hold, and inventing them is not an option.
+- **Enrichment loses events to timeouts.** Reasons are now recorded rather than
+  swallowed: on production about a third of batches fail, and with the causes
+  visible it turned out half of them were three-language articles being cut off
+  at 4 096 tokens — fixed. What remains is both providers timing out at 60s and
+  24s on the slowest articles. The structural fix is to stop asking for three
+  languages in one call, which changes the enrichment contract and re-drains the
+  corpus; worth doing deliberately, not in passing.
 
 ### 2. Landing pages, aimed at the demand we can actually see
 
@@ -120,10 +127,15 @@ The queries above say the demand is venue-anchored. Build order revised:
    below the threshold get no page, two spellings of one theatre become one, and
    names that are not places (the city's own name, "luoghi vari in città") are
    dropped.
-2. `/{region}/{city}/questo-weekend/`, `/oggi/`, `/domani/` — the time-bound
-   pages. Still worth building; just not first, since nothing in the data yet
-   shows us reaching those searchers.
-3. `/{region}/{city}/gratis/` — 173 events qualify.
+2. `/{region}/{city}/this-weekend/`, `/today/`, `/tomorrow/` — **deliberately
+   not built yet.** 85 cities × 3 windows × 3 locales is 765 pages whose content
+   is true only on the day they were generated, and most of them would be empty
+   for a small city. They need either a rebuild cadence tied to the day or a
+   generation threshold per city, and shipping 765 thin, stale pages at a site
+   that is already being marked down for 404s would make things worse. Decide
+   the cadence first, then build.
+3. `/{region}/{city}/free/` — 157 events qualify, and unlike the above it is not
+   date-relative, so it is the safe one to build next.
 4. Category × city: `/concerti/`, `/mostre/`, `/mercatini/`.
 
 Each needs its own title, description, `ItemList` markup and an honest empty
@@ -134,11 +146,13 @@ ranking for a city is worse than no page.
 
 - **Telegram channel** per region, fed by the existing bot: one post per
   interesting event, one weekly digest. The bot's digest code already exists.
-- **ICS subscription** promoted on every city page: "add this city's events to
-  your calendar". A calendar subscription is the stickiest retention primitive
-  this category has — it survives without the reader ever visiting again.
-- **RSS** per city and category, for aggregators and for Telegram/Discord bots
-  run by other people.
+- **ICS subscription**: now discoverable from every region page's head
+  (2026-08-23). Still missing the visible invitation — a button on the city feed
+  saying "add these to your calendar" — which is what actually converts.
+- ~~**RSS**~~ — **done 2026-08-23**: `/{region}/rss.xml`, the fifty soonest
+  events, and both it and the calendar are declared with `rel="alternate"` on
+  every page of a region, which is where browsers and aggregators look. Per-city
+  and per-category feeds are the obvious next cut.
 
 ### 4. Links, which is what actually moves rankings
 
