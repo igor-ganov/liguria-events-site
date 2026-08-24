@@ -72,9 +72,28 @@ describe('facets', () => {
 });
 
 describe('facetOf', () => {
-  test('the four slugs resolve, anything else does not', () => {
-    assert.deepEqual(FACETS.map((facet) => facet.slug), ['today', 'tomorrow', 'this-weekend', 'free']);
+  test('the time and price facets resolve, and so does every category', () => {
+    assert.deepEqual(
+      FACETS.slice(0, 4).map((facet) => facet.slug),
+      ['today', 'tomorrow', 'this-weekend', 'free'],
+    );
+    assert.equal(facetOf('music')?.slug, 'music');
+    assert.equal(facetOf('theatre')?.slug, 'theatre');
+    // Nobody searches for "other events".
+    assert.equal(facetOf('other'), undefined);
+  });
+
+  test('anything that is not a facet is left to the venue route', () => {
     assert.equal(facetOf('teatro-carlo-felice'), undefined);
     assert.equal(facetOf(''), undefined);
+  });
+
+  test('a category facet keeps only events in that category', () => {
+    const events = [
+      ev({ id: 'gig', c: ['music'] }),
+      ev({ id: 'play', c: ['theatre'] }),
+      ev({ id: 'both', c: ['music', 'theatre'] }),
+    ];
+    assert.deepEqual([...narrow('music', events, '2026-08-24')].sort(), ['both', 'gig']);
   });
 });

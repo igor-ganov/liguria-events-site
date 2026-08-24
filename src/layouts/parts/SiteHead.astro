@@ -19,9 +19,10 @@ type Props = Readonly<{
   locales: readonly Locale[];
   /** The region whose feeds this page can be subscribed to, when it has one. */
   region?: string | undefined;
+  city?: string | undefined;
   site: URL | undefined;
 }>;
-const { lang, title, description, path, needsMap, image, locales, region, site } = Astro.props;
+const { lang, title, description, path, needsMap, image, locales, region, city, site } = Astro.props;
 const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
 const canonical = canonicalUrl(lang, path, site);
 const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
@@ -41,7 +42,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
     <link rel="alternate" hreflang={hreflang} href={href} />
   ))
 }
-<SiteFeeds region={region} site={site} />
+<SiteFeeds region={region} city={city} site={site} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />

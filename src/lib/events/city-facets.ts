@@ -1,3 +1,4 @@
+import { CATEGORIES } from './categories.ts';
 import { occursBetween } from './occurs-between.ts';
 import { weekendOf } from './weekend-of.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -29,4 +30,11 @@ export const FACETS: readonly Facet[] = [
     },
   },
   { slug: 'free', narrow: (events) => events.filter((event) => event.f === true) },
+  // One facet per category, minus "other": nobody searches for other events.
+  // The slug is the category id, so the vocabulary stays ours rather than being
+  // translated three ways into three sets of URLs.
+  ...CATEGORIES.filter((category) => category !== 'other').map((category) => ({
+    slug: category,
+    narrow: (events: readonly CompactEvent[]) => events.filter((event) => event.c.includes(category)),
+  })),
 ];

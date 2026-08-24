@@ -5,12 +5,12 @@ import { subscribeLinks } from '../../lib/seo/subscribe-links.ts';
 // subscription keeps working without the reader ever coming back, and an RSS
 // feed is read by aggregators and by the bots other people run. Neither was
 // discoverable from anywhere but one menu item.
-type Props = Readonly<{ region?: string | undefined; site: URL | undefined }>;
-const { region, site } = Astro.props;
+type Props = Readonly<{ region?: string | undefined; city?: string | undefined; site: URL | undefined }>;
+const { region, city, site } = Astro.props;
 ---
 
 {
-  subscribeLinks(region, site).map((feed) => (
+  subscribeLinks(region, site, city).map((feed) => (
     <link rel="alternate" type={feed.type} href={feed.href} title={feed.title} />
   ))
 }

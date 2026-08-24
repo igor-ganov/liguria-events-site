@@ -1313,3 +1313,17 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .empty-state h2 { margin: 0; font-size: 1.1rem; }
 .empty-note { margin: 0; color: var(--ink-2); font-size: 0.92rem; max-width: 42rem; }
 .empty-onward { margin-top: 0.3rem; font-weight: 700; color: var(--accent); }
+
+/* Subscribing: the one thing that keeps working without the reader returning. */
+.subscribe-bar {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  margin: 1.6rem 0 0.5rem; padding: 0.7rem 0.9rem;
+  border-top: 1px solid var(--line); font-size: 0.88rem;
+}
+.subscribe-bar p { margin: 0; color: var(--ink-2); flex: 1 1 16rem; }
+.subscribe-bar a {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 0.35rem 0.7rem; color: var(--ink); text-decoration: none; font-weight: 600;
+}
+.subscribe-bar a:hover { border-color: var(--accent); color: var(--accent); }

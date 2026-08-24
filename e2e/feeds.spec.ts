@@ -32,10 +32,29 @@ test('both feeds are advertised from the region page itself', async ({ page }) =
   await expect(page.locator('link[type="text/calendar"]')).toHaveCount(1);
 });
 
-test('a city page inherits its region’s feeds', async ({ page }) => {
+test('a city has a feed of its own, not just its region', async ({ request }) => {
+  const res = await request.get('/liguria/genova/rss.xml');
+  expect(res.status()).toBe(200);
+  const xml = await res.text();
+  expect(xml).toContain('href="https://dovego.it/liguria/genova/rss.xml" rel="self"');
+  expect((xml.match(/<item>/g) ?? []).length).toBeGreaterThan(0);
+});
+
+test('a city page points at its own feeds, not the region’s', async ({ page }) => {
   await page.goto('/liguria/genova/');
   await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
     'href',
-    'https://dovego.it/liguria/rss.xml',
+    'https://dovego.it/liguria/genova/rss.xml',
   );
+});
+
+test('subscribing is offered on the page, not only in the head', async ({ page }) => {
+  // A calendar subscription keeps working without the reader ever returning;
+  // it was declared where no reader looks.
+  await page.goto('/liguria/genova/');
+  const bar = page.locator('[data-subscribe]');
+  await expect(bar).toBeVisible();
+  await expect(bar.locator('a')).toHaveCount(2);
+  await expect(bar.locator('a').first()).toHaveAttribute('href', /calendar\.ics/);
+  await expect(bar.locator('a').last()).toHaveAttribute('href', /\/liguria\/genova\/rss\.xml/);
 });

@@ -15,13 +15,16 @@ const ICS_URL = 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics'
 export const subscribeLinks = (
   region: string | undefined,
   site: URL | undefined,
+  city?: string | undefined,
 ): readonly SubscribeLink[] =>
   [region ?? '']
     .filter((slug) => slug !== '')
-    .flatMap((slug) => [
+    // A reader on a city page wants that city, not the whole region.
+    .map((slug) => [slug, city ?? ''].filter((part) => part !== '').join('/'))
+    .flatMap((path) => [
       {
         type: 'application/rss+xml',
-        href: new URL(`/${slug}/rss.xml`, site).toString(),
+        href: new URL(`/${path}/rss.xml`, site).toString(),
         title: 'Upcoming events (RSS)',
       },
       { type: 'text/calendar', href: ICS_URL, title: 'Upcoming events (calendar)' },

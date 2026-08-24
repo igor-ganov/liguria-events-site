@@ -1,0 +1,28 @@
+---
+import { subscribeLinks } from '../../../lib/seo/subscribe-links.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// A calendar subscription is the stickiest thing this site can offer: it keeps
+// working without the reader ever coming back. It was declared in the head,
+// where no reader looks, and nowhere on the page itself.
+type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui }>;
+const { region, city, site, ui } = Astro.props;
+const { note, calendar, rss } = ui.subscribe;
+const [feedRss, feedIcs] = subscribeLinks(region, site, city);
+---
+
+<aside class="subscribe-bar" data-subscribe>
+  <p>{note}</p>
+  <a href={feedIcs?.href} rel="nofollow">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 11h18"></path>
+    </svg>
+    {calendar}
+  </a>
+  <a href={feedRss?.href} rel="nofollow">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.5"></circle>
+    </svg>
+    {rss}
+  </a>
+</aside>
