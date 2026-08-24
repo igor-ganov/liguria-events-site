@@ -47,3 +47,32 @@ It does not spend money, and it does not touch the account: it produces files a
 person imports. There is a Google Ads API that could push directly; it needs a
 developer token and OAuth on the account, which is a decision rather than a
 piece of work.
+
+
+# The weekly reel
+
+    bun run scripts/growth/build-reel.ts <city-slug> [outDir]   # default: out/reels
+
+Needs `ffmpeg` on PATH. Writes `<city>-week.mp4`: 1080×1920, ~18 seconds — a
+cover card and up to six events on in the next seven days, each with the
+photograph the corpus already holds.
+
+One creative serves three places: a YouTube Short, an Instagram/TikTok Reel,
+and the video asset a YouTube campaign has to have before it can run at all.
+That last one is why this exists — you cannot advertise on YouTube without a
+video, and hiring one made weekly for 110 cities is not a plan.
+
+Details that matter more than they look:
+
+- **Vertical, always.** The feeds show nothing else.
+- **A slow push in on every slide.** A still frame in a feed reads as a broken
+  video. Each slide is encoded separately with `zoompan`, then concatenated —
+  identical streams are what the concat demuxer needs.
+- **A silent audio track**, because several platforms reject a video with no
+  audio at all. Music is left out on purpose: licensing is a real problem and
+  a copyright strike costs more than the reach.
+- **A run already open shows when it closes**, not when it opened. Half the
+  corpus is months-long exhibitions, and "10 apr" on a video about this week
+  reads as a stale post.
+- **Fewer than three events with photographs means no video.** A reel of one
+  slide is worse than silence.
