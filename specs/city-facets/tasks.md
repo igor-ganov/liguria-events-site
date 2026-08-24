@@ -8,4 +8,7 @@
       unrecognised city.  *R3.1, R3.2* · `e2e/owner-city-facets.spec.ts`
 - [x] **T4 — Empty facets answer 200** with the shared empty state.  *R2.1*
 - [x] **T5 — Non-empty facets enter the sitemap.**  *R2.2* · `e2e/seo-discovery.spec.ts`
-- [ ] **T6 — Verify on production.**
+- [x] **T6 — Verified on production**, 2026-08-24. All 200, titles substituted,
+      an unrecognised city still 404. Sitemap: 5 208 URLs — 3 510 events,
+      1 341 venues, 357 facets (119 city-facet pages × 3 languages, only the
+      ones with events in them).
