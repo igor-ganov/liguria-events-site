@@ -60,3 +60,13 @@ test('a feed page carries a link-preview image on our own origin', async ({ page
   expect(image).toContain('/cdn-cgi/image/');
   expect(image).toContain('width=1200,height=630');
 });
+
+test('the analytics beacon is on the page, not just configured in the dashboard', async ({ page }) => {
+  // It was configured on 5 July and reported 20 pageloads in a month: the
+  // zone's automatic injection never reached a Worker-rendered response, so
+  // the dashboard showed a flat line and nothing said why.
+  await page.goto('/liguria/genova/');
+  const beacon = page.locator('script[data-cf-beacon]');
+  await expect(beacon).toHaveCount(1);
+  await expect(beacon).toHaveAttribute('src', /cloudflareinsights\.com\/beacon/);
+});
