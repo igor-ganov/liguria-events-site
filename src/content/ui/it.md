@@ -80,6 +80,7 @@ calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }
 share: { label: "Condividi", copied: "Link copiato" }
+contribute: { link: "Aggiungi il tuo evento", venue: "Gestisci {place}? Aggiungi le tue date — l'inserimento è gratuito.", empty: "Sai di qualcosa a {place}? Aggiungilo." }
 facets: { category: { title: "{category} a {place}", description: "Eventi di {category} a {place} — date, orari e biglietti." }, today: { title: "Cosa fare oggi a {place}", description: "Eventi di oggi a {place} — orari, luoghi e biglietti." }, tomorrow: { title: "Cosa fare domani a {place}", description: "Eventi di domani a {place} — orari, luoghi e biglietti." }, weekend: { title: "Cosa fare questo weekend a {place}", description: "Eventi di sabato e domenica a {place} — orari, luoghi e biglietti." }, free: { title: "Eventi gratis a {place}", description: "Eventi a ingresso libero a {place} — orari, luoghi e cosa aspettarsi." } }
 gone: { heading: "Questo evento non è più disponibile", note: "È terminato e i suoi dettagli non sono più conservati. Ecco cosa c’è in programma ora.", onward: "Guarda cosa c’è" }
 nothingHere: { heading: "Al momento non c’è nulla in programma", note: "Non ci sono eventi in programma a {place}. Ne compaiono di nuovi appena vengono annunciati.", onward: "Guarda cosa c’è nei dintorni" }

@@ -1,8 +1,8 @@
 ---
 // "Nothing here" is an answer, and it deserves a page. The site used to give a
 // 404 instead — telling a visitor, and Google, that a real place did not exist.
-type Props = Readonly<{ heading: string; note: string; href: string; label: string }>;
-const { heading, note, href, label } = Astro.props;
+type Props = Readonly<{ heading: string; note: string; href: string; label: string; invite?: string | undefined }>;
+const { heading, note, href, label, invite } = Astro.props;
 ---
 
 <section class="empty-state" data-empty-state>
@@ -14,4 +14,7 @@ const { heading, note, href, label } = Astro.props;
   <h2>{heading}</h2>
   <p class="empty-note">{note}</p>
   <a class="empty-onward" href={href}>{label}</a>
+  {invite && (
+    <p class="empty-invite"><a href="/submit">{invite}</a></p>
+  )}
 </section>

@@ -28,6 +28,7 @@ const ui = defineCollection({
     badges: z.object({ free: z.string(), gem: z.string() }),
     subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string() }),
     share: z.object({ label: z.string(), copied: z.string() }),
+    contribute: z.object({ link: z.string(), venue: z.string(), empty: z.string() }),
     facets: z.object({ category: z.object({ title: z.string(), description: z.string() }), today: z.object({ title: z.string(), description: z.string() }), tomorrow: z.object({ title: z.string(), description: z.string() }), weekend: z.object({ title: z.string(), description: z.string() }), free: z.object({ title: z.string(), description: z.string() }) }),
     gone: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),
     nothingHere: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),

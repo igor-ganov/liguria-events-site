@@ -41,6 +41,7 @@ export const DEFAULT_UI: Ui = {
   badges: { free: 'free', gem: 'gem' },
   subscribe: { note: '', calendar: '', rss: '' },
   share: { label: '', copied: '' },
+  contribute: { link: '', venue: '', empty: '' },
   facets: { category: { title: '', description: '' }, today: { title: '', description: '' }, tomorrow: { title: '', description: '' }, weekend: { title: '', description: '' }, free: { title: '', description: '' } },
   gone: { heading: '', note: '', onward: '' },
   nothingHere: { heading: '', note: '', onward: '' },

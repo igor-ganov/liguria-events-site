@@ -46,6 +46,7 @@ const image = socialImageUrl(socialImage(events), Astro.site);
       name={venue.name}
       count={events.length}
       label={ui.seo.venueCount}
+      invite={ui.contribute.venue}
     />
   )}
 
@@ -60,6 +61,7 @@ const image = socialImageUrl(socialImage(events), Astro.site);
       note={ui.nothingHere.note.replace('{place}', placeName)}
       href={onward}
       label={ui.nothingHere.onward}
+      invite={ui.contribute.empty.replace('{place}', placeName)}
     />
   )}
   <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>

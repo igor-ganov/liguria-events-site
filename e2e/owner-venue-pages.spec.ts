@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 // Venue pages exist because the search demand we already appear for is
 // venue-shaped: "acquario di genova ferragosto", "acquario eventi genova".
-// They are prerendered, so they are checked against the built site.
+// They are server-rendered — a venue with nothing on is still a venue — so
+// they are checked against the real worker.
 
 // Venue pages are server-rendered, so they are advertised through the events
 // sitemap rather than the generated one.
@@ -55,4 +56,13 @@ test('a venue nobody plays at still has a page, it just says nothing is on', asy
   const response = await page.goto('/liguria/genova/bar-sotto-casa-che-non-esiste/');
   expect(response?.status()).toBe(200);
   await expect(page.locator('[data-empty-state]')).toBeVisible();
+});
+
+test('a venue page asks the venue itself for its dates', async ({ page }) => {
+  // The organiser is exactly who lands on a venue page, and until now the site
+  // had nothing to say to them.
+  await page.goto('/liguria/genova/teatro-carlo-felice/');
+  const invite = page.locator('.venue-invite a');
+  await expect(invite).toContainText('Teatro Carlo Felice');
+  await expect(invite).toHaveAttribute('href', '/submit');
 });
