@@ -26,3 +26,10 @@
   void initAuthUi();
   document.addEventListener('astro:after-swap', () => void initAuthUi());
 </script>
+
+<script>
+  // Share control: the native sheet where there is one, the clipboard elsewhere.
+  import { initShare } from '../../components/share/init-share.ts';
+  initShare();
+  document.addEventListener('astro:page-load', initShare);
+</script>

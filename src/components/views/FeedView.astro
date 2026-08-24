@@ -12,6 +12,8 @@ import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import { feedViewModel } from '../../lib/events/feed-view-model.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
+import { socialImage } from '../../lib/events/social-image.ts';
+import { socialImageUrl } from '../../lib/img/social-image-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { FeedProps } from './feed/feed-props.ts';
 
@@ -28,9 +30,12 @@ const today = given ?? isoToday();
 const view = feedViewModel({ lang, scope: { region, city, venue, facet, today }, events: payload.events, today, ui });
 const { events, groups, placeName, title, description, path, onward } = view;
 const heading = dayHeading(ui);
+// A shared link with no picture arrives as a grey rectangle, so every feed
+// page takes the cover of its soonest event, cropped to preview size.
+const image = socialImageUrl(socialImage(events), Astro.site);
 ---
 
-<Layout lang={lang} region={region} city={city} title={title} description={description} path={path}>
+<Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   {venue === undefined && <h1 class="visually-hidden">{ui.nav.feed}</h1>}
   {venue !== undefined && (
@@ -58,7 +63,7 @@ const heading = dayHeading(ui);
     />
   )}
   <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
-  <SubscribeBar region={region} city={city} site={Astro.site} ui={ui} />
+  <SubscribeBar region={region} city={city} site={Astro.site} ui={ui} title={title} />
 </Layout>
 
 <script is:inline type="application/json" id="icons-data" set:html={categoryIconsJson()} />

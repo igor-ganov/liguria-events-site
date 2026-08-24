@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import ShareButton from '../share/ShareButton.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventHero from './event/EventHero.astro';
 import EventGalleryMore from './event/EventGalleryMore.astro';
@@ -34,14 +35,17 @@ const view = eventDetailView({
   site: Astro.site,
   today: isoToday(),
 });
-const { region, title, desc, descHtml, descMeta, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
+const { region, title, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
 const programme = programmeSessions(event, lang);
 ---
 
-<Layout lang={lang} region={region} title={title} description={descMeta || title} path={eventPath(event.id)} image={heroImage}>
+<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event.id)} image={heroImage} ogType="article">
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
-    <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
+    <p class="event-topbar">
+      <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
+      <span class="event-share"><ShareButton ui={ui} title={title} /></span>
+    </p>
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && (
       <EventPassed

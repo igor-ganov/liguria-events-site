@@ -1,12 +1,13 @@
 ---
+import ShareButton from '../../share/ShareButton.astro';
 import { subscribeLinks } from '../../../lib/seo/subscribe-links.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
 // A calendar subscription is the stickiest thing this site can offer: it keeps
 // working without the reader ever coming back. It was declared in the head,
 // where no reader looks, and nowhere on the page itself.
-type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui }>;
-const { region, city, site, ui } = Astro.props;
+type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui; title: string }>;
+const { region, city, site, ui, title } = Astro.props;
 const { note, calendar, rss } = ui.subscribe;
 const [feedRss, feedIcs] = subscribeLinks(region, site, city);
 ---
@@ -25,4 +26,5 @@ const [feedRss, feedIcs] = subscribeLinks(region, site, city);
     </svg>
     {rss}
   </a>
+  <ShareButton ui={ui} title={title} />
 </aside>

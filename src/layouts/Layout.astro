@@ -24,6 +24,7 @@ const {
   needsEvents = false,
   needsMap = false,
   image,
+  ogType = 'website',
   locales = LOCALES,
 } = Astro.props;
 const payload = await pageEvents(needsEvents);
@@ -41,6 +42,7 @@ const uiData = JSON.stringify({ lang, ui });
       path={path}
       needsMap={needsMap}
       image={image}
+      ogType={ogType}
       locales={locales}
       region={region}
       city={city}

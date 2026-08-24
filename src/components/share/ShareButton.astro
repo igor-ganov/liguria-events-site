@@ -1,0 +1,18 @@
+---
+import { SHARE } from './share-selectors.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The visitor is the other half of distribution: search brings them once, a
+// shared link brings the people they know. There was no way to pass a page on.
+type Props = Readonly<{ ui: Ui; title: string }>;
+const { ui, title } = Astro.props;
+const hooks = { [SHARE.button]: '', [SHARE.copiedAttr]: ui.share.copied, [SHARE.titleAttr]: title };
+---
+
+<button type="button" class="share-button" aria-label={ui.share.label} {...hooks}>
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+    <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path>
+  </svg>
+  <span {...{ [SHARE.label]: '' }}>{ui.share.label}</span>
+</button>

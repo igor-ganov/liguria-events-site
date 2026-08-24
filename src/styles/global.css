@@ -1327,3 +1327,15 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   padding: 0.35rem 0.7rem; color: var(--ink); text-decoration: none; font-weight: 600;
 }
 .subscribe-bar a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Passing a page on: same weight as the subscribe links it sits beside. */
+.share-button {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 0.35rem 0.7rem; color: var(--ink); background: none;
+  font: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+}
+.share-button:hover, .share-button:focus-visible { border-color: var(--accent); color: var(--accent); }
+.share-button[data-share-state='copied'] { border-color: var(--accent); color: var(--accent); }
+.event-topbar { display: flex; align-items: center; gap: 0.8rem; margin: 0 0 0.6rem; }
+.event-share { margin-left: auto; }

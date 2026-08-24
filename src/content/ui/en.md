@@ -79,6 +79,7 @@ headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All e
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }
+share: { label: "Share", copied: "Link copied" }
 facets: { category: { title: "{category} in {place}", description: "{category} events in {place} — dates, times and tickets." }, today: { title: "What's on today in {place}", description: "Events happening today in {place} — times, places and tickets." }, tomorrow: { title: "What's on tomorrow in {place}", description: "Events happening tomorrow in {place} — times, places and tickets." }, weekend: { title: "What's on this weekend in {place}", description: "Events this Saturday and Sunday in {place} — times, places and tickets." }, free: { title: "Free events in {place}", description: "Events with free entry in {place} — times, places and what to expect." } }
 gone: { heading: "This event is no longer available", note: "It has ended and its details are no longer kept. Here is what is on now.", onward: "See what’s on" }
 nothingHere: { heading: "Nothing on here right now", note: "No upcoming events are listed for {place}. New ones appear as soon as they are announced.", onward: "See what’s on nearby" }

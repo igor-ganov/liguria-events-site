@@ -49,3 +49,14 @@ test('the generated sitemap no longer spends itself on map views', async ({ requ
   const xml = await (await request.get('/sitemap-0.xml')).text();
   expect(xml).not.toContain('/map/');
 });
+
+test('a feed page carries a link-preview image on our own origin', async ({ page }) => {
+  // A shared listing link used to arrive as a grey rectangle: og:image was
+  // emitted only on event pages, and there only as a hot-link in whatever
+  // shape the source CDN happened to use (R1.1, R1.3).
+  await page.goto('/liguria/genova/');
+  const image = await page.locator('meta[property="og:image"]').getAttribute('content');
+  expect(image).toBeTruthy();
+  expect(image).toContain('/cdn-cgi/image/');
+  expect(image).toContain('width=1200,height=630');
+});

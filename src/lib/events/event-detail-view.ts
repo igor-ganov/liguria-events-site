@@ -1,4 +1,6 @@
 import { absoluteImage } from '../img/absolute-image.ts';
+import { clipText } from '../seo/clip-text.ts';
+import { socialImageUrl } from '../img/social-image-url.ts';
 import { canonicalUrl } from '../seo/canonical-url.ts';
 import { descriptionArticleHtml } from '../description/description-article-html.ts';
 import { descriptionOf } from './description-of.ts';
@@ -47,7 +49,8 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
     desc,
     descHtml: descriptionArticleHtml(desc),
     descMeta,
-    heroImage: image,
+    heroImage: socialImageUrl(event.img, site),
+    descPreview: clipText(descMeta, 200),
     cover: gallery[0],
     more: gallery.slice(1),
     links: eventLinks(event),

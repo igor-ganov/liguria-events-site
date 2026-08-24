@@ -11,6 +11,9 @@ export type LayoutProps = Readonly<{
   needsEvents?: boolean;
   needsMap?: boolean;
   image?: string | undefined;
+  /** `article` for a single event; the shell's default `website` is right for
+   *  every listing. */
+  ogType?: 'website' | 'article';
   /** The locales this page is actually built in; defaults to all of them. A
    *  page that exists only at the root must say so, or its hreflang points at
    *  pages that were never built. */
