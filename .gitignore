@@ -12,3 +12,4 @@ scripts/.cache/
 # Playwright
 test-results/
 playwright-report/
+out/
