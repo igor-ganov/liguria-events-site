@@ -172,6 +172,30 @@ account menu, behind a sign-in.
   the creative a YouTube campaign cannot run without, and the same file serves
   Reels and Shorts.
 
+### 2c. The measuring, and the things that were quietly broken — 2026-08-25
+
+- **IndexNow**: Bing, Yandex and Seznam are told about a page the hour it
+  appears. No account anywhere — ownership is proved by a key file we serve.
+  The first live submission offered 900 URLs and came back 429, so a first run
+  now records where the corpus stands and says nothing; after that it reports
+  only what is genuinely new. Google does not take part.
+- **The analytics beacon had never been on the page.** Web Analytics was
+  switched on for this site on 5 July and had recorded twenty pageloads since,
+  against ~8 000 page views a week in the zone's own numbers: Cloudflare's
+  automatic injection does not reach a Worker-rendered response. Every "we do
+  not know where anyone comes from" line above was true for a reason nobody
+  had looked for. Fixed, and guarded by an e2e and a health check.
+- **Enrichment no longer fails.** One call used to read a source article and
+  write three structured articles from it; on the longest sources both
+  providers timed out. It now reads once in English and translates twice from a
+  short input. The first deploy of that then lost 23 of 24 events to a single
+  backslash — the prompt's JSON example had real newlines inside a string
+  value, so the model copied an unparseable shape. Both fixed: **24 enriched,
+  0 failed**, and the health report is green on all 17 checks for the first
+  time.
+- **The reels build themselves** every Monday in CI, five cities, delivered as
+  a run artifact or straight to Telegram if the bot secrets are set.
+
 ### 3. Distribution we already half-own
 
 - **Telegram channel** per region, fed by the existing bot: one post per
