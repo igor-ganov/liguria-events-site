@@ -127,16 +127,18 @@ The queries above say the demand is venue-anchored. Build order revised:
    below the threshold get no page, two spellings of one theatre become one, and
    names that are not places (the city's own name, "luoghi vari in città") are
    dropped.
-2. `/{region}/{city}/this-weekend/`, `/today/`, `/tomorrow/` — **deliberately
-   not built yet.** 85 cities × 3 windows × 3 locales is 765 pages whose content
-   is true only on the day they were generated, and most of them would be empty
-   for a small city. They need either a rebuild cadence tied to the day or a
-   generation threshold per city, and shipping 765 thin, stale pages at a site
-   that is already being marked down for 404s would make things worse. Decide
-   the cadence first, then build.
-3. `/{region}/{city}/free/` — 157 events qualify, and unlike the above it is not
-   date-relative, so it is the safe one to build next.
-4. Category × city: `/concerti/`, `/mostre/`, `/mercatini/`.
+2. ~~`this-weekend`, `today`, `tomorrow`~~ — **done 2026-08-24**. The staleness
+   objection was answered by server-rendering them: the date is computed per
+   request, so the six-hour rebuild cadence stops mattering. A page built at
+   23:23 would otherwise have called yesterday's events "today" until morning.
+3. ~~`free`~~ — **done**, same mechanism.
+4. ~~Category × city~~ — **done**: every category but "other", titled from one
+   template per language filled with the category labels that already existed.
+
+All of them answer 200 with the shared empty state when there is nothing in
+them, and enter the sitemap only while there is: reachable, not advertised.
+Sitemap now 6 108 URLs — 3 510 events, 1 341 venues, 900 categories, 357 time
+and free.
 
 Each needs its own title, description, `ItemList` markup and an honest empty
 state — and must not be generated at all when it would be thin. An empty page
@@ -146,13 +148,12 @@ ranking for a city is worse than no page.
 
 - **Telegram channel** per region, fed by the existing bot: one post per
   interesting event, one weekly digest. The bot's digest code already exists.
-- **ICS subscription**: now discoverable from every region page's head
-  (2026-08-23). Still missing the visible invitation — a button on the city feed
-  saying "add these to your calendar" — which is what actually converts.
-- ~~**RSS**~~ — **done 2026-08-23**: `/{region}/rss.xml`, the fifty soonest
-  events, and both it and the calendar are declared with `rel="alternate"` on
-  every page of a region, which is where browsers and aggregators look. Per-city
-  and per-category feeds are the obvious next cut.
+- ~~**ICS subscription**~~ — **done**: declared in the head and, since
+  2026-08-24, offered on the page itself under every feed. It was previously
+  announced only where no reader looks.
+- ~~**RSS**~~ — **done**: `/{region}/rss.xml` and `/{region}/{city}/rss.xml`,
+  the fifty soonest events each. A city page declares its own feed rather than
+  its region's — a reader in Genoa does not want Liguria.
 
 ### 4. Links, which is what actually moves rankings
 
