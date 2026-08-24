@@ -144,6 +144,34 @@ Each needs its own title, description, `ItemList` markup and an honest empty
 state — and must not be generated at all when it would be thin. An empty page
 ranking for a city is worse than no page.
 
+### 2b. Beyond search — done 2026-08-25
+
+Search brings a stranger once. Nothing on the site turned that stranger into a
+returning visitor or into a distributor. Measured before touching anything: no
+`og:image` on any listing page, the event pages' one hot-linked from the source
+CDN in its own aspect ratio beside 700 characters of body copy, no share control
+anywhere, five Telegram subscribers, and one link to `/submit` — inside the
+account menu, behind a sign-in.
+
+- **A shared link now carries a picture.** Every feed page takes the cover of
+  its soonest event, cropped to 1200×630 and served from our own origin through
+  an allowlisted proxy; a scope with no photograph gets a brand card. Verified
+  on production: `og-images — 4 of 4 show a real photograph`.
+- **A share control** on every feed and event page: the native sheet where the
+  browser has one, the clipboard elsewhere, in all three languages.
+- **The submit form is findable** — footer, venue page ("Do you run Teatro
+  Carlo Felice? Add your dates"), and the empty state of a place with nothing
+  on. Zero submissions in a fortnight was a discovery problem, not a demand one.
+- **The bot can hold a public channel** and posts one event a day to it, silent
+  when there is nothing worth saying. Needs the channel to exist.
+- **Search campaigns build themselves** from the corpus:
+  `scripts/growth/build-ads.ts` → 105 ad groups, 1 440 keywords, and a negative
+  list for the industry, medical and geological senses of "eventi". Nothing is
+  advertised that we cannot show.
+- **A weekly vertical video per city**: `scripts/growth/build-reel.ts <city>` —
+  the creative a YouTube campaign cannot run without, and the same file serves
+  Reels and Shorts.
+
 ### 3. Distribution we already half-own
 
 - **Telegram channel** per region, fed by the existing bot: one post per
