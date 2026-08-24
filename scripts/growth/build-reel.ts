@@ -13,6 +13,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { Effect } from 'effect';
 import { coverSvg } from './reel/cover-svg.ts';
 import { dataUri } from './reel/data-uri.ts';
+import { busiestCities } from './busiest-cities.ts';
 import { pickReelEvents } from './reel/pick-reel-events.ts';
 import { slideSvg } from './reel/slide-svg.ts';
 import { slideWhen } from './reel/slide-when.ts';
@@ -55,16 +56,15 @@ const slideOf = (from: string) => async (event: CompactEvent): Promise<string | 
       });
 };
 
-const main = async (): Promise<void> => {
-  const city = process.argv[2] ?? '';
-  const outDir = process.argv[3] ?? 'out/reels';
-  if (city === '') throw new Error('usage: build-reel.ts <city-slug> [outDir]');
-
-  const from = iso(new Date());
-  const to = iso(new Date(Date.parse(`${from}T12:00:00Z`) + 6 * 86_400_000));
-  const payload = await Effect.runPromise(loadEvents(EVENTS_URL));
+const reelFor = async (
+  city: string,
+  outDir: string,
+  from: string,
+  to: string,
+  all: readonly CompactEvent[],
+): Promise<void> => {
   const events = pickReelEvents(
-    payload.events.filter((event) => event.ct === city),
+    all.filter((event) => event.ct === city),
     from,
     to,
     SLIDES,
@@ -101,6 +101,22 @@ const main = async (): Promise<void> => {
     '-shortest', '-c:v', 'copy', '-c:a', 'aac', `${outDir}/${city}-week.mp4`,
   ]);
   console.log(`${outDir}/${city}-week.mp4 — ${svgs.length} slides, ${(svgs.length * SLIDE_SECONDS).toFixed(1)}s`);
+};
+
+/** `<city-slug>` for one, or `top:N` for the N busiest cities this week. */
+const main = async (): Promise<void> => {
+  const target = process.argv[2] ?? '';
+  const outDir = process.argv[3] ?? 'out/reels';
+  if (target === '') throw new Error('usage: build-reel.ts <city-slug|top:N> [outDir]');
+
+  const from = iso(new Date());
+  const to = iso(new Date(Date.parse(`${from}T12:00:00Z`) + 6 * 86_400_000));
+  const payload = await Effect.runPromise(loadEvents(EVENTS_URL));
+  const top = /^top:(\d+)$/.exec(target);
+  const cities = top === null ? [target] : busiestCities(payload.events, from, to, Number(top[1]));
+  // One at a time: each city runs several ffmpeg encodes of its own, and a CI
+  // runner has two cores.
+  for (const city of cities) await reelFor(city, outDir, from, to, payload.events);
 };
 
 await main();

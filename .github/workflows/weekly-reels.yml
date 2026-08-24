@@ -1,0 +1,62 @@
+# The weekly vertical videos, one per busy city.
+#
+# Monday morning, so the week they describe is still ahead. Kept off the deploy
+# path: this reads the live corpus and shells out to ffmpeg, and neither is
+# something a release should wait on.
+#
+# The files come back as a run artifact. If BOT_TOKEN and OWNER_CHAT_ID are set
+# as repository secrets, they also arrive in Telegram — which is the difference
+# between "the videos exist" and "the videos are in your hand on Monday".
+name: Weekly reels
+
+on:
+  schedule:
+    - cron: '15 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      cities:
+        description: 'city slug, or top:N for the N busiest'
+        default: 'top:5'
+
+concurrency:
+  group: weekly-reels
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      # ffmpeg is preinstalled on ubuntu-latest; assert it rather than discover
+      # its absence three minutes into an encode.
+      - run: ffmpeg -version | head -1
+      - name: Build
+        run: bun run scripts/growth/build-reel.ts "${{ inputs.cities || 'top:5' }}" out/reels
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reels
+          path: out/reels/*.mp4
+          if-no-files-found: warn
+          retention-days: 30
+      # The `secrets` context is not available in a step-level `if`, so the
+      # absence of a token is handled where it can be: in the shell.
+      - name: Send to Telegram
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          OWNER_CHAT_ID: ${{ secrets.OWNER_CHAT_ID }}
+        run: |
+          if [ -z "${BOT_TOKEN}" ] || [ -z "${OWNER_CHAT_ID}" ]; then
+            echo "No bot secrets set — the videos are in the run artifact."
+            exit 0
+          fi
+          for file in out/reels/*.mp4; do
+            [ -e "$file" ] || continue
+            curl -sS -F "chat_id=${OWNER_CHAT_ID}" \
+                 -F "caption=$(basename "$file" .mp4)" \
+                 -F "video=@${file}" \
+                 "https://api.telegram.org/bot${BOT_TOKEN}/sendVideo" > /dev/null
+          done

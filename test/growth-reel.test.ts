@@ -7,6 +7,7 @@ import { wrapText } from '../scripts/growth/reel/wrap-text.ts';
 import { pickReelEvents } from '../scripts/growth/reel/pick-reel-events.ts';
 import { slideSvg } from '../scripts/growth/reel/slide-svg.ts';
 import { slideWhen } from '../scripts/growth/reel/slide-when.ts';
+import { busiestCities } from '../scripts/growth/busiest-cities.ts';
 
 describe('wrapText', () => {
   test('keeps a short headline on one line', () => {
@@ -110,5 +111,33 @@ describe('slideWhen', () => {
 
   test('an open-ended run just says it is on', () => {
     assert.equal(slideWhen(event('2026-04-10'), from), 'in corso');
+  });
+});
+
+describe('busiestCities', () => {
+  const event = (ct: string, s: string, img = 'x.jpg') => ({ id: `${ct}${s}`, t: 'x', s, c: [], u: 'u', ct, img });
+
+  test('ranks by how much is on in the window', () => {
+    const events = [
+      event('genova', '2026-08-26'),
+      event('genova', '2026-08-27'),
+      event('milano', '2026-08-26'),
+      event('roma', '2026-12-01'),
+    ];
+    assert.deepEqual(busiestCities(events, '2026-08-25', '2026-08-31', 5), ['genova', 'milano']);
+  });
+
+  test('ignores events with no photograph — they cannot be in a video', () => {
+    const events = [event('genova', '2026-08-26', ''), event('milano', '2026-08-26')];
+    assert.deepEqual(busiestCities(events, '2026-08-25', '2026-08-31', 5), ['milano']);
+  });
+
+  test('ties break by name, so the same week produces the same list twice', () => {
+    const events = [event('milano', '2026-08-26'), event('genova', '2026-08-26')];
+    assert.deepEqual(busiestCities(events, '2026-08-25', '2026-08-31', 5), ['genova', 'milano']);
+  });
+
+  test('an event with no city cannot become a city of its own', () => {
+    assert.deepEqual(busiestCities([{ id: 'x', t: 'x', s: '2026-08-26', c: [], u: 'u', img: 'x.jpg' }], '2026-08-25', '2026-08-31', 5), []);
   });
 });
