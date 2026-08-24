@@ -10,6 +10,8 @@ import { EVENTS_URL } from '../../../../../data/events-url.ts';
 import { PLACES_URL } from '../../../../../data/places-url.ts';
 import { branch } from '../../../../../lib/branch.ts';
 import { isVenueSlug } from '../../../../../lib/events/is-venue-slug.ts';
+import { facetOf } from '../../../../../lib/events/facet-of.ts';
+import { isoToday } from '../../../../../lib/calendar/iso-today.ts';
 import { venueView } from '../../../../../lib/events/venue-view.ts';
 import { LOCALES } from '../../../../../lib/i18n/locales.ts';
 
@@ -23,11 +25,17 @@ switch (lang) {
 const payload = await cachedEvents(EVENTS_URL);
 const places = await cachedPlaces(PLACES_URL, payload.events);
 const known = (places[region] ?? []).includes(city) && isVenueSlug(slug);
+// A facet wins over a venue of the same slug — there is no venue called
+// "today" — and "today" is computed per request, so a page built hours ago
+// cannot call yesterday's events today.
+const facet = facetOf(slug);
+const today = isoToday();
 const venue = venueView(payload.events, region, city, slug);
 Astro.response.status = branch(known)(() => 200, () => 404);
 ---
 
-{known && <FeedView lang={lang} region={region} city={city} venue={venue} />}
+{known && facet && <FeedView lang={lang} region={region} city={city} facet={facet} today={today} />}
+{known && !facet && <FeedView lang={lang} region={region} city={city} venue={venue} />}
 {!known && (
   <Layout lang={lang} title="Not found">
     <p class="feed-empty">This page could not be found.</p>

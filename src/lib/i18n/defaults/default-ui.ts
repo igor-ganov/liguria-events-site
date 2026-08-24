@@ -39,6 +39,7 @@ export const DEFAULT_UI: Ui = {
   headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events' },
   calNav: { prev: 'Previous month', next: 'Next month' },
   badges: { free: 'free', gem: 'gem' },
+  facets: { today: { title: '', description: '' }, tomorrow: { title: '', description: '' }, weekend: { title: '', description: '' }, free: { title: '', description: '' } },
   gone: { heading: '', note: '', onward: '' },
   nothingHere: { heading: '', note: '', onward: '' },
   empty: 'Nothing matches these filters yet.',

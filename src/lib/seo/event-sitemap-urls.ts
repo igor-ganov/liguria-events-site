@@ -4,6 +4,7 @@ import { eventPath } from '../event-path.ts';
 import { isUpcoming } from '../events/is-upcoming.ts';
 import { LOCALES } from '../i18n/locales.ts';
 import { venuePath } from '../events/venue-path.ts';
+import { facetSitemapUrls } from './facet-sitemap-urls.ts';
 import { venuesOf } from '../events/venues-of.ts';
 import type { AlternateLink } from './alternate-links.ts';
 import type { CompactEvent } from '../events/event-schema.ts';
@@ -56,4 +57,5 @@ export const eventSitemapUrls = (
       alternates: alternateLinks(path, site),
     }));
   }),
+  ...facetSitemapUrls(events, today, site),
 ];

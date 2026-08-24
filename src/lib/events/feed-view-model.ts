@@ -1,6 +1,7 @@
 import { branch } from '../branch.ts';
 import { feedDayGroups } from './feed-day-groups.ts';
 import { feedEvents } from './feed-events.ts';
+import { facetSeo } from './facet-seo.ts';
 import { feedPath } from '../region/feed-path.ts';
 import { localizedUrl } from '../i18n/localized-url.ts';
 import { placeLabel } from '../region/place-label.ts';
@@ -23,7 +24,7 @@ type Input = Readonly<{ lang: Locale; scope: FeedScope; events: readonly Compact
 export const feedViewModel = ({ lang, scope, events, today, ui }: Input) => {
   const shown = feedEvents(events, scope);
   const placeName = scope.venue?.name ?? placeLabel(scope.region, scope.city);
-  const seo = branch(scope.venue === undefined)(
+  const seo = facetSeo(scope, ui) ?? branch(scope.venue === undefined)(
     () => ({ title: `${placeName} — ${ui.nav.feed}`, description: ui.seo.feed }),
     () => ({ title: ui.seo.venueTitle.replace('{place}', placeName), description: ui.seo.venue }),
   );
@@ -31,14 +32,17 @@ export const feedViewModel = ({ lang, scope, events, today, ui }: Input) => {
     events: shown,
     groups: feedDayGroups(today)(shown),
     placeName,
-    title: seo.title,
+    // Both halves take the place name; only the description used to, so a
+    // facet page titled itself "What's on today in {place}".
+    title: seo.title.replace('{place}', placeName),
     description: seo.description.replace('{place}', placeName),
-    path: branch(scope.venue === undefined)(
+    path: branch(scope.facet === undefined && scope.venue === undefined)(
       () => feedPath(scope.region, scope.city),
-      () => venuePath(scope.region, scope.city ?? '', scope.venue?.slug ?? ''),
+      () =>
+        venuePath(scope.region, scope.city ?? '', scope.facet?.slug ?? scope.venue?.slug ?? ''),
     ),
-    // A venue leads up to its city, a city up to its region.
-    onward: branch(scope.venue === undefined)(
+    // A venue or a facet leads up to its city, a city up to its region.
+    onward: branch(scope.facet === undefined && scope.venue === undefined)(
       () => regionUrl(lang, scope.region),
       () => localizedUrl(lang, `${scope.region}/${scope.city ?? ''}/`),
     ),

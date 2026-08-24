@@ -12,11 +12,10 @@ import { feedViewModel } from '../../lib/events/feed-view-model.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
-import type { Locale } from '../../lib/i18n/locales.ts';
-import type { VenueView } from '../../lib/events/feed-events.ts';
+import type { FeedProps } from './feed/feed-props.ts';
 
-type Props = Readonly<{ lang: Locale; region: string; city?: string | undefined; venue?: VenueView | undefined }>;
-const { lang, region, city, venue } = Astro.props;
+type Props = FeedProps;
+const { lang, region, city, venue, facet, today: given } = Astro.props;
 const ui = await uiOf(lang);
 
 // Server-rendered feed: the cards ship in the HTML (fast LCP, crawlable, no
@@ -24,8 +23,8 @@ const ui = await uiOf(lang);
 // Lit/Effect runtime on this page. A city or venue page pre-filters here, so
 // there is no client-side flash from region → city.
 const payload = await cachedEvents(EVENTS_URL);
-const today = isoToday();
-const view = feedViewModel({ lang, scope: { region, city, venue }, events: payload.events, today, ui });
+const today = given ?? isoToday();
+const view = feedViewModel({ lang, scope: { region, city, venue, facet, today }, events: payload.events, today, ui });
 const { events, groups, placeName, title, description, path, onward } = view;
 const heading = dayHeading(ui);
 ---
