@@ -24,8 +24,8 @@
       *Satisfies* R4.2, R4.3 · *Design* §5
 - [x] **T8 — The share row** on a freshly made event.
       *Satisfies* R1.3 · *Design* §6
-- [ ] **T9 — Daily cap per account.**
+- [x] **T9 — Daily cap per account.**
       *Satisfies* R5.3 · *Design* §7
-- [ ] **T10 — Health check** for the gate and the mark.
+- [x] **T10 — Health check** for the gate and the mark.
       *Satisfies* R6.1
 - [ ] **T11 — Verified on production.**
