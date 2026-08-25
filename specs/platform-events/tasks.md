@@ -28,4 +28,13 @@
       *Satisfies* R5.3 · *Design* §7
 - [x] **T10 — Health check** for the gate and the mark.
       *Satisfies* R6.1
-- [ ] **T11 — Verified on production.**
+- [x] **T11 — Verified on production**, 2026-08-25:
+
+      | | |
+      | --- | --- |
+      | `events.visibility` | `TEXT NOT NULL DEFAULT 'link'` |
+      | `/submit` anonymous | 200, form + the choice, unticked |
+      | Header create button | on every page, and on a phone |
+      | Feed filter | `data-feed-made` present |
+      | `/api/events/published.json` | `[]` — nothing made here yet |
+      | `platform-feed` health check | ok, "nothing published here yet" |

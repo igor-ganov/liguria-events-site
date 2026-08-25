@@ -40,7 +40,9 @@ test('a container event is created from its programme and skips the empty days',
 
   await page.locator('#event-form button[type=submit]').click();
   await page.waitForURL(/\/event\/[a-z0-9]+/);
-  const id = page.url().split('/').filter(Boolean).at(-1) ?? '';
+  // The create redirect carries ?created, which is what makes the page lead
+  // with the link — so read the id off the path rather than the whole URL.
+  const id = new URL(page.url()).pathname.split('/').filter(Boolean).at(-1) ?? '';
   expect(id).not.toBe('');
 
   // The run was DERIVED from the programme, not from anything typed in.

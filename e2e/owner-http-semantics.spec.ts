@@ -12,7 +12,7 @@ test('a city with nothing on answers 200 and says so', async ({ page }) => {
   expect(response?.status()).toBe(200);
   await expect(page.locator('[data-empty-state] h2')).not.toBeEmpty();
   // …and it leads somewhere rather than dead-ending.
-  await expect(page.locator('[data-empty-state] a')).toHaveAttribute('href', /\/liguria\//);
+  await expect(page.locator('[data-empty-state] a.empty-onward')).toHaveAttribute('href', /\/liguria\//);
 });
 
 test('a venue with nothing on answers 200, named after itself', async ({ page }) => {
@@ -20,7 +20,7 @@ test('a venue with nothing on answers 200, named after itself', async ({ page })
   expect(response?.status()).toBe(200);
   await expect(page.locator('.venue-head h1')).toHaveText('Teatro Che Non Ha Nulla In Programma');
   await expect(page.locator('[data-empty-state]')).toBeVisible();
-  await expect(page.locator('[data-empty-state] a')).toHaveAttribute('href', /\/liguria\/genova\//);
+  await expect(page.locator('[data-empty-state] a.empty-onward')).toHaveAttribute('href', /\/liguria\/genova\//);
 });
 
 test('a venue under a city that is not a city is still a 404', async ({ page }) => {
@@ -34,7 +34,7 @@ test('an event that existed and is gone answers 410, not 404', async ({ page }) 
   const response = await page.goto('/event/1e6b4b74d225/');
   expect(response?.status()).toBe(410);
   await expect(page.locator('[data-empty-state] h2')).not.toBeEmpty();
-  await expect(page.locator('[data-empty-state] a')).toHaveAttribute('href', /\//);
+  await expect(page.locator('[data-empty-state] a.empty-onward')).toHaveAttribute('href', /\//);
 });
 
 test('an id that was never ours keeps its 404', async ({ page }) => {
