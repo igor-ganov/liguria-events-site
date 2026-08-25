@@ -15,7 +15,7 @@ const v: Prefill = event ?? EMPTY_PREFILL;
 const SUBMIT_LABEL: Record<Props['mode'], string> = { create: 'Submit for review', edit: 'Save changes' };
 ---
 
-<form id="event-form" class="submit-form" data-mode={mode} data-id={eventId}>
+<form id="event-form" class="submit-form" data-mode={mode} data-id={eventId} data-signin-note={ui.submitAuth.signin}>
   <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
   <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
 

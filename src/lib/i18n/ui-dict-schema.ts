@@ -36,6 +36,7 @@ export const UiDictSchema = Schema.Struct({
   subscribe: Schema.Struct({ note: Schema.String, calendar: Schema.String, rss: Schema.String }),
   share: Schema.Struct({ label: Schema.String, copied: Schema.String }),
   contribute: Schema.Struct({ link: Schema.String, venue: Schema.String, empty: Schema.String }),
+  submitAuth: Schema.Struct({ note: Schema.String, signin: Schema.String }),
   facets: Schema.Struct({ category: Schema.Struct({ title: Schema.String, description: Schema.String }), today: Schema.Struct({ title: Schema.String, description: Schema.String }), tomorrow: Schema.Struct({ title: Schema.String, description: Schema.String }), weekend: Schema.Struct({ title: Schema.String, description: Schema.String }), free: Schema.Struct({ title: Schema.String, description: Schema.String }) }),
   gone: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
   nothingHere: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),

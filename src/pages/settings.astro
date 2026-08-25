@@ -10,7 +10,7 @@ const passkeys = await passkeysOf(Astro.locals.runtime.env.DB)(user);
 ---
 
 <Layout lang="en" title="Settings" path="settings/" locales={ROOT_ONLY}>
-  <main class="auth-card settings-card">
+  <section class="auth-card settings-card">
     <h1>Settings</h1>
     <p>Signed in as <strong>{user?.email}</strong> (@{user?.handle}).</p>
 
@@ -30,7 +30,7 @@ const passkeys = await passkeysOf(Astro.locals.runtime.env.DB)(user);
     </section>
 
     <button type="button" class="link-btn" data-signout>Sign out</button>
-  </main>
+  </section>
 </Layout>
 
 <script>

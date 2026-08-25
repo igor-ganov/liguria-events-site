@@ -3,6 +3,7 @@
 // which, for a fresh submission, shows the author their pending event.
 import { isDefined } from '../../lib/is-defined.ts';
 import { eventFormMode } from './event-form-mode.ts';
+import { restoreDraft } from './restore-draft.ts';
 import { wireEventSubmit } from './wire-event-submit.ts';
 import { wireImageUpload } from './wire-image-upload.ts';
 import { wireProgramme } from './wire-programme.ts';
@@ -25,6 +26,8 @@ const fillStart = (form: HTMLFormElement): void => {
 const setup = (form: HTMLFormElement): void => {
   form.dataset['ready'] = 'true';
   fillStart(form);
+  // Before the widgets: a restored value must not be overwritten by a default.
+  restoreDraft(form);
   wireImageUpload(form);
   wireProgramme(form);
   wireEventSubmit({
@@ -32,6 +35,7 @@ const setup = (form: HTMLFormElement): void => {
     status: document.getElementById('submit-status') ?? undefined,
     mode: eventFormMode(form.dataset['mode']),
     id: form.dataset['id'] ?? '',
+    signinNote: form.dataset['signinNote'] ?? '',
   });
 };
 
