@@ -76,3 +76,59 @@ Details that matter more than they look:
   reads as a stale post.
 - **Fewer than three events with photographs means no video.** A reel of one
   slide is worse than silence.
+
+
+# Outreach — who to ask for a link, and what to say
+
+    bun run scripts/growth/build-outreach.ts [outDir]   # default: out/outreach
+
+Writes `targets.csv` (the list) and `letters.md` (one letter per target, in
+Italian, ready to paste). Run of 2026-08-25: **30 targets — 20 venues, 10
+comuni**.
+
+## Why it is thirty and not three hundred
+
+Links are what move a ranking that sits on page six, and bulk link requests are
+the one way to make that ranking worse. Google's guidelines name link schemes
+explicitly; unsolicited commercial mail at volume is spam under Italian and EU
+rules; and a hundred identical letters read like a hundred identical letters.
+The list is capped at what one person can send by hand over a fortnight,
+changing a line in each.
+
+## Who is on it
+
+**Venues with at least three of their events on the site.** They are the ones
+where the link is useful to *them*: we have built and we maintain a page
+listing their whole programme, and their audience is looking for exactly that.
+Below three events the letter is asking a favour rather than offering
+something.
+
+**The comuni of the ten busiest cities.** An Italian municipality's "Eventi"
+page is the closest thing to a local directory, its URP address is public by
+law, and a free, ad-free, three-language calendar of the town's own events is
+a reasonable thing to list.
+
+Not on it: the sources we crawl (they are competitors), and directories that
+sell placements (a paid link is the thing being penalised).
+
+## Contacts
+
+A venue's own website is filled in only when an Overture place within 350
+metres carries **every** significant word of its name. A looser match found
+something for almost every venue and was wrong about a third of the time —
+"Palazzo Ducale" landed on the site of an exhibition being held there, "Galata
+Maritime Museum" on a different museum. Writing to the wrong organisation about
+"your page" is worse than not writing, so the rest of the rows carry a search
+link and get looked up by hand.
+
+Coverage is currently Liguria only: the websites live in
+`scripts/.cache/overture-*.ndjson`, which the shipped shards drop for size, and
+only Liguria's cache is present locally. Running the places refresh for a region
+fills in its venues too.
+
+## The letters
+
+Both open with what has already been done for them and close with a way out —
+an aggregator nobody can opt out of is a nuisance, and saying so is what makes
+the rest of the letter credible. Neither mentions SEO, and neither asks for a
+reciprocal link.
