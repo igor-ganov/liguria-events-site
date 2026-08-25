@@ -169,7 +169,13 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   padding: 0.7rem 0.8rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--bg); color: var(--ink); font: inherit;
 }
-.auth-card button, .auth-card .btn {
+/* The card's own primary action — NOT every button inside it. As a blanket
+   descendant selector this reached into MapLibre's zoom controls on the create
+   and edit pages and painted them solid accent, leaving two orange squares
+   where + and - should be. Anything nested that styles itself (.link-btn,
+   .account-signin, the programme rows) was already immune; the widget we do
+   not own was not. */
+.auth-card > form > button[type='submit'], .auth-card > button[type='submit'], .auth-card .btn {
   padding: 0.7rem 1rem; border: none; border-radius: var(--radius-sm); cursor: pointer;
   background: var(--accent); color: var(--on-accent); font: inherit; font-weight: 700; text-align: center;
 }
@@ -303,7 +309,17 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   padding: 0.6rem 0.7rem; border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--bg); color: var(--ink); font: inherit;
 }
+/* Two fields side by side. `min-width: 0` is not optional: a grid item's
+   default minimum is its CONTENT's, and an <input> refuses to shrink below its
+   intrinsic size — so two of them plus the gap pushed the whole page 52px wider
+   than a phone and every screen scrolled sideways. Below 26rem they stack:
+   two inputs on a 348px card is technically fine and horrible to type in. */
 .submit-form .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+.submit-form .row2 > * { min-width: 0; }
+.submit-form .row2 input { width: 100%; box-sizing: border-box; }
+@media (max-width: 26rem) {
+  .submit-form .row2 { grid-template-columns: 1fr; }
+}
 .form-image { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-start; }
 .form-image-label { font-size: 0.9rem; color: var(--ink-2); }
 .form-image-preview { max-width: 100%; max-height: 12rem; border-radius: var(--radius-sm); border: 1px solid var(--line); object-fit: cover; }
