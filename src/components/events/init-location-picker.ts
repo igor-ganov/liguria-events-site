@@ -17,13 +17,26 @@ const PMTILES_URL =
   import.meta.env.PUBLIC_PMTILES_URL ?? `${location.origin}${B}/tiles/italy.pmtiles`;
 const GENOA: [number, number] = [9.19, 44.4056];
 
-const input = (selector: string): HTMLInputElement | undefined =>
-  document.querySelector<HTMLInputElement>(selector) ?? undefined;
+/**
+ * The form's own hidden coordinate field.
+ *
+ * Scoped to the form, and checked to BE an input, because a document-wide
+ * `[data-lat]` matched the region picker's city list first: eighty
+ * `<li class="rp-city" data-lat="…">` sit above the form in the DOM. An `<li>`
+ * has a `value` property of its own — its ordinal, which is 0 — so the picker
+ * read 0/0, opened over the Atlantic at zoom 14, and looked like a map that
+ * had failed to load.
+ */
+const input = (form: Element | undefined, selector: string): HTMLInputElement | undefined =>
+  [form?.querySelector(selector)]
+    .filter((node): node is HTMLInputElement => node instanceof HTMLInputElement)
+    .at(0);
 
 const start = (el: HTMLElement): void => {
   el.dataset['ready'] = 'true';
-  const latIn = input('[data-lat]');
-  const lngIn = input('[data-lng]');
+  const form = el.closest('form') ?? undefined;
+  const latIn = input(form, '[data-lat]');
+  const lngIn = input(form, '[data-lng]');
   maplibregl.addProtocol('pmtiles', new Protocol().tile);
   const from = startCoords(latIn?.value, lngIn?.value);
   const map = new maplibregl.Map({
