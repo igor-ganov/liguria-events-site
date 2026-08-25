@@ -8,6 +8,7 @@ export const feedRowOf = (item: HTMLElement): FeedRow => ({
   end: item.dataset['end'] ?? item.dataset['start'] ?? '',
   free: item.dataset['free'] === '1',
   gem: item.dataset['gem'] === '1',
+  made: item.dataset['made'] === '1',
   city: item.dataset['ct'] ?? '',
   cats: (item.dataset['cats'] ?? '').split(','),
 });

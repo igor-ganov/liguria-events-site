@@ -54,7 +54,7 @@ landmarks:
   empty: No landmarks match.
   search: Search landmarks…
   kinds: { castle: Castles, church: Churches, museum: Museums, palace: Palaces, monument: Monuments, tower: Towers, lighthouse: Lighthouses, square: Squares, park: Parks, heritage: Heritage sites, beach: Beaches, attraction: Attractions }
-chips: { free: 'Free only', gems: 'Hidden gems', clear: 'Clear' }
+chips: { free: 'Free only', gems: 'Hidden gems', made: 'Made here', clear: 'Clear' }
 theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' }
 range: { from: 'From', to: 'To' }
 sort: { label: 'Sort', date: 'By date', created: 'Newest first' }
@@ -77,7 +77,7 @@ weekdays: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 months: [January, February, March, April, May, June, July, August, September, October, November, December]
 headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events' }
 calNav: { prev: 'Previous month', next: 'Next month' }
-badges: { free: 'free', gem: 'gem' }
+badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }
 share: { label: "Share", copied: "Link copied" }
 contribute: { link: "Add your event", venue: "Do you run {place}? Add your dates — listing is free.", empty: "Know something on in {place}? Add it." }

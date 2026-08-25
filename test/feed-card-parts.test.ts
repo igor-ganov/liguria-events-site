@@ -33,6 +33,7 @@ describe('feedCardAttrs', () => {
       end: '2026-07-06',
       free: '0',
       gem: '0',
+      made: '0',
       created: '1750000000',
     });
   });

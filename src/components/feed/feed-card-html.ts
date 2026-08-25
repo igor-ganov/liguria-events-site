@@ -36,6 +36,7 @@ export const feedCardHtml = (context: FeedContext, event: CompactEvent): string 
     descHtml(descriptionOf(lang)(event)) +
     `<div class="mini-tags">${feedCardTags(event, ui, icons)}` +
     `${badge(event.f === true, 'badge-free', ui.badges.free)}` +
-    `${badge(event.x === true, 'badge-gem', ui.badges.gem)}</div></div></a>`
+    `${badge(event.x === true, 'badge-gem', ui.badges.gem)}` +
+    `${badge(event.pl === true, 'badge-made', ui.badges.made)}</div></div></a>`
   );
 };

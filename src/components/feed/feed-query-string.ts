@@ -15,6 +15,7 @@ const params = (state: FeedState, today: string): readonly Param[] => [
   ...[state.to].filter((to) => to !== '').map((to): Param => ['to', to]),
   ...[state.free].filter((free) => free).map((): Param => ['free', '1']),
   ...[state.gems].filter((gems) => gems).map((): Param => ['gems', '1']),
+  ...[state.made].filter((made) => made).map((): Param => ['made', '1']),
   ...[state.sort].filter((sort) => sort === 'created').map((): Param => ['sort', 'created']),
 ];
 

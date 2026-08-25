@@ -46,3 +46,27 @@ test('the bot link points at the bot that exists', async ({ page }) => {
   await page.goto('/liguria/genova/');
   await expect(page.locator('nav[aria-label="Site"] a[href*="t.me"]')).toHaveAttribute('href', 'https://t.me/dovego_bot');
 });
+
+test('the feed offers a filter for events made here', async ({ page }) => {
+  await page.goto('/liguria/genova/');
+  const chip = page.locator('[data-feed-made]');
+  await expect(chip).toBeVisible();
+  await expect(chip).toHaveText('Made here');
+  await expect(chip).toHaveAttribute('aria-pressed', 'false');
+});
+
+test('turning it on records itself in the URL, and clearing puts it back', async ({ page }) => {
+  await page.goto('/liguria/genova/');
+  await page.locator('[data-feed-made]').click();
+  await expect(page.locator('[data-feed-made]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page).toHaveURL(/made=1/);
+  await page.locator('[data-feed-clear]').click();
+  await expect(page.locator('[data-feed-made]')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page).not.toHaveURL(/made=1/);
+});
+
+test('with nothing made here yet, the filter empties the feed rather than lying', async ({ page }) => {
+  // The corpus is entirely crawled today, so this is the honest outcome.
+  await page.goto('/liguria/genova/?made=1');
+  await expect(page.locator('[data-feed-empty]')).toBeVisible();
+});

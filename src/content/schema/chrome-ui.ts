@@ -9,7 +9,7 @@ export const chromeUi = {
   search: z.object({ placeholder: z.string(), none: z.string() }),
   mapLayers: z.object({ events: z.string(), landmarks: z.string(), places: z.string() }),
   map: z.object({ retry: z.string(), failed: z.string(), locate: z.string() }),
-  chips: z.object({ free: z.string(), gems: z.string(), clear: z.string() }),
+  chips: z.object({ free: z.string(), gems: z.string(), made: z.string(), clear: z.string() }),
   theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
   range: z.object({ from: z.string(), to: z.string() }),
   sort: z.object({ label: z.string(), date: z.string(), created: z.string() }),

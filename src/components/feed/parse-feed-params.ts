@@ -9,6 +9,7 @@ export type FeedParams = {
   readonly to: string;
   readonly free: boolean;
   readonly gems: boolean;
+  readonly made: boolean;
   readonly sort: FeedSort;
 };
 
@@ -23,6 +24,7 @@ export const parseFeedParams = (search: string, today: string): FeedParams => {
     to: params.get('to') ?? '',
     free: params.get('free') === '1',
     gems: params.get('gems') === '1',
+    made: params.get('made') === '1',
     sort: feedSortOf(params.get('sort') ?? undefined),
   };
 };

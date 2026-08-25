@@ -26,4 +26,7 @@ export const toCompact = (r: EventRow): Record<string, unknown> => ({
   // honour it instead of the run.
   ...[storedSessions(r.sessions)].filter((p) => p.length > 0).map((p) => ({ p })).at(0),
   ...truthy(r.kind === 'container').map(() => ({ k: true })).at(0),
+  // Made here, not found: the feed badges it, the filter offers it, and the
+  // within-day sort puts it first.
+  ...truthy(r.origin === 'user').map(() => ({ pl: true })).at(0),
 });

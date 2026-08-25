@@ -16,11 +16,11 @@
       *Satisfies* R1.2 · *Design* §1
 - [x] **T4 — `noindex` on a link-only page**, and out of the sitemap.
       *Satisfies* R2.3 · *Design* §3
-- [ ] **T5 — `pl` in the projection**, badge on the card and the detail page.
+- [x] **T5 — `pl` in the projection**, badge on the card and the detail page.
       *Satisfies* R3.3 · *Design* §4
-- [ ] **T6 — The filter chip** for events made here.
+- [x] **T6 — The filter chip** for events made here.
       *Satisfies* R4.1 · *Design* §4
-- [ ] **T7 — Platform first within a day**, never across days.
+- [x] **T7 — Platform first within a day**, never across days.
       *Satisfies* R4.2, R4.3 · *Design* §5
 - [x] **T8 — The share row** on a freshly made event.
       *Satisfies* R1.3 · *Design* §6

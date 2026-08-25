@@ -23,6 +23,7 @@ const state = (over: Partial<FeedState> = {}): FeedState => ({
   cats: new Set<string>(),
   free: false,
   gems: false,
+  made: false,
   query: '',
   city: '',
   hits: undefined,
@@ -37,6 +38,7 @@ const row = (over: Partial<FeedRow> = {}): FeedRow => ({
   end: '2026-07-10',
   free: false,
   gem: false,
+  made: false,
   city: '',
   cats: ['music'],
   ...over,
@@ -63,12 +65,16 @@ describe('parseFeedParams', () => {
       to: '',
       free: false,
       gems: false,
+      made: false,
       sort: 'date',
     });
   });
   test('reads every filter back', () => {
     assert.deepEqual(
-      parseFeedParams('?q=jazz&cats=music,art&from=2026-08-01&to=2026-08-31&free=1&gems=1&sort=created', TODAY),
+      parseFeedParams(
+        '?q=jazz&cats=music,art&from=2026-08-01&to=2026-08-31&free=1&gems=1&made=1&sort=created',
+        TODAY,
+      ),
       {
         query: 'jazz',
         cats: ['music', 'art'],
@@ -76,6 +82,7 @@ describe('parseFeedParams', () => {
         to: '2026-08-31',
         free: true,
         gems: true,
+        made: true,
         sort: 'created',
       },
     );
@@ -242,5 +249,25 @@ describe('feedDayOf', () => {
   });
   test('one starting today is today', () => {
     assert.equal(feedDayOf(TODAY, TODAY), TODAY);
+  });
+});
+
+describe('the made-here filter', () => {
+  test('is off unless the query says otherwise', () => {
+    assert.equal(parseFeedParams('?free=1', TODAY).made, false);
+  });
+
+  test('survives a reload, like every other chip', () => {
+    assert.equal(parseFeedParams('?made=1', TODAY).made, true);
+    assert.equal(feedUrl('/feed/', state({ made: true }), TODAY), '/feed/?made=1');
+  });
+
+  test('keeps only events made here when it is on', () => {
+    assert.equal(matchesFeedRow(state({ made: true }), row()), false);
+    assert.equal(matchesFeedRow(state({ made: true }), row({ made: true })), true);
+  });
+
+  test('off, it hides nothing', () => {
+    assert.equal(matchesFeedRow(state(), row({ made: false })), true);
   });
 });

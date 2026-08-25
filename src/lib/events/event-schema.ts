@@ -57,6 +57,8 @@ export const EventSchema = Schema.Struct({
   d: Schema.optional(LocalizedTextSchema),
   l: Schema.optional(Schema.Array(SourceLinkSchema)),
   x: Schema.optional(Schema.Boolean),
+  /** Made on the platform rather than found by the crawler (pl = platform). */
+  pl: Schema.optional(Schema.Boolean),
   /** First-seen time (epoch seconds) — powers the "newest added first" sort. */
   cr: Schema.optional(Schema.Number),
 });

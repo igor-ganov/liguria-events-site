@@ -54,7 +54,7 @@ landmarks:
   empty: Nessun luogo corrisponde.
   search: Cerca luoghi…
   kinds: { castle: Castelli, church: Chiese, museum: Musei, palace: Palazzi, monument: Monumenti, tower: Torri, lighthouse: Fari, square: Piazze, park: Parchi, heritage: Siti storici, beach: Spiagge, attraction: Attrazioni }
-chips: { free: 'Solo gratuiti', gems: 'Chicche', clear: 'Azzera' }
+chips: { free: 'Solo gratuiti', gems: 'Chicche', made: 'Creati qui', clear: 'Azzera' }
 theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 range: { from: 'Da', to: 'A' }
 sort: { label: 'Ordina', date: 'Per data', created: 'Più recenti' }
@@ -77,7 +77,7 @@ weekdays: [Lun, Mar, Mer, Gio, Ven, Sab, Dom]
 months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Settembre, Ottobre, Novembre, Dicembre]
 headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
-badges: { free: 'gratis', gem: 'chicca' }
+badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }
 share: { label: "Condividi", copied: "Link copiato" }
 contribute: { link: "Aggiungi il tuo evento", venue: "Gestisci {place}? Aggiungi le tue date — l'inserimento è gratuito.", empty: "Sai di qualcosa a {place}? Aggiungilo." }

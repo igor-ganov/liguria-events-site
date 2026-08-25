@@ -25,7 +25,7 @@ const ui = defineCollection({
     months: z.array(z.string()).length(12),
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
-    badges: z.object({ free: z.string(), gem: z.string() }),
+    badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),
     subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string() }),
     share: z.object({ label: z.string(), copied: z.string() }),
     contribute: z.object({ link: z.string(), venue: z.string(), empty: z.string() }),

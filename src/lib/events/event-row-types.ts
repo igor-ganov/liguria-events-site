@@ -22,6 +22,8 @@ export type EventRow = {
   sessions: string | null;
   /** 'container' when the event happens only on those dates. */
   kind: string | null;
+  /** 'user' for an event made here, 'crawler' for one that was found. */
+  origin: string | null;
 };
 
 /** The contact block, absent field by absent field. */

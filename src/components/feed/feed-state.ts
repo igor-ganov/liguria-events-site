@@ -12,6 +12,8 @@ export type FeedState = {
   readonly cats: Set<string>;
   free: boolean;
   gems: boolean;
+  /** Only events made on the platform. */
+  made: boolean;
   query: string;
   city: string;
   hits: ReadonlySet<string> | undefined;
@@ -27,6 +29,7 @@ export const feedState: FeedState = {
   cats: new Set<string>(),
   free: false,
   gems: false,
+  made: false,
   query: '',
   city: '',
   hits: undefined,

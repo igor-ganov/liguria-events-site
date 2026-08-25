@@ -7,6 +7,7 @@ export type FeedRow = {
   readonly end: string;
   readonly free: boolean;
   readonly gem: boolean;
+  readonly made: boolean;
   readonly city: string;
   readonly cats: readonly string[];
 };
@@ -21,6 +22,7 @@ const RULES: readonly Rule[] = [
   (state, row) => state.from === '' || row.end >= state.from,
   (state, row) => !state.free || row.free,
   (state, row) => !state.gems || row.gem,
+  (state, row) => !state.made || row.made,
   (state, row) => state.city === '' || row.city === state.city,
   (state, row) => state.cats.size === 0 || row.cats.some((cat) => state.cats.has(cat)),
 ];

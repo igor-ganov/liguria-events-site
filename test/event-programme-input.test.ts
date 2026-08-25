@@ -129,6 +129,7 @@ describe('storedSessions / toCompact', () => {
     gem: 0,
     sessions: EMPTY,
     kind: EMPTY,
+  origin: 'crawler',
     ...over,
   });
 

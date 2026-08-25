@@ -23,7 +23,7 @@ const wireCat =
     });
   };
 
-const wireToggle = (selector: string, key: 'free' | 'gems', refresh: () => void): void => {
+const wireToggle = (selector: string, key: 'free' | 'gems' | 'made', refresh: () => void): void => {
   [document.querySelector<HTMLElement>(selector) ?? undefined]
     .filter(isDefined)
     .forEach((button) => {
@@ -40,7 +40,8 @@ const clearAll = (refresh: () => void): void => {
   feedState.cats.clear();
   feedState.free = false;
   feedState.gems = false;
-  queryAll(document, '[data-feed-cat], [data-feed-free], [data-feed-gems]').forEach((chip) =>
+  feedState.made = false;
+  queryAll(document, '[data-feed-cat], [data-feed-free], [data-feed-gems], [data-feed-made]').forEach((chip) =>
     chip.setAttribute('aria-pressed', 'false'),
   );
   refresh();
@@ -51,5 +52,6 @@ export const wireFeedChips = (refresh: () => void): void => {
   queryAll(document, '[data-feed-cat]').forEach(wireCat(refresh));
   wireToggle('[data-feed-free]', 'free', refresh);
   wireToggle('[data-feed-gems]', 'gems', refresh);
+  wireToggle('[data-feed-made]', 'made', refresh);
   document.querySelector('[data-feed-clear]')?.addEventListener('click', () => clearAll(refresh));
 };

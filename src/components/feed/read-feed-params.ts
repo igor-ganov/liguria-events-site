@@ -12,6 +12,7 @@ export const readFeedParams = (today: string): void => {
   feedState.to = params.to;
   feedState.free = params.free;
   feedState.gems = params.gems;
+  feedState.made = params.made;
   feedState.sort = params.sort;
   // The city is a path segment (/<region>/<city>/), server-rendered onto the
   // list — not a query filter. It stays fixed for the page; reading it keeps the

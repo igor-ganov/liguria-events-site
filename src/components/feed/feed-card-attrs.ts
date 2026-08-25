@@ -16,6 +16,7 @@ export const feedCardAttrs = (event: CompactEvent): Readonly<Record<string, stri
   end: event.e ?? event.s,
   free: flag(event.f === true),
   gem: flag(event.x === true),
+  made: flag(event.pl === true),
   created: branch(event.cr === undefined)(
     () => '',
     () => String(event.cr),

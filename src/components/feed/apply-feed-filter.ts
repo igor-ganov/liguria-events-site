@@ -28,6 +28,6 @@ export const applyFeedFilter = (): void => {
   setHidden(el('[data-feed-empty]'), visible > 0);
   setHidden(
     el('[data-feed-clear]'),
-    feedState.cats.size === 0 && !feedState.free && !feedState.gems,
+    feedState.cats.size === 0 && !feedState.free && !feedState.gems && !feedState.made,
   );
 };

@@ -1337,6 +1337,12 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .share-button:hover, .share-button:focus-visible { border-color: var(--accent); color: var(--accent); }
 .share-button[data-share-state='copied'] { border-color: var(--accent); color: var(--accent); }
+/* Made here, not found: the one badge that says this event exists nowhere else. */
+.badge-made {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
 /* The moment the product exists for: what was made, and the link out of it. */
 .new-event {
   border: 1px solid var(--accent); border-radius: var(--radius-sm);
