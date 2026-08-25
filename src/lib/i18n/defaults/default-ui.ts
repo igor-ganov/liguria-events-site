@@ -43,6 +43,7 @@ export const DEFAULT_UI: Ui = {
   share: { label: '', copied: '' },
   contribute: { link: '', venue: '', empty: '' },
   submitAuth: { note: '', signin: '' },
+  created: { heading: '', linkNote: '', publicNote: '', copy: '', copied: '' },
   visibility: { legend: '', listedTitle: '', listedNote: '', linkNote: '' },
   facets: { category: { title: '', description: '' }, today: { title: '', description: '' }, tomorrow: { title: '', description: '' }, weekend: { title: '', description: '' }, free: { title: '', description: '' } },
   gone: { heading: '', note: '', onward: '' },

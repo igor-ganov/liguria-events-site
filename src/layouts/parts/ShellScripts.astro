@@ -33,3 +33,10 @@
   initShare();
   document.addEventListener('astro:page-load', initShare);
 </script>
+
+<script>
+  // The link handed back after making an event: copy it, or at least select it.
+  import { initCopyLink } from '../../components/events/init-copy-link.ts';
+  initCopyLink();
+  document.addEventListener('astro:page-load', initCopyLink);
+</script>

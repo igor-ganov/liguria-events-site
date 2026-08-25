@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import type { EventDetailProps } from './event-detail-props.ts';
 import ShareButton from '../share/ShareButton.astro';
+import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventHero from './event/EventHero.astro';
 import EventGalleryMore from './event/EventGalleryMore.astro';
@@ -14,6 +15,7 @@ import EventMapEmbed from './event/EventMapEmbed.astro';
 import EventSources from './event/EventSources.astro';
 import { cityName } from '../../lib/region/city-name.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
+import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { programmeSessions } from '../../lib/events/programme-sessions.ts';
@@ -25,6 +27,9 @@ const { lang, event, editable = false, status, visibility, contacts } = Astro.pr
 // Anything not offered to the feed is kept out of the index too. A crawled
 // event has no row and no visibility, and is public by definition.
 const unlisted = visibility === 'link';
+// The redirect after a successful create carries ?created, which is the only
+// way this page can know to lead with the link rather than the event.
+const justCreated = Astro.url.searchParams.get('created') === '1';
 const ui = await uiOf(lang);
 // The address a crawler event carries lives on the event itself; only a
 // user-submitted one has a contact block. Structured data needs whichever is
@@ -47,6 +52,9 @@ const programme = programmeSessions(event, lang);
       <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
       <span class="event-share"><ShareButton ui={ui} title={title} /></span>
     </p>
+    {justCreated && (
+      <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event.id), Astro.site)} title={title} unlisted={unlisted} />
+    )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && (
       <EventPassed

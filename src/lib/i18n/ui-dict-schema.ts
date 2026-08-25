@@ -1,4 +1,5 @@
 import { Schema } from 'effect';
+import { SubmitUiSchema } from './submit-ui-schema.ts';
 import { AuthUiSchema } from './auth-ui-schema.ts';
 import { CatUiSchema } from './cat-ui-schema.ts';
 import { LandmarksUiSchema } from './landmarks-ui-schema.ts';
@@ -35,14 +36,7 @@ export const UiDictSchema = Schema.Struct({
   badges: Schema.Struct({ free: Schema.String, gem: Schema.String }),
   subscribe: Schema.Struct({ note: Schema.String, calendar: Schema.String, rss: Schema.String }),
   share: Schema.Struct({ label: Schema.String, copied: Schema.String }),
-  contribute: Schema.Struct({ link: Schema.String, venue: Schema.String, empty: Schema.String }),
-  submitAuth: Schema.Struct({ note: Schema.String, signin: Schema.String }),
-  visibility: Schema.Struct({
-    legend: Schema.String,
-    listedTitle: Schema.String,
-    listedNote: Schema.String,
-    linkNote: Schema.String,
-  }),
+  ...SubmitUiSchema,
   facets: Schema.Struct({ category: Schema.Struct({ title: Schema.String, description: Schema.String }), today: Schema.Struct({ title: Schema.String, description: Schema.String }), tomorrow: Schema.Struct({ title: Schema.String, description: Schema.String }), weekend: Schema.Struct({ title: Schema.String, description: Schema.String }), free: Schema.Struct({ title: Schema.String, description: Schema.String }) }),
   gone: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
   nothingHere: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),

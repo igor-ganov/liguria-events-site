@@ -22,7 +22,7 @@
       *Satisfies* R4.1 · *Design* §4
 - [ ] **T7 — Platform first within a day**, never across days.
       *Satisfies* R4.2, R4.3 · *Design* §5
-- [ ] **T8 — The share row** on a freshly made event.
+- [x] **T8 — The share row** on a freshly made event.
       *Satisfies* R1.3 · *Design* §6
 - [ ] **T9 — Daily cap per account.**
       *Satisfies* R5.3 · *Design* §7

@@ -1,0 +1,34 @@
+---
+import ShareButton from '../share/ShareButton.astro';
+import { COPY_LINK } from './copy-link-selectors.ts';
+import { branch } from '../../lib/branch.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The moment the product exists for: something was made here, and the author
+// needs the link out of it. Until now they were dropped on the page with only
+// the address bar.
+type Props = Readonly<{ ui: Ui; url: string; title: string; unlisted: boolean }>;
+const { ui, url, title, unlisted } = Astro.props;
+const note = branch(unlisted)(
+  () => ui.created.linkNote,
+  () => ui.created.publicNote,
+);
+---
+
+<section class="new-event" {...{ [COPY_LINK.root]: '' }}>
+  <h2>{ui.created.heading}</h2>
+  <p class="new-event-note">{note}</p>
+  <p class="new-event-row">
+    <input
+      type="text"
+      readonly
+      value={url}
+      aria-label={ui.created.heading}
+      {...{ [COPY_LINK.field]: '' }}
+    />
+    <button type="button" class="copy-link" {...{ [COPY_LINK.button]: '', [COPY_LINK.doneAttr]: ui.created.copied }}>
+      {ui.created.copy}
+    </button>
+    <ShareButton ui={ui} title={title} />
+  </p>
+</section>

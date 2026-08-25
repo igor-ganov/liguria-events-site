@@ -1337,6 +1337,27 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .share-button:hover, .share-button:focus-visible { border-color: var(--accent); color: var(--accent); }
 .share-button[data-share-state='copied'] { border-color: var(--accent); color: var(--accent); }
+/* The moment the product exists for: what was made, and the link out of it. */
+.new-event {
+  border: 1px solid var(--accent); border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem; margin: 0 0 1.2rem;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+.new-event h2 { margin: 0 0 0.2rem; font-size: 1.05rem; }
+.new-event-note { margin: 0 0 0.7rem; color: var(--ink-2); font-size: 0.9rem; }
+.new-event-row { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0; }
+.new-event-row input {
+  flex: 1 1 16rem; min-width: 0; padding: 0.4rem 0.6rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--ink); font: inherit; font-size: 0.88rem;
+}
+.copy-link {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem; background: var(--accent); color: #fff;
+  font: inherit; font-size: 0.86rem; font-weight: 600; cursor: pointer;
+}
+.copy-link[data-copy-state='copied'] { filter: brightness(1.1); }
+
 /* The visibility choice: the private default is stated in words underneath, so
    nobody has to infer what an unticked box means. */
 .visibility-choice { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.8rem 0.9rem; margin: 0.2rem 0; }
