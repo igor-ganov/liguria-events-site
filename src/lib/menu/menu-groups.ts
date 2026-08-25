@@ -12,6 +12,7 @@ export type MenuGroup = Readonly<{
 /** The slice of the UI dictionary the menu reads — the full `Ui` satisfies it. */
 export type MenuUi = Readonly<{
   menu: Readonly<{ events: string; explore: string; more: string }>;
+  contribute: Readonly<{ link: string }>;
   nav: Readonly<{
     feed: string;
     calendar: string;
@@ -33,6 +34,8 @@ export const menuGroups = (lang: Locale, region: string, ui: MenuUi): readonly M
     label: ui.menu.events,
     favourites: true,
     links: [
+      // First, and above the feed: making an event is what the site is for.
+      { href: '/submit', icon: 'plus', label: ui.contribute.link },
       { href: regionUrl(lang, region), icon: 'feed', label: ui.nav.feed },
       { href: regionUrl(lang, region, 'calendar/'), icon: 'calendar', label: ui.nav.calendar },
       { href: regionUrl(lang, region, 'map/'), icon: 'map', label: ui.nav.map },
@@ -50,7 +53,7 @@ export const menuGroups = (lang: Locale, region: string, ui: MenuUi): readonly M
     label: ui.menu.more,
     favourites: false,
     links: [
-      { href: 'https://t.me/liguria_events_bot', icon: 'bot', label: ui.nav.bot },
+      { href: 'https://t.me/dovego_bot', icon: 'bot', label: ui.nav.bot },
       {
         href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics',
         icon: 'ical',

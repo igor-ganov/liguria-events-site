@@ -36,6 +36,16 @@ const { lang, region, path, city, ui } = Astro.props;
     </a>
   </p>
   <SiteNav lang={lang} region={region} path={path} ui={ui} />
+  <!-- Outside the nav on purpose, like the region picker below: the nav is
+       hidden on a phone, and making an event is the thing this site is for.
+       Reachable without an account — the sign-in comes at the moment of
+       publishing, by which point the draft is already saved. -->
+  <a class="head-create" href="/submit">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" stroke-linecap="round"></path>
+    </svg>
+    <span>{ui.contribute.link}</span>
+  </a>
   <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
        region is the one control that must stay reachable everywhere. -->
   <RegionPicker lang={lang} region={region} page={pageSegment(path, city)} city={city} />

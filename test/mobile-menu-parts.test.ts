@@ -20,6 +20,7 @@ const ui: MenuUi = {
     bot: 'Bot',
     ical: 'iCal',
   },
+  contribute: { link: 'Add your event' },
 };
 const view = { width: 400, height: 800 };
 
@@ -36,16 +37,18 @@ describe('menuGroups', () => {
     );
   });
   test('region links stay inside the locale and the region', () => {
+    // /submit leads the group and is locale-free on purpose: one form, and the
+    // page picks the language up from the shell.
     assert.deepEqual(
       groups[0]?.links.map((l) => l.href),
-      ['/it/liguria/', '/it/liguria/calendar/', '/it/liguria/map/'],
+      ['/submit', '/it/liguria/', '/it/liguria/calendar/', '/it/liguria/map/'],
     );
   });
   test('the last section links out, untouched by the locale', () => {
     assert.deepEqual(
       groups[2]?.links.map((l) => l.href),
       [
-        'https://t.me/liguria_events_bot',
+        'https://t.me/dovego_bot',
         'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics',
       ],
     );
@@ -98,5 +101,21 @@ describe('panelOffsets', () => {
       top: '80px',
       bottom: 'auto',
     });
+  });
+});
+
+describe('the menu leads with making one', () => {
+  const groups = menuGroups('it', 'liguria', ui);
+
+  test('creating is the first link, above the feed', () => {
+    // The header button is hidden with the nav on a phone; this is where the
+    // same action lives there, and it is what the site is for.
+    const [first] = groups[0]?.links ?? [];
+    assert.equal(first?.href, '/submit');
+    assert.equal(first?.label, 'Add your event');
+  });
+
+  test('it is reachable without an account, like the page it opens', () => {
+    assert.ok((groups[0]?.links ?? []).some((link) => link.href === '/submit'));
   });
 });

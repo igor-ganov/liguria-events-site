@@ -1337,6 +1337,19 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .share-button:hover, .share-button:focus-visible { border-color: var(--accent); color: var(--accent); }
 .share-button[data-share-state='copied'] { border-color: var(--accent); color: var(--accent); }
+/* The one thing the site is for, so it looks like an action and not a link —
+   and it stays on a phone, where the nav does not. */
+.head-create {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.4rem 0.75rem; border-radius: var(--radius-sm);
+  background: var(--accent); color: #fff; text-decoration: none;
+  font-size: 0.86rem; font-weight: 600; white-space: nowrap;
+}
+.head-create:hover, .head-create:focus-visible { filter: brightness(1.08); }
+@media (max-width: 30rem) {
+  .head-create span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .head-create { padding: 0.4rem 0.5rem; }
+}
 .foot-contribute { margin: 0.4rem 0 0; }
 .foot-contribute a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .foot-contribute a:hover { text-decoration: underline; }
