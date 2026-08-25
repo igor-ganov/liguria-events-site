@@ -8,7 +8,8 @@ import { localizedText } from '../src/lib/events/localized-text.ts';
 import { numberText } from '../src/lib/events/number-text.ts';
 import { parseCategories } from '../src/lib/events/parse-categories.ts';
 import { toCompact } from '../src/lib/events/to-compact.ts';
-import type { EditableRow, EventRow } from '../src/lib/events/event-row-types.ts';
+import type { EventRow } from '../src/lib/events/event-row-types.ts';
+import type { EditableRow } from '../src/lib/events/detail-row-types.ts';
 
 // The database's own empty marker, spelled without the literal so the house
 // style's absent-value rule is not tripped by every assertion.

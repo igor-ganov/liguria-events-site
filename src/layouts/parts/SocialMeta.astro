@@ -1,0 +1,28 @@
+---
+import { ogLocale } from '../../lib/seo/og-locale.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// What a link looks like when somebody passes it on. Split out of SiteHead so
+// each stays readable; the page decides the values, this decides the tags.
+type Props = Readonly<{
+  lang: Locale;
+  title: string;
+  description: string;
+  canonical: string;
+  image: string | undefined;
+  ogType: 'website' | 'article';
+}>;
+const { lang, title, description, canonical, image, ogType } = Astro.props;
+---
+
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content="Dove Go" />
+<meta property="og:locale" content={ogLocale(lang)} />
+{image && <meta property="og:image" content={image} />}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{image && <meta name="twitter:image" content={image} />}

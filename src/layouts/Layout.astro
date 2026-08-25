@@ -25,6 +25,7 @@ const {
   needsMap = false,
   image,
   ogType = 'website',
+  noindex = false,
   locales = LOCALES,
 } = Astro.props;
 const payload = await pageEvents(needsEvents);
@@ -35,19 +36,7 @@ const uiData = JSON.stringify({ lang, ui });
 <!doctype html>
 <html lang={lang}>
   <head>
-    <SiteHead
-      lang={lang}
-      title={title}
-      description={description}
-      path={path}
-      needsMap={needsMap}
-      image={image}
-      ogType={ogType}
-      locales={locales}
-      region={region}
-      city={city}
-      site={Astro.site}
-    />
+    <SiteHead {...{ lang, title, description, path, needsMap, image, ogType, noindex, locales, region, city }} site={Astro.site} />
   </head>
   <body>
     <NavProgress />

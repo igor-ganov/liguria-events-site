@@ -23,4 +23,6 @@ export const eventDraft = (body: unknown): EventDraft => ({
   lng: trimmedString(jsonValue(body, 'lng'), 32),
   categories: stringList(jsonValue(body, 'categories')).slice(0, MAX_CATEGORIES),
   free: jsonValue(body, 'free') === true,
+  // Only an explicit true asks for the feed; a missing field is private.
+  listed: jsonValue(body, 'listed') === true,
 });

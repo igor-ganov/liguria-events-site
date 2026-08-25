@@ -9,6 +9,8 @@ export type ResolvedEvent = Readonly<{
   event: CompactEvent | undefined;
   editable: boolean;
   status: string | undefined;
+  /** 'link' when only people holding the URL may see it. */
+  visibility: string | undefined;
   contacts: EventContacts | undefined;
 }>;
 
@@ -47,6 +49,7 @@ export const resolveEvent = async (input: ResolveInput): Promise<ResolvedEvent> 
     event: fromCorpus ?? fromDb ?? fromArchive,
     editable: rows.some((found) => found.owned),
     status: rows.at(0)?.status,
+    visibility: rows.at(0)?.visibility,
     contacts: rows.at(0)?.contacts,
   };
 };

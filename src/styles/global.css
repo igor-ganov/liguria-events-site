@@ -1337,6 +1337,15 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .share-button:hover, .share-button:focus-visible { border-color: var(--accent); color: var(--accent); }
 .share-button[data-share-state='copied'] { border-color: var(--accent); color: var(--accent); }
+/* The visibility choice: the private default is stated in words underneath, so
+   nobody has to infer what an unticked box means. */
+.visibility-choice { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0.8rem 0.9rem; margin: 0.2rem 0; }
+.visibility-choice legend { padding: 0 0.35rem; font-size: 0.82rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }
+.visibility-opt { display: flex; align-items: flex-start; gap: 0.6rem; cursor: pointer; }
+.visibility-opt span { display: flex; flex-direction: column; gap: 0.15rem; }
+.visibility-opt small { color: var(--ink-2); font-size: 0.85rem; }
+.visibility-default { margin: 0.6rem 0 0; padding-top: 0.6rem; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 0.85rem; }
+
 /* The one thing the site is for, so it looks like an action and not a link —
    and it stays on a phone, where the nav does not. */
 .head-create {

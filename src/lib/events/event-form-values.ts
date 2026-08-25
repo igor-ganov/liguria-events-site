@@ -1,4 +1,4 @@
-import type { EditableRow, EventFormValues } from './event-row-types.ts';
+import type { EditableRow, EventFormValues } from './detail-row-types.ts';
 import { numberText } from './number-text.ts';
 import { parseCategories } from './parse-categories.ts';
 import { storedSessions } from './stored-sessions.ts';

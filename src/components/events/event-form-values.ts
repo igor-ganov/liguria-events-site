@@ -21,6 +21,8 @@ export const eventFormValues = (
     lng: text('lng'),
     categories: data.getAll('category'),
     free: data.get('free') === 'on',
+    // Opt-in: unticked means the private case, which is the default.
+    listed: data.get('listed') === 'on',
     kind: [data.get('container')].filter((v) => v === 'on').map(() => 'container').at(0) ?? 'standalone',
     sessions,
   };

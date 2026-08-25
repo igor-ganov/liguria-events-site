@@ -4,9 +4,9 @@ import FeedFilterInit from './FeedFilterInit.astro';
 import ThemeInit from './ThemeInit.astro';
 import { alternateLinks } from '../../lib/seo/alternate-links.ts';
 import SiteFeeds from './SiteFeeds.astro';
+import SocialMeta from './SocialMeta.astro';
 import WebAnalytics from './WebAnalytics.astro';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
-import { ogLocale } from '../../lib/seo/og-locale.ts';
 import { tilesOrigin } from '../../lib/seo/tiles-origin.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
@@ -18,13 +18,14 @@ type Props = Readonly<{
   needsMap: boolean;
   image: string | undefined;
   ogType: 'website' | 'article';
+  noindex: boolean;
   locales: readonly Locale[];
   /** The region whose feeds this page can be subscribed to, when it has one. */
   region?: string | undefined;
   city?: string | undefined;
   site: URL | undefined;
 }>;
-const { lang, title, description, path, needsMap, image, ogType, locales, region, city, site } = Astro.props;
+const { lang, title, description, path, needsMap, image, ogType, noindex, locales, region, city, site } = Astro.props;
 const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
 const canonical = canonicalUrl(lang, path, site);
 const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
@@ -38,6 +39,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 <title>{title} · Dove Go</title>
 {needsMap && tiles && <link rel="preconnect" href={tiles} crossorigin />}
 {needsMap && tiles && <link rel="dns-prefetch" href={tiles} />}
+{noindex && <meta name="robots" content="noindex, nofollow" />}
 <link rel="canonical" href={canonical} />
 {
   alternateLinks(path, site, locales).map(({ hreflang, href }) => (
@@ -45,17 +47,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
   ))
 }
 <SiteFeeds region={region} city={city} site={site} />
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
-<meta property="og:type" content={ogType} />
-<meta property="og:url" content={canonical} />
-<meta property="og:site_name" content="Dove Go" />
-<meta property="og:locale" content={ogLocale(lang)} />
-{image && <meta property="og:image" content={image} />}
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content={title} />
-<meta name="twitter:description" content={description} />
-{image && <meta name="twitter:image" content={image} />}
+<SocialMeta lang={lang} title={title} description={description} canonical={canonical} image={image} ogType={ogType} />
 <WebAnalytics />
 <ClientRouter />
 <ThemeInit />

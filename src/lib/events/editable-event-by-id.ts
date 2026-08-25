@@ -1,4 +1,4 @@
-import type { EditableRow, EventFormValues } from './event-row-types.ts';
+import type { EditableRow, EventFormValues } from './detail-row-types.ts';
 import { eventFormValues } from './event-form-values.ts';
 import { isDefined } from '../is-defined.ts';
 

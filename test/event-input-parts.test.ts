@@ -27,6 +27,7 @@ const draft = (over: Partial<EventDraft> = {}): EventDraft => ({
   sessions: [],
   categories: [],
   free: false,
+  listed: false,
   ...over,
 });
 

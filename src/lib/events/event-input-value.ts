@@ -30,4 +30,5 @@ export const eventInputValue = (draft: EventDraft): EventInput => ({
   // happened to carry rows in the form keeps its plain run.
   sessionsJson: sqlText(programmeJson(draft)),
   kind: sqlText([draft.container].filter(Boolean).map(() => 'container').at(0) ?? ''),
+  visibility: [draft.listed].filter(Boolean).map(() => 'public' as const).at(0) ?? 'link',
 });

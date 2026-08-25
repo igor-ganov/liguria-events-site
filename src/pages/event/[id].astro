@@ -17,7 +17,7 @@ import { uiOf } from '../../lib/i18n/ui-of.ts';
 
 const { id = '' } = Astro.params;
 const corpus = await cachedEvents(EVENTS_URL);
-const { event, editable, status, contacts } = await resolveEvent({
+const { event, editable, status, visibility, contacts } = await resolveEvent({
   id,
   corpus: corpus.events,
   db: Astro.locals.runtime.env.DB,
@@ -30,7 +30,7 @@ Astro.response.status = eventStatusCode(id, event !== undefined);
 const ui = await uiOf('en');
 ---
 
-{event && <EventDetail lang="en" event={event} editable={editable} status={status} contacts={contacts} />}
+{event && <EventDetail lang="en" event={event} editable={editable} status={status} visibility={visibility} contacts={contacts} />}
 {
   event === undefined && (
     <Layout lang="en" title={ui.gone.heading}>

@@ -1,4 +1,5 @@
-import type { DetailRow, EventContacts } from './event-row-types.ts';
+import type { DetailRow } from './detail-row-types.ts';
+import type { EventContacts } from './event-row-types.ts';
 import { EVENT_COLUMNS } from './event-columns.ts';
 import { eventContactsOf } from './event-contacts-of.ts';
 import { isDefined } from '../is-defined.ts';
@@ -7,6 +8,8 @@ import { toCompact } from './to-compact.ts';
 export type EventDetail = Readonly<{
   compact: Record<string, unknown>;
   status: string;
+  /** 'link' — anyone with the URL, and no crawler — or 'public'. */
+  visibility: string;
   owned: boolean;
   contacts: EventContacts;
 }>;
@@ -20,7 +23,7 @@ export const eventForDetail = async (
   viewerId?: string,
 ): Promise<EventDetail | undefined> => {
   const row = await db
-    .prepare(`SELECT ${EVENT_COLUMNS}, address, phone, website, status, submitter_id FROM events WHERE id = ?`)
+    .prepare(`SELECT ${EVENT_COLUMNS}, address, phone, website, status, visibility, submitter_id FROM events WHERE id = ?`)
     .bind(id)
     .first<DetailRow>();
   return [row ?? undefined]
@@ -30,6 +33,7 @@ export const eventForDetail = async (
     .map(({ r, owned }) => ({
       compact: toCompact(r),
       status: r.status,
+      visibility: r.visibility,
       owned,
       contacts: eventContactsOf(r),
     }))

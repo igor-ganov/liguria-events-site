@@ -1,0 +1,20 @@
+---
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// Opt-in, never opt-out: an unticked box means the private case, and the line
+// underneath says so in words rather than leaving anyone to infer it.
+type Props = Readonly<{ ui: Ui }>;
+const { ui } = Astro.props;
+---
+
+<fieldset class="visibility-choice">
+  <legend>{ui.visibility.legend}</legend>
+  <label class="visibility-opt">
+    <input type="checkbox" name="listed" />
+    <span>
+      <strong>{ui.visibility.listedTitle}</strong>
+      <small>{ui.visibility.listedNote}</small>
+    </span>
+  </label>
+  <p class="visibility-default">{ui.visibility.linkNote}</p>
+</fieldset>

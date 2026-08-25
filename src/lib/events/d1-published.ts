@@ -3,7 +3,8 @@
 // user-submitted event resolves the same way in both places. Every query and
 // every piece of row shaping now lives in its own module; this file stays the
 // import surface the API endpoints and the .astro pages already use.
-export type { EventContacts, EventFormValues, EventRow } from './event-row-types.ts';
+export type { EventContacts, EventRow } from './event-row-types.ts';
+export type { EventFormValues } from './detail-row-types.ts';
 export type { EventDetail } from './event-for-detail.ts';
 export { toCompact } from './to-compact.ts';
 export { publishedEvents } from './published-events.ts';

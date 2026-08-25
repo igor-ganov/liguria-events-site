@@ -1,5 +1,6 @@
 ---
 import ImageField from './events/ImageField.astro';
+import VisibilityField from './events/VisibilityField.astro';
 import CategoryFields from './events/CategoryFields.astro';
 import ProgrammeField from './events/ProgrammeField.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
@@ -18,6 +19,8 @@ const SUBMIT_LABEL: Record<Props['mode'], string> = { create: 'Submit for review
 <form id="event-form" class="submit-form" data-mode={mode} data-id={eventId} data-signin-note={ui.submitAuth.signin}>
   <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
   <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
+
+  <VisibilityField ui={ui} />
 
   <ImageField coverImage={v.coverImage} />
 

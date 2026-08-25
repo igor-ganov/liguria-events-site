@@ -6,15 +6,15 @@
       moment of publishing, by which point the draft is already saved.
       *Satisfies* R1.1 · *Design* §6
 
-- [~] **T1 — `visibility` column**, defaulting to `link`, crawled rows
+- [x] **T1 — `visibility` column**, defaulting to `link`, crawled rows
       backfilled to `public`.
       *Satisfies* R2, R3 · *Design* §1
-- [ ] **T2 — The feed gate**: `publishedEvents` returns public rows only.
+- [x] **T2 — The feed gate**: `publishedEvents` returns public rows only.
       *Satisfies* R2.2 · *Design* §2
-- [ ] **T3 — The choice in the form**, defaulting to link-only, and carried
+- [x] **T3 — The choice in the form**, defaulting to link-only, and carried
       through the create API.
       *Satisfies* R1.2 · *Design* §1
-- [ ] **T4 — `noindex` on a link-only page**, and out of the sitemap.
+- [x] **T4 — `noindex` on a link-only page**, and out of the sitemap.
       *Satisfies* R2.3 · *Design* §3
 - [ ] **T5 — `pl` in the projection**, badge on the card and the detail page.
       *Satisfies* R3.3 · *Design* §4

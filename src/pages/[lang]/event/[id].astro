@@ -23,7 +23,7 @@ switch (lang) {
 }
 
 const corpus = await cachedEvents(EVENTS_URL);
-const { event, editable, status, contacts } = await resolveEvent({
+const { event, editable, status, visibility, contacts } = await resolveEvent({
   id,
   corpus: corpus.events,
   db: Astro.locals.runtime.env.DB,
@@ -34,7 +34,7 @@ Astro.response.status = eventStatusCode(id, event !== undefined);
 const ui = await uiOf(lang);
 ---
 
-{event && <EventDetail lang={lang} event={event} editable={editable} status={status} contacts={contacts} />}
+{event && <EventDetail lang={lang} event={event} editable={editable} status={status} visibility={visibility} contacts={contacts} />}
 {
   event === undefined && (
     <Layout lang={lang} title={ui.gone.heading}>

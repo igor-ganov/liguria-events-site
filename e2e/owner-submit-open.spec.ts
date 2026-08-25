@@ -57,3 +57,14 @@ test('the page has exactly one main landmark', async ({ page }) => {
   await page.goto('/submit');
   await expect(page.locator('main')).toHaveCount(1);
 });
+
+test('the form asks who may see it, and defaults to nobody but the link', async ({ page }) => {
+  // The default is what happens when nobody chooses, so it has to be the
+  // private one: a friends' party must not land in a city feed or in Google.
+  await page.goto('/submit');
+  const listed = page.locator('input[name=listed]');
+  await expect(listed).toBeVisible();
+  await expect(listed).not.toBeChecked();
+  await expect(page.locator('.visibility-choice')).toContainText('Show it in the city feed');
+  await expect(page.locator('.visibility-default')).toContainText('only people you send the link to');
+});

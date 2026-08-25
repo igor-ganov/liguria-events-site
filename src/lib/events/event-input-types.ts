@@ -17,6 +17,9 @@ export type EventDraft = Readonly<{
   lng: string;
   categories: readonly string[];
   free: boolean;
+  /** The author asked for it in the city's feed. Absent means the private
+   *  case, which is what happens when nobody chooses. */
+  listed: boolean;
   /** Set when the event happens only on its programmed dates. */
   container: boolean;
   /** The programme, ascending; empty for a standalone event. */
@@ -43,6 +46,8 @@ export type EventInput = {
   sessionsJson: string | null;
   /** 'container', or the empty marker for a standalone event. */
   kind: string | null;
+  /** 'link' — anyone holding the URL and nobody else — or 'public'. */
+  visibility: 'link' | 'public';
 };
 
 export type EventInputResult =

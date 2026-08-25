@@ -89,6 +89,7 @@ describe('eventFormValues', () => {
       'lng',
       'categories',
       'free',
+      'listed',
       'kind',
       'sessions',
     ]);
@@ -156,5 +157,18 @@ describe('uploadedImageUrl', () => {
   test('an accepted response with no usable URL yields nothing', () => {
     assert.equal(uploadedImageUrl(true, undefined), undefined);
     assert.equal(uploadedImageUrl(true, ''), undefined);
+  });
+});
+
+describe('the visibility the form sends', () => {
+  test('an unticked box is a private event, not a missing field', () => {
+    // The API reads only an explicit true, so this has to be a real false.
+    assert.equal(eventFormValues(new FormData()).listed, false);
+  });
+
+  test('ticking it asks for the city feed', () => {
+    const data = new FormData();
+    data.set('listed', 'on');
+    assert.equal(eventFormValues(data).listed, true);
   });
 });
