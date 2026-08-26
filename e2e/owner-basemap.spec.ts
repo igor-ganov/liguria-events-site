@@ -27,6 +27,10 @@ test('clicking the map sets the base and the from/back legs appear', async ({ pa
   // Arm the route-base picker, then click the map centre.
   await page.locator('[data-pick-base-route]').click();
   await expect(page.locator('.route-pick-hint')).toBeVisible();
+  // The mouse works in viewport coordinates and does not scroll on its own:
+  // once the page above the map grew by a row, the canvas centre sat below the
+  // fold and the click landed nowhere.
+  await canvas.scrollIntoViewIfNeeded();
   const box = await canvas.boundingBox();
   if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 

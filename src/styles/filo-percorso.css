@@ -8,13 +8,17 @@
   position: relative;
   padding-left: var(--corsia);
 }
+/* Pinned to the screen, not to the column: a feed is forty thousand pixels
+   tall, and an SVG that size is past what the browser places accurately —
+   the stops drifted further off their cards the further down you scrolled.
+   The path is regenerated each frame for the stretch that can be seen, so
+   the line still belongs to the page and travels with it. */
 .percorso__linea {
-  position: absolute;
-  left: 2px;
+  position: fixed;
   top: 0;
   width: 18px;
-  height: 100%;
-  overflow: visible;
+  z-index: 1;
+  overflow: hidden;
   pointer-events: none;
 }
 .percorso__tratto {
@@ -23,8 +27,6 @@
   stroke-width: 1.8;
   stroke-linecap: round;
   opacity: 0.72;
-  stroke-dasharray: 1;
-  stroke-dashoffset: var(--tratto, 0);
 }
 
 /* A stop: hollow means found elsewhere, filled means made here. The nodes
@@ -34,16 +36,17 @@
 .fermata {
   list-style: none;
 }
+/* The stop appears by taking colour, not by growing. CSS `scale` composes
+   with the element's own transform before it, so a scaled stop is moved as
+   well as shrunk — the unlit ones sat at 0.45 of their own height up the
+   page, tens of pixels off the card they mark. */
 .percorso__nodo {
   fill: var(--carta);
   stroke: var(--filo);
   stroke-width: 1.6;
   stroke-linecap: round;
-  transform-box: fill-box;
-  transform-origin: center;
-  opacity: 0.45;
-  transition: opacity 0.34s var(--mano), scale 0.34s var(--mano);
-  scale: 0.45;
+  opacity: 0.34;
+  transition: opacity 0.34s var(--mano), stroke-width 0.34s var(--mano);
 }
 .percorso__nodo--nostra {
   fill: var(--sosta);
@@ -52,7 +55,7 @@
 }
 .percorso__nodo--passata {
   opacity: 1;
-  scale: 1;
+  stroke-width: 1.9;
 }
 
 /* The frayed end: the sequence stops, and the line admits it. */
@@ -75,12 +78,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .percorso__tratto {
-    stroke-dashoffset: 0;
-  }
   .percorso__nodo {
     opacity: 1;
-    scale: 1;
     transition: none;
   }
 }

@@ -3,13 +3,18 @@ import { routeFeature } from './route-feature.ts';
 import type { GeoJSONSource, Map as MapLibreMap } from 'maplibre-gl';
 import type { Line } from './map-types.ts';
 
+/** The line on the map is the same thread as the one down the feed, so it
+ *  takes its colour from the same token and follows the theme with it. */
+const threadColour = (): string =>
+  getComputedStyle(document.documentElement).getPropertyValue('--filo').trim() || '#33697a';
+
 const addLayer = (map: MapLibreMap, data: GeoJSON.Feature): void => {
   map.addSource('route', { type: 'geojson', data });
   map.addLayer({
     id: 'route-line',
     type: 'line',
     source: 'route',
-    paint: { 'line-color': '#e5484d', 'line-width': 3, 'line-dasharray': [2, 1.5] },
+    paint: { 'line-color': threadColour(), 'line-width': 3, 'line-dasharray': [2, 1.5] },
   });
 };
 

@@ -36,12 +36,11 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 <meta name="description" content={description} />
 <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#16181c" media="(prefers-color-scheme: dark)" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap"
-/>
+<!-- The two faces are served from here, so nothing blocks on another
+     origin. Only the two that every page uses are preloaded; the rest are
+     fetched by the browser when a page actually needs those letters. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/rubik-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-latin.woff2" crossorigin />
 <link rel="icon" type="image/svg+xml" href={icon} />
 <title>{title} · Dove Go</title>
 {needsMap && tiles && <link rel="preconnect" href={tiles} crossorigin />}

@@ -1,11 +1,4 @@
 <script>
-  // The thread down the feed: drawn by the scroll, one per page.
-  import { initPercorso } from '../../components/percorso/init-percorso.ts';
-  initPercorso();
-  document.addEventListener('astro:page-load', initPercorso);
-</script>
-
-<script>
   // Three-way theme cycle (light → dark → system) with circular reveal;
   // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
   // = user choice.
@@ -46,4 +39,13 @@
   import { initCopyLink } from '../../components/events/init-copy-link.ts';
   initCopyLink();
   document.addEventListener('astro:page-load', initCopyLink);
+</script>
+
+<script>
+  // The thread down the feed, drawn by the scroll. Last on purpose: it is
+  // decoration for the reading, and it sets up an observer over every row —
+  // ahead of the feed's own start-up that delayed the filter the page needs.
+  import { initPercorso } from '../../components/percorso/init-percorso.ts';
+  document.addEventListener('astro:page-load', initPercorso);
+  initPercorso();
 </script>

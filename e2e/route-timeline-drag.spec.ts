@@ -64,6 +64,10 @@ test('generator timeline: dragging a block body pins its start time and persists
   // Grab the first block's BODY (its centre, clear of the top/bottom resize
   // handles) and drag it well below the second — it reorders (and pins if that
   // opens a gap).
+  // The mouse takes viewport coordinates and does not scroll on its own, so
+  // the block has to be on screen before it is measured — otherwise a page
+  // that grows by a row silently turns this drag into a no-op.
+  await page.locator('.tl-block').first().scrollIntoViewIfNeeded();
   const box = (await page.locator('.tl-block').first().boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
