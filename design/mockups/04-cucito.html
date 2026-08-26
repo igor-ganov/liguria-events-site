@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cucito</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&family=Lora:ital,wght@0,400;1,400&display=swap">
+<style>
+/* 04 — CUCITO
+   Il bottone è cucito sul foglio: un punto a mano, con i tratti disuguali e
+   il filo che continua un poco oltre l'angolo. Il resto della pagina è
+   tessuto chiaro e niente altro. */
+:root{
+  --tela:#fbfaf7; --pieno:#ffffff; --riga:#eae6de;
+  --testo:#2b2926; --tenue:#807b73; --filo:#a85a3c; --filo-2:#4c6b6a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--tela);color:var(--testo);
+  font-family:'Outfit',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.58;
+  font-weight:300;-webkit-font-smoothing:antialiased;
+}
+main{max-width:790px;margin:0 auto;padding:50px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:58px}
+.logo{margin:0;font-size:16px;font-weight:500}
+.logo i{font-style:normal;color:var(--filo)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 12px;font-family:'Lora',Georgia,serif;font-weight:400;
+  font-size:clamp(38px,6.2vw,56px);line-height:1.08;letter-spacing:-.018em;text-wrap:balance;
+}
+h1 em{font-style:italic;color:var(--filo)}
+.sommario{margin:0 0 44px;max-width:50ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri: piccoli punti ──────────────────────────────────── */
+.filtri{display:flex;gap:11px;flex-wrap:wrap;margin-bottom:40px}
+.filtro{
+  font:inherit;font-size:13.5px;padding:7px 15px;cursor:pointer;background:none;
+  color:var(--tenue);border:1.4px dashed var(--riga);border-radius:20px 19px 21px 18px;
+}
+.filtro[aria-pressed="true"]{color:var(--filo);border-color:var(--filo);border-style:dashed}
+.filtro:focus-visible{outline:2px solid var(--filo);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:21px 0;border-bottom:1px dashed var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:20px;font-weight:400;letter-spacing:-.01em;line-height:1.32}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.data{margin:0;font-size:14px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--filo-2)}
+
+/* ── il bottone: cucitura a mano ────────────────────────────── */
+.azioni{display:flex;gap:16px;flex-wrap:wrap;margin-top:48px}
+.punto{
+  position:relative;font:inherit;font-size:14.5px;font-weight:400;
+  padding:13px 26px;cursor:pointer;border:0;background:var(--pieno);
+  color:var(--testo);border-radius:6px 8px 6px 9px;
+  box-shadow:0 1px 2px rgba(60,50,40,.07);
+}
+.punto::before{
+  /* il filo: trattini disuguali, e l'ultimo punto esce dal bordo */
+  content:"";position:absolute;inset:5px;border-radius:4px 6px 4px 7px;
+  border:1.6px dashed var(--filo);
+  -webkit-mask-image:linear-gradient(90deg,#000 0 92%,rgba(0,0,0,.35) 100%);
+  mask-image:linear-gradient(90deg,#000 0 92%,rgba(0,0,0,.35) 100%);
+  pointer-events:none;
+}
+.punto--pieno{background:var(--filo);color:var(--pieno)}
+.punto--pieno::before{border-color:rgba(255,255,255,.72)}
+.punto--verde{background:var(--pieno);color:var(--filo-2)}
+.punto--verde::before{border-color:var(--filo-2)}
+.punto:focus-visible{outline:2px solid var(--testo);outline-offset:4px}
+
+.piede{margin-top:62px;padding-top:16px;border-top:1px dashed var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare <em>a Genova</em></h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="punto punto--pieno" type="button">Crea evento</button>
+    <button class="punto punto--verde" type="button">Condividi</button>
+    <button class="punto" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">04 — Cucito · il filo si smorza verso l'ultimo punto, i raggi non sono uguali</p>
+</main>
+</body>
+</html>

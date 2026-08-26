@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piega</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&family=Petrona:wght@300;400&display=swap">
+<style>
+/* 10 — PIEGA
+   Come una mappa ripiegata: il bottone porta una piega vera, con un lato che
+   prende luce e l'altro che la perde, e un angolo appena sollevato. Nessuna
+   texture, nessun bordo: solo la geometria della carta piegata. */
+:root{
+  --carta:#fcfcfa; --pieno:#ffffff; --riga:#ebeae6;
+  --testo:#212528; --tenue:#7e8388; --lago:#3f6f86; --terra:#a97a4e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Albert Sans',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.58;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:800px;margin:0 auto;padding:52px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:56px}
+.logo{margin:0;font-size:16px;font-weight:600;letter-spacing:-.005em}
+.logo i{font-style:normal;color:var(--lago)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 12px;font-family:'Petrona',Georgia,serif;font-weight:300;
+  font-size:clamp(40px,6.8vw,60px);line-height:1.04;letter-spacing:-.024em;text-wrap:balance;
+}
+.sommario{margin:0 0 44px;max-width:50ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri: linguette piegate ──────────────────────────────── */
+.filtri{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px}
+.filtro{
+  position:relative;font:inherit;font-size:13.5px;padding:8px 16px;cursor:pointer;
+  border:0;background:var(--pieno);color:var(--tenue);
+  box-shadow:0 1px 1.5px rgba(35,40,45,.07);
+  clip-path:polygon(0 0,100% 0,100% 100%,7px 100%,0 calc(100% - 7px));
+}
+.filtro[aria-pressed="true"]{background:var(--lago);color:#fff}
+.filtro:focus-visible{outline:2px solid var(--lago);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:21px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:20px;font-weight:500;letter-spacing:-.015em;line-height:1.32}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.data{margin:0;font-size:14px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--terra)}
+
+/* ── il bottone: una piega e un angolo sollevato ────────────── */
+.azioni{display:flex;gap:16px;flex-wrap:wrap;margin-top:48px}
+.piega{
+  position:relative;font:inherit;font-size:14.5px;font-weight:500;
+  padding:14px 26px 14px 27px;cursor:pointer;border:0;color:#fff;
+  background:linear-gradient(101deg,
+    color-mix(in srgb,var(--lago) 88%,#fff) 0 38%,
+    var(--lago) 38% 100%);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%);
+  box-shadow:0 1.5px 2px rgba(35,40,45,.14);
+}
+.piega::after{
+  /* l'angolo sollevato: il triangolo che resta scoperto */
+  content:"";position:absolute;right:0;bottom:0;width:9px;height:9px;
+  background:color-mix(in srgb,var(--lago) 45%,#fff);
+}
+.piega--terra{
+  background:linear-gradient(101deg,
+    color-mix(in srgb,var(--terra) 88%,#fff) 0 38%, var(--terra) 38% 100%);
+}
+.piega--terra::after{background:color-mix(in srgb,var(--terra) 45%,#fff)}
+.piega--carta{
+  color:var(--testo);
+  background:linear-gradient(101deg,#fff 0 38%,var(--pieno) 38% 100%);
+  box-shadow:0 1px 1.5px rgba(35,40,45,.10), inset 0 0 0 1px var(--riga);
+}
+.piega--carta::after{background:#f1f0ec}
+.piega:hover{transform:translateY(-1px)}
+.piega:focus-visible{outline:2px solid var(--testo);outline-offset:4px}
+
+.piede{margin-top:62px;padding-top:16px;border-top:1px solid var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+@media (prefers-reduced-motion:reduce){.piega:hover{transform:none}}
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare a Genova</h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="piega" type="button">Crea evento</button>
+    <button class="piega piega--terra" type="button">Condividi</button>
+    <button class="piega piega--carta" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">10 — Piega · un lato prende luce, l'angolo sollevato è un triangolo scoperto</p>
+</main>
+</body>
+</html>

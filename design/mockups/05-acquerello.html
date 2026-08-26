@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acquerello</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Literata:opsz,wght@7..72,300;7..72,400&display=swap">
+<style>
+/* 05 — ACQUERELLO
+   Il colore non ha un bordo: si ferma dove l'acqua si è fermata. Il bottone è
+   una macchia che si addensa ai margini, come fa il pigmento asciugando.
+   Pagina bianchissima, così la macchia resta l'unica cosa che si vede. */
+:root{
+  --carta:#fdfdfc; --riga:#ecedee; --testo:#20262b; --tenue:#7c848b;
+  --mare:#4b86a8; --salvia:#6e9077; --pesca:#c98268;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Figtree',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.58;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:800px;margin:0 auto;padding:50px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:58px}
+.logo{margin:0;font-size:16px;font-weight:600}
+.logo i{font-style:normal;color:var(--mare)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 12px;font-family:'Literata',Georgia,serif;font-weight:300;
+  font-size:clamp(38px,6.4vw,58px);line-height:1.06;letter-spacing:-.02em;text-wrap:balance;
+}
+.sommario{margin:0 0 44px;max-width:50ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri: velature leggerissime ──────────────────────────── */
+.filtri{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:42px}
+.filtro{
+  font:inherit;font-size:13.5px;padding:8px 16px;cursor:pointer;border:0;
+  background:none;color:var(--tenue);position:relative;isolation:isolate;
+}
+.filtro::before{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:14px 18px 15px 20px;
+  background:var(--mare);opacity:0;filter:blur(.4px);
+}
+.filtro[aria-pressed="true"]{color:var(--testo)}
+.filtro[aria-pressed="true"]::before{opacity:.14}
+.filtro:focus-visible{outline:2px solid var(--mare);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:21px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:20px;font-weight:500;letter-spacing:-.014em;line-height:1.32}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.data{margin:0;font-size:14px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--pesca)}
+
+/* ── il bottone: macchia che si addensa ai bordi ────────────── */
+.azioni{display:flex;gap:18px;flex-wrap:wrap;margin-top:48px}
+.macchia{
+  position:relative;font:inherit;font-size:15px;font-weight:500;
+  padding:14px 28px;cursor:pointer;border:0;background:none;color:#fff;
+  isolation:isolate;
+}
+.macchia::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  border-radius:46% 54% 50% 50% / 58% 42% 58% 42%;
+  background:
+    radial-gradient(120% 130% at 12% 22%, rgba(255,255,255,.30) 0 30%, transparent 62%),
+    var(--mare);
+  /* l'orlo più scuro: il pigmento che si raccoglie asciugando */
+  box-shadow:inset 0 0 0 1.5px rgba(20,60,80,.28), inset 0 -3px 8px rgba(20,60,80,.20);
+  filter:url(#acqua);
+}
+.macchia--salvia::before{
+  background:radial-gradient(120% 130% at 78% 30%, rgba(255,255,255,.28) 0 30%, transparent 62%), var(--salvia);
+  border-radius:52% 48% 56% 44% / 44% 56% 44% 56%;
+  box-shadow:inset 0 0 0 1.5px rgba(40,70,45,.26), inset 0 -3px 8px rgba(40,70,45,.18);
+}
+.macchia--chiara{color:var(--testo)}
+.macchia--chiara::before{
+  background:var(--pesca);opacity:.22;
+  border-radius:50% 50% 44% 56% / 52% 48% 52% 48%;
+  box-shadow:inset 0 0 0 1.5px rgba(160,90,60,.30);
+}
+.macchia:focus-visible{outline:2px solid var(--testo);outline-offset:5px}
+
+.piede{margin-top:62px;padding-top:16px;border-top:1px solid var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <!-- l'acqua non lascia un bordo netto: turbolenza morbida, spostamento breve -->
+  <filter id="acqua">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="11" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="4.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare a Genova</h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="macchia" type="button">Crea evento</button>
+    <button class="macchia macchia--salvia" type="button">Condividi</button>
+    <button class="macchia macchia--chiara" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">05 — Acquerello · orlo più scuro in inset shadow, bordo mosso da feTurbulence lieve</p>
+</main>
+</body>
+</html>

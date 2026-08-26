@@ -1,4 +1,11 @@
 <script>
+  // The thread down the feed: drawn by the scroll, one per page.
+  import { initPercorso } from '../../components/percorso/init-percorso.ts';
+  initPercorso();
+  document.addEventListener('astro:page-load', initPercorso);
+</script>
+
+<script>
   // Three-way theme cycle (light → dark → system) with circular reveal;
   // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
   // = user choice.

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap">
+<style>
+/* 07 — MATITA
+   Il contorno è tirato due volte, come si fa quando si vuole essere sicuri:
+   il secondo tratto non ricalca il primo e negli angoli scappa un poco oltre.
+   Grigi tenui, nessun colore forte: la matita non urla. */
+:root{
+  --carta:#fafaf8; --pieno:#ffffff; --riga:#eaeae6;
+  --testo:#2a2c2f; --tenue:#82868b; --grafite:#5a5f66; --blu:#556f8c; --rosso:#a86055;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Manrope',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.58;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:780px;margin:0 auto;padding:50px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:58px}
+.logo{margin:0;font-size:16px;font-weight:600}
+.logo i{font-style:normal;color:var(--blu)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 12px;font-family:'Newsreader',Georgia,serif;font-weight:300;
+  font-size:clamp(38px,6.4vw,58px);line-height:1.05;letter-spacing:-.022em;text-wrap:balance;
+}
+.sommario{margin:0 0 44px;max-width:50ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri: sottolineati a matita ──────────────────────────── */
+.filtri{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:40px}
+.filtro{
+  position:relative;font:inherit;font-size:14.5px;padding:2px 2px 8px;cursor:pointer;
+  border:0;background:none;color:var(--tenue);
+}
+.filtro[aria-pressed="true"]{color:var(--testo)}
+.filtro[aria-pressed="true"]::after{
+  content:"";position:absolute;left:-3px;right:-5px;bottom:2px;height:5px;
+  background:
+    linear-gradient(var(--grafite),var(--grafite)) left 0 top 1px/98% 1.2px no-repeat,
+    linear-gradient(var(--grafite),var(--grafite)) left 3px top 3.4px/94% 1px no-repeat;
+  opacity:.75;
+}
+.filtro:focus-visible{outline:2px solid var(--grafite);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:21px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:20px;font-weight:500;letter-spacing:-.016em;line-height:1.32}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.data{margin:0;font-size:14px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--rosso)}
+
+/* ── il bottone: due tratti che non coincidono ──────────────── */
+.azioni{display:flex;gap:18px;flex-wrap:wrap;margin-top:48px}
+.schizzo{
+  position:relative;font:inherit;font-size:14.5px;font-weight:500;
+  padding:13px 26px;cursor:pointer;border:0;background:none;color:var(--testo);
+}
+.schizzo::before,.schizzo::after{
+  content:"";position:absolute;border:1.3px solid var(--grafite);border-radius:9px 7px 10px 6px;
+  pointer-events:none;
+}
+.schizzo::before{inset:0;opacity:.9}
+/* il secondo giro: più largo, ruotato, e negli angoli scappa oltre il primo */
+.schizzo::after{
+  inset:-4px -6px -3px -5px;opacity:.55;transform:rotate(-.9deg);
+  border-radius:6px 11px 5px 10px;border-width:1.1px;
+}
+.schizzo--blu{color:var(--blu)}
+.schizzo--blu::before,.schizzo--blu::after{border-color:var(--blu)}
+.schizzo--pieno{background:var(--grafite);color:var(--pieno);border-radius:9px 7px 10px 6px}
+.schizzo--pieno::before{border-color:rgba(255,255,255,.55)}
+.schizzo--pieno::after{border-color:var(--grafite);opacity:.5}
+.schizzo:focus-visible{outline:2px solid var(--testo);outline-offset:5px}
+
+.piede{margin-top:62px;padding-top:16px;border-top:1px solid var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare a Genova</h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="schizzo schizzo--pieno" type="button">Crea evento</button>
+    <button class="schizzo schizzo--blu" type="button">Condividi</button>
+    <button class="schizzo" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">07 — Matita · due contorni sovrapposti, il secondo più largo e ruotato</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filo — feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap">
+<link rel="stylesheet" href="filo.css">
+<link rel="stylesheet" href="componenti.css">
+<link rel="stylesheet" href="mano.css">
+<style>
+/* Il feed è l'unica pagina con una vera sequenza di date, quindi è
+   l'unica dove il filo attraversa tutto. */
+.cerca{max-width:420px}
+.strumento-riga{
+  display:flex;gap:var(--sp-4);align-items:center;justify-content:space-between;
+  flex-wrap:wrap;margin-bottom:var(--sp-4);
+}
+.zona:not([data-stato="pronto"]) .veri{display:none}
+.zona:not([data-stato="attesa"]) .ossa{display:none}
+.ossa{display:grid;gap:var(--sp-5);padding:var(--sp-4) 0}
+.osso-riga{display:grid;grid-template-columns:46px 1fr 30px;gap:var(--sp-4);align-items:center}
+.osso--titolo{height:15px;width:62%}
+.osso--nota{height:11px;width:40%;margin-top:7px}
+.in-fondo{display:grid;place-items:center;margin-top:var(--sp-6)}
+.evento{animation:appare .42s var(--mano) backwards}
+.evento:nth-child(2){animation-delay:.05s}
+.evento:nth-child(3){animation-delay:.1s}
+.evento:nth-child(4){animation-delay:.15s}
+@keyframes appare{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.evento{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <a class="marchio" href="00-sistema.html">Dove<i>Go</i></a>
+  <nav class="strumenti" aria-label="Sito">
+    <span class="suggerisce">
+      <button class="giro giro--piccolo" type="button" data-tema>Tema scuro</button>
+      <span class="suggerisce__bolla" role="tooltip">Chiaro, scuro, o come il sistema</span>
+    </span>
+    <a class="giro giro--primario giro--piccolo" href="03-crea.html">Crea evento</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Cosa fare <em>a Genova</em></h1>
+  <p class="sommario">Raccogliamo ogni ora quello che i teatri, i comuni e i locali annunciano.
+    Quello che manca lo aggiunge chi c'è stato.</p>
+
+  <section class="cifre" aria-label="Numeri">
+    <span class="cifra"><b data-conta="1166">0</b><span>eventi in Italia</span></span>
+    <span class="cifra"><b data-conta="214">0</b><span>a Genova</span></span>
+    <span class="cifra"><b data-conta="38">0</b><span>creati qui</span></span>
+  </section>
+
+  <section data-setaccio>
+    <nav class="giorni" data-giorni aria-label="Scegli il giorno">
+      <button class="giorno-cella" type="button" aria-pressed="true"><small>Oggi</small><b>26</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false"><small>Gio</small><b>27</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false"><small>Ven</small><b>28</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false"><small>Sab</small><b>29</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false"><small>Dom</small><b>30</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false" data-vuoto><small>Lun</small><b>31</b></button>
+      <button class="giorno-cella" type="button" aria-pressed="false" data-vuoto><small>Mar</small><b>1</b></button>
+    </nav>
+
+    <section class="strumento-riga">
+      <p class="cerca" data-cerca>
+        <svg class="icona" aria-hidden="true"><use href="#i-cerca"/></svg>
+        <input type="search" placeholder="Filtra per titolo o luogo" aria-label="Filtra gli eventi">
+        <button class="cerca__pulisci" type="button">pulisci</button>
+      </p>
+      <nav class="segmenti" data-segmenti aria-label="Come vedere">
+        <span class="segmenti__cursore" aria-hidden="true"></span>
+        <button class="segmento" type="button" aria-selected="true" data-valore="lista">Lista</button>
+        <button class="segmento" type="button" aria-selected="false" data-valore="mappa">Mappa</button>
+        <button class="segmento" type="button" aria-selected="false" data-valore="calendario">Calendario</button>
+      </nav>
+    </section>
+
+    <nav class="filtri" aria-label="Filtri" style="margin-bottom:var(--sp-6)">
+      <button class="filtro" type="button" aria-pressed="false" data-filtro="qui">Creati qui <span class="filtro__conto">38</span></button>
+      <button class="filtro" type="button" aria-pressed="false" data-filtro="gratis">Gratis <span class="filtro__conto">61</span></button>
+      <button class="filtro" type="button" aria-pressed="false" data-filtro="sera">Di sera <span class="filtro__conto">94</span></button>
+      <button class="filtro" type="button" aria-pressed="false" data-filtro="musica">Musica <span class="filtro__conto">47</span></button>
+      <span class="etichetta" style="margin-left:auto"><span data-conto-visibili>7</span> in vista</span>
+    </nav>
+
+    <section class="percorso" aria-label="Eventi in ordine di data">
+      <p class="giorno">Oggi · mercoledì 26 agosto</p>
+      <section class="eventi">
+
+        <article class="evento fermata" data-tag="musica sera">
+          <p class="evento__ora">21:00</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Turandot</a></h2>
+            <p class="dettagli">Teatro Carlo Felice · da 18 €</p>
+            <p class="evento__extra"><span>Ultima replica della stagione. Restano posti in galleria.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Turandot">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+        <article class="evento fermata fermata--nostra" data-tag="qui gratis sera musica">
+          <p class="evento__ora">19:30</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Concerto in cortile</a></h2>
+            <p class="dettagli">Palazzo Spinola · <span class="segno segno--qui">creato qui</span> · <span class="segno segno--gratis">gratis</span></p>
+            <p class="evento__extra"><span>Un quartetto d'archi a lume di candela. Novanta minuti, senza intervallo.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="true" aria-label="Salva Concerto in cortile">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+        <article class="evento fermata" data-tag="gratis">
+          <p class="evento__ora">10:00</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Mercato di Piazza Scio</a></h2>
+            <p class="dettagli">Piazza Scio · <span class="segno segno--gratis">ingresso libero</span></p>
+            <p class="evento__extra"><span>Ogni mercoledì fino a ottobre.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Mercato di Piazza Scio">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+      </section>
+
+      <p class="giorno">Giovedì 27 agosto</p>
+      <section class="eventi">
+
+        <article class="evento fermata" data-tag="gratis sera">
+          <p class="evento__ora">21:15</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Cinema all'aperto</a></h2>
+            <p class="dettagli">Porto Antico · <span class="segno segno--gratis">gratis</span></p>
+            <p class="evento__extra"><span>In caso di pioggia si sposta sotto la tettoia.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Cinema all'aperto">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+        <article class="evento fermata fermata--nostra" data-tag="qui">
+          <p class="evento__ora">18:00</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Passeggiata fra i caruggi</a></h2>
+            <p class="dettagli">Da Piazza Banchi · <span class="segno segno--qui">creato qui</span></p>
+            <p class="evento__extra"><span>Siamo già in nove. <span class="facce" style="display:inline-flex;vertical-align:-9px"><span class="faccia">M</span><span class="faccia">L</span><span class="faccia">R</span><span class="faccia" style="background:var(--sosta)">+6</span></span></span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Passeggiata fra i caruggi">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+      </section>
+
+      <p class="giorno">Venerdì 28 agosto</p>
+      <section class="eventi">
+
+        <article class="evento fermata" data-tag="musica sera">
+          <p class="evento__ora">22:00</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Ex Novo Trio</a></h2>
+            <p class="dettagli">Count Basie Jazz Club · da 12 €</p>
+            <p class="evento__extra"><span>Prenotazione consigliata: il locale ha quaranta posti.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Ex Novo Trio">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+        <article class="evento fermata" data-tag="gratis">
+          <p class="evento__ora">17:00</p>
+          <section class="evento__corpo">
+            <h2><a href="02-evento.html">Apertura straordinaria di Palazzo Reale</a></h2>
+            <p class="dettagli">Via Balbi 10 · <span class="segno segno--gratis">gratis</span></p>
+            <p class="evento__extra"><span>Ultimo ingresso alle 19:30.</span></p>
+          </section>
+          <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Apertura di Palazzo Reale">
+            <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+          </button>
+        </article>
+
+      </section>
+
+      <section class="zona" data-zona="ancora">
+        <section class="ossa" aria-hidden="true">
+          <span class="osso-riga"><span class="osso" style="height:13px"></span><span><span class="osso osso--titolo"></span><span class="osso osso--nota"></span></span><span class="osso" style="height:19px;width:19px;border-radius:50%"></span></span>
+          <span class="osso-riga"><span class="osso" style="height:13px"></span><span><span class="osso osso--titolo" style="width:48%"></span><span class="osso osso--nota" style="width:56%"></span></span><span class="osso" style="height:19px;width:19px;border-radius:50%"></span></span>
+        </section>
+        <section class="eventi veri">
+          <article class="evento fermata" data-tag="musica sera">
+            <p class="evento__ora">21:00</p>
+            <section class="evento__corpo">
+              <h2><a href="02-evento.html">Notturno al Ducale</a></h2>
+              <p class="dettagli">Palazzo Ducale · da 10 &euro;</p>
+              <p class="evento__extra"><span>Visita guidata a lume di torcia, gruppi da venti.</span></p>
+            </section>
+            <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Notturno al Ducale">
+              <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+            </button>
+          </article>
+          <article class="evento fermata fermata--nostra" data-tag="qui gratis">
+            <p class="evento__ora">11:00</p>
+            <section class="evento__corpo">
+              <h2><a href="02-evento.html">Scambio di libri in Villetta Di Negro</a></h2>
+              <p class="dettagli">Villetta Di Negro &middot; <span class="segno segno--qui">creato qui</span> &middot; <span class="segno segno--gratis">gratis</span></p>
+              <p class="evento__extra"><span>Porta un libro, prendine un altro. Si sta sotto i lecci.</span></p>
+            </section>
+            <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva Scambio di libri">
+              <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+            </button>
+          </article>
+        </section>
+      </section>
+
+      <p class="capo" aria-hidden="true">
+        <svg viewBox="0 0 18 30"><path d="M9,0 C6,9 12,15 9,20" stroke="var(--filo)" stroke-width="1.5" opacity=".5"/><path d="M9,20 C7,24 6,26 4,29" stroke="var(--filo)" stroke-width="1" opacity=".34"/><path d="M9,20 C11,24 13,26 15,28" stroke="var(--filo)" stroke-width="1" opacity=".28"/></svg>
+      </p>
+    </section>
+
+    <section class="vuoto" data-quando-vuoto hidden style="margin-top:var(--sp-5)">
+      <h2>Niente che corrisponda</h2>
+      <p>Nessun evento risponde a questi filtri. Prova a toglierne uno, oppure aggiungi tu quello che manca.</p>
+      <section class="azioni"><a class="giro giro--primario" href="03-crea.html">Crea evento</a></section>
+    </section>
+
+    <section class="in-fondo">
+      <button class="giro" type="button" data-carica="ancora">Mostra altri 12</button>
+    </section>
+  </section>
+
+  <p class="piede">
+    <a href="00-sistema.html">Sistema</a>
+    <a href="02-evento.html">Evento</a>
+    <a href="03-crea.html">Crea</a>
+    <a href="04-mobile.html">Mobile</a>
+  </p>
+</main>
+
+<script type="module" src="filo.js"></script>
+</body>
+</html>

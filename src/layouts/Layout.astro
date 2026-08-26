@@ -12,6 +12,11 @@ import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
 import type { LayoutProps } from './layout-props.ts';
 import '../styles/global.css';
+// Filo comes after global.css on purpose: it re-points the old token names at
+// the new palette, so every rule already written against them follows along.
+import '../styles/filo-tokens.css';
+import '../styles/filo-mano.css';
+import '../styles/filo-percorso.css';
 
 type Props = LayoutProps;
 const {

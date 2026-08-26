@@ -1,0 +1,116 @@
+/* ══ Filo — palette and voice ═══════════════════════════════════════
+   Loaded after global.css, which keeps its own token names: everything
+   already written against --bg / --ink / --accent picks the new design
+   up without being touched. The Filo names are the source, the old
+   names are aliases pointing at them.
+
+   Two carrying colours and two semantic ones. --filo is the line and
+   every primary action; --sosta means "made here" and nothing else.
+   The greys lean toward --filo so they read as chosen, not inherited. */
+:root {
+  --carta: #fbfaf7;
+  --superficie: #ffffff;
+  --alzata: #f4f2ec;
+  --riga: #e9e6dd;
+  --riga-forte: #d6d2c6;
+  --testo: #20232a;
+  --tenue: #767b84;
+  --filo: #33697a;
+  --filo-scuro: #255465;
+  --filo-velo: #e8f0f2;
+  --sosta: #c2703f;
+  --sosta-velo: #f8ece4;
+  --gratis: #4a7b5c;
+  --gratis-velo: #e9f2eb;
+  --allarme: #a8452f;
+  --su-filo: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgb(32 35 42 / 0.05);
+  --shadow-md: 0 4px 16px -6px rgb(32 35 42 / 0.16);
+  --shadow-lg: 0 18px 44px -18px rgb(32 35 42 / 0.34);
+  --mano: cubic-bezier(0.22, 0.9, 0.28, 1);
+  --corsia: 34px;
+
+  /* Category hues stay — they carry real information — but at a third of
+     the saturation, so eleven of them can share a page with one accent. */
+  --chip-sat: 26%;
+  --chip-text-l: 32%;
+  --chip-bg-l: 94%;
+  --chip-line-l: 86%;
+
+  /* Fraunces with SOFT at the top and WONK on: soft serifs, and a few
+     letters that step out of line. Rubik for everything else — wide,
+     rounded corners. Neither is condensed: a narrow grotesque reads as
+     technology, not as an afternoon spent walking around a city. */
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Rubik', 'Segoe UI Variable', system-ui, sans-serif;
+  font-family: var(--font-body);
+}
+
+:root[data-theme='dark'] {
+  --carta: #16181c;
+  --superficie: #1c1f24;
+  --alzata: #23272d;
+  --riga: #2b3037;
+  --riga-forte: #3a4047;
+  --testo: #eceae5;
+  --tenue: #9aa1a9;
+  --filo: #7fb4c4;
+  --filo-scuro: #a4cfdb;
+  --filo-velo: #1d272c;
+  --sosta: #dd9463;
+  --sosta-velo: #2b2119;
+  --gratis: #7fae8c;
+  --gratis-velo: #1b2620;
+  --allarme: #e08872;
+  /* On dark the line colour is the light one, so its ink has to be dark. */
+  --su-filo: #16181c;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 16px -6px rgb(0 0 0 / 0.6);
+  --shadow-lg: 0 18px 44px -18px rgb(0 0 0 / 0.8);
+  --chip-text-l: 76%;
+  --chip-bg-l: 18%;
+  --chip-line-l: 28%;
+}
+
+/* The aliases have to be stated for BOTH themes. global.css redefines
+   --accent, --bg and friends inside :root[data-theme='dark'], which outranks
+   a plain :root — so pointing them at Filo only once left the whole dark
+   theme on the old orange. */
+:root,
+:root[data-theme='dark'] {
+  --bg: var(--carta);
+  --surface: var(--superficie);
+  --surface-2: var(--alzata);
+  --ink: var(--testo);
+  --ink-2: var(--tenue);
+  --line: var(--riga);
+  --accent: var(--filo);
+  --accent-2: var(--sosta);
+  --brand: var(--filo);
+  --on-accent: var(--su-filo);
+  --free: var(--gratis);
+  --free-bg: var(--gratis-velo);
+  --today-ring: var(--filo);
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  line-height: 1.62;
+}
+
+h1,
+h2,
+h3,
+.serif {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 90;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+h1 {
+  line-height: 1.06;
+  text-wrap: balance;
+}

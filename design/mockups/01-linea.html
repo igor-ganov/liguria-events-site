@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,500&display=swap">
+<style>
+/* 01 — LINEA
+   Pagina chiara, aria, niente cornici. Il fatto a mano sta solo nel bottone:
+   un contorno tracciato in un colpo solo, che non chiude perfettamente
+   l'angolo — come una penna che stacca dal foglio. */
+:root{
+  --carta:#fcfcfa; --superficie:#ffffff; --riga:#e7e7e2;
+  --testo:#1d2328; --tenue:#7b8288; --inchiostro:#2f6f5e; --caldo:#b4664e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Instrument Sans',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:760px;margin:0 auto;padding:44px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:56px}
+.logo{margin:0;font-size:16px;font-weight:600;letter-spacing:.01em}
+.logo i{font-style:normal;color:var(--inchiostro)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 10px;font-family:'Newsreader',Georgia,serif;font-weight:300;
+  font-size:clamp(38px,6.4vw,58px);line-height:1.06;letter-spacing:-.022em;
+  text-wrap:balance;
+}
+.sommario{margin:0 0 40px;max-width:52ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri: linea sottile, nessun riquadro ─────────────────── */
+.filtri{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:38px;padding-bottom:14px;border-bottom:1px solid var(--riga)}
+.filtro{
+  border:0;background:none;padding:0 0 5px;cursor:pointer;font:inherit;
+  font-size:14.5px;color:var(--tenue);border-bottom:1.5px solid transparent;
+}
+.filtro[aria-pressed="true"]{color:var(--testo);border-bottom-color:var(--inchiostro)}
+.filtro:focus-visible{outline:2px solid var(--inchiostro);outline-offset:4px;border-radius:2px}
+
+/* ── eventi: righe, non schede ──────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:74px 1fr;gap:24px;align-items:baseline;
+  padding:22px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.data{margin:0;font-size:13.5px;color:var(--tenue);font-variant-numeric:tabular-nums;white-space:nowrap}
+.evento h2{margin:0 0 3px;font-size:20px;font-weight:500;letter-spacing:-.012em;line-height:1.3}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.segno{color:var(--caldo)}
+
+/* ── il bottone: un solo tratto, angolo che non chiude ──────── */
+.azioni{display:flex;gap:14px;flex-wrap:wrap;margin-top:44px}
+.tratto{
+  font:inherit;font-size:14.5px;font-weight:500;letter-spacing:.005em;
+  padding:12px 22px;cursor:pointer;background:none;color:var(--testo);border:0;
+  border-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='64'><path d='M14,7 C70,4 150,6 226,5 C232,18 231,44 227,57 C160,60 76,58 16,59 C11,45 10,20 13,8' fill='none' stroke='%231d2328' stroke-width='1.4' stroke-linecap='round'/></svg>") 12 / 12px / 0 stretch;
+}
+.tratto--accento{
+  color:var(--inchiostro);
+  border-image-source:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='64'><path d='M13,8 C72,3 152,7 228,6 C233,20 232,45 226,58 C158,61 74,57 15,58 C10,44 11,21 12,9' fill='none' stroke='%232f6f5e' stroke-width='1.7' stroke-linecap='round'/></svg>");
+}
+.tratto--pieno{
+  color:var(--superficie);
+  border-image-source:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='64'><path d='M14,7 C70,4 150,6 226,5 C232,18 231,44 227,57 C160,60 76,58 16,59 C11,45 10,20 13,8 Z' fill='%232f6f5e' stroke='%232f6f5e' stroke-width='2.4' stroke-linejoin='round'/></svg>");
+  border-image-slice:12 fill;
+}
+.tratto:focus-visible{outline:2px solid var(--inchiostro);outline-offset:5px}
+
+.piede{margin-top:60px;padding-top:16px;border-top:1px solid var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · agosto</p>
+  </header>
+
+  <h1>Cosa fare a Genova</h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <p class="data">27 ago<br>21:00</p>
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+    </article>
+    <article class="evento">
+      <p class="data">fino al<br>6 set</p>
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+    </article>
+    <article class="evento">
+      <p class="data">28 ago<br>21:30</p>
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="segno">creato qui</span></p>
+      </section>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="tratto tratto--pieno" type="button">Crea evento</button>
+    <button class="tratto tratto--accento" type="button">Condividi</button>
+    <button class="tratto" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">01 — Linea · il contorno è un tratto continuo che non chiude l'angolo</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,191 @@
+/* ═══════════════════════════════════════════════════════════════
+   FILO — sistema di design per dovego.it
+   Una linea sola attraversa la pagina. Non è un ornamento: dice il
+   tempo. Si disegna mentre scorri, si ferma sulle fermate, e alla
+   fine si sfilaccia perché la strada finisce davvero.
+   Questo file: colore, misure, tipografia, il filo.
+   I componenti stanno in componenti.css, il comportamento in filo.js.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Colore ────────────────────────────────────────────────
+   Tre definizioni: chiaro di base, preferenza di sistema, scelta
+   esplicita. Chi non ha mai toccato l'interruttore vede la prima. */
+:root{
+  --carta:#fbfaf7;
+  --superficie:#ffffff;
+  --alzata:#f4f2ec;
+  --riga:#e9e6dd;
+  --riga-forte:#d6d2c6;
+  --testo:#20232a;
+  --tenue:#767b84;
+  --filo:#33697a;
+  --filo-scuro:#255465;
+  --filo-velo:#e8f0f2;
+  --sosta:#c2703f;
+  --sosta-velo:#f8ece4;
+  --gratis:#4a7b5c;
+  --gratis-velo:#e9f2eb;
+  --allarme:#a8452f;
+  --ombra-1:0 1px 2px rgba(32,35,42,.05);
+  --ombra-2:0 4px 16px -6px rgba(32,35,42,.16);
+  --ombra-3:0 18px 44px -18px rgba(32,35,42,.34);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --carta:#16181c;
+    --superficie:#1c1f24;
+    --alzata:#23272d;
+    --riga:#2b3037;
+    --riga-forte:#3a4047;
+    --testo:#eceae5;
+    --tenue:#9aa1a9;
+    --filo:#7fb4c4;
+    --filo-scuro:#a4cfdb;
+    --filo-velo:#1d272c;
+    --sosta:#dd9463;
+    --sosta-velo:#2b2119;
+    --gratis:#7fae8c;
+    --gratis-velo:#1b2620;
+    --allarme:#e08872;
+    --ombra-1:0 1px 2px rgba(0,0,0,.4);
+    --ombra-2:0 4px 16px -6px rgba(0,0,0,.6);
+    --ombra-3:0 18px 44px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --carta:#16181c;
+  --superficie:#1c1f24;
+  --alzata:#23272d;
+  --riga:#2b3037;
+  --riga-forte:#3a4047;
+  --testo:#eceae5;
+  --tenue:#9aa1a9;
+  --filo:#7fb4c4;
+  --filo-scuro:#a4cfdb;
+  --filo-velo:#1d272c;
+  --sosta:#dd9463;
+  --sosta-velo:#2b2119;
+  --gratis:#7fae8c;
+  --gratis-velo:#1b2620;
+  --allarme:#e08872;
+  --ombra-1:0 1px 2px rgba(0,0,0,.4);
+  --ombra-2:0 4px 16px -6px rgba(0,0,0,.6);
+  --ombra-3:0 18px 44px -18px rgba(0,0,0,.8);
+}
+
+/* ── 2. Misure e voce ──────────────────────────────────────────
+   Fraunces per i titoli: grazie morbide, asse SOFT alto, WONK
+   acceso — è una lettera disegnata a mano, non compressa.
+   Rubik per il resto: larga, angoli smussati, niente da spartire
+   con le grottesche strette. Nessuna delle due è stretta: era il
+   difetto della coppia precedente. */
+:root{
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:22px; --sp-6:30px; --sp-7:44px; --sp-8:64px;
+  --corsia:34px;
+  --colonna:880px;
+  --largo:1180px;
+  --r:12px;
+  --t-xs:12.5px; --t-sm:14px; --t-md:16px; --t-lg:19px;
+  --t-xl:25px; --t-2xl:38px; --t-3xl:58px;
+  --mano:cubic-bezier(.22,.9,.28,1);
+}
+
+*{box-sizing:border-box}
+html{color-scheme:light dark;scroll-behavior:smooth}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Rubik','Segoe UI',system-ui,sans-serif;
+  font-size:var(--t-md);line-height:1.62;font-weight:300;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:var(--colonna);margin:0 auto;padding:var(--sp-6) var(--sp-5) var(--sp-8)}
+
+h1,h2,h3,.serif{
+  font-family:'Fraunces','Iowan Old Style',Georgia,serif;
+  font-variation-settings:'SOFT' 100,'WONK' 1,'opsz' 90;
+  font-weight:400;
+}
+h1{
+  margin:0 0 var(--sp-3);
+  font-size:clamp(var(--t-2xl),6.4vw,var(--t-3xl));
+  line-height:1.04;letter-spacing:-.018em;text-wrap:balance;
+}
+h1 em{font-style:italic;color:var(--filo)}
+h2{margin:0;font-size:var(--t-lg);line-height:1.28;letter-spacing:-.006em}
+h3{margin:0;font-size:var(--t-md)}
+p{margin:0}
+
+/* I collegamenti non si annunciano con il blu del browser. */
+a{color:inherit;text-decoration:none}
+h2 a{text-decoration:underline;text-decoration-color:transparent;text-underline-offset:3px;transition:text-decoration-color .16s}
+h2 a:hover,h2 a:focus-visible{text-decoration-color:var(--filo)}
+:focus-visible{outline:2px solid var(--filo);outline-offset:3px;border-radius:3px}
+
+.sommario{margin:0 0 var(--sp-6);max-width:56ch;color:var(--tenue)}
+.etichetta{font-size:var(--t-xs);letter-spacing:.11em;text-transform:uppercase;color:var(--tenue)}
+.numeri{font-variant-numeric:tabular-nums}
+
+/* ── 3. Il filo ────────────────────────────────────────────────
+   La linea è un <svg> vero, non un bordo: così può disegnarsi.
+   pathLength=1 → il dashoffset è la frazione di strada percorsa,
+   e filo.js la lega allo scorrimento. */
+.percorso{position:relative;padding-left:var(--corsia)}
+.percorso__linea{
+  position:absolute;left:2px;top:0;width:18px;height:100%;
+  overflow:visible;pointer-events:none;
+}
+.percorso__linea path{
+  fill:none;stroke:var(--filo);stroke-width:1.8;stroke-linecap:round;
+  opacity:.72;stroke-dasharray:1;stroke-dashoffset:var(--tratto,0);
+}
+@media (prefers-reduced-motion:reduce){
+  .percorso__linea path{stroke-dashoffset:0}
+}
+
+/* la fermata: vuota = trovata altrove, piena = fatta qui */
+.fermata{position:relative}
+.fermata::before{
+  content:"";position:absolute;left:calc(-1 * var(--corsia) + 4px);top:30px;
+  width:9px;height:9px;border-radius:50%;z-index:1;
+  background:var(--carta);border:1.7px solid var(--filo);
+  transition:transform .34s var(--mano),background .34s;
+  transform:scale(.4);opacity:.5;
+}
+.fermata[data-passata]::before{transform:scale(1);opacity:1}
+.fermata--nostra::before{background:var(--sosta);border-color:var(--sosta)}
+.fermata--nostra[data-passata]::before{animation:pulsa .9s var(--mano)}
+@keyframes pulsa{
+  0%{box-shadow:0 0 0 0 var(--sosta)}
+  100%{box-shadow:0 0 0 9px transparent}
+}
+@media (prefers-reduced-motion:reduce){
+  .fermata::before{transform:scale(1);opacity:1;transition:none}
+  .fermata--nostra[data-passata]::before{animation:none}
+}
+
+/* il capo sfilacciato */
+.capo{position:relative;height:30px;margin-left:calc(-1 * var(--corsia))}
+.capo svg{position:absolute;left:2px;top:0;width:18px;height:30px}
+.capo path{fill:none;stroke:var(--filo);stroke-linecap:round}
+
+/* ── 4. Struttura di pagina ──────────────────────────────────── */
+.testata{
+  position:sticky;top:0;z-index:40;
+  display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
+  padding:var(--sp-3) var(--sp-5);margin:0 calc(-1 * var(--sp-5)) var(--sp-6);
+  background:color-mix(in srgb,var(--carta) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid transparent;
+  transition:border-color .2s,box-shadow .2s;
+}
+.testata[data-staccata]{border-bottom-color:var(--riga);box-shadow:var(--ombra-1)}
+.marchio{font-family:'Fraunces',Georgia,serif;font-size:var(--t-lg);font-weight:500;font-variation-settings:'SOFT' 100,'WONK' 1}
+.marchio i{font-style:italic;color:var(--filo)}
+.strumenti{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap}
+.luogo{font-size:var(--t-sm);color:var(--tenue)}
+.piede{
+  display:flex;gap:var(--sp-4);flex-wrap:wrap;margin-top:var(--sp-8);
+  padding-top:var(--sp-4);border-top:1px solid var(--riga);
+  font-size:var(--t-sm);color:var(--tenue);
+}
+.piede a:hover{text-decoration:underline;text-underline-offset:3px}

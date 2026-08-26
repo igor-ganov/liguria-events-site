@@ -1,6 +1,7 @@
 ---
 import MiniCard from '../../shared/MiniCard.astro';
 import { feedItemAttrs } from '../../../lib/events/feed-item-attrs.ts';
+import { stopClass } from '../../percorso/stop-class.ts';
 import type { DayGroup } from '../../../lib/events/feed-day-groups.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
@@ -19,7 +20,7 @@ const { groups, heading, ui, lang } = Astro.props;
     <h3>{heading(day)}</h3>
     <ul class="feed-list">
       {events.map((event) => (
-        <li {...feedItemAttrs(event)}>
+        <li class={stopClass(event.pl === true)} {...feedItemAttrs(event)}>
           <MiniCard event={event} ui={ui} lang={lang} />
         </li>
       ))}

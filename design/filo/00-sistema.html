@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filo — sistema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap">
+<link rel="stylesheet" href="filo.css">
+<link rel="stylesheet" href="componenti.css">
+<link rel="stylesheet" href="mano.css">
+<style>
+main{max-width:var(--largo)}
+.sezione{margin-top:var(--sp-8);padding-top:var(--sp-5);border-top:1px solid var(--riga)}
+.sezione > h2{font-size:var(--t-xl);margin-bottom:var(--sp-2)}
+.sezione > p{margin-bottom:var(--sp-5);color:var(--tenue);max-width:60ch;font-size:var(--t-sm)}
+.campioni{display:flex;gap:var(--sp-4);flex-wrap:wrap;align-items:center}
+.griglia{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:var(--sp-6)}
+.tinte{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:var(--sp-3)}
+.tinta{font-size:var(--t-xs);color:var(--tenue)}
+.tinta b{display:block;height:52px;border-radius:8px;border:1px solid var(--riga);margin-bottom:6px;font-weight:400}
+.tinta code{display:block;font-size:11px;opacity:.7}
+.regole{margin:0;padding-left:1.15em;color:var(--tenue);font-size:var(--t-sm);max-width:64ch}
+.regole li{margin-bottom:var(--sp-3)}
+.regole b{color:var(--testo);font-weight:400}
+.scala p{margin-bottom:var(--sp-3)}
+.riquadro{padding:var(--sp-5);border:1px solid var(--riga);border-radius:var(--r);background:var(--superficie)}
+.ossa-prova{display:grid;gap:var(--sp-3)}
+.ossa-prova .veri{display:none}
+.ossa-prova[data-stato="pronto"] .osso{display:none}
+.ossa-prova[data-stato="pronto"] .veri{display:block}
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+  <nav class="strumenti" aria-label="Sito">
+    <span class="suggerisce">
+      <button class="giro giro--piccolo" type="button" data-tema>Tema scuro</button>
+      <span class="suggerisce__bolla" role="tooltip">Prova il sistema nell'altra luce</span>
+    </span>
+  </nav>
+</header>
+
+<main>
+  <h1>Filo</h1>
+  <p class="sommario">
+    Una linea sola attraversa la pagina. Non è un ornamento: dice il tempo, si disegna
+    mentre scorri e alla fine si sfilaccia. Tutto il resto sta quieto perché lei si veda.
+  </p>
+
+  <section class="sezione">
+    <h2>Le regole del filo</h2>
+    <p>Senza queste è decorazione, e la decorazione invecchia in sei mesi.</p>
+    <ol class="regole">
+      <li><b>Una volta per pagina.</b> Entra sopra la prima fermata ed esce sotto l'ultima. Due fili non sono un percorso.</li>
+      <li><b>Solo dove c'è una sequenza di date.</b> Il feed ce l'ha. La pagina di un evento no: lì è un nodo solo. Il modulo di creazione no: lì diventa l'avanzamento dei passi.</li>
+      <li><b>Si disegna mentre scorri.</b> La linea segue la lettura, e ogni fermata si accende quando la raggiungi.</li>
+      <li><b>Il nodo pieno vuol dire "fatto qui".</b> Vuoto vuol dire trovato altrove. È una differenza vera, non un colore scelto per varietà.</li>
+      <li><b>Non attraversa mai il testo.</b> Ha una corsia di 34 px, e nessun altro ci entra.</li>
+      <li><b>Quando la sequenza finisce, il capo si sfilaccia.</b> Non un punto fermo: la strada finisce, non è mai stata finta.</li>
+      <li><b>Attorno al bottone gira e non si chiude.</b> Stessa linea, stesso spessore, stessa mano — e passandoci sopra la mano ripassa il giro.</li>
+    </ol>
+  </section>
+
+  <section class="sezione">
+    <h2>Colore</h2>
+    <p>Due colori portanti e due semantici. Il resto è carta e grigio. Il grigio non è neutro: tira verso il blu del filo, così sembra scelto e non ereditato.</p>
+    <section class="tinte">
+      <p class="tinta"><b style="background:var(--filo)"></b>filo · linea e azione<code>#33697a</code></p>
+      <p class="tinta"><b style="background:var(--sosta)"></b>sosta · fatto qui<code>#c2703f</code></p>
+      <p class="tinta"><b style="background:var(--gratis)"></b>gratis<code>#4a7b5c</code></p>
+      <p class="tinta"><b style="background:var(--allarme)"></b>errore<code>#a8452f</code></p>
+      <p class="tinta"><b style="background:var(--testo)"></b>testo<code>#20232a</code></p>
+      <p class="tinta"><b style="background:var(--tenue)"></b>tenue<code>#767b84</code></p>
+      <p class="tinta"><b style="background:var(--alzata)"></b>alzata<code>#f4f2ec</code></p>
+      <p class="tinta"><b style="background:var(--carta)"></b>carta<code>#fbfaf7</code></p>
+    </section>
+  </section>
+
+  <section class="sezione scala">
+    <h2>Voce</h2>
+    <p>Fraunces per i titoli, con l'asse SOFT al massimo e WONK acceso: le grazie sono
+      morbide e qualche lettera esce dai ranghi, come in una scritta a mano. Rubik per il
+      resto: larga, angoli smussati. Nessuna delle due è stretta — le grottesche compresse
+      raccontano tecnologia, non un pomeriggio in giro per la città.</p>
+    <p class="serif" style="font-size:var(--t-3xl);line-height:1">Cosa fare</p>
+    <p class="serif" style="font-size:var(--t-2xl);line-height:1.1;font-style:italic">a Genova, stasera</p>
+    <p style="font-size:var(--t-lg)">Titolo di un evento</p>
+    <p>Testo corrente, sedici pixel, interlinea generosa.</p>
+    <p style="font-size:var(--t-sm);color:var(--tenue)">Dettagli e date</p>
+    <p class="etichetta">Etichetta</p>
+  </section>
+
+  <section class="sezione">
+    <h2>Bottoni</h2>
+    <p>Tre livelli e nient'altro. Passaci sopra: il tratto viene ripassato una seconda
+      volta, appena fuori registro. È l'unico punto dove la mano si vede.</p>
+    <section class="campioni">
+      <button class="giro giro--primario" type="button">Primario</button>
+      <button class="giro giro--sosta" type="button">Secondario</button>
+      <button class="giro" type="button">Terziario</button>
+      <button class="giro" type="button" disabled>Disattivato</button>
+      <button class="giro giro--primario" type="button" aria-busy="true">In corso</button>
+    </section>
+    <section class="campioni" style="margin-top:var(--sp-5)">
+      <button class="giro giro--primario giro--piccolo" type="button">Primario piccolo</button>
+      <button class="giro giro--piccolo" type="button">Piccolo</button>
+      <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva">
+        <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+      </button>
+      <button class="nodo-salva" type="button" data-salva aria-pressed="true" aria-label="Togli dai salvati">
+        <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+      </button>
+      <span class="suggerisce">
+        <button class="giro giro--piccolo" type="button">Con suggerimento</button>
+        <span class="suggerisce__bolla" role="tooltip">Compare dopo un attimo, non subito</span>
+      </span>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Scelte</h2>
+    <p>Filtri, segmentato, giorni ed etichette: quattro modi di dire la stessa cosa, ognuno
+      per una densità diversa. Il cerchietto del filtro è lo stesso nodo del percorso.</p>
+    <section class="griglia">
+      <section>
+        <p class="etichetta" style="margin-bottom:var(--sp-3)">Filtri</p>
+        <nav class="filtri" aria-label="Esempio filtri">
+          <button class="filtro" type="button" aria-pressed="true">Oggi <span class="filtro__conto">12</span></button>
+          <button class="filtro" type="button" aria-pressed="false">Weekend <span class="filtro__conto">31</span></button>
+          <button class="filtro" type="button" aria-pressed="false">Gratis <span class="filtro__conto">61</span></button>
+        </nav>
+      </section>
+      <section>
+        <p class="etichetta" style="margin-bottom:var(--sp-3)">Segmentato</p>
+        <nav class="segmenti" data-segmenti aria-label="Esempio segmentato">
+          <span class="segmenti__cursore" aria-hidden="true"></span>
+          <button class="segmento" type="button" aria-selected="true">Lista</button>
+          <button class="segmento" type="button" aria-selected="false">Mappa</button>
+          <button class="segmento" type="button" aria-selected="false">Calendario</button>
+        </nav>
+      </section>
+      <section>
+        <p class="etichetta" style="margin-bottom:var(--sp-3)">Giorni</p>
+        <nav class="giorni" data-giorni aria-label="Esempio giorni">
+          <button class="giorno-cella" type="button" aria-pressed="true"><small>Oggi</small><b>26</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false"><small>Gio</small><b>27</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false"><small>Ven</small><b>28</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false" data-vuoto><small>Sab</small><b>29</b></button>
+        </nav>
+      </section>
+      <section>
+        <p class="etichetta" style="margin-bottom:var(--sp-3)">Etichette</p>
+        <section class="campioni" style="gap:var(--sp-2)">
+          <button class="tag" type="button" aria-pressed="true">Musica</button>
+          <button class="tag" type="button" aria-pressed="false">Teatro</button>
+          <button class="tag" type="button" aria-pressed="true">All'aperto</button>
+          <button class="tag" type="button" aria-pressed="false">Per bambini</button>
+        </section>
+      </section>
+    </section>
+    <p style="margin-top:var(--sp-5)">
+      <span class="segno segno--qui">creato qui</span> ·
+      <span class="segno segno--gratis">gratis</span> ·
+      <span class="segno segno--passato">già passato</span>
+      <span class="dettagli" style="display:block;margin-top:var(--sp-2)">I segni sono testo colorato, non pillole: una pillola pesa quanto un titolo.</span>
+    </p>
+  </section>
+
+  <section class="sezione">
+    <h2>Campi</h2>
+    <p>Nessun riquadro attorno al testo: una riga sotto, che prende colore quando prende
+      il fuoco. Lo stato di errore dice cosa fare, non che qualcosa è andato storto.</p>
+    <section class="griglia">
+      <section>
+        <p class="cerca" data-cerca style="margin-bottom:var(--sp-5)">
+          <svg class="icona" aria-hidden="true"><use href="#i-cerca"/></svg>
+          <input type="search" placeholder="Cerca" aria-label="Cerca">
+          <button class="cerca__pulisci" type="button">pulisci</button>
+        </p>
+        <label class="campo" data-conta-caratteri="80">
+          <span>Titolo <span class="campo__conta"></span></span>
+          <input type="text" value="Concerto in cortile" maxlength="80">
+        </label>
+        <label class="campo" data-errato>
+          <span>Indirizzo</span>
+          <input type="text" placeholder="Via, numero, città">
+          <small class="campo__aiuto">Senza indirizzo non possiamo metterlo sulla mappa.</small>
+        </label>
+      </section>
+      <section>
+        <label class="leva">
+          <input type="checkbox">
+          <span class="leva__pista" aria-hidden="true"></span>
+          <span class="leva__testo">Mostralo nel calendario della città
+            <small>Prima lo controlliamo, poi lo trova chiunque.</small></span>
+        </label>
+        <label class="scelta"><input type="checkbox" checked>
+          <span>Avvisami quando qualcuno si aggiunge<small>Una email, non di più.</small></span></label>
+        <section class="deposito" tabindex="0" role="button" style="margin-top:var(--sp-4)">
+          <svg class="icona" aria-hidden="true"><use href="#i-foto"/></svg>
+          <span>Trascina qui una foto</span>
+          <small>JPG o PNG, meno di 5 MB</small>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Passi</h2>
+    <p>Dove non c'è una sequenza di date ma c'è comunque un percorso, il filo diventa
+      avanzamento: stesso spessore, stesso colore, stesso nodo.</p>
+    <nav class="passi" aria-label="Esempio passi">
+      <span class="passo" data-stato="fatto"><span class="passo__nodo"><svg class="icona" aria-hidden="true"><use href="#i-spunta"/></svg></span> Cosa</span>
+      <span class="passo__tratto" style="--avanzo:1" aria-hidden="true"></span>
+      <span class="passo" data-stato="ora"><span class="passo__nodo">2</span> Quando e dove</span>
+      <span class="passo__tratto" aria-hidden="true"></span>
+      <span class="passo" data-stato="dopo"><span class="passo__nodo">3</span> Chi lo vede</span>
+    </nav>
+  </section>
+
+  <section class="sezione">
+    <h2>Superfici che si aprono</h2>
+    <p>Linguette per contenuto di pari livello, fisarmonica per il dettaglio che non serve
+      subito, foglio dal basso per una decisione breve. Nessun riquadro modale al centro:
+      arriva dal bordo, e dal bordo se ne va.</p>
+
+    <nav class="linguette" data-linguette aria-label="Esempio linguette">
+      <span class="linguette__tratto" aria-hidden="true"></span>
+      <button class="linguetta" type="button" aria-selected="true" data-valore="uno">Di cosa si tratta</button>
+      <button class="linguetta" type="button" aria-selected="false" data-valore="due">Programma</button>
+      <button class="linguetta" type="button" aria-selected="false" data-valore="tre">Come arrivare</button>
+    </nav>
+    <section class="pannello" data-pannello="uno">
+      <p class="dettagli">Il contenuto cambia senza far saltare la pagina: entra dal basso di sei pixel.</p>
+    </section>
+    <section class="pannello" data-pannello="due" hidden>
+      <p class="dettagli">Boccherini, Puccini, Respighi. Novanta minuti senza intervallo.</p>
+    </section>
+    <section class="pannello" data-pannello="tre" hidden>
+      <p class="dettagli">Cinque minuti a piedi dalla metropolitana San Giorgio.</p>
+    </section>
+
+    <section style="margin-top:var(--sp-6);max-width:56ch">
+      <section class="piega">
+        <button class="piega__testa" type="button" aria-expanded="true">
+          <span>In caso di pioggia</span><span class="piega__segno" aria-hidden="true"><svg class="icona"><use href="#i-piu"/></svg></span></button>
+        <section class="piega__corpo"><section><p>Si suona lo stesso, nel salone al primo piano.</p></section></section>
+      </section>
+      <section class="piega">
+        <button class="piega__testa" type="button" aria-expanded="false">
+          <span>Si può portare da bere</span><span class="piega__segno" aria-hidden="true"><svg class="icona"><use href="#i-piu"/></svg></span></button>
+        <section class="piega__corpo"><section><p>Sì, ma niente bicchieri di vetro nel cortile.</p></section></section>
+      </section>
+    </section>
+
+    <section class="campioni" style="margin-top:var(--sp-6)">
+      <button class="giro giro--sosta" type="button" data-apre="prova">Apri il foglio</button>
+      <button class="giro" type="button" data-copia="https://dovego.it/event/c00299cb2ef1/">Copia un link</button>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Attesa</h2>
+    <p>Mentre arrivano i dati la pagina non salta: lo scheletro ha le stesse misure delle
+      righe che sostituirà. Poi un avviso passa in fondo e se ne va da solo.</p>
+    <section class="riquadro ossa-prova" data-zona="prova">
+      <span class="osso" style="height:15px;width:52%"></span>
+      <span class="osso" style="height:11px;width:34%"></span>
+      <span class="osso" style="height:11px;width:41%"></span>
+      <section class="veri">
+        <h3>Notturno al Ducale</h3>
+        <p class="dettagli">Palazzo Ducale &middot; 21:00 &middot; da 10 &euro;</p>
+      </section>
+    </section>
+    <section class="campioni" style="margin-top:var(--sp-5)">
+      <button class="giro" type="button" data-carica="prova">Fai finta di caricare</button>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Numeri e persone</h2>
+    <p>Le cifre salgono una volta sola, quando entrano nello schermo. Se il sistema chiede
+      meno movimento, appaiono già arrivate.</p>
+    <section class="cifre">
+      <span class="cifra"><b data-conta="1166">0</b><span>eventi in Italia</span></span>
+      <span class="cifra"><b data-conta="214">0</b><span>a Genova</span></span>
+      <span class="cifra"><b data-conta="38">0</b><span>creati qui</span></span>
+    </section>
+    <section class="campioni">
+      <span class="facce">
+        <span class="faccia">M</span><span class="faccia">L</span>
+        <span class="faccia">R</span><span class="faccia" style="background:var(--sosta)">+6</span>
+      </span>
+      <p class="dettagli" style="margin:0">Nove persone ci vanno</p>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Il percorso, e come finisce</h2>
+    <p>Due fermate e il capo sfilacciato: dopo non c'è ancora nulla annunciato. Scorri la
+      pagina e guarda la linea disegnarsi.</p>
+    <section class="percorso">
+      <section class="eventi">
+        <article class="evento fermata">
+          <p class="evento__ora">21:00</p>
+          <section class="evento__corpo"><h2>Turandot</h2>
+            <p class="dettagli">Teatro Carlo Felice · trovato altrove</p></section>
+        </article>
+        <article class="evento fermata fermata--nostra">
+          <p class="evento__ora">19:30</p>
+          <section class="evento__corpo"><h2>Concerto in cortile</h2>
+            <p class="dettagli">Palazzo Spinola · <span class="segno segno--qui">creato qui</span></p></section>
+        </article>
+      </section>
+      <p class="capo" aria-hidden="true">
+        <svg viewBox="0 0 18 30"><path d="M9,0 C6,9 12,15 9,20" stroke="var(--filo)" stroke-width="1.5" opacity=".5"/><path d="M9,20 C7,24 6,26 4,29" stroke="var(--filo)" stroke-width="1" opacity=".34"/><path d="M9,20 C11,24 13,26 15,28" stroke="var(--filo)" stroke-width="1" opacity=".28"/></svg>
+      </p>
+    </section>
+  </section>
+
+  <section class="sezione">
+    <h2>Quando non c'è niente</h2>
+    <p>Savona esiste anche nelle settimane vuote. La pagina risponde, e lo dice.</p>
+    <section class="vuoto">
+      <h2>Per ora a Savona non c'è nulla</h2>
+      <p>Nessun evento annunciato questa settimana. Ne compaiono di nuovi ogni ora.</p>
+      <section class="azioni">
+        <a class="giro giro--primario" href="03-crea.html">Crea evento</a>
+        <a class="giro" href="01-feed.html">Guarda a Genova</a>
+      </section>
+    </section>
+  </section>
+
+  <p class="piede">
+    <a href="01-feed.html">Feed</a>
+    <a href="02-evento.html">Evento</a>
+    <a href="03-crea.html">Crea</a>
+    <a href="04-mobile.html">Mobile</a>
+  </p>
+</main>
+
+<section class="velo" data-velo aria-hidden="true"></section>
+<section class="foglio" data-foglio="prova" role="dialog" aria-label="Foglio di prova">
+  <p class="foglio__presa" aria-hidden="true"></p>
+  <h2>Condividi Concerto in cortile</h2>
+  <section class="foglio__voci">
+    <button class="foglio__voce" type="button" data-copia="https://dovego.it/event/c00299cb2ef1/"><svg class="icona" aria-hidden="true"><use href="#i-copia"/></svg> Copia il link</button>
+    <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-telegram"/></svg> Manda su Telegram</button>
+    <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-qr"/></svg> Scarica il codice QR</button>
+  </section>
+  <section class="azioni" style="margin-top:var(--sp-4);justify-content:flex-end">
+    <button class="giro giro--piccolo" type="button" data-chiude>Chiudi</button>
+  </section>
+</section>
+
+<script type="module" src="filo.js"></script>
+</body>
+</html>

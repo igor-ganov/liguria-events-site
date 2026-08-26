@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filo — mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap">
+<link rel="stylesheet" href="filo.css">
+<link rel="stylesheet" href="componenti.css">
+<link rel="stylesheet" href="mano.css">
+<style>
+/* Tre schermi a 390 px, per guardarli insieme. Dentro ogni telefono
+   vale il sistema senza eccezioni: la corsia del filo si stringe da
+   34 a 24 px, i bottoni vanno a piena larghezza, e le azioni scendono
+   in fondo — il pollice arriva lì, non in cima. */
+body{background:#eeece7}
+:root[data-theme="dark"] body{background:#0d0f11}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:#0d0f11}}
+main{max-width:none;display:flex;gap:var(--sp-6);flex-wrap:wrap;justify-content:center;padding:var(--sp-6) var(--sp-4) var(--sp-8)}
+.colonna{display:grid;gap:var(--sp-3);justify-items:center}
+.telefono{
+  position:relative;
+  --corsia:24px;
+  width:390px;max-width:100%;height:720px;display:flex;flex-direction:column;
+  background:var(--carta);border:1px solid var(--riga-forte);border-radius:22px;
+  overflow:hidden;box-shadow:var(--ombra-3);
+}
+.schermo{flex:1;overflow-y:auto;padding:var(--sp-4) var(--sp-4) var(--sp-6);position:relative}
+.telefono h1{font-size:31px;margin-bottom:var(--sp-2)}
+.telefono .testata{margin:0 calc(-1 * var(--sp-4)) var(--sp-4);padding:var(--sp-3) var(--sp-4)}
+.telefono .sommario{font-size:var(--t-sm);margin-bottom:var(--sp-4)}
+.telefono .evento{grid-template-columns:auto 1fr auto;gap:var(--sp-3)}
+.telefono .evento__ora{min-width:40px;font-size:var(--t-xs)}
+.telefono .cifre{gap:var(--sp-5);margin:var(--sp-4) 0}
+.telefono .cifra b{font-size:var(--t-lg)}
+.telefono .foglio,.telefono .velo,.telefono .avvisi{position:absolute}
+.telefono .velo{border-radius:22px}
+.telefono .foglio{width:100%;left:0;transform:none;border-radius:18px 18px 0 0}
+/* La barra in fondo tiene la sola azione che conta su questa pagina. */
+.zoccolo{display:flex;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);border-top:1px solid var(--riga);background:var(--superficie)}
+.voce-zoccolo{
+  flex:1;display:grid;justify-items:center;gap:3px;padding:7px 0;border:0;background:none;
+  font:inherit;font-size:11px;color:var(--tenue);cursor:pointer;border-radius:10px;
+  transition:color .2s,background .2s;
+}
+.voce-zoccolo[aria-current="page"]{color:var(--filo);background:var(--filo-velo)}
+.voce-zoccolo span{font-size:16px;line-height:1}
+.telefono .giorni{margin:0 calc(-1 * var(--sp-4));padding-inline:var(--sp-4)}
+.telefono .filtri{flex-wrap:nowrap;overflow-x:auto;margin:0 calc(-1 * var(--sp-4)) var(--sp-4);padding:0 var(--sp-4) var(--sp-2)}
+.telefono .filtro{flex:0 0 auto}
+.didascalia{font-size:var(--t-sm);color:var(--tenue);text-align:center;max-width:390px}
+</style>
+</head>
+<body>
+
+<main>
+
+  <section class="colonna">
+    <p class="etichetta">Feed · 390 px</p>
+    <section class="telefono">
+      <section class="schermo" data-setaccio>
+        <header class="testata">
+          <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+          <nav class="strumenti"><p class="luogo">Genova ▾</p></nav>
+        </header>
+
+        <h1>Cosa fare <em>a Genova</em></h1>
+        <p class="sommario">1 166 eventi in tutta Italia, raccolti ogni ora.</p>
+
+        <nav class="giorni" data-giorni aria-label="Giorno">
+          <button class="giorno-cella" type="button" aria-pressed="true"><small>Oggi</small><b>26</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false"><small>Gio</small><b>27</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false"><small>Ven</small><b>28</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false"><small>Sab</small><b>29</b></button>
+          <button class="giorno-cella" type="button" aria-pressed="false" data-vuoto><small>Dom</small><b>30</b></button>
+        </nav>
+
+        <nav class="filtri" aria-label="Filtri">
+          <button class="filtro" type="button" aria-pressed="false" data-filtro="qui">Creati qui</button>
+          <button class="filtro" type="button" aria-pressed="false" data-filtro="gratis">Gratis</button>
+          <button class="filtro" type="button" aria-pressed="false" data-filtro="sera">Di sera</button>
+          <button class="filtro" type="button" aria-pressed="false" data-filtro="musica">Musica</button>
+        </nav>
+
+        <section class="percorso" aria-label="Eventi">
+          <p class="giorno">Oggi · 26 agosto</p>
+          <section class="eventi">
+            <article class="evento fermata" data-tag="musica sera">
+              <p class="evento__ora">21:00</p>
+              <section class="evento__corpo"><h2>Turandot</h2>
+                <p class="dettagli">Teatro Carlo Felice</p></section>
+              <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva">
+                <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+              </button>
+            </article>
+            <article class="evento fermata fermata--nostra" data-tag="qui gratis sera">
+              <p class="evento__ora">19:30</p>
+              <section class="evento__corpo"><h2>Concerto in cortile</h2>
+                <p class="dettagli">Palazzo Spinola · <span class="segno segno--qui">creato qui</span></p></section>
+              <button class="nodo-salva" type="button" data-salva aria-pressed="true" aria-label="Salva">
+                <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+              </button>
+            </article>
+          </section>
+          <p class="giorno">Giovedì 27</p>
+          <section class="eventi">
+            <article class="evento fermata" data-tag="gratis sera">
+              <p class="evento__ora">21:15</p>
+              <section class="evento__corpo"><h2>Cinema all'aperto</h2>
+                <p class="dettagli">Porto Antico · <span class="segno segno--gratis">gratis</span></p></section>
+              <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva">
+                <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+              </button>
+            </article>
+            <article class="evento fermata fermata--nostra" data-tag="qui">
+              <p class="evento__ora">18:00</p>
+              <section class="evento__corpo"><h2>Passeggiata fra i caruggi</h2>
+                <p class="dettagli">Da Piazza Banchi · <span class="segno segno--qui">creato qui</span></p></section>
+              <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva">
+                <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+              </button>
+            </article>
+          </section>
+          <p class="capo" aria-hidden="true">
+            <svg viewBox="0 0 18 30"><path d="M9,0 C6,9 12,15 9,20" stroke="var(--filo)" stroke-width="1.5" opacity=".5"/><path d="M9,20 C7,24 6,26 4,29" stroke="var(--filo)" stroke-width="1" opacity=".34"/><path d="M9,20 C11,24 13,26 15,28" stroke="var(--filo)" stroke-width="1" opacity=".28"/></svg>
+          </p>
+        </section>
+      </section>
+      <nav class="zoccolo" aria-label="Sezioni">
+        <button class="voce-zoccolo" type="button" aria-current="page"><svg class="icona" aria-hidden="true"><use href="#i-lista"/></svg>Eventi</button>
+        <button class="voce-zoccolo" type="button"><svg class="icona" aria-hidden="true"><use href="#i-mappa"/></svg>Mappa</button>
+        <button class="voce-zoccolo" type="button"><svg class="icona" aria-hidden="true"><use href="#i-piu"/></svg>Crea</button>
+        <button class="voce-zoccolo" type="button"><svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>Salvati</button>
+      </nav>
+    </section>
+    <p class="didascalia">Filtri e giorni scorrono in orizzontale invece di andare a capo:
+      a 390 px una riga in più costa un evento in meno.</p>
+  </section>
+
+  <section class="colonna">
+    <p class="etichetta">Evento · foglio di condivisione aperto</p>
+    <section class="telefono">
+      <section class="schermo">
+        <header class="testata">
+          <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+          <nav class="strumenti"><p class="luogo">Genova</p></nav>
+        </header>
+        <h1>Concerto in cortile</h1>
+        <p class="sommario" style="margin-bottom:var(--sp-4)">
+          <span class="segno segno--qui">Creato qui da Marta</span> ·
+          <span class="segno segno--gratis">libero</span>
+        </p>
+        <dl style="display:grid;gap:var(--sp-3);margin:0 0 var(--sp-4);padding:var(--sp-4) 0;border-top:1px solid var(--riga);border-bottom:1px solid var(--riga)">
+          <section><dt class="etichetta">Quando</dt><dd style="margin:0">giovedì 27 agosto, 19:30</dd></section>
+          <section><dt class="etichetta">Dove</dt><dd style="margin:0">Palazzo Spinola, Genova</dd></section>
+        </dl>
+        <p class="mappa" style="height:130px">Mappa</p>
+        <section class="chi-va" style="display:flex;gap:var(--sp-3);align-items:center;margin:var(--sp-4) 0">
+          <span class="facce"><span class="faccia">M</span><span class="faccia">L</span><span class="faccia" style="background:var(--sosta)">+7</span></span>
+          <p class="dettagli">Nove persone ci vanno</p>
+        </section>
+        <section class="azioni" style="display:grid;gap:var(--sp-2)">
+          <button class="giro giro--primario giro--pieno" type="button">Aggiungi al calendario</button>
+          <button class="giro giro--sosta giro--pieno" type="button">Condividi</button>
+        </section>
+      </section>
+      <section class="velo" data-aperto style="position:absolute"></section>
+      <section class="foglio" data-aperto role="dialog" aria-label="Condividi">
+        <p class="foglio__presa" aria-hidden="true"></p>
+        <h2>Condividi</h2>
+        <section class="foglio__voci">
+          <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-copia"/></svg> Copia il link</button>
+          <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-telegram"/></svg> Manda su Telegram</button>
+          <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-qr"/></svg> Codice QR</button>
+        </section>
+      </section>
+    </section>
+    <p class="didascalia">Il foglio arriva dal bordo basso e non copre il titolo:
+      si vede sempre cosa si sta condividendo.</p>
+  </section>
+
+  <section class="colonna">
+    <p class="etichetta">Crea · secondo passo</p>
+    <section class="telefono">
+      <section class="schermo">
+        <header class="testata">
+          <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+          <nav class="strumenti"><p class="luogo">Genova</p></nav>
+        </header>
+        <h1>Crea un evento</h1>
+        <p class="sommario">Ti chiederemo di accedere una sola volta, al momento dell'invio.</p>
+
+        <nav class="passi" aria-label="Avanzamento">
+          <span class="passo" data-stato="fatto"><span class="passo__nodo"><svg class="icona" aria-hidden="true"><use href="#i-spunta"/></svg></span></span>
+          <span class="passo__tratto" style="--avanzo:1" aria-hidden="true"></span>
+          <span class="passo" data-stato="ora"><span class="passo__nodo">2</span> Quando e dove</span>
+          <span class="passo__tratto" aria-hidden="true"></span>
+          <span class="passo" data-stato="dopo"><span class="passo__nodo">3</span></span>
+        </nav>
+
+        <form>
+          <section style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+            <label class="campo"><span>Inizio</span><input type="date" value="2026-08-27"></label>
+            <label class="campo"><span>Ora</span><input type="time" value="19:30"></label>
+          </section>
+          <label class="campo"><span>Luogo</span><input type="text" value="Palazzo Spinola"></label>
+          <label class="campo" data-errato><span>Indirizzo</span>
+            <input type="text" placeholder="Via, numero, città">
+            <small class="campo__aiuto">Senza indirizzo non finisce sulla mappa.</small>
+          </label>
+          <label class="leva">
+            <input type="checkbox">
+            <span class="leva__pista" aria-hidden="true"></span>
+            <span class="leva__testo">Mostralo nel calendario<small>Prima lo controlliamo.</small></span>
+          </label>
+        </form>
+      </section>
+      <nav class="barra">
+        <button class="giro giro--piccolo" type="button">Indietro</button>
+        <button class="giro giro--primario" type="button" style="flex:1">Avanti</button>
+      </nav>
+    </section>
+    <p class="didascalia">A 390 px la coppia data/ora resta su una riga sola: sotto i
+      560 px va a capo, ma qui i due campi ci stanno e restano leggibili insieme.</p>
+  </section>
+
+</main>
+
+<p class="piede" style="max-width:var(--colonna);margin:0 auto;padding:0 var(--sp-4) var(--sp-7)">
+  <a href="00-sistema.html">Sistema</a>
+  <a href="01-feed.html">Feed</a>
+  <a href="02-evento.html">Evento</a>
+  <a href="03-crea.html">Crea</a>
+</p>
+
+<script type="module" src="filo.js"></script>
+</body>
+</html>

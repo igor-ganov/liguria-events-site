@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impronta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400&display=swap">
+<style>
+/* 03 — IMPRONTA
+   Il bottone non è disegnato: è premuto nella carta. Nessun bordo, solo
+   l'ombra che il torchio lascia dentro l'incavo — più profonda in alto,
+   quasi assente in basso, e mai perfettamente uniforme. */
+:root{
+  --carta:#f8f7f3; --incavo:#f2f0ea; --riga:#e5e2d9;
+  --testo:#242629; --tenue:#7f8288; --blu:#3f5d8a; --oliva:#6b7a54;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Sora',"Helvetica Neue",sans-serif;font-size:15.5px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:780px;margin:0 auto;padding:52px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:64px}
+.logo{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em}
+.logo i{font-style:normal;color:var(--blu)}
+.luogo{margin:0;font-size:13px;color:var(--tenue);letter-spacing:.03em}
+
+h1{
+  margin:0 0 14px;font-family:'Source Serif 4',Georgia,serif;font-weight:300;
+  font-size:clamp(38px,6.2vw,56px);line-height:1.08;letter-spacing:-.02em;text-wrap:balance;
+}
+.sommario{margin:0 0 46px;max-width:50ch;color:var(--tenue);font-size:16px}
+
+/* ── filtri: incavi piccoli ─────────────────────────────────── */
+.filtri{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:42px}
+.filtro{
+  font:inherit;font-size:13.5px;padding:8px 16px;cursor:pointer;border:0;
+  background:var(--incavo);color:var(--tenue);border-radius:7px 8px 7px 9px;
+  box-shadow:inset 0 1.5px 2px rgba(60,55,45,.09), inset 0 -1px 0 rgba(255,255,255,.7);
+}
+.filtro[aria-pressed="true"]{color:var(--testo);box-shadow:inset 0 2px 3px rgba(60,55,45,.16), inset 0 -1px 0 rgba(255,255,255,.6)}
+.filtro:focus-visible{outline:2px solid var(--blu);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:0}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:21px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:19.5px;font-weight:500;letter-spacing:-.012em;line-height:1.32}
+.dettagli{margin:0;font-size:14px;color:var(--tenue)}
+.data{margin:0;font-size:13.5px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--oliva)}
+
+/* ── il bottone: premuto, con l'incavo mai uniforme ─────────── */
+.azioni{display:flex;gap:14px;flex-wrap:wrap;margin-top:50px}
+.premuto{
+  font:inherit;font-size:14.5px;font-weight:500;padding:13px 26px;cursor:pointer;
+  border:0;color:var(--carta);background:var(--blu);
+  /* raggi diversi ai quattro angoli: la matrice non era mai simmetrica */
+  border-radius:11px 9px 12px 8px;
+  box-shadow:
+    inset 0 2px 3px rgba(255,255,255,.28),
+    inset 0 -2px 4px rgba(0,0,0,.22),
+    0 1px 0 rgba(255,255,255,.8);
+}
+.premuto--oliva{background:var(--oliva);border-radius:9px 12px 8px 11px}
+.premuto--vuoto{
+  background:var(--incavo);color:var(--testo);border-radius:12px 8px 11px 9px;
+  box-shadow:inset 0 2px 3px rgba(60,55,45,.13), inset 0 -1.5px 0 rgba(255,255,255,.75);
+}
+.premuto:active{box-shadow:inset 0 3px 6px rgba(0,0,0,.28)}
+.premuto:focus-visible{outline:2px solid var(--testo);outline-offset:4px}
+
+.piede{margin-top:64px;padding-top:16px;border-top:1px solid var(--riga);font-size:12.5px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare a Genova</h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="premuto" type="button">Crea evento</button>
+    <button class="premuto premuto--oliva" type="button">Condividi</button>
+    <button class="premuto premuto--vuoto" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">03 — Impronta · quattro raggi diversi per angolo, incavo in inset shadow</p>
+</main>
+</body>
+</html>

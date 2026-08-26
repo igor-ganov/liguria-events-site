@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pennello</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400&display=swap">
+<style>
+/* 02 — PENNELLO
+   Il bottone non ha cornice: sotto la parola c'è una pennellata, data in un
+   colpo, più spessa all'inizio e assottigliata alla fine. Tutto il resto
+   della pagina resta bianco e silenzioso. */
+:root{
+  --carta:#fdfdfb; --riga:#eceae4; --testo:#22262a; --tenue:#7d838a;
+  --blu:#3c6e8f; --verde:#5c7f5f; --ruggine:#b06a4a;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--carta);color:var(--testo);
+  font-family:'Onest',"Helvetica Neue",sans-serif;font-size:16px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+main{max-width:800px;margin:0 auto;padding:48px 24px 90px}
+
+.testata{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:60px}
+.logo{margin:0;font-size:16px;font-weight:600}
+.logo i{font-style:normal;color:var(--blu)}
+.luogo{margin:0;font-size:13.5px;color:var(--tenue)}
+
+h1{
+  margin:0 0 12px;font-family:'Newsreader',Georgia,serif;font-weight:300;
+  font-size:clamp(40px,7vw,64px);line-height:1.02;letter-spacing:-.026em;text-wrap:balance;
+}
+h1 em{font-style:italic;position:relative;white-space:nowrap}
+h1 em::after{
+  /* la stessa pennellata, in piccolo, sotto due parole */
+  content:"";position:absolute;left:-2%;right:-2%;bottom:.08em;height:.28em;
+  background:var(--blu);opacity:.16;
+  -webkit-mask-image:url(#pennellata);mask-image:url(#pennellata);
+}
+.sommario{margin:0 0 44px;max-width:50ch;color:var(--tenue);font-size:16.5px}
+
+/* ── filtri ─────────────────────────────────────────────────── */
+.filtri{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:40px}
+.filtro{
+  font:inherit;font-size:14px;padding:8px 15px;cursor:pointer;border:0;
+  background:none;color:var(--tenue);border-radius:2px;
+}
+.filtro[aria-pressed="true"]{color:var(--testo);background:#eef2f4}
+.filtro:focus-visible{outline:2px solid var(--blu);outline-offset:3px}
+
+/* ── eventi ─────────────────────────────────────────────────── */
+.eventi{display:grid;gap:2px}
+.evento{
+  display:grid;grid-template-columns:1fr auto;gap:20px;align-items:baseline;
+  padding:20px 0;border-bottom:1px solid var(--riga);
+}
+.evento:last-child{border-bottom:0}
+.evento h2{margin:0 0 4px;font-size:20.5px;font-weight:500;letter-spacing:-.014em;line-height:1.3}
+.dettagli{margin:0;font-size:14.5px;color:var(--tenue)}
+.data{margin:0;font-size:14px;color:var(--tenue);white-space:nowrap;font-variant-numeric:tabular-nums}
+.qui{color:var(--ruggine)}
+
+/* ── il bottone: parola sopra la pennellata ─────────────────── */
+.azioni{display:flex;gap:18px;flex-wrap:wrap;margin-top:48px;align-items:center}
+.pennellata{
+  position:relative;font:inherit;font-size:15px;font-weight:500;
+  padding:11px 26px 13px;cursor:pointer;border:0;background:none;color:var(--carta);
+  isolation:isolate;
+}
+.pennellata::before{
+  content:"";position:absolute;inset:0;z-index:-1;background:var(--blu);
+  -webkit-mask-image:url(#pennellata);mask-image:url(#pennellata);
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+}
+.pennellata--verde::before{background:var(--verde)}
+.pennellata--chiaro{color:var(--testo)}
+.pennellata--chiaro::before{background:var(--ruggine);opacity:.2}
+.pennellata:hover::before{filter:brightness(1.08)}
+.pennellata:focus-visible{outline:2px solid var(--testo);outline-offset:4px}
+
+.piede{margin-top:64px;padding-top:16px;border-top:1px solid var(--riga);font-size:13px;color:var(--tenue)}
+@media (max-width:520px){.evento{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <!-- una pennellata: entra spessa, esce assottigliata, i bordi non sono paralleli -->
+  <mask id="pennellata" maskContentUnits="objectBoundingBox">
+    <path fill="#fff" d="M0.012,0.30 C0.05,0.09 0.14,0.05 0.30,0.035 C0.50,0.015 0.72,0.02 0.90,0.055
+      C0.96,0.07 0.995,0.16 0.985,0.44 C0.978,0.70 0.955,0.87 0.90,0.925
+      C0.74,0.975 0.44,0.985 0.22,0.955 C0.08,0.935 0.02,0.83 0.008,0.60 Z"/>
+  </mask>
+</svg>
+
+<main>
+  <header class="testata">
+    <p class="logo">Dove<i>Go</i></p>
+    <p class="luogo">Genova · Liguria</p>
+  </header>
+
+  <h1>Cosa fare <em>a Genova</em></h1>
+  <p class="sommario">Millecentosessantasei eventi in tutta Italia, raccolti ogni ora dalle fonti che li annunciano.</p>
+
+  <nav class="filtri" aria-label="Filtri">
+    <button class="filtro" aria-pressed="true" type="button">Oggi</button>
+    <button class="filtro" aria-pressed="false" type="button">Weekend</button>
+    <button class="filtro" aria-pressed="false" type="button">Gratis</button>
+    <button class="filtro" aria-pressed="false" type="button">Creati qui</button>
+  </nav>
+
+  <section class="eventi" aria-label="Eventi">
+    <article class="evento">
+      <section>
+        <h2>Turandot</h2>
+        <p class="dettagli">Teatro Carlo Felice · da 25 €</p>
+      </section>
+      <p class="data">27 ago · 21:00</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Frida Kahlo, il caos dentro</h2>
+        <p class="dettagli">Palazzo Ducale · piazza Matteotti 9</p>
+      </section>
+      <p class="data">fino al 6 set</p>
+    </article>
+    <article class="evento">
+      <section>
+        <h2>Cinema all'aperto al Porto Antico</h2>
+        <p class="dettagli">Porto Antico · ingresso libero · <span class="qui">creato qui</span></p>
+      </section>
+      <p class="data">28 ago · 21:30</p>
+    </article>
+  </section>
+
+  <footer class="azioni">
+    <button class="pennellata" type="button">Crea evento</button>
+    <button class="pennellata pennellata--verde" type="button">Condividi</button>
+    <button class="pennellata pennellata--chiaro" type="button">Tutti gli eventi</button>
+  </footer>
+
+  <p class="piede">02 — Pennello · la forma del bottone è una mask SVG a spessore variabile</p>
+</main>
+</body>
+</html>

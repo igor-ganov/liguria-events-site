@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { isPainted } from './is-painted.ts';
 
 // The create page on a phone. Both of these shipped: the page scrolled sideways
 // because two form fields would not shrink, and the map's zoom controls were
@@ -56,8 +57,7 @@ test('the map keeps its own zoom controls', async ({ page }) => {
 
 test('the submit button is still the loud one', async ({ page }) => {
   await ready(page);
-  const bg = await page
-    .locator('#event-form button[type=submit]')
-    .evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  // Filled by the drawn stroke rather than a background colour since Filo,
+  // so the question is whether anything fills it — not which property does.
+  expect(await isPainted(page.locator('#event-form button[type=submit]'))).toBe(true);
 });

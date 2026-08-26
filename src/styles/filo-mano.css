@@ -1,0 +1,335 @@
+/* ══ Filo — the hand ════════════════════════════════════════════════
+   Where the site stops using the browser's borders. A CSS border is
+   perfect and therefore mute: it says "box", not "somebody drew this".
+   Here every frame, rule and circle is a real stroke, and none of them
+   closes — the hand starts, goes round, and stops just short of coming
+   back to where it began.
+
+   The recipe throughout is `border: 0` plus a border-image whose WIDTH
+   is set independently: the stroke is painted inside the padding box
+   and costs the layout nothing, so no element moves when it is added. */
+
+:root {
+  --t-cornice: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%23d6d2c6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cornice-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%2333697a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-cornice-tratteggio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%23d6d2c6' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='7 6'/></svg>");
+  --t-giro: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7' fill='none' stroke='%2333697a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-giro-ripasso: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M27,9 C89,4 170,7 213,5 C233,7 236,24 233,37 C229,54 216,59 187,58 C127,59 57,57 24,58 C12,56 5,43 6,29 C7,16 15,7 33,9' fill='none' stroke='%2333697a' stroke-width='1.1' stroke-linecap='round' opacity='.75'/></svg>");
+  --t-giro-pieno: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7 Z' fill='%2333697a' stroke='%2333697a' stroke-width='3'/></svg>");
+  --t-pillola: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%23d6d2c6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-pillola-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%2333697a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-pillola-piena: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5 Z' fill='%2333697a' stroke='%2333697a' stroke-width='2.6' stroke-linejoin='round'/></svg>");
+  --t-riga: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%23e9e6dd' stroke-width='1.2' stroke-linecap='round'/></svg>");
+  --t-riga-forte: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%23d6d2c6' stroke-width='1.3' stroke-linecap='round'/></svg>");
+  --t-riga-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%2333697a' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-riga-errore: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23a8452f' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cerchio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23fbfaf7' stroke='%2333697a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-cerchio-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23c2703f' stroke='%23c2703f' stroke-width='2.2' stroke-linecap='round'/></svg>");
+  --t-casella: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%23d6d2c6' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-casella-segnata: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%2333697a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-spunta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5,10.6 C6.6,12 7.7,13.4 8.7,15 C10.6,11.2 13.2,7.2 16.2,4.2' fill='none' stroke='%2333697a' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+:root[data-theme='dark'] {
+  --t-cornice: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cornice-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-cornice-tratteggio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='7 6'/></svg>");
+  --t-giro: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-giro-ripasso: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M27,9 C89,4 170,7 213,5 C233,7 236,24 233,37 C229,54 216,59 187,58 C127,59 57,57 24,58 C12,56 5,43 6,29 C7,16 15,7 33,9' fill='none' stroke='%237fb4c4' stroke-width='1.1' stroke-linecap='round' opacity='.75'/></svg>");
+  --t-giro-pieno: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7 Z' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='3'/></svg>");
+  --t-pillola: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-pillola-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-pillola-piena: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5 Z' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2.6' stroke-linejoin='round'/></svg>");
+  --t-riga: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%232b3037' stroke-width='1.2' stroke-linecap='round'/></svg>");
+  --t-riga-forte: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%233a4047' stroke-width='1.3' stroke-linecap='round'/></svg>");
+  --t-riga-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-riga-errore: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23e08872' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cerchio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%2316181c' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-cerchio-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23dd9463' stroke='%23dd9463' stroke-width='2.2' stroke-linecap='round'/></svg>");
+  --t-casella: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-casella-segnata: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-spunta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5,10.6 C6.6,12 7.7,13.4 8.7,15 C10.6,11.2 13.2,7.2 16.2,4.2' fill='none' stroke='%237fb4c4' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+/* ── The loop that does not close ────────────────────────────────
+   Every button on the site. Hovering it, the hand goes round a second
+   time slightly out of register — the one place the drawing shows. */
+.head-create,
+.auth-card > form > button[type='submit'],
+.auth-card > button[type='submit'],
+.auth-card .btn,
+.account-signin,
+.account-signout,
+.account-submit,
+.nav-btn,
+.share-button,
+.copy-link,
+.empty-onward,
+.map-retry,
+.route-generate,
+.route-save,
+.subscribe-bar a,
+.new-event a {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: none;
+  color: var(--ink);
+  border-image: var(--t-giro) 14 / 14px / 0 stretch;
+  transition: transform 0.14s var(--mano), color 0.16s;
+}
+.head-create::after,
+.auth-card > form > button[type='submit']::after,
+.auth-card > button[type='submit']::after,
+.account-submit::after,
+.share-button::after,
+.empty-onward::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  pointer-events: none;
+  opacity: 0;
+  border-image: var(--t-giro-ripasso) 14 / 14px / 0 stretch;
+  transform: rotate(-0.4deg) scale(1.01);
+  transition: opacity 0.18s var(--mano), transform 0.18s var(--mano);
+}
+.head-create:hover::after,
+.head-create:focus-visible::after,
+.auth-card > form > button[type='submit']:hover::after,
+.auth-card > button[type='submit']:hover::after,
+.account-submit:hover::after,
+.share-button:hover::after,
+.empty-onward:hover::after {
+  opacity: 1;
+  transform: rotate(0.35deg) scale(1);
+}
+.head-create:hover,
+.account-submit:hover,
+.share-button:hover,
+.empty-onward:hover {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+/* The primary action is the same loop, filled in. */
+.head-create,
+.auth-card > form > button[type='submit'],
+.auth-card > button[type='submit'],
+.auth-card .btn,
+.account-submit,
+.route-generate,
+.subscribe-bar a,
+.new-event a {
+  color: var(--on-accent);
+  border-image-source: var(--t-giro-pieno);
+  border-image-slice: 14 fill;
+}
+
+/* ── Chips: the ring is the same node as the thread ─────────────── */
+.chip,
+.cat-tag,
+.lm-tag,
+.event-tags a,
+.badge {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  border-image: var(--t-pillola) 12 / 12px / 0 stretch;
+}
+.chip:hover {
+  border-image-source: var(--t-pillola-filo);
+  box-shadow: none;
+}
+.chip[aria-pressed='true'],
+.chip--free[aria-pressed='true'],
+.chip--layer[aria-pressed='true'] {
+  color: var(--on-accent);
+  background-color: transparent;
+  border-image-source: var(--t-pillola-piena);
+  border-image-slice: 12 fill;
+}
+
+/* ── Frames: drawn on a pseudo-element, so the card keeps its own
+   background and spacing and the stroke passes over it. ─────────── */
+/* Only the ones that are static get a positioning context: .fab-popup is
+   fixed, .acct-dropdown is absolute and <dialog> is placed by the browser,
+   and taking that away drops them back into the flow — which is how the
+   mobile menu ended up 48 000 px tall. */
+.mini-card,
+.auth-card,
+.submit-card,
+.empty-state,
+.lm-card,
+.event-facts,
+.confirm-box,
+.map-pop,
+.feed-search,
+.visibility-choice,
+.form-when {
+  position: relative;
+}
+.mini-card,
+.auth-card,
+.submit-card,
+.empty-state,
+.lm-card,
+.event-facts,
+.confirm-box,
+.signin-dialog,
+.acct-dropdown,
+.fab-popup,
+.map-pop,
+.feed-search,
+.visibility-choice,
+.form-when {
+  border: 0;
+}
+.mini-card::before,
+.auth-card::before,
+.submit-card::before,
+.empty-state::before,
+.lm-card::before,
+.event-facts::before,
+.confirm-box::before,
+.signin-dialog::before,
+.acct-dropdown::before,
+.fab-popup::before,
+.map-pop::before,
+.feed-search::before,
+.visibility-choice::before,
+.form-when::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 0;
+  border: 16px solid transparent;
+  border-image: var(--t-cornice) 16 / 16px / 0 stretch;
+}
+.mini-card:hover::before,
+.lm-card:hover::before,
+.feed-search:focus-within::before {
+  border-image-source: var(--t-cornice-filo);
+}
+
+/* ── Rules: no border-bottom anywhere, a line pulled by hand ────── */
+.site-head,
+.site-foot,
+.feed-group,
+.programme-row,
+.rv-item,
+.passkey-row,
+.settings-section {
+  border-top: 0;
+  border-bottom: 0;
+}
+.site-head {
+  background-image: var(--t-riga);
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 160px 4px;
+}
+.site-foot,
+.settings-section,
+.rv-item,
+.passkey-row {
+  background-image: var(--t-riga);
+  background-repeat: repeat-x;
+  background-position: top;
+  background-size: 160px 4px;
+}
+
+/* ── Fields: a line underneath, which takes colour when it takes
+   focus. No box around the text. ────────────────────────────────── */
+.submit-form input:not([type='checkbox']):not([type='radio']),
+.submit-form textarea,
+.submit-form select,
+.dur-input,
+.feed-search input,
+.feed-dates input,
+.rv-comment {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  background-image: var(--t-riga-forte);
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 160px 4px;
+  padding-bottom: 0.55rem;
+}
+.submit-form input:not([type='checkbox']):not([type='radio']):focus,
+.submit-form textarea:focus,
+.submit-form select:focus,
+.dur-input:focus,
+.feed-search input:focus,
+.feed-dates input:focus,
+.rv-comment:focus {
+  outline: none;
+  background-image: var(--t-riga-filo);
+}
+.submit-form [aria-invalid='true'] {
+  background-image: var(--t-riga-errore);
+}
+
+/* ── Checkboxes: a drawn square with a drawn tick ───────────────── */
+.submit-form input[type='checkbox'],
+.visibility-opt input[type='checkbox'] {
+  appearance: none;
+  width: 19px;
+  height: 19px;
+  flex: none;
+  cursor: pointer;
+  background: var(--t-casella) no-repeat center / 100% 100%;
+}
+.submit-form input[type='checkbox']:checked,
+.visibility-opt input[type='checkbox']:checked {
+  background-image: var(--t-casella-segnata), var(--t-spunta);
+  background-size: 100% 100%, 100% 100%;
+}
+
+/* ── Small controls ─────────────────────────────────────────────
+   A stroke sliced at twelve pixels needs twenty-four to sit in. The
+   language pills and the theme button are barely that tall, so the
+   frame folded onto itself and crossed the letters. They get their
+   own, smaller slice — and the round button gets a drawn circle
+   rather than a stretched pill. */
+.lang-switch a {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  border-image: var(--t-pillola) 8 / 8px / 0 stretch;
+}
+.lang-switch a[aria-current='true'] {
+  color: var(--on-accent);
+  background-color: transparent;
+  border-image-source: var(--t-pillola-piena);
+  border-image-slice: 8 fill;
+}
+.cat-tag,
+.badge {
+  border-image-slice: 8;
+  border-image-width: 8px;
+}
+.theme-btn,
+.region-current {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  border-image: var(--t-pillola) 10 / 10px / 0 stretch;
+}
+.theme-btn:hover,
+.region-current:hover {
+  border-image-source: var(--t-pillola-filo);
+}
+
+/* A fieldset's legend has to sit above the drawn frame, and needs the page
+   under it so the stroke does not run through the words. */
+.visibility-choice legend,
+.form-when legend {
+  position: relative;
+  z-index: 1;
+  padding-inline: 0.4rem;
+  background: var(--surface);
+}

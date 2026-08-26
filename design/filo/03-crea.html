@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filo — crea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap">
+<link rel="stylesheet" href="filo.css">
+<link rel="stylesheet" href="componenti.css">
+<link rel="stylesheet" href="mano.css">
+<style>
+/* Un modulo non è una sequenza di date: il filo non attraversa la
+   pagina. Diventa invece l'avanzamento dei passi, e torna a essere
+   filo solo attorno al bottone che pubblica. */
+main{max-width:var(--largo)}
+.banco{display:grid;gap:var(--sp-7);align-items:start}
+@media (min-width:900px){.banco{grid-template-columns:1fr 340px}}
+.gruppo{margin-bottom:var(--sp-6)}
+.gruppo > h2{margin-bottom:var(--sp-4);font-size:var(--t-md);color:var(--tenue)}
+.due{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
+.due > *{min-width:0}
+@media (max-width:560px){.due{grid-template-columns:1fr}}
+.nota-accesso{
+  margin-bottom:var(--sp-6);padding:var(--sp-3) var(--sp-4);
+  border-left:2px solid var(--filo);background:var(--filo-velo);
+  border-radius:0 var(--r) var(--r) 0;color:var(--tenue);font-size:var(--t-sm);max-width:56ch;
+}
+.scheda[hidden]{display:none}
+.scheda{animation:entra .34s var(--mano)}
+.tags{display:flex;gap:var(--sp-2);flex-wrap:wrap}
+/* L'anteprima è la stessa riga che comparirà nel feed, non un
+   riquadro inventato per il modulo: quello che vedi è quello che esce. */
+.anteprima{
+  position:sticky;top:76px;padding:var(--sp-5);border:1px solid var(--riga);
+  border-radius:var(--r);background:var(--superficie);box-shadow:var(--ombra-1);
+}
+.anteprima > .etichetta{display:block;margin-bottom:var(--sp-4)}
+.anteprima .percorso{padding-left:var(--corsia)}
+.anteprima .evento{border-bottom:0;margin:0;padding:var(--sp-3) 0}
+.anteprima .evento:hover{background:none;transform:none}
+.stato-riga{display:flex;gap:var(--sp-2);align-items:center;margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid var(--riga);font-size:var(--t-sm);color:var(--tenue)}
+.pallino{width:8px;height:8px;border-radius:50%;background:var(--sosta)}
+.deposito__prova{width:100%;height:120px;border-radius:8px;background:linear-gradient(140deg,var(--filo-velo),var(--sosta-velo));display:grid;place-items:center;color:var(--tenue);font-size:var(--t-xs)}
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+  <nav class="strumenti" aria-label="Sito">
+    <p class="luogo">Genova · Liguria</p>
+    <button class="giro giro--piccolo" type="button" data-tema>Tema scuro</button>
+  </nav>
+</header>
+
+<main>
+  <h1>Crea un evento</h1>
+  <p class="nota-accesso">
+    Compila pure: ti chiederemo di accedere una sola volta, al momento dell'invio.
+    Quello che scrivi resta qui anche se l'accesso ti porta via dalla pagina.
+  </p>
+
+  <nav class="passi" data-passi aria-label="Avanzamento">
+    <span class="passo" data-passo="1" data-stato="ora"><span class="passo__nodo">1</span> Cosa</span>
+    <span class="passo__tratto" aria-hidden="true"></span>
+    <span class="passo" data-passo="2" data-stato="dopo"><span class="passo__nodo">2</span> Quando e dove</span>
+    <span class="passo__tratto" aria-hidden="true"></span>
+    <span class="passo" data-passo="3" data-stato="dopo"><span class="passo__nodo">3</span> Chi lo vede</span>
+  </nav>
+
+  <section class="banco">
+    <form novalidate>
+
+      <section class="scheda" data-scheda="1">
+        <section class="gruppo">
+          <label class="campo" data-conta-caratteri="80">
+            <span>Titolo <span class="campo__conta"></span></span>
+            <input type="text" value="Concerto in cortile" data-specchio="titolo" maxlength="80">
+            <small class="campo__aiuto">Come lo diresti a un amico. Niente maiuscole urlate.</small>
+          </label>
+          <label class="campo" data-conta-caratteri="400">
+            <span>Descrizione <span class="campo__conta"></span></span>
+            <textarea maxlength="400">Un quartetto d'archi nel cortile di Palazzo Spinola, a lume di candela.</textarea>
+          </label>
+        </section>
+        <section class="gruppo">
+          <h2>Che tipo di serata è</h2>
+          <section class="tags">
+            <button class="tag" type="button" aria-pressed="true">Musica</button>
+            <button class="tag" type="button" aria-pressed="false">Mostra</button>
+            <button class="tag" type="button" aria-pressed="false">Teatro</button>
+            <button class="tag" type="button" aria-pressed="true">All'aperto</button>
+            <button class="tag" type="button" aria-pressed="false">Per bambini</button>
+            <button class="tag" type="button" aria-pressed="false">Sport</button>
+            <button class="tag" type="button" aria-pressed="false">Mercato</button>
+          </section>
+        </section>
+        <section class="gruppo">
+          <h2>Un'immagine, se ce l'hai</h2>
+          <section class="deposito" tabindex="0" role="button">
+            <span class="deposito__prova" aria-hidden="true"><svg class="icona" aria-hidden="true"><use href="#i-foto"/></svg></span>
+            <span>Trascina qui una foto, o scegli dal telefono</span>
+            <small>JPG o PNG, meno di 5 MB</small>
+          </section>
+        </section>
+        <section class="azioni">
+          <button class="giro giro--primario" type="button" data-vai="2">Avanti</button>
+        </section>
+      </section>
+
+      <section class="scheda" data-scheda="2" hidden>
+        <section class="gruppo">
+          <h2>Quando</h2>
+          <section class="due">
+            <label class="campo"><span>Inizio</span><input type="date" value="2026-08-27" data-specchio="data"></label>
+            <label class="campo"><span>Ora</span><input type="time" value="19:30" data-specchio="ora"></label>
+          </section>
+          <section class="due">
+            <label class="campo"><span>Fine (facoltativa)</span><input type="date"></label>
+            <label class="campo"><span>Durata</span>
+              <select><option>90 minuti</option><option>un'ora</option><option>due ore</option><option>tutto il giorno</option></select>
+            </label>
+          </section>
+        </section>
+        <section class="gruppo">
+          <h2>Dove</h2>
+          <label class="campo"><span>Luogo</span><input type="text" value="Palazzo Spinola" data-specchio="luogo"></label>
+          <label class="campo" data-errato>
+            <span>Indirizzo</span>
+            <input type="text" placeholder="Via, numero, città">
+            <small class="campo__aiuto">Senza indirizzo non possiamo metterlo sulla mappa.</small>
+          </label>
+          <p class="mappa">La mappa si centra sull'indirizzo</p>
+        </section>
+        <section class="azioni">
+          <button class="giro" type="button" data-vai="1">Indietro</button>
+          <button class="giro giro--primario" type="button" data-vai="3">Avanti</button>
+        </section>
+      </section>
+
+      <section class="scheda" data-scheda="3" hidden>
+        <fieldset class="gruppo" style="border:0;padding:0;margin-inline:0">
+          <legend class="etichetta" style="padding:0;margin-bottom:var(--sp-3)">Chi può vederlo</legend>
+          <label class="leva">
+            <input type="checkbox" data-specchio="pubblico">
+            <span class="leva__pista" aria-hidden="true"></span>
+            <span class="leva__testo">Mostralo nel calendario della città
+              <small>Prima lo controlliamo, poi lo trova chiunque sfogli Genova. Di solito ci vuole un'ora.</small>
+            </span>
+          </label>
+          <p class="dettagli" style="margin-top:var(--sp-2)">
+            Con la leva spenta lo apre solo chi riceve il link: resta fuori dal calendario
+            e dai motori di ricerca.
+          </p>
+        </fieldset>
+        <section class="gruppo">
+          <h2>Prima di pubblicare</h2>
+          <label class="scelta"><input type="checkbox" checked>
+            <span>Avvisami quando qualcuno si aggiunge<small>Una email, non di più.</small></span></label>
+          <label class="scelta"><input type="checkbox">
+            <span>Permetti i commenti<small>Puoi spegnerli in qualsiasi momento.</small></span></label>
+        </section>
+        <section class="azioni">
+          <button class="giro" type="button" data-vai="2">Indietro</button>
+          <button class="giro giro--primario" type="button" data-pubblica>Pubblica</button>
+          <button class="giro" type="button" disabled>Salva bozza</button>
+        </section>
+      </section>
+
+    </form>
+
+    <aside class="anteprima">
+      <span class="etichetta">Come apparirà nel feed</span>
+      <section class="percorso">
+        <section class="eventi">
+          <article class="evento fermata fermata--nostra" data-passata>
+            <p class="evento__ora" data-eco="ora">19:30</p>
+            <section class="evento__corpo">
+              <h2 data-eco="titolo">Concerto in cortile</h2>
+              <p class="dettagli"><span data-eco="luogo">Palazzo Spinola</span> · <span class="segno segno--qui">creato qui</span></p>
+            </section>
+          </article>
+        </section>
+      </section>
+      <p class="stato-riga"><span class="pallino" aria-hidden="true"></span>
+        <span data-eco="visibilita">Solo chi ha il link</span></p>
+    </aside>
+  </section>
+
+  <p class="piede">
+    <a href="00-sistema.html">Sistema</a>
+    <a href="01-feed.html">Feed</a>
+    <a href="02-evento.html">Evento</a>
+    <a href="04-mobile.html">Mobile</a>
+  </p>
+</main>
+
+<script type="module">
+import { avvisa } from './filo.js';
+
+const uno = (s, r = document) => r.querySelector(s);
+const tutti = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+/* I passi: lo stato è un numero, tutto il resto ne discende. */
+const schede = tutti('[data-scheda]');
+const passi = tutti('.passo');
+const tratti = tutti('.passo__tratto');
+
+const mostra = (n) => {
+  schede.forEach((s) => { s.hidden = s.dataset.scheda !== String(n); });
+  passi.forEach((p) => {
+    const suo = Number(p.dataset.passo);
+    p.dataset.stato = suo === n ? 'ora' : suo < n ? 'fatto' : 'dopo';
+    p.querySelector('.passo__nodo').innerHTML =
+      suo < n ? '<svg class="icona" aria-hidden="true"><use href="#i-spunta"/></svg>' : String(suo);
+  });
+  tratti.forEach((t, i) => t.style.setProperty('--avanzo', i < n - 1 ? '1' : '0'));
+  scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+tutti('[data-vai]').forEach((b) => b.addEventListener('click', () => mostra(Number(b.dataset.vai))));
+
+/* L'anteprima è viva: ogni campo si rispecchia mentre scrivi. */
+const eco = (chiave, testo) => tutti(`[data-eco="${chiave}"]`).forEach((n) => { n.textContent = testo; });
+tutti('[data-specchio]').forEach((campo) => {
+  const chiave = campo.dataset.specchio;
+  const aggiorna = () => eco(chiave, campo.value || '—');
+  campo.addEventListener('input', aggiorna);
+});
+
+const leva = uno('[data-specchio="pubblico"]');
+const nodoAnteprima = uno('.anteprima .fermata');
+leva.addEventListener('change', () => {
+  eco('visibilita', leva.checked ? 'Nel calendario di Genova, dopo il controllo' : 'Solo chi ha il link');
+  uno('.pallino').style.background = leva.checked ? 'var(--filo)' : 'var(--sosta)';
+  nodoAnteprima.classList.toggle('fermata--nostra', true);
+});
+
+/* Pubblica: il bottone aspetta, poi lo dice. */
+uno('[data-pubblica]').addEventListener('click', (e) => {
+  const b = e.currentTarget;
+  b.setAttribute('aria-busy', 'true');
+  setTimeout(() => {
+    b.removeAttribute('aria-busy');
+    avvisa(leva.checked ? 'Inviato al controllo: lo vedrai online entro un’ora' : 'Pubblicato. Il link è tuo, condividilo');
+  }, 1200);
+});
+</script>
+</body>
+</html>

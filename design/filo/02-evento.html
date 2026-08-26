@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filo — evento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1&family=Rubik:ital,wght@0,300..600;1,300..500&display=swap">
+<link rel="stylesheet" href="filo.css">
+<link rel="stylesheet" href="componenti.css">
+<link rel="stylesheet" href="mano.css">
+<style>
+/* La pagina di un evento non è una sequenza: è UN punto. Qui il filo
+   non attraversa niente — resta il nodo accanto al titolo. */
+.torna{font-size:var(--t-sm);color:var(--tenue);display:inline-block;margin-bottom:var(--sp-5)}
+.torna:hover{color:var(--testo)}
+.nodo{position:relative;padding-left:var(--corsia)}
+.nodo::before{
+  content:"";position:absolute;left:8px;top:.5em;width:10px;height:10px;border-radius:50%;
+  background:var(--sosta);border:1.7px solid var(--sosta);
+  animation:pulsa 1.1s var(--mano) .3s;
+}
+.fatti{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:var(--sp-4) var(--sp-5);margin:var(--sp-6) 0;padding:var(--sp-5) 0;
+  border-top:1px solid var(--riga);border-bottom:1px solid var(--riga);
+}
+.fatto dt{font-size:var(--t-xs);letter-spacing:.09em;text-transform:uppercase;color:var(--tenue);margin-bottom:3px}
+.fatto dd{margin:0}
+.corpo{max-width:62ch}
+.corpo p + p{margin-top:var(--sp-4)}
+.galleria{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--sp-3);margin:var(--sp-6) 0}
+.lastra{
+  aspect-ratio:4/3;border-radius:var(--r);border:1px solid var(--riga);cursor:pointer;
+  background:linear-gradient(140deg,var(--filo-velo),var(--alzata));
+  display:grid;place-items:center;color:var(--tenue);font-size:var(--t-xs);
+  transition:transform .22s var(--mano),box-shadow .22s;
+}
+.lastra:hover{transform:translateY(-3px) rotate(-.5deg);box-shadow:var(--ombra-2)}
+.lastra:nth-child(2){background:linear-gradient(140deg,var(--sosta-velo),var(--alzata))}
+.lastra:nth-child(3){background:linear-gradient(140deg,var(--gratis-velo),var(--alzata))}
+/* La barra delle azioni resta a portata di pollice: si stacca dal
+   fondo solo quando il contenuto è più lungo dello schermo. */
+.azioni-fisse{
+  position:sticky;bottom:0;z-index:30;display:flex;gap:var(--sp-3);align-items:center;
+  flex-wrap:wrap;padding:var(--sp-3) 0;margin-top:var(--sp-6);
+  background:color-mix(in srgb,var(--carta) 90%,transparent);
+  backdrop-filter:blur(10px);border-top:1px solid var(--riga);
+}
+.chi-va{display:flex;align-items:center;gap:var(--sp-3);margin:var(--sp-5) 0}
+.collegamento{display:flex;gap:var(--sp-3);align-items:center;flex-wrap:wrap;margin-top:var(--sp-6);padding-top:var(--sp-4);border-top:1px solid var(--riga)}
+.collegamento input{
+  flex:1 1 18rem;min-width:0;font:inherit;font-size:var(--t-sm);color:var(--tenue);
+  background:var(--alzata);border:1px solid var(--riga);border-radius:var(--r);padding:9px var(--sp-3);
+}
+.vicini{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--sp-3);margin-top:var(--sp-4)}
+.vicino{
+  padding:var(--sp-4);border:1px solid var(--riga);border-radius:var(--r);background:var(--superficie);
+  transition:transform .2s var(--mano),box-shadow .2s,border-color .2s;
+}
+.vicino:hover{transform:translateY(-2px);box-shadow:var(--ombra-2);border-color:var(--riga-forte)}
+.vicino p{font-size:var(--t-sm);color:var(--tenue);margin-top:3px}
+</style>
+</head>
+<body>
+
+<header class="testata">
+  <a class="marchio" href="01-feed.html">Dove<i>Go</i></a>
+  <nav class="strumenti" aria-label="Sito">
+    <p class="luogo">Genova · Liguria</p>
+    <button class="giro giro--piccolo" type="button" data-tema>Tema scuro</button>
+    <a class="giro giro--primario giro--piccolo" href="03-crea.html">Crea evento</a>
+  </nav>
+</header>
+
+<main>
+  <a class="torna" href="01-feed.html"><svg class="icona" aria-hidden="true"><use href="#i-indietro"/></svg> Tutti gli eventi a Genova</a>
+
+  <section class="nodo">
+    <h1>Concerto in cortile</h1>
+    <p class="sommario" style="margin-bottom:0">
+      <span class="segno segno--qui">Creato qui da Marta</span> ·
+      <span class="segno segno--gratis">ingresso libero</span>
+    </p>
+  </section>
+
+  <dl class="fatti">
+    <section class="fatto"><dt>Quando</dt><dd>giovedì 27 agosto, 19:30</dd></section>
+    <section class="fatto"><dt>Dove</dt><dd>Palazzo Spinola, Genova</dd></section>
+    <section class="fatto"><dt>Ingresso</dt><dd>libero</dd></section>
+    <section class="fatto"><dt>Durata</dt><dd>circa 90 minuti</dd></section>
+  </dl>
+
+  <section class="galleria" aria-label="Immagini">
+    <button class="lastra" type="button">Il cortile</button>
+    <button class="lastra" type="button">Le candele</button>
+    <button class="lastra" type="button">Il quartetto</button>
+  </section>
+
+  <nav class="linguette" data-linguette aria-label="Sezioni">
+    <span class="linguette__tratto" aria-hidden="true"></span>
+    <button class="linguetta" type="button" aria-selected="true" data-valore="cosa">Di cosa si tratta</button>
+    <button class="linguetta" type="button" aria-selected="false" data-valore="programma">Programma</button>
+    <button class="linguetta" type="button" aria-selected="false" data-valore="arrivare">Come arrivare</button>
+  </nav>
+
+  <section class="pannello corpo" data-pannello="cosa">
+    <p>Un quartetto d'archi suona nel cortile di Palazzo Spinola, a lume di candela.
+      Il programma è breve e non c'è intervallo: si comincia alle 19:30 e alle 21 si è fuori.</p>
+    <p>Le sedie sono un centinaio e non si prenotano. Chi arriva dopo resta in piedi
+      sotto il loggiato, che per il suono non è affatto la posizione peggiore.</p>
+  </section>
+
+  <section class="pannello corpo" data-pannello="programma" hidden>
+    <section class="piega">
+      <button class="piega__testa" type="button" aria-expanded="true">
+        <span>Prima parte · 19:30</span><span class="piega__segno" aria-hidden="true"><svg class="icona"><use href="#i-piu"/></svg></span>
+      </button>
+      <section class="piega__corpo"><section><p>Boccherini, Quintettino in do maggiore.
+        Puccini, Crisantemi, nella versione per quartetto.</p></section></section>
+    </section>
+    <section class="piega">
+      <button class="piega__testa" type="button" aria-expanded="false">
+        <span>Seconda parte · 20:15</span><span class="piega__segno" aria-hidden="true"><svg class="icona"><use href="#i-piu"/></svg></span>
+      </button>
+      <section class="piega__corpo"><section><p>Respighi, Antiche danze ed arie, suite terza.</p></section></section>
+    </section>
+    <section class="piega">
+      <button class="piega__testa" type="button" aria-expanded="false">
+        <span>In caso di pioggia</span><span class="piega__segno" aria-hidden="true"><svg class="icona"><use href="#i-piu"/></svg></span>
+      </button>
+      <section class="piega__corpo"><section><p>Si suona lo stesso, nel salone al primo piano.
+        La decisione si prende alle 18 e la scriviamo qui.</p></section></section>
+    </section>
+  </section>
+
+  <section class="pannello corpo" data-pannello="arrivare" hidden>
+    <p>Piazza di Pellicceria 1. Dalla metropolitana San Giorgio sono cinque minuti a piedi,
+      salendo per via degli Orefici.</p>
+    <p class="mappa">Mappa</p>
+  </section>
+
+  <section class="chi-va">
+    <span class="facce">
+      <span class="faccia">M</span><span class="faccia">L</span>
+      <span class="faccia">R</span><span class="faccia" style="background:var(--sosta)">+6</span>
+    </span>
+    <p class="dettagli" style="margin:0">Nove persone ci vanno</p>
+  </section>
+
+  <footer class="azioni-fisse">
+    <button class="giro giro--primario" type="button">Aggiungi al calendario</button>
+    <button class="giro giro--sosta" type="button" data-apre="condividi">Condividi</button>
+    <button class="nodo-salva" type="button" data-salva aria-pressed="false" aria-label="Salva questo evento">
+      <svg class="icona" aria-hidden="true"><use href="#i-salva"/></svg>
+    </button>
+    <span class="suggerisce" style="margin-left:auto">
+      <button class="giro giro--piccolo" type="button">Segnala un errore</button>
+      <span class="suggerisce__bolla" role="tooltip">Correggiamo entro il giorno</span>
+    </span>
+  </footer>
+
+  <p class="collegamento">
+    <label class="etichetta" for="url">Link diretto</label>
+    <input id="url" type="text" readonly value="https://dovego.it/event/c00299cb2ef1/">
+    <button class="giro giro--piccolo" type="button" data-copia="https://dovego.it/event/c00299cb2ef1/">Copia</button>
+  </p>
+
+  <section style="margin-top:var(--sp-8)">
+    <h2 class="serif" style="font-size:var(--t-xl)">Quella sera, lì vicino</h2>
+    <section class="vicini">
+      <a class="vicino" href="02-evento.html"><h3>Turandot</h3><p>Teatro Carlo Felice · 21:00</p></a>
+      <a class="vicino" href="02-evento.html"><h3>Ex Novo Trio</h3><p>Count Basie · 22:00</p></a>
+      <a class="vicino" href="02-evento.html"><h3>Cinema all'aperto</h3><p>Porto Antico · 21:15</p></a>
+    </section>
+  </section>
+
+  <p class="piede">
+    <a href="00-sistema.html">Sistema</a>
+    <a href="01-feed.html">Feed</a>
+    <a href="03-crea.html">Crea</a>
+    <a href="04-mobile.html">Mobile</a>
+  </p>
+</main>
+
+<section class="velo" data-velo aria-hidden="true"></section>
+<section class="foglio" data-foglio="condividi" role="dialog" aria-label="Condividi">
+  <p class="foglio__presa" aria-hidden="true"></p>
+  <h2>Condividi Concerto in cortile</h2>
+  <section class="foglio__voci">
+    <button class="foglio__voce" type="button" data-copia="https://dovego.it/event/c00299cb2ef1/"><svg class="icona" aria-hidden="true"><use href="#i-copia"/></svg> Copia il link</button>
+    <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-telegram"/></svg> Manda su Telegram</button>
+    <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-posta"/></svg> Manda per email</button>
+    <button class="foglio__voce" type="button"><svg class="icona" aria-hidden="true"><use href="#i-qr"/></svg> Scarica il codice QR</button>
+  </section>
+  <section class="azioni" style="margin-top:var(--sp-4);justify-content:flex-end">
+    <button class="giro giro--piccolo" type="button" data-chiude>Chiudi</button>
+  </section>
+</section>
+
+<script type="module" src="filo.js"></script>
+</body>
+</html>

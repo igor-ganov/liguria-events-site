@@ -1,0 +1,330 @@
+/* ═══════════════════════════════════════════════════════════════
+   FILO — la mano
+   Dove il sistema smette di usare i bordi del browser. Un bordo CSS
+   è perfetto e per questo muto: dice "riquadro", non dice "qualcuno
+   l'ha disegnato". Qui ogni cornice, ogni riga e ogni cerchio sono
+   un tratto vero, con la stessa penna del filo — e nessuno di loro
+   si chiude: la mano parte, gira, e si ferma poco prima di tornare
+   al punto di partenza.
+   Questo strato arriva dopo componenti.css e ne sostituisce i bordi.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── I tratti ──────────────────────────────────────────────────
+   Il colore va cotto dentro il data URI, quindi ogni tinta è un
+   tratto suo. Il tema scuro li ridefinisce più sotto. */
+:root{
+  --t-cornice:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%23d6d2c6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cornice-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%2333697a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-cornice-errore:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%23a8452f' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-cornice-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%23d6d2c6' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='7 6'/></svg>");
+  --t-pillola:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%23d6d2c6' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-pillola-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%2333697a' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-pillola-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%23d6d2c6' stroke-width='1.4' stroke-linecap='round' stroke-dasharray='5 5'/></svg>");
+  --t-cella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='none' stroke='%23e9e6dd' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%2333697a' stroke='%2333697a' stroke-width='2.4' stroke-linecap='round'/></svg>");
+  --t-riga:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%23e9e6dd' stroke-width='1.2' stroke-linecap='round'/></svg>");
+  --t-riga-forte:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%23d6d2c6' stroke-width='1.3' stroke-linecap='round'/></svg>");
+  --t-riga-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%2333697a' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-riga-errore:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23a8452f' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cerchio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='none' stroke='%2333697a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-casella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%23d6d2c6' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-casella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%2333697a' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-cerchio-pieno:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%2333697a' stroke='%2333697a' stroke-width='2' stroke-linecap='round'/></svg>");
+  --t-pista:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%23d6d2c6' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-pista-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%2333697a' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cella-piena:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%2333697a' stroke='%2333697a' stroke-width='2.6' stroke-linejoin='round'/></svg>");
+  --t-spunta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5,10.6 C6.6,12 7.7,13.4 8.7,15 C10.6,11.2 13.2,7.2 16.2,4.2' fill='none' stroke='%2333697a' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+:root[data-theme="dark"],
+:root:not([data-theme="light"]){
+  --t-cornice-dark:1;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --t-cornice:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    --t-cornice-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+    --t-cornice-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='7 6'/></svg>");
+    --t-pillola:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    --t-pillola-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+    --t-pillola-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round' stroke-dasharray='5 5'/></svg>");
+    --t-cella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='none' stroke='%232b3037' stroke-width='1.4' stroke-linecap='round'/></svg>");
+    --t-cella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2.4' stroke-linecap='round'/></svg>");
+    --t-riga:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%232b3037' stroke-width='1.2' stroke-linecap='round'/></svg>");
+    --t-riga-forte:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%233a4047' stroke-width='1.3' stroke-linecap='round'/></svg>");
+    --t-riga-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+    --t-riga-errore:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23e08872' stroke-width='1.8' stroke-linecap='round'/></svg>");
+    --t-cerchio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='none' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+    --t-casella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round'/></svg>");
+    --t-casella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+    --t-cerchio-pieno:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2' stroke-linecap='round'/></svg>");
+  --t-pista:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%233a4047' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-pista-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cella-piena:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2.6' stroke-linejoin='round'/></svg>");
+  --t-spunta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5,10.6 C6.6,12 7.7,13.4 8.7,15 C10.6,11.2 13.2,7.2 16.2,4.2' fill='none' stroke='%237fb4c4' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+}
+:root[data-theme="dark"]{
+  --t-cornice:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cornice-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-cornice-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='120'><path d='M20,8 C62,5 122,6 166,8 C181,9 190,16 191,30 C193,60 192,88 190,103 C189,112 179,113 167,113 C120,115 62,113 27,112 C14,111 9,103 9,91 C7,65 8,36 9,23 C10,13 14,9 26,8' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round' stroke-dasharray='7 6'/></svg>");
+  --t-pillola:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-pillola-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%237fb4c4' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-pillola-tratteggio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%233a4047' stroke-width='1.4' stroke-linecap='round' stroke-dasharray='5 5'/></svg>");
+  --t-cella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='none' stroke='%232b3037' stroke-width='1.4' stroke-linecap='round'/></svg>");
+  --t-cella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2.4' stroke-linecap='round'/></svg>");
+  --t-riga:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%232b3037' stroke-width='1.2' stroke-linecap='round'/></svg>");
+  --t-riga-forte:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%233a4047' stroke-width='1.3' stroke-linecap='round'/></svg>");
+  --t-riga-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-riga-errore:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23e08872' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cerchio:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='none' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-casella:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%233a4047' stroke-width='1.5' stroke-linecap='round'/></svg>");
+  --t-casella-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M4,4 C8,3 13,3.4 16.2,4.1 C17.1,7 17.2,13 16.4,16.4 C12.4,17.4 7,17.1 3.8,16.4 C2.9,13 2.9,7 3.6,4.4' fill='none' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-cerchio-pieno:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2' stroke-linecap='round'/></svg>");
+  --t-pista:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%233a4047' stroke-width='1.6' stroke-linecap='round'/></svg>");
+  --t-pista-filo:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='44' height='25'><path d='M13,3 C22,1.6 32,2.4 37,3.4 C41,4.6 42.6,8 42.4,12.4 C42.2,17.6 40,21.4 35,22 C26,23.4 15,22.6 9,21.6 C4.6,20.6 2.2,17 2.4,12.4 C2.6,7.6 5,4.2 11.5,3.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-cella-piena:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='70' height='70'><path d='M13,5 C29,3 49,4 58,5 C64,6 66,10 66,16 C67,34 66,52 65,58 C64,64 60,66 54,66 C36,68 18,66 12,65 C7,64 4,60 4,54 C3,36 4,18 5,12 C5,7 8,5 15,5' fill='%237fb4c4' stroke='%237fb4c4' stroke-width='2.6' stroke-linejoin='round'/></svg>");
+  --t-spunta:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20'><path d='M5,10.6 C6.6,12 7.7,13.4 8.7,15 C10.6,11.2 13.2,7.2 16.2,4.2' fill='none' stroke='%237fb4c4' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+
+/* ── La cornice ────────────────────────────────────────────────
+   Disegnata su uno pseudo-elemento, non sul bordo: così l'elemento
+   tiene il suo sfondo e la sua spaziatura, e il tratto gli passa
+   sopra come una matita su una scheda già stampata. */
+.cornice{position:relative;border:0}
+.cornice::before{
+  content:"";position:absolute;inset:-8px;pointer-events:none;z-index:0;
+  border:16px solid transparent;
+  border-image:var(--t-cornice) 16 / 16px / 0 stretch;
+}
+.cornice > *{position:relative;z-index:1}
+.cornice--filo::before{border-image-source:var(--t-cornice-filo)}
+.cornice--tratteggio::before{border-image-source:var(--t-cornice-tratteggio)}
+
+/* ── La riga ───────────────────────────────────────────────────
+   Nessun border-bottom da nessuna parte: una riga tirata a mano,
+   che si ripete senza mai stare perfettamente dritta. */
+.riga-mano{position:relative;border-bottom:0 !important}
+.riga-mano::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:4px;
+  background:var(--t-riga) repeat-x 0 0;background-size:160px 4px;
+  pointer-events:none;
+}
+
+/* ── Dove il sistema aveva bordi dritti ────────────────────────
+   Ogni regola qui sotto toglie un bordo del browser e mette un
+   tratto al suo posto. */
+
+/* separatori di struttura */
+.testata{border-bottom:0}
+.testata[data-staccata]{
+  background-image:var(--t-riga-forte);
+  background-repeat:repeat-x;background-position:bottom;background-size:160px 4px;
+}
+.piede,
+.fatti,
+.collegamento,
+.azioni-fisse,
+.linguette,
+.piega,
+.evento,
+.predefinito,
+.sezione,
+.zoccolo,
+.barra,
+.stato-riga{border-top:0;border-bottom:0}
+.piede,.collegamento,.azioni-fisse,.sezione,.zoccolo,.barra,.stato-riga,.predefinito{
+  background-image:var(--t-riga);
+  background-repeat:repeat-x;background-position:top;background-size:160px 4px;
+}
+.evento,.piega,.linguette{
+  background-image:var(--t-riga);
+  background-repeat:repeat-x;background-position:bottom;background-size:160px 4px;
+}
+.evento:last-of-type,.piega:last-of-type{background-image:none}
+.fatti{
+  background-image:var(--t-riga),var(--t-riga);
+  background-repeat:repeat-x,repeat-x;
+  background-position:top,bottom;background-size:160px 4px;
+}
+/* Lo sfondo al passaggio del mouse non deve cancellare la riga. */
+.evento:hover{background-color:var(--alzata)}
+
+/* riquadri */
+.vuoto,.riquadro,.vicino,.anteprima,.mappa,.lastra,.telefono,.cerca,.foglio,.avviso,.suggerisce__bolla{
+  border:0;
+}
+.vuoto,.riquadro,.vicino,.cerca{position:relative}
+.vuoto::before,.riquadro::before,.vicino::before,.anteprima::before,.cerca::before,.foglio::before{
+  content:"";position:absolute;inset:-8px;pointer-events:none;
+  border:16px solid transparent;
+  border-image:var(--t-cornice) 16 / 16px / 0 stretch;
+}
+.cerca:focus-within::before{border-image-source:var(--t-cornice-filo)}
+.cerca:focus-within{box-shadow:none}
+.cerca{background-color:transparent}
+.vicino:hover::before{border-image-source:var(--t-cornice-filo)}
+/* Il foglio è aperto sui lati: il tratto scende e non torna su. */
+.foglio::before{inset:-8px -8px -26px;border-image-source:var(--t-cornice)}
+
+.mappa{
+  position:relative;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 26px,var(--riga) 26px 27px),
+    repeating-linear-gradient(90deg,transparent 0 26px,var(--riga) 26px 27px),
+    var(--filo-velo);
+}
+.mappa::before,.lastra::before,.telefono::before{
+  content:"";position:absolute;inset:-8px;pointer-events:none;z-index:2;
+  border:16px solid transparent;
+  border-image:var(--t-cornice) 16 / 16px / 0 stretch;
+}
+.lastra,.telefono{position:relative}
+
+/* pillole e celle */
+.filtro,.tag{
+  border:0;background-color:transparent;
+  border-image:var(--t-pillola) 12 / 12px / 0 stretch;
+}
+.tag{border-image-source:var(--t-pillola-tratteggio)}
+.filtro:hover,.tag:hover{border-image-source:var(--t-pillola-filo)}
+.filtro[aria-pressed="true"],.tag[aria-pressed="true"]{
+  border-image-source:var(--t-pillola-filo);background-color:var(--filo-velo);
+}
+.filtro::before{
+  border:0;background-image:var(--t-cerchio);background-size:100% 100%;
+  width:9px;height:9px;border-radius:0;
+}
+.filtro[aria-pressed="true"]::before{
+  background-image:none;background-color:var(--filo);border-radius:50%;transform:scale(1.05);
+}
+
+.giorno-cella{
+  border:0;background-color:transparent;background-repeat:no-repeat;
+  background-position:center;background-size:100% 100%;
+  background-image:var(--t-cella);
+}
+.giorno-cella:hover{background-image:var(--t-cella-filo);color:var(--tenue)}
+.giorno-cella[aria-pressed="true"]{background-image:var(--t-cella-piena);background-color:transparent}
+
+/* campi: la riga sotto è un tratto */
+.campo input,.campo textarea,.campo select,.collegamento input{
+  border:0;border-radius:0;box-shadow:none;
+  background-image:var(--t-riga-forte);
+  background-repeat:repeat-x;background-position:bottom;background-size:160px 4px;
+  background-color:transparent;padding-bottom:9px;
+}
+.campo input:focus,.campo textarea:focus,.campo select:focus{
+  border:0;box-shadow:none;padding-bottom:9px;
+  background-image:var(--t-riga-filo);
+}
+.campo[data-errato] input,.campo[data-errato] textarea{
+  border:0;box-shadow:none;background-image:var(--t-riga-errore);
+}
+
+/* casella di scelta disegnata */
+.scelta input{
+  appearance:none;width:19px;height:19px;margin-top:4px;flex:0 0 auto;cursor:pointer;
+  background:var(--t-casella) no-repeat center/100% 100%;
+}
+.scelta input:checked{
+  background-image:var(--t-casella-filo),var(--t-spunta);
+  background-size:100% 100%,100% 100%;
+}
+.scelta input:focus-visible{outline:2px solid var(--filo);outline-offset:2px}
+
+/* l'interruttore è una pista disegnata, con dentro un sasso */
+.leva__pista{
+  border:0;background-color:transparent;background-repeat:no-repeat;
+  background-position:center;background-size:100% 100%;
+  background-image:var(--t-pista);
+}
+.leva input:checked + .leva__pista{background-image:var(--t-pista-filo);background-color:transparent}
+.leva__pista::after{
+  border-radius:0;box-shadow:none;background-color:transparent;
+  background-repeat:no-repeat;background-position:center;background-size:100% 100%;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='19' height='19'><path d='M9.8,2.2 C14,2.3 16.8,5.4 16.7,9.4 C16.6,13.6 13.4,16.7 9.3,16.6 C5.2,16.5 2.2,13.4 2.4,9.4 C2.5,5.4 5.6,2.4 10.6,2.5' fill='%23d6d2c6' stroke='%23d6d2c6' stroke-width='2' stroke-linejoin='round'/></svg>");
+  transition:transform .26s var(--mano);
+}
+.leva input:checked + .leva__pista::after{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='19' height='19'><path d='M9.8,2.2 C14,2.3 16.8,5.4 16.7,9.4 C16.6,13.6 13.4,16.7 9.3,16.6 C5.2,16.5 2.2,13.4 2.4,9.4 C2.5,5.4 5.6,2.4 10.6,2.5' fill='%2333697a' stroke='%2333697a' stroke-width='2' stroke-linejoin='round'/></svg>");
+}
+
+/* il nodo del percorso: un cerchio che non si chiude */
+.fermata::before{
+  border:0;border-radius:0;background:var(--t-cerchio) no-repeat center/100% 100%;
+  width:12px;height:12px;left:calc(-1 * var(--corsia) + 2px);
+}
+.fermata--nostra::before{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23c2703f' stroke='%23c2703f' stroke-width='2.2' stroke-linecap='round'/></svg>");
+}
+.passo__nodo,
+.passo[data-stato="ora"] .passo__nodo,
+.passo[data-stato="fatto"] .passo__nodo{
+  border:0;width:26px;height:26px;
+  background-color:transparent;background-repeat:no-repeat;
+  background-position:center;background-size:100% 100%;
+  background-image:var(--t-cerchio);
+}
+.passo[data-stato="ora"] .passo__nodo{background-image:var(--t-cerchio-pieno);color:#fff}
+.passo[data-stato="fatto"] .passo__nodo{color:var(--filo)}
+.passo[data-stato="dopo"] .passo__nodo{opacity:.5}
+.passo__tratto{
+  background:var(--t-riga-forte) repeat-x 0 center;background-size:160px 4px;height:4px;
+}
+.passo__tratto::after{
+  background:var(--t-riga-filo) repeat-x 0 center;background-size:160px 4px;
+}
+
+/* la linguetta attiva è sottolineata a mano */
+.linguette__tratto{
+  background:var(--t-riga-filo) repeat-x 0 center;background-size:160px 4px;height:4px;bottom:-3px;
+}
+
+/* deposito: la cornice tratteggiata è disegnata anche lei */
+.deposito{
+  border:0;position:relative;
+  border-image:var(--t-cornice-tratteggio) 16 / 16px / 0 stretch;
+}
+.deposito:hover,.deposito[data-sopra]{border-image-source:var(--t-cornice-filo)}
+
+/* il segmentato: nessuna scanalatura grigia, un giro attorno alla scelta */
+.segmenti{
+  background:none;border-radius:0;padding:4px 3px;
+  border-image:var(--t-pillola) 12 / 12px / 0 stretch;
+}
+.segmenti__cursore{
+  background:none;box-shadow:none;border-radius:0;
+  border:12px solid transparent;
+  border-image:var(--t-pillola-filo) 12 / 12px / 0 stretch;
+}
+.segmento[aria-selected="true"]{color:var(--filo)}
+
+/* il velo e la presa del foglio */
+.foglio__presa{
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='5'><path d='M2,3 C12,1.6 26,3.6 38,2.4' fill='none' stroke='%23d6d2c6' stroke-width='2.6' stroke-linecap='round'/></svg>") no-repeat center/100% 100%;
+  height:5px;width:40px;
+}
+
+/* ── I segni ───────────────────────────────────────────────────
+   Nessuna icona geometrica: ogni tratto è tirato a mano, e nessuno
+   dei contorni chiusi si chiude davvero. */
+.icona{
+  width:1.35em;height:1.35em;flex:0 0 auto;
+  fill:none;stroke:currentColor;stroke-width:1.5;
+  stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .18s var(--mano);
+}
+.icona--piena{fill:currentColor}
+.nodo-salva{padding:5px}
+.nodo-salva .icona{width:21px;height:21px}
+.nodo-salva[aria-pressed="true"] .icona{fill:currentColor;animation:annoda .45s var(--mano)}
+.cerca .icona{width:18px;height:18px;stroke:var(--tenue)}
+.voce-zoccolo .icona{width:19px;height:19px}
+.foglio__voce .icona{stroke-width:1.4}
+.piega__segno .icona{width:17px;height:17px}
+.passo__nodo .icona{width:14px;height:14px;stroke-width:2}
+.deposito .icona{width:28px;height:28px;stroke-width:1.3;opacity:.7}
+.deposito__prova .icona{width:34px;height:34px}
+.torna .icona{width:15px;height:15px;vertical-align:-2px}
+.avviso .icona{width:16px;height:16px}
+.piega__testa[aria-expanded="true"] .piega__segno .icona{transform:rotate(45deg)}

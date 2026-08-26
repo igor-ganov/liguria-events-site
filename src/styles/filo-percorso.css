@@ -1,0 +1,86 @@
+/* ══ Filo — the thread ══════════════════════════════════════════════
+   One line runs down the page. It is not an ornament: it says time.
+   It gets a lane of its own and never crosses the text; it draws
+   itself as you scroll; and where the sequence runs out it frays,
+   because the road ends rather than stopping at a full point. */
+
+.percorso {
+  position: relative;
+  padding-left: var(--corsia);
+}
+.percorso__linea {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 18px;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.percorso__tratto {
+  fill: none;
+  stroke: var(--filo);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  opacity: 0.72;
+  stroke-dasharray: 1;
+  stroke-dashoffset: var(--tratto, 0);
+}
+
+/* A stop: hollow means found elsewhere, filled means made here. The nodes
+   live inside the thread's own drawing, not on the rows — a feed row carries
+   content-visibility, which clips anything drawn outside it, so a node on the
+   row would be cut away and never seen. */
+.fermata {
+  list-style: none;
+}
+.percorso__nodo {
+  fill: var(--carta);
+  stroke: var(--filo);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.45;
+  transition: opacity 0.34s var(--mano), scale 0.34s var(--mano);
+  scale: 0.45;
+}
+.percorso__nodo--nostra {
+  fill: var(--sosta);
+  stroke: var(--sosta);
+  stroke-width: 2.2;
+}
+.percorso__nodo--passata {
+  opacity: 1;
+  scale: 1;
+}
+
+/* The frayed end: the sequence stops, and the line admits it. */
+.capo {
+  position: relative;
+  height: 30px;
+  margin: 0 0 0 calc(-1 * var(--corsia));
+}
+.capo svg {
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 18px;
+  height: 30px;
+}
+.capo path {
+  fill: none;
+  stroke: var(--filo);
+  stroke-linecap: round;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .percorso__tratto {
+    stroke-dashoffset: 0;
+  }
+  .percorso__nodo {
+    opacity: 1;
+    scale: 1;
+    transition: none;
+  }
+}
