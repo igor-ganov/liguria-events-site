@@ -452,7 +452,11 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 }
 .fab-menu.open .fab-overlay { opacity: 1; pointer-events: auto; visibility: visible; }
 .fab-popup {
-  position: fixed; z-index: 201; min-width: 210px;
+  position: fixed; z-index: 201;
+  /* The box follows its contents rather than the other way round: the row of
+     languages and the theme button grew with the drawn strokes and hung out
+     of a fixed 210px. It still never passes the edge of the screen. */
+  width: max-content; min-width: 210px; max-width: calc(100vw - 2rem);
   /* Never taller than the screen (the FAB sits ~80px in from its corner, so
      leave room for that plus a margin) — scroll within instead of running off. */
   max-height: calc(100dvh - 7rem); overflow-y: auto; overscroll-behavior: contain;
@@ -475,7 +479,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .fab-links a:hover, .fab-links a:focus-visible { background: var(--surface-2); text-decoration: none; }
 .fab-tools {
   margin-top: 0.4rem; padding-top: 0.5rem; border-top: 1px solid var(--line);
-  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  /* Two rows rather than a row that spills, on the narrowest screens. */
+  flex-wrap: wrap;
 }
 /* Desktop: header nav visible, FAB hidden. Mobile: swap. */
 @media (max-width: 44rem) {
