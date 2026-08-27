@@ -66,3 +66,34 @@ test('a venue page asks the venue itself for its dates', async ({ page }) => {
   await expect(invite).toContainText('Teatro Carlo Felice');
   await expect(invite).toHaveAttribute('href', '/submit');
 });
+
+test('one event is one event, in every language', async ({ page, request }) => {
+  // "1 eventi in programma" and "1 событий" were on every city and venue page.
+  const path = await aVenue(request);
+  await page.goto(path);
+  const conteggio = await page.locator('.venue-sub').textContent();
+  const quanti = Number(/\d+/.exec(conteggio ?? '')?.[0] ?? 0);
+  expect(quanti).toBeGreaterThan(0);
+  // English says "event" for one and "events" for more; never "1 events".
+  expect(conteggio).toMatch(quanti === 1 ? /\b1 event\b/ : /\bevents\b/);
+
+  await page.goto(`/it${path}`);
+  const italiano = await page.locator('.venue-sub').textContent();
+  expect(italiano).toMatch(quanti === 1 ? /\b1 evento\b/ : /\beventi\b/);
+
+  // Russian needs a third form, which the dictionary supplies and pluralForm
+  // picks — both covered in test/plural.test.ts. What this can still catch is
+  // the page falling back to an empty string when a form is missing.
+  await page.goto(`/ru${path}`);
+  await expect(page.locator('.venue-sub')).toContainText(String(quanti));
+});
+
+test('an Italian venue title does not ask for an article it cannot have', async ({ page, request }) => {
+  // "Cosa fare a Acquario di Genova" needs "all'", and the venue name cannot
+  // supply it — so the phrasing has to work whatever the name begins with.
+  const path = await aVenue(request);
+  await page.goto(`/it${path}`);
+  const titolo = await page.title();
+  expect(titolo, 'a bare "a" before a vowel is broken Italian').not.toMatch(/\ba [AEIOUaeiou]/);
+  await expect(page.locator('.venue-head h1')).not.toBeEmpty();
+});

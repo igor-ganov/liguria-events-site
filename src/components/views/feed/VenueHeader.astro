@@ -3,12 +3,14 @@ import { cityName } from '../../../lib/region/city-name.ts';
 import { regionName } from '../../../lib/region/region-name.ts';
 import { regionUrl } from '../../../lib/region/region-url.ts';
 import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { countText } from '../../../lib/i18n/count-text.ts';
+import type { CountForms } from '../../../lib/i18n/count-text.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
 
 // A venue page is a landing page: somebody arrives from a search for the venue
 // itself, so the venue has to be the first thing on it. Without this the page
 // opened on a filter bar and a list, and never said where it was about.
-type Props = Readonly<{ lang: Locale; region: string; city: string; name: string; count: number; label: string; invite: string }>;
+type Props = Readonly<{ lang: Locale; region: string; city: string; name: string; count: number; label: CountForms; invite: string }>;
 const { lang, region, city, name, count, label, invite } = Astro.props;
 const place = cityName(city);
 ---
@@ -20,7 +22,7 @@ const place = cityName(city);
     <a href={localizedUrl(lang, `${region}/${city}/`)}>{place}</a>
   </p>
   <h1>{name}</h1>
-  <p class="venue-sub">{label.replace('{n}', String(count)).replace('{place}', place)}</p>
+  <p class="venue-sub">{countText(lang, label, count, place)}</p>
   <p class="venue-invite">
     <a href="/submit">{invite.replace('{place}', name)}</a>
   </p>
