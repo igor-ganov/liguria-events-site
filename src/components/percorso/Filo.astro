@@ -1,0 +1,15 @@
+---
+import Capo from './Capo.astro';
+
+type Props = Readonly<{ city: string; today: string; hasDays: boolean }>;
+const { city, today, hasDays } = Astro.props;
+---
+
+{/* The thread runs only where there is a sequence of dates. The veil covers
+    what has not been read yet and is sticky, so the browser keeps it at the
+    reading line by itself; the frayed end says the announced days ran out. */}
+<section class="percorso" data-feed-list data-city={city} data-today={today}>
+  {hasDays && <span class="velo-filo" aria-hidden="true"></span>}
+  <slot />
+  {hasDays && <Capo />}
+</section>

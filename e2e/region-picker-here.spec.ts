@@ -10,6 +10,10 @@ const PALERMO = { latitude: 38.1157, longitude: 13.3615 };
 
 const openPicker = async (page: import('@playwright/test').Page): Promise<void> => {
   await page.goto('/liguria/');
+  // The picker marks itself bound once its script has wired the button. Clicking
+  // before that lands on a control with no listener yet: the dialog stays shut
+  // and the failure reads as though the picker were broken.
+  await expect(page.locator('[data-region-picker][data-bound="true"]').first()).toBeAttached();
   await page.locator('[data-region-toggle]').first().click();
   await expect(page.locator('[data-region-pop]').first()).toBeVisible();
 };

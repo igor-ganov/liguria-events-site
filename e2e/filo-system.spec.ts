@@ -50,65 +50,78 @@ test('chips carry the same hand as the buttons', async ({ page }) => {
 
 test('the thread runs down the feed and ends frayed', async ({ page }) => {
   await page.goto('/liguria/');
-  const percorso = page.locator('.percorso').first();
+  const percorso = page.locator('.percorso');
   await expect(percorso).toBeVisible();
   // One thread per page: two would stop being a route and become decoration.
-  await expect(page.locator('.percorso')).toHaveCount(1);
-  // The thread's surface is pinned to the screen and therefore lives on the
-  // body, not inside the column — but there is still only ever one of it.
-  await expect(page.locator('.percorso__linea')).toHaveCount(1);
-  // Line and stops share one drawing, so each needs a name of its own: a
-  // selector on the element alone reaches both and silently restyles the stops.
-  await expect(page.locator('.percorso__tratto')).toHaveCount(1);
-  await expect(page.locator('.percorso__nodo').first()).toHaveCSS('fill', /rgb/);
+  await expect(percorso).toHaveCount(1);
   await expect(page.locator('.capo')).toHaveCount(1);
+  // The rope and the stops are drawn, not bordered.
+  const disegni = await page.evaluate(() => {
+    const riga = document.querySelector('.fermata');
+    const nodo = getComputedStyle(riga, '::before');
+    return {
+      corda: getComputedStyle(document.querySelector('.percorso'), '::before').backgroundImage,
+      nodo: nodo.backgroundImage,
+      // `top: 50%` resolves to half the row's height: the stop is placed by
+      // the layout at the middle of its own card, so it cannot drift off it.
+      alto: Number.parseFloat(nodo.top),
+      mezzaRiga: riga.getBoundingClientRect().height / 2,
+      spostamento: nodo.translate,
+    };
+  });
+  expect(disegni.corda).toContain('svg');
+  expect(disegni.nodo).toContain('svg');
+  expect(Math.abs(disegni.alto - disegni.mezzaRiga)).toBeLessThanOrEqual(1);
+  expect(disegni.spostamento).toContain('-50%');
 });
 
-test('the thread draws itself as the page scrolls', async ({ page }) => {
+test('the thread is drawn as far as it has been read, and no further', async ({ page }) => {
   await page.goto('/liguria/');
-  const linea = page.locator('.percorso__tratto');
-  await expect(linea).toBeVisible();
-  const disegno = () => linea.getAttribute('d');
-  const accesi = () => page.locator('.percorso__nodo--passata').count();
-  const prima = { d: await disegno(), n: await accesi() };
-  await page.evaluate(() => scrollTo({ top: 3000 }));
-  // The line is redrawn for the stretch on screen, and more stops light up.
-  await expect.poll(disegno).not.toBe(prima.d);
-  await expect.poll(accesi).toBeGreaterThan(prima.n);
+  const velo = page.locator('.velo-filo');
+  await expect(velo).toHaveCount(1);
+
+  // The end of the rope stays on screen, near the reading line, whatever the
+  // scroll position: that is the whole point of covering it rather than
+  // clipping it against a column forty thousand pixels tall.
+  const cima = () => velo.evaluate((n) => Math.round(n.getBoundingClientRect().top));
+  const schermo = page.viewportSize()?.height ?? 720;
+  const prima = await cima();
+  expect(prima).toBeGreaterThan(schermo * 0.5);
+  expect(prima).toBeLessThan(schermo);
+
+  await page.evaluate(() => scrollTo({ top: 6000 }));
+  await expect.poll(cima).toBeGreaterThan(schermo * 0.5);
+  expect(await cima()).toBeLessThan(schermo);
+
+  // And it covers the lane, not the cards.
+  const largo = await velo.evaluate((n) => n.getBoundingClientRect().width);
+  expect(largo).toBeLessThan(20);
 });
 
-test('the thread is drawn on a surface the browser can place accurately', async ({ page }) => {
+test('the create button is the loud one, and says what it does', async ({ page }) => {
   await page.goto('/liguria/');
-  await page.waitForFunction(() => document.querySelectorAll('.percorso__nodo').length > 0);
-  await page.evaluate(() => scrollTo({ top: 9000 }));
-  // Every stop sits level with the card it marks — each is paired to its row
-  // by id, so this cannot pass by landing near somebody else's card. Polled
-  // rather than timed: the stops are placed on the next frame after the rows
-  // near the screen change, and under load that is not the very next one.
-  const scarto = () =>
-    page.evaluate(() =>
-      Array.from(document.querySelectorAll('.percorso__nodo')).map((n) => {
-        const id = n.getAttribute('data-fermata') ?? '';
-        const riga = document.querySelector(`.fermata[data-nodo="${id}"]`);
-        const rb = riga?.getBoundingClientRect();
-        const nb = n.getBoundingClientRect();
-        return {
-          id,
-          orfano: riga === null,
-          d: Math.round(Math.abs((rb?.top ?? 0) + (rb?.height ?? 0) / 2 - (nb.top + nb.height / 2))),
-        };
-      }),
-    );
-  // A surface as tall as the whole feed drifted these by tens of pixels.
-  await expect
-    .poll(async () => {
-      const letto = await scarto();
-      return { peggiore: Math.max(0, ...letto.map((s) => s.d)), orfani: letto.filter((s) => s.orfano).length };
-    })
-    .toEqual({ peggiore: expect.any(Number), orfani: 0 });
-  const finale = await scarto();
-  expect(
-    Math.max(0, ...finale.map((s) => s.d)),
-    `stops off their cards: ${finale.map((s) => `${s.id}:${s.d}`).join(' ')}`,
-  ).toBeLessThanOrEqual(2);
+  const crea = page.locator('.head-create');
+  await expect(crea).toBeVisible();
+  // Not a bare plus sign: the label is the whole point of the control.
+  await expect(crea.locator('span')).toBeVisible();
+  await expect(crea.locator('span')).not.toBeEmpty();
+  const disegno = await crea.evaluate((n) => ({
+    tratto: getComputedStyle(n).borderImageSource,
+    bordo: getComputedStyle(n).borderStyle,
+    padding: getComputedStyle(n).padding,
+  }));
+  expect(disegno.tratto).toContain('svg');
+  expect(disegno.bordo).toBe('none');
+  // The stroke is painted about eight pixels inside the padding box, so the
+  // words need more room than a one-pixel border would have asked for.
+  expect(Number.parseFloat(disegno.padding.split(' ')[1] ?? '0')).toBeGreaterThan(14);
+});
+
+test('the create button stands out on a phone too', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto('/liguria/');
+  const crea = page.locator('.head-create');
+  await expect(crea.locator('span')).toBeVisible();
+  const box = await crea.boundingBox();
+  expect(box?.width ?? 0, 'the create button collapsed to an icon').toBeGreaterThan(90);
 });

@@ -23,6 +23,10 @@
   --t-riga-forte: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%23d6d2c6' stroke-width='1.3' stroke-linecap='round'/></svg>");
   --t-riga-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%2333697a' stroke-width='1.8' stroke-linecap='round'/></svg>");
   --t-riga-errore: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23a8452f' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-corda: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='240'><path d='M7,0 C4,40 10,80 7,120 C4,160 10,200 7,240' fill='none' stroke='%2333697a' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-nodo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23fbfaf7' stroke='%2333697a' stroke-width='1.7' stroke-linecap='round'/></svg>");
+  --t-nodo-nostra: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23c2703f' stroke='%23c2703f' stroke-width='2.2' stroke-linejoin='round'/></svg>");
+  --t-giro-sosta-pieno: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7 Z' fill='%23c2703f' stroke='%23c2703f' stroke-width='3'/></svg>");
   --t-cerchio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23fbfaf7' stroke='%2333697a' stroke-width='1.6' stroke-linecap='round'/></svg>");
   --t-cerchio-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23c2703f' stroke='%23c2703f' stroke-width='2.2' stroke-linecap='round'/></svg>");
   --t-pillola-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%23c2703f' stroke-width='1.5' stroke-linecap='round'/></svg>");
@@ -45,6 +49,10 @@
   --t-riga-forte: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1.2 50,3 78,2.1 C104,1.3 132,3 160,2.2' fill='none' stroke='%233a4047' stroke-width='1.3' stroke-linecap='round'/></svg>");
   --t-riga-filo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
   --t-riga-errore: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='4'><path d='M0,2.2 C26,1 50,3.2 78,2 C104,1.1 132,3.2 160,2.2' fill='none' stroke='%23e08872' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-corda: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='240'><path d='M7,0 C4,40 10,80 7,120 C4,160 10,200 7,240' fill='none' stroke='%237fb4c4' stroke-width='1.8' stroke-linecap='round'/></svg>");
+  --t-nodo: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%2316181c' stroke='%237fb4c4' stroke-width='1.7' stroke-linecap='round'/></svg>");
+  --t-nodo-nostra: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23dd9463' stroke='%23dd9463' stroke-width='2.2' stroke-linejoin='round'/></svg>");
+  --t-giro-sosta-pieno: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='60'><path d='M31,6 C92,2 172,5 215,8 C231,10 234,26 231,39 C228,52 213,56 189,56 C129,57 59,55 26,55 C11,54 7,41 8,27 C9,14 17,9 35,7 Z' fill='%23dd9463' stroke='%23dd9463' stroke-width='3'/></svg>");
   --t-cerchio: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%2316181c' stroke='%237fb4c4' stroke-width='1.6' stroke-linecap='round'/></svg>");
   --t-cerchio-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14'><path d='M7.3,1.7 C10.4,1.8 12.4,4.2 12.3,7.1 C12.2,10.2 9.9,12.4 7,12.3 C3.9,12.2 1.7,9.9 1.8,7 C1.9,4.1 4.2,1.9 7.9,2' fill='%23dd9463' stroke='%23dd9463' stroke-width='2.2' stroke-linecap='round'/></svg>");
   --t-pillola-sosta: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='38'><path d='M20,5 C52,2 96,4 120,6 C130,8 134,14 133,20 C132,29 126,33 114,33 C80,35 40,33 21,33 C10,32 5,27 5,20 C5,12 10,7 23,5' fill='none' stroke='%23dd9463' stroke-width='1.5' stroke-linecap='round'/></svg>");
@@ -114,8 +122,20 @@
   text-decoration: none;
 }
 
+/* The create button wears the "made here" colour rather than the line's: it
+   is the one control on the page that makes something, and terracotta is what
+   that means everywhere else in this system. It also has to stand out from a
+   page that is otherwise teal. */
+.head-create {
+  color: #fff;
+  border-image-source: var(--t-giro-sosta-pieno);
+  border-image-slice: 14 fill;
+}
+.head-create svg {
+  stroke: currentColor;
+}
+
 /* The primary action is the same loop, filled in. */
-.head-create,
 .auth-card > form > button[type='submit'],
 .auth-card > button[type='submit'],
 .auth-card .btn,
@@ -353,30 +373,32 @@
 .route-save,
 .subscribe-bar a,
 .new-event a {
-  padding: 0.68rem 1.35rem;
+  padding: 0.82rem 1.6rem;
 }
 /* The header has to stay one line: eight pixels is what the stroke needs,
    and the rest of the room in there belongs to the navigation. Padding
    sized for a page button pushed the place picker onto a second row and
    took it off the screen. */
-.head-create,
+.head-create {
+  padding: 0.6rem 1.25rem;
+}
 .account-signin,
 .account-signout,
 .account-submit,
 .nav-btn {
-  padding: 0.42rem 0.9rem;
+  padding: 0.52rem 1.05rem;
 }
 .chip {
-  padding: 0.42rem 1.05rem;
+  padding: 0.5rem 1.2rem;
 }
 .cat-tag {
-  padding: 0.2rem 0.7rem;
+  padding: 0.26rem 0.8rem;
 }
 .badge {
-  padding: 0.2rem 0.7rem;
+  padding: 0.26rem 0.8rem;
 }
 .lang-switch a {
-  padding: 0.24rem 0.6rem;
+  padding: 0.3rem 0.7rem;
 }
 .giro--piccolo,
 .head-create.head-create--piccolo {
@@ -384,11 +406,7 @@
 }
 /* On a narrow screen the create button loses its label and becomes a
    square: it still needs the stroke's own margin on both sides. */
-@media (max-width: 30rem) {
-  .head-create {
-    padding: 0.5rem 0.75rem;
-  }
-}
+
 
 /* ── The route page ─────────────────────────────────────────────
    It had three visual languages at once: browser-bordered date

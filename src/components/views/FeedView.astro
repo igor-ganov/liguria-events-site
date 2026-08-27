@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedGroups from './feed/FeedGroups.astro';
-import Capo from '../percorso/Capo.astro';
+import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
 import SubscribeBar from './feed/SubscribeBar.astro';
 import VenueHeader from './feed/VenueHeader.astro';
@@ -53,10 +53,9 @@ const image = socialImageUrl(socialImage(events), Astro.site);
 
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
-  <section class="percorso" data-feed-list data-city={city ?? ''} data-today={today}>
+  <Filo city={city ?? ''} today={today} hasDays={groups.length > 0}>
     <FeedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
-    {groups.length > 0 && <Capo />}
-  </section>
+  </Filo>
   {groups.length === 0 && (
     <EmptyState
       heading={ui.nothingHere.heading}

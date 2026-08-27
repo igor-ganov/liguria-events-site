@@ -40,12 +40,3 @@
   initCopyLink();
   document.addEventListener('astro:page-load', initCopyLink);
 </script>
-
-<script>
-  // The thread down the feed, drawn by the scroll. Last on purpose: it is
-  // decoration for the reading, and it sets up an observer over every row —
-  // ahead of the feed's own start-up that delayed the filter the page needs.
-  import { initPercorso } from '../../components/percorso/init-percorso.ts';
-  document.addEventListener('astro:page-load', initPercorso);
-  initPercorso();
-</script>
