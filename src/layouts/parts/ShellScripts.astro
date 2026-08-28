@@ -40,3 +40,9 @@
   initCopyLink();
   document.addEventListener('astro:page-load', initCopyLink);
 </script>
+
+<script>
+  // pro-motion custom events: SPA pageviews, event views, favourites, outbound.
+  import { initAnalytics } from '../../components/analytics/init-analytics.ts';
+  initAnalytics();
+</script>
