@@ -15,3 +15,13 @@ const TOKEN = 'f833c208ec95461b9d28ca255c477582';
   src="https://static.cloudflareinsights.com/beacon.min.js"
   data-cf-beacon={`{"token": "${TOKEN}"}`}
 ></script>
+
+<!-- pro-motion first-party beacon (pm-collector Worker). Classic deferred
+     script on purpose: pm.js reads document.currentScript, which is null in
+     modules. Cookieless like the CF beacon above; custom events go through
+     src/components/analytics/track.ts. -->
+<script
+  is:inline
+  defer
+  src="https://pm-collector.igor-ganov.workers.dev/pm.js"
+  data-project="dovego-it"></script>
