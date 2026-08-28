@@ -6,6 +6,7 @@ export const SHARE = {
   label: 'data-share-label',
   labelSelector: '[data-share-label]',
   copiedAttr: 'data-copied',
+  urlAttr: 'data-share-url',
   titleAttr: 'data-share-title',
   stateAttr: 'data-share-state',
 };

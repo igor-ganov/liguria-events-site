@@ -1,5 +1,6 @@
 ---
 import ShareButton from '../share/ShareButton.astro';
+import SendLinks from '../share/SendLinks.astro';
 import { COPY_LINK } from './copy-link-selectors.ts';
 import { branch } from '../../lib/branch.ts';
 import type { Ui } from '../../lib/i18n/ui-schema.ts';
@@ -29,6 +30,7 @@ const note = branch(unlisted)(
     <button type="button" class="copy-link" {...{ [COPY_LINK.button]: '', [COPY_LINK.doneAttr]: ui.created.copied }}>
       {ui.created.copy}
     </button>
-    <ShareButton ui={ui} title={title} />
+    <ShareButton ui={ui} title={title} url={url} />
   </p>
+  <SendLinks ui={ui} url={url} title={title} />
 </section>

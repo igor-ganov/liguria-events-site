@@ -461,3 +461,35 @@
   width: 1.6rem;
   height: 1.6rem;
 }
+
+/* ── Sending it on ──────────────────────────────────────────────
+   The step the platform rests on. Two plain links, because a desktop
+   browser has no share sheet and "copied" leaves somebody to go and
+   find the conversation themselves. */
+.send-links {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0.7rem 0 0;
+}
+.send-links-label {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.send-link {
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.4rem 0.9rem;
+  border-image: var(--t-pillola) 10 / 10px / 0 stretch;
+}
+.send-link:hover,
+.send-link:focus-visible {
+  border-image-source: var(--t-pillola-filo);
+  text-decoration: none;
+}

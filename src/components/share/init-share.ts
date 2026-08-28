@@ -1,5 +1,6 @@
 import { branch } from '../../lib/branch.ts';
 import { SHARE } from './share-selectors.ts';
+import { shareableUrl } from './shareable-url.ts';
 
 const REVERT_MS = 2000;
 
@@ -23,7 +24,7 @@ const flash = (button: Element, copied: string): void => {
 /** The native sheet where the browser has one — on iOS it is the only route
  *  into WhatsApp — and the clipboard everywhere else. */
 const share = async (button: Element): Promise<void> => {
-  const url = globalThis.location.href;
+  const url = button.getAttribute(SHARE.urlAttr) ?? shareableUrl(globalThis.location.href);
   const title = button.getAttribute(SHARE.titleAttr) ?? document.title;
   await branch('share' in navigator)(
     () => navigator.share({ title, url }).catch(() => undefined),

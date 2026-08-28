@@ -1,12 +1,23 @@
 ---
 import { SHARE } from './share-selectors.ts';
+import { branch } from '../../lib/branch.ts';
 import type { Ui } from '../../lib/i18n/ui-schema.ts';
 
 // The visitor is the other half of distribution: search brings them once, a
 // shared link brings the people they know. There was no way to pass a page on.
-type Props = Readonly<{ ui: Ui; title: string }>;
-const { ui, title } = Astro.props;
-const hooks = { [SHARE.button]: '', [SHARE.copiedAttr]: ui.share.copied, [SHARE.titleAttr]: title };
+type Props = Readonly<{ ui: Ui; title: string; url?: string | undefined }>;
+const { ui, title, url } = Astro.props;
+const hooks = {
+  [SHARE.button]: '',
+  [SHARE.copiedAttr]: ui.share.copied,
+  [SHARE.titleAttr]: title,
+  // The canonical address, when the caller knows one better than the address
+  // bar does — the page a new event lands on carries a note to itself there.
+  ...branch(url === undefined)<Readonly<Record<string, string>>>(
+    () => ({}),
+    () => ({ [SHARE.urlAttr]: url ?? '' }),
+  ),
+};
 ---
 
 <button type="button" class="share-button" aria-label={ui.share.label} {...hooks}>

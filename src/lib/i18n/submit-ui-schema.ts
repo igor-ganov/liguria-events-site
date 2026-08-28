@@ -13,6 +13,9 @@ export const SubmitUiSchema = {
     publicNote: Schema.String,
     copy: Schema.String,
     copied: Schema.String,
+    sendTo: Schema.String,
+    whatsapp: Schema.String,
+    telegram: Schema.String,
   }),
   visibility: Schema.Struct({
     legend: Schema.String,

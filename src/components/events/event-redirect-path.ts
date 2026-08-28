@@ -1,3 +1,4 @@
+import { eventPath } from '../../lib/event-path.ts';
 import type { EventFormMode } from './event-form-mode.ts';
 
 const ID_OF: Readonly<Record<EventFormMode, (id: string, created: string) => string>> = {
@@ -12,6 +13,9 @@ const ID_OF: Readonly<Record<EventFormMode, (id: string, created: string) => str
 const MARK: Readonly<Record<EventFormMode, string>> = { edit: '', create: '?created=1' };
 
 /** Where the browser goes once the endpoint accepted the form: back to the
- *  edited event, or to the freshly created one. */
+ *  edited event, or to the freshly created one. The shape of an event address
+ *  is decided in one place — this used to leave off the trailing slash, so the
+ *  author landed on an address that was not the canonical one and was not what
+ *  the sitemap or any link on the site says. */
 export const eventRedirectPath = (mode: EventFormMode, id: string, created: string): string =>
-  `/event/${ID_OF[mode](id, created)}${MARK[mode]}`;
+  `/${eventPath(ID_OF[mode](id, created))}${MARK[mode]}`;

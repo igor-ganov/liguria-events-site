@@ -1,0 +1,23 @@
+---
+import { sendLinks } from './send-links.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// Straight into the two apps people here actually use. The native share sheet
+// is the better route on a phone and the button beside these uses it — but a
+// desktop browser usually has none, and "copied to clipboard" asks somebody to
+// go and find the conversation themselves. This is the step the whole platform
+// side rests on: an event nobody sends is an event nobody comes to.
+type Props = Readonly<{ ui: Ui; url: string; title: string }>;
+const { ui, url, title } = Astro.props;
+const links = sendLinks(url, title);
+---
+
+<p class="send-links">
+  <span class="send-links-label">{ui.created.sendTo}</span>
+  <a class="send-link" href={links.whatsapp} target="_blank" rel="noopener noreferrer" data-send="whatsapp">
+    {ui.created.whatsapp}
+  </a>
+  <a class="send-link" href={links.telegram} target="_blank" rel="noopener noreferrer" data-send="telegram">
+    {ui.created.telegram}
+  </a>
+</p>

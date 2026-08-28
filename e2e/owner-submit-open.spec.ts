@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signInAsOwner } from './owner-fixture.ts';
 
 // The funnel's second half. /submit was behind the auth gate, so an organiser
 // arriving from a venue page was bounced to the home page with a dialog and no
@@ -67,4 +68,42 @@ test('the form asks who may see it, and defaults to nobody but the link', async 
   await expect(listed).not.toBeChecked();
   await expect(page.locator('.visibility-choice')).toContainText('Show it in the city feed');
   await expect(page.locator('.visibility-default')).toContainText('only people you send the link to');
+});
+
+test('the link handed back is the one friends should get, and can be sent in a tap', async ({
+  page,
+  context,
+}) => {
+  await signInAsOwner(page, context);
+  await page.goto('/submit');
+  await expect(page.locator('#event-form')).toHaveAttribute('data-ready', 'true');
+  await page.locator('#event-form [name=title]').fill('Concerto in cortile');
+  await page.locator('#event-form [name=startDate]').fill('2026-12-01');
+  await page.locator('#event-form [name=venue]').fill('Palazzo Spinola');
+  await page.locator('#event-form button[type=submit]').click();
+  await page.waitForURL(/\/event\/[0-9a-f]{12}\/\?created=1/);
+
+  // The address bar carries a note to ourselves; the field the author copies
+  // must not. Friends were being sent "?created=1" pasted into their chat.
+  const shared = await page.locator('[data-new-event-url]').inputValue();
+  expect(shared).not.toContain('created=1');
+  expect(shared).toMatch(/\/event\/[0-9a-f]{12}\/$/);
+
+  // And there is a way into the apps people here actually use, which a desktop
+  // browser cannot offer through the native sheet because it has none.
+  const whatsapp = page.locator('[data-send="whatsapp"]');
+  await expect(whatsapp).toBeVisible();
+  const href = decodeURIComponent((await whatsapp.getAttribute('href')) ?? '');
+  expect(href).toContain('wa.me');
+  expect(href).toContain(shared);
+  expect(href).toContain('Concerto in cortile');
+  await expect(page.locator('[data-send="telegram"]')).toBeVisible();
+
+  // The native sheet, where there is one, gets the same clean address. The
+  // page's own share button has no address of its own and strips the marker
+  // from the address bar instead — covered in test/sharing.test.ts.
+  await expect(page.locator('[data-new-event] [data-share-button]')).toHaveAttribute(
+    'data-share-url',
+    shared,
+  );
 });
