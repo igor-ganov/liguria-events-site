@@ -1,0 +1,17 @@
+---
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The loop the platform runs on: somebody arrives because a friend sent them a
+// link, and leaves having made one of their own. Until now the only way to make
+// an event from here was the header button, which reads as site navigation
+// rather than as something addressed to the person reading this page.
+type Props = Readonly<{ ui: Ui; lang: Locale }>;
+const { ui, lang } = Astro.props;
+---
+
+<aside class="own-event" data-own-event>
+  <p class="own-event-lead">{ui.contribute.ownEvent}</p>
+  <a class="own-event-link" href={localizedUrl(lang, "submit/")}>{ui.contribute.ownEventLink}</a>
+</aside>

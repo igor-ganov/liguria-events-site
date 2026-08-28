@@ -493,3 +493,39 @@
   border-image-source: var(--t-pillola-filo);
   text-decoration: none;
 }
+
+/* ── The invitation on somebody else's event ────────────────────
+   Whoever is reading this arrived because a friend sent them a link.
+   The loop closes when they leave having made one of their own — and
+   the header button reads as navigation, not as an offer. */
+.own-event {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1.6rem 0 0;
+  padding: 1.1rem 1.2rem;
+}
+.own-event::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  border: 16px solid transparent;
+  border-image: var(--t-cornice-tratteggio) 16 / 16px / 0 stretch;
+}
+.own-event-lead {
+  margin: 0;
+  color: var(--ink-2);
+}
+.own-event-link {
+  color: var(--accent-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+.own-event-link:hover,
+.own-event-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

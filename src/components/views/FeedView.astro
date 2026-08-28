@@ -58,6 +58,7 @@ const image = socialImageUrl(socialImage(events), Astro.site);
   </Filo>
   {groups.length === 0 && (
     <EmptyState
+      lang={lang}
       heading={ui.nothingHere.heading}
       note={ui.nothingHere.note.replace('{place}', placeName)}
       href={onward}

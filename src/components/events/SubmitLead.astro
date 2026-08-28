@@ -1,0 +1,18 @@
+---
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// Somebody arriving here from an advert or from a friend's event has three
+// seconds to understand what they get. The page used to open straight into a
+// form with a policy note above it, which answers a question nobody had asked
+// yet. Kept short on purpose: the form itself must stay above the fold.
+type Props = Readonly<{ ui: Ui }>;
+const { ui } = Astro.props;
+const lead = ui.submitLead;
+---
+
+<p class="submit-lead">{lead.lead}</p>
+<ul class="submit-points">
+  <li>{lead.pointLink}</li>
+  <li>{lead.pointFree}</li>
+  <li>{lead.pointWho}</li>
+</ul>

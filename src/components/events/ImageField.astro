@@ -1,16 +1,20 @@
 ---
 import { resized } from '../../lib/img/resized.ts';
 import { branch } from '../../lib/branch.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
 
-type Props = Readonly<{ coverImage: string }>;
-const { coverImage } = Astro.props;
+type Props = Readonly<{ ui: Ui; coverImage: string }>;
+const { ui, coverImage } = Astro.props;
 const empty = coverImage === '';
 const src = branch(empty)(() => '', () => resized(coverImage, 480));
-const pickLabel = branch(empty)(() => 'Upload an image', () => 'Replace image');
+const pickLabel = branch(empty)(
+  () => ui.eventForm.uploadImage,
+  () => ui.eventForm.replaceImage,
+);
 ---
 
 <div class="form-image" data-image>
-  <span class="form-image-label">Image</span>
+  <span class="form-image-label">{ui.eventForm.image}</span>
   <img class="form-image-preview" src={src} alt="" data-image-preview hidden={empty} />
   <label class="form-image-pick">
     <input type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" data-image-input hidden />

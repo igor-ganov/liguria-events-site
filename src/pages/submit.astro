@@ -1,8 +1,8 @@
 ---
-import { ROOT_ONLY } from '../lib/i18n/root-only-locales.ts';
 export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import EventForm from '../components/EventForm.astro';
+import SubmitLead from '../components/events/SubmitLead.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 
 // Open to anyone. An organiser arriving from a venue page used to be bounced to
@@ -14,9 +14,10 @@ const user = Astro.locals.user;
 const ui = await uiOf('en');
 ---
 
-<Layout lang="en" title="Add an event" path="submit/" locales={ROOT_ONLY}>
+<Layout lang="en" title={ui.contribute.link} path="submit/">
   <section class="auth-card submit-card">
-    <h1>Add an event</h1>
+    <h1>{ui.contribute.link}</h1>
+    <SubmitLead ui={ui} />
     {user && (
       <p>
         Signed in as <strong>{user.email}</strong>. Every submission is screened against our
@@ -29,6 +30,6 @@ const ui = await uiOf('en');
         <a href="/content-policy">Content Policy</a> before it can appear.
       </p>
     )}
-    <EventForm mode="create" />
+    <EventForm mode="create" lang="en" />
   </section>
 </Layout>

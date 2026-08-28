@@ -8,7 +8,7 @@ test('every page offers a way to add an event', async ({ page }) => {
   await page.goto('/liguria/genova/');
   const link = page.locator('.foot-contribute a');
   await expect(link).toHaveText('Add your event');
-  await expect(link).toHaveAttribute('href', '/submit');
+  await expect(link).toHaveAttribute('href', '/submit/');
 });
 
 test('a place with nothing on asks whoever knows better', async ({ page }) => {
@@ -29,7 +29,7 @@ test('the header offers to make an event, without an account', async ({ page }) 
   await page.goto('/liguria/genova/');
   const create = page.locator('.head-create');
   await expect(create).toBeVisible();
-  await expect(create).toHaveAttribute('href', '/submit');
+  await expect(create).toHaveAttribute('href', '/submit/');
 });
 
 test('it survives on a phone, where the nav does not', async ({ page }) => {

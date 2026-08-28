@@ -53,7 +53,7 @@ const uiData = JSON.stringify({ lang, ui });
       <slot />
     </main>
     <MobileMenu lang={lang} path={path} region={region} />
-    <SiteFooter ui={ui} generatedAt={payload?.generatedAt} />
+    <SiteFooter ui={ui} lang={lang} generatedAt={payload?.generatedAt} />
     <SigninDialog ui={ui} />
     <ShellScripts />
   </body>

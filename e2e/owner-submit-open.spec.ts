@@ -107,3 +107,32 @@ test('the link handed back is the one friends should get, and can be sent in a t
     shared,
   );
 });
+
+// The one thing this site asks people to do existed in English only: /it/submit
+// and /ru/submit both answered 404, so the header's own button sent an Italian
+// reader from an Italian page to an English form.
+for (const [path, atteso] of [
+  ['/it/submit', 'Aggiungi il tuo evento'],
+  ['/ru/submit', 'Добавить'],
+] as const) {
+  test(`the create page speaks the language of ${path}`, async ({ page }) => {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator('#event-form')).toBeVisible();
+    await expect(page.locator('.submit-card h1')).not.toBeEmpty();
+    // A label in the visitor's language, not "Title".
+    await expect(page.locator('#event-form')).not.toContainText('Location on the map');
+    expect(await page.title()).toContain(atteso.split(' ')[0]);
+  });
+}
+
+test('the header sends an Italian reader to the Italian form', async ({ page }) => {
+  await page.goto('/it/liguria/');
+  await expect(page.locator('.head-create')).toHaveAttribute('href', '/it/submit/');
+});
+
+test('a segment that is not a language is not a second create page', async ({ page }) => {
+  const response = await page.goto('/liguria/submit');
+  expect(new URL(page.url()).pathname).toBe('/submit');
+  expect(response?.status()).toBe(200);
+});

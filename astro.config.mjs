@@ -12,7 +12,14 @@ export default defineConfig({
   site: siteUrl,
   base: '/',
   output: 'static',
-  adapter: cloudflare({ platformProxy: { enabled: false }, imageService: 'compile' }),
+    // wasmModuleImports: the link-preview card is rasterised in the worker, and
+  // Workers refuse to compile WebAssembly from a buffer at runtime — the module
+  // has to be bound at deploy time, which is what this import mode does.
+  adapter: cloudflare({
+    platformProxy: { enabled: false },
+    imageService: 'compile',
+    wasmModuleImports: true,
+  }),
   // Emits sitemap-index.xml + sitemap-0.xml over the prerendered routes. SSR
   // event detail pages (prerender = false) are intentionally excluded.
   // The map is an application view, not a page anybody should land on from a

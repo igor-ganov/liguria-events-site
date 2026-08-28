@@ -49,7 +49,9 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
     desc,
     descHtml: descriptionArticleHtml(desc),
     descMeta,
-    heroImage: socialImageUrl(event.img, site),
+    // An event with no photo of its own gets a card drawn from what it says —
+    // title, when, where — rather than the same rectangle as everything else.
+    heroImage: socialImageUrl(event.img, site, `/og/${event.id}.png`),
     descPreview: clipText(descMeta, 200),
     cover: gallery[0],
     more: gallery.slice(1),

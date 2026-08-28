@@ -3,6 +3,7 @@ import type { EventContacts } from './event-row-types.ts';
 import { EVENT_COLUMNS } from './event-columns.ts';
 import { eventContactsOf } from './event-contacts-of.ts';
 import { isDefined } from '../is-defined.ts';
+import { openableBy } from './openable-by.ts';
 import { toCompact } from './to-compact.ts';
 
 export type EventDetail = Readonly<{
@@ -14,9 +15,13 @@ export type EventDetail = Readonly<{
   contacts: EventContacts;
 }>;
 
-// Author-preview: a published event is visible to everyone; a not-yet-published
-// one (pending/held/rejected) only to its author, so the post-submit redirect
-// lands on a real page instead of a 404 while moderation runs.
+// An event is reachable by its own link from the moment it is made, and only a
+// rejection takes it down. It used to require `published`, and post-write
+// moderation overwrites that with the model's verdict — a `hold`, which is also
+// what a transient model failure returns by design, handed 410 to everybody the
+// invitation had been sent to while the author went on seeing the page.
+// Reachable is not listed: feeds, sitemap and digest gate on status AND
+// visibility, and the page tells crawlers to keep out until it is really public.
 export const eventForDetail = async (
   db: D1Database,
   id: string,
@@ -29,7 +34,7 @@ export const eventForDetail = async (
   return [row ?? undefined]
     .filter(isDefined)
     .map((r) => ({ r, owned: viewerId !== undefined && r.submitter_id === viewerId }))
-    .filter(({ r, owned }) => r.status === 'published' || owned)
+    .filter(({ r, owned }) => openableBy(r.status, owned))
     .map(({ r, owned }) => ({
       compact: toCompact(r),
       status: r.status,

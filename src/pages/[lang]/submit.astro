@@ -1,0 +1,33 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import EventForm from '../../components/EventForm.astro';
+import SubmitLead from '../../components/events/SubmitLead.astro';
+import { isLocale } from '../../lib/i18n/is-locale.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+
+// The one thing this site asks people to do, in the language they are reading.
+// It lived at /submit only, in English, on a site whose readers are in Italy:
+// /it/submit and /ru/submit both answered 404, so the header's own button sent
+// an Italian visitor to an English form.
+const { lang = '' } = Astro.params;
+// A segment that is not one of our languages is not this page: /liguria/submit
+// would otherwise render an English form at a second address.
+const locale = [lang].filter(isLocale).at(0);
+switch (locale) {
+  case undefined:
+    return Astro.redirect('/submit', 308);
+}
+const ui = await uiOf(locale);
+---
+
+<Layout lang={locale} title={ui.contribute.link} path="submit/">
+  <section class="auth-card submit-card">
+    <h1>{ui.contribute.link}</h1>
+    <SubmitLead ui={ui} />
+    <p class="submit-policy">
+      {ui.submitAuth.note} <a href="/content-policy">Content Policy</a>
+    </p>
+    <EventForm mode="create" lang={locale} />
+  </section>
+</Layout>

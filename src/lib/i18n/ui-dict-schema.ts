@@ -1,5 +1,6 @@
 import { Schema } from 'effect';
 import { SubmitUiSchema } from './submit-ui-schema.ts';
+import { EventFormSchema } from './event-form-schema.ts';
 import { AuthUiSchema } from './auth-ui-schema.ts';
 import { CatUiSchema } from './cat-ui-schema.ts';
 import { LandmarksUiSchema } from './landmarks-ui-schema.ts';
@@ -33,6 +34,7 @@ export const UiDictSchema = Schema.Struct({
     }),
     venueTitle: Schema.String,
     venue: Schema.String, feed: Schema.String, calendar: Schema.String, map: Schema.String }),
+  eventForm: EventFormSchema,
   cat: CatUiSchema,
   weekdays: Schema.Array(Schema.String),
   months: Schema.Array(Schema.String),

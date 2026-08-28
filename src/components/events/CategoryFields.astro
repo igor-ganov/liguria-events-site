@@ -7,7 +7,7 @@ const { ui, selected } = Astro.props;
 ---
 
 <fieldset class="cats">
-  <legend>Categories</legend>
+  <legend>{ui.eventForm.categories}</legend>
   {CATEGORIES.map((c) => (
     <label class="cat-check">
       <input type="checkbox" name="category" value={c} checked={selected.includes(c)} /> {ui.cat[c]}

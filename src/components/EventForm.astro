@@ -1,49 +1,56 @@
 ---
 import ImageField from './events/ImageField.astro';
+import ContactFields from './events/ContactFields.astro';
 import VisibilityField from './events/VisibilityField.astro';
 import CategoryFields from './events/CategoryFields.astro';
 import ProgrammeField from './events/ProgrammeField.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { EMPTY_PREFILL } from '../lib/events/event-prefill.ts';
 import type { Prefill } from '../lib/events/event-prefill.ts';
+import type { Locale } from '../lib/i18n/locales.ts';
 
 // Shared create/edit form. `mode` switches the submit target (POST /submit vs
 // PATCH /event/<id>) and the button label; `event` prefills it on edit.
-type Props = Readonly<{ mode: 'create' | 'edit'; eventId?: string | undefined; event?: Prefill | undefined }>;
-const { mode, eventId, event } = Astro.props;
-const ui = await uiOf('en');
+type Props = Readonly<{
+  mode: 'create' | 'edit';
+  lang?: Locale | undefined;
+  eventId?: string | undefined;
+  event?: Prefill | undefined;
+}>;
+const { mode, lang = 'en', eventId, event } = Astro.props;
+const ui = await uiOf(lang);
+const f = ui.eventForm;
 const v: Prefill = event ?? EMPTY_PREFILL;
-const SUBMIT_LABEL: Record<Props['mode'], string> = { create: 'Submit for review', edit: 'Save changes' };
+const SUBMIT_LABEL: Record<Props['mode'], string> = {
+  create: f.submitCreate,
+  edit: f.submitEdit,
+};
 ---
 
 <form id="event-form" class="submit-form" data-mode={mode} data-id={eventId} data-signin-note={ui.submitAuth.signin}>
-  <label>Title<input name="title" required maxlength="200" value={v.title} /></label>
-  <label>Description<textarea name="description" rows="4" set:text={v.description} /></label>
+  <label>{f.title}<input name="title" required maxlength="200" value={v.title} /></label>
+  <label>{f.description}<textarea name="description" rows="4" set:text={v.description} /></label>
 
   <VisibilityField ui={ui} />
 
-  <ImageField coverImage={v.coverImage} />
+  <ImageField ui={ui} coverImage={v.coverImage} />
 
   <ProgrammeField
+    ui={ui}
     container={v.container}
     sessions={v.sessions}
     startDate={v.startDate}
     endDate={v.endDate}
   />
-  <label>Venue<input name="venue" maxlength="200" value={v.venue} /></label>
-  <label>Address<input name="address" maxlength="300" value={v.address} placeholder="Street, city" /></label>
-  <div class="row2">
-    <label>Phone<input name="phone" type="tel" maxlength="40" value={v.phone} /></label>
-    <label>Website<input name="website" type="url" maxlength="300" value={v.website} placeholder="https://" /></label>
-  </div>
+  <ContactFields ui={ui} v={v} />
 
   <CategoryFields ui={ui} selected={v.categories} />
-  <label class="inline"><input type="checkbox" name="free" checked={v.free} /> Free entry</label>
+  <label class="inline"><input type="checkbox" name="free" checked={v.free} /> {f.freeEntry}</label>
 
   <div class="form-loc">
-    <span class="form-image-label">Location on the map</span>
+    <span class="form-image-label">{f.mapLabel}</span>
     <div class="form-loc-map" data-loc-map></div>
-    <span class="form-loc-hint">Click the map to drop a pin — drag it to fine-tune.</span>
+    <span class="form-loc-hint">{f.mapHint}</span>
   </div>
   <input type="hidden" name="lat" value={v.lat} data-lat />
   <input type="hidden" name="lng" value={v.lng} data-lng />

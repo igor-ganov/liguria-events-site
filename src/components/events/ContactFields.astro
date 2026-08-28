@@ -1,0 +1,23 @@
+---
+import type { Prefill } from '../../lib/events/event-prefill.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// Where it is and how to reach whoever is putting it on. Split out of the form,
+// which had grown past the file limit.
+type Props = Readonly<{ ui: Ui; v: Prefill }>;
+const { ui, v } = Astro.props;
+const f = ui.eventForm;
+---
+
+<label>{f.venue}<input name="venue" maxlength="200" value={v.venue} /></label>
+<label>
+  {f.address}
+  <input name="address" maxlength="300" value={v.address} placeholder={f.addressHint} />
+</label>
+<div class="row2">
+  <label>{f.phone}<input name="phone" type="tel" maxlength="40" value={v.phone} /></label>
+  <label>
+    {f.website}
+    <input name="website" type="url" maxlength="300" value={v.website} placeholder="https://" />
+  </label>
+</div>

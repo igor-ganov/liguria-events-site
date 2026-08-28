@@ -5,8 +5,20 @@ import { Schema } from 'effect';
  *  handed back once it exists. Split out of the main dictionary, which had
  *  grown past the file limit. */
 export const SubmitUiSchema = {
-  contribute: Schema.Struct({ link: Schema.String, venue: Schema.String, empty: Schema.String }),
+  contribute: Schema.Struct({
+    link: Schema.String,
+    venue: Schema.String,
+    empty: Schema.String,
+    ownEvent: Schema.String,
+    ownEventLink: Schema.String,
+  }),
   submitAuth: Schema.Struct({ note: Schema.String, signin: Schema.String }),
+  submitLead: Schema.Struct({
+    lead: Schema.String,
+    pointLink: Schema.String,
+    pointFree: Schema.String,
+    pointWho: Schema.String,
+  }),
   created: Schema.Struct({
     heading: Schema.String,
     linkNote: Schema.String,

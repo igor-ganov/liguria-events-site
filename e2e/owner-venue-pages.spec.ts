@@ -64,7 +64,7 @@ test('a venue page asks the venue itself for its dates', async ({ page }) => {
   await page.goto('/liguria/genova/teatro-carlo-felice/');
   const invite = page.locator('.venue-invite a');
   await expect(invite).toContainText('Teatro Carlo Felice');
-  await expect(invite).toHaveAttribute('href', '/submit');
+  await expect(invite).toHaveAttribute('href', '/submit/');
 });
 
 test('one event is one event, in every language', async ({ page, request }) => {

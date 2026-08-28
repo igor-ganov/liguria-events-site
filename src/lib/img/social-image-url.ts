@@ -30,5 +30,16 @@ const BUILD: Record<Kind, (src: string, site: URL) => string> = {
 
 /** The `og:image` for a page: our own origin, our own crop, or the branded
  *  fallback — never a bare hot-link in the source's own aspect ratio. */
-export const socialImageUrl = (src: string | undefined, site: URL | undefined): string | undefined =>
-  [site].filter(isDefined).map((base) => BUILD[kindOf(src)](src ?? '', base))[0];
+export const socialImageUrl = (
+  src: string | undefined,
+  site: URL | undefined,
+  fallback = DEFAULT_IMAGE,
+): string | undefined =>
+  [site]
+    .filter(isDefined)
+    .map((base) =>
+      branch(kindOf(src) === 'none')(
+        () => new URL(fallback, base).toString(),
+        () => BUILD[kindOf(src)](src ?? '', base),
+      ),
+    )[0];

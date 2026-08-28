@@ -24,6 +24,6 @@ const place = cityName(city);
   <h1>{name}</h1>
   <p class="venue-sub">{countText(lang, label, count, place)}</p>
   <p class="venue-invite">
-    <a href="/submit">{invite.replace('{place}', name)}</a>
+    <a href={localizedUrl(lang, "submit/")}>{invite.replace('{place}', name)}</a>
   </p>
 </header>

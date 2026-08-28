@@ -2,6 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import type { EventDetailProps } from './event-detail-props.ts';
 import ShareButton from '../share/ShareButton.astro';
+import OwnEventInvite from '../events/OwnEventInvite.astro';
+import { keepOutOfSearch } from '../../lib/events/keep-out-of-search.ts';
 import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventHero from './event/EventHero.astro';
@@ -45,7 +47,7 @@ const { region, title, desc, descHtml, descPreview, heroImage, cover, more, link
 const programme = programmeSessions(event, lang);
 ---
 
-<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event.id)} image={heroImage} ogType="article" noindex={unlisted}>
+<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event.id)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <p class="event-topbar">
@@ -75,5 +77,6 @@ const programme = programmeSessions(event, lang);
     {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
     <EventSources links={links} heading={ui.headings.sources} />
+    {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
   </article>
 </Layout>

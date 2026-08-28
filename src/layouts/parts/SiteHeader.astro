@@ -1,4 +1,5 @@
 ---
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import RegionPicker from '../../components/RegionPicker.astro';
 import SiteNav from './SiteNav.astro';
 import { pageSegment } from '../../lib/region/page-segment.ts';
@@ -40,7 +41,7 @@ const { lang, region, path, city, ui } = Astro.props;
        hidden on a phone, and making an event is the thing this site is for.
        Reachable without an account — the sign-in comes at the moment of
        publishing, by which point the draft is already saved. -->
-  <a class="head-create" href="/submit">
+  <a class="head-create" href={localizedUrl(lang, "submit/")}>
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true">
       <path d="M12,4.4 C12.2,9 12.1,14.8 11.9,19.6"></path>
       <path d="M4.4,12.1 C9,11.9 14.8,12 19.6,11.9"></path>
