@@ -1,5 +1,5 @@
 import { cachedEvents } from '../../data/cached-events.ts';
-import { cardFont } from '../../lib/og/card-font.ts';
+import { cardFonts } from '../../lib/og/card-fonts.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { eventCard } from '../../lib/og/event-card.ts';
 import { ogCardSvg } from '../../lib/og/og-card-svg.ts';
@@ -30,7 +30,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     case undefined:
       return new Response('', { status: 404 });
   }
-  const png = await renderCard(ogCardSvg(eventCard(event)), cardFont());
+  const png = await renderCard(ogCardSvg(eventCard(event)), cardFonts());
   return new Response(png, {
     headers: { 'content-type': 'image/png', 'cache-control': CACHE },
   });

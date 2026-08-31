@@ -1,3 +1,4 @@
+import { CARD_FAMILIES } from './card-families.ts';
 import { branch } from '../branch.ts';
 import { escapeSvg } from './escape-svg.ts';
 import { wrapLine } from './wrap-line.ts';
@@ -40,10 +41,10 @@ const madeMark = (madeHere: boolean): string =>
 export const ogCardSvg = ({ title, when, place, madeHere }: OgCard): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">` +
   `<style>` +
-  `.t{font-family:Fraunces,Georgia,serif;font-size:64px;fill:#20232a}` +
-  `.w{font-family:Rubik,sans-serif;font-size:30px;fill:#767b84}` +
-  `.m{font-family:Rubik,sans-serif;font-size:24px;fill:#c2703f;letter-spacing:2px}` +
-  `.b{font-family:Fraunces,Georgia,serif;font-size:30px;fill:#33697a}` +
+  `.t{font-family:'${CARD_FAMILIES.title}',Georgia,serif;font-size:64px;fill:#20232a}` +
+  `.w{font-family:'${CARD_FAMILIES.text}',sans-serif;font-size:30px;fill:#767b84}` +
+  `.m{font-family:'${CARD_FAMILIES.text}',sans-serif;font-size:24px;fill:#c2703f;letter-spacing:2px}` +
+  `.b{font-family:'${CARD_FAMILIES.title}',Georgia,serif;font-size:30px;fill:#33697a}` +
   `</style>` +
   `<rect width="${W}" height="${H}" fill="#fbfaf7"/>` +
   `<path d="M46,0 C42,120 52,240 46,360 C40,480 50,560 46,630" fill="none" stroke="#33697a" stroke-width="3" opacity="0.72"/>` +
