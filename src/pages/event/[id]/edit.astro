@@ -6,10 +6,12 @@ import Layout from '../../../layouts/Layout.astro';
 import EventForm from '../../../components/EventForm.astro';
 import { editableEventById } from '../../../lib/events/d1-published.ts';
 import { branch } from '../../../lib/branch.ts';
+import { eventIdOfPath } from '../../../lib/events/event-id-of-path.ts';
 
 const { id } = Astro.params;
 const user = Astro.locals.user;
-const eventId = id ?? '';
+// The address carries the event's words now; the row is still keyed by the id.
+const eventId = eventIdOfPath(id ?? '');
 const userId = user?.id ?? '';
 const event = await branch(eventId !== '' && userId !== '')(
   () => editableEventById(Astro.locals.runtime.env.DB, eventId, userId),

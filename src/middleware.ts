@@ -4,6 +4,7 @@ import { authGate } from './lib/auth/auth-gate.ts';
 import { isDefined } from './lib/is-defined.ts';
 import { magicLinkLanding } from './lib/auth/magic-link-landing.ts';
 import { sessionUser } from './lib/auth/session-user.ts';
+import { strayEventPath } from './lib/events/stray-event-path.ts';
 
 const SESSION_MAX_AGE = 7 * 24 * 3600;
 
@@ -36,6 +37,10 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   const bounce = [
     ...signin.map(({ target }) => ctx.redirect(target)),
     ...[authGate(ctx.url.pathname, ctx.locals.user)].filter(isDefined).map((to) => ctx.redirect(to)),
+    // An event id where a city slug belongs: a shape only crawlers ask for,
+    // tens of thousands of times a day. It names a real event, so it is moved
+    // to it rather than answered with a 404.
+    ...[strayEventPath(ctx.url.pathname)].filter(isDefined).map((to) => ctx.redirect(to, 301)),
   ];
   return bounce.at(0) ?? next();
 });

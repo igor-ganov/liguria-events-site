@@ -57,14 +57,14 @@ describe('eventCard', () => {
   test('carries the localized link, image, title and date span', () => {
     const card = eventCard('en')(event({ img: 'https://img/a.jpg', h: '21:00' }));
     assert.deepEqual(card, {
-      href: '/event/abc/',
+      href: '/event/festa-2026-08-20-abc/',
       image: 'https://img/a.jpg',
       title: 'Festa',
       when: '20.08 · 21:00',
     });
   });
   test('prefixes the path for a non-default locale', () => {
-    assert.equal(eventCard('it')(event({})).href, '/it/event/abc/');
+    assert.equal(eventCard('it')(event({})).href, '/it/event/festa-2026-08-20-abc/');
   });
   test('prefers the translated title when the locale has one', () => {
     // A localized title carries every locale; only the Russian one is asserted.

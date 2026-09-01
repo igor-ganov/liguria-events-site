@@ -1,9 +1,12 @@
-import { eventPath } from '../../lib/event-path.ts';
 import type { EventFormMode } from './event-form-mode.ts';
 
-const ID_OF: Readonly<Record<EventFormMode, (id: string, created: string) => string>> = {
-  edit: (id) => id,
-  create: (_id, created) => created,
+// The endpoint answers with the event's address, which is what both modes
+// navigate to. The id it fell back to before still resolves — it is redirected
+// — but landing on the canonical URL saves the author a hop and shows them the
+// address they are about to send.
+const ADDRESS_OF: Readonly<Record<EventFormMode, (id: string, answered: string) => string>> = {
+  edit: (id, answered) => answered || id,
+  create: (_id, answered) => answered,
 };
 
 // A freshly created event arrives with `?created`, which is how the page knows
@@ -18,4 +21,4 @@ const MARK: Readonly<Record<EventFormMode, string>> = { edit: '', create: '?crea
  *  author landed on an address that was not the canonical one and was not what
  *  the sitemap or any link on the site says. */
 export const eventRedirectPath = (mode: EventFormMode, id: string, created: string): string =>
-  `/${eventPath(ID_OF[mode](id, created))}${MARK[mode]}`;
+  `/event/${ADDRESS_OF[mode](id, created)}/${MARK[mode]}`;

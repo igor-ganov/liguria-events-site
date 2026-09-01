@@ -1,5 +1,6 @@
 import type { EventEnv } from './event-env.ts';
 import type { DeferredWork } from '../deferred-work.ts';
+import { eventSlug } from './event-slug.ts';
 import { initialStatus } from './initial-status.ts';
 import { moderateAndNotify } from '../moderation/moderate-and-notify.ts';
 import type { AppUser } from '../auth/types.ts';
@@ -31,5 +32,8 @@ export const createEvent = async (
   ctx.waitUntil(
     moderateAndNotify(env, { id, title: e.title, description: e.description, submitterEmail: user.email }),
   );
-  return Response.json({ ok: true, id, status: initialStatus(e.visibility), visibility: e.visibility });
+  // The address, not just the id: the form sends the author straight to the
+  // canonical URL rather than through a redirect.
+  const slug = eventSlug({ id, t: e.title, s: e.startDate, v: e.venue ?? undefined });
+  return Response.json({ ok: true, id, slug, status: initialStatus(e.visibility), visibility: e.visibility });
 };

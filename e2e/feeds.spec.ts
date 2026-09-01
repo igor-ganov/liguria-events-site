@@ -20,7 +20,7 @@ test('a region serves a valid RSS feed of what is coming up', async ({ request }
   expect(items).toBeGreaterThan(0);
   expect(items).toBeLessThanOrEqual(50);
   // Entries point at the event pages, not back at the feed.
-  expect(xml).toMatch(/<link>https:\/\/dovego\.it\/event\/[a-z0-9]+\/<\/link>/);
+  expect(xml).toMatch(/<link>https:\/\/dovego\.it\/event\/[a-z0-9-]+-[0-9a-f]{12}\/<\/link>/);
 });
 
 test('both feeds are advertised from the region page itself', async ({ page }) => {

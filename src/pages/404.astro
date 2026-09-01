@@ -1,11 +1,21 @@
 ---
+// Server-rendered, and that is the point: a prerendered 404.html is handed
+// straight to the reader by the assets layer, which never runs the worker — so
+// nothing here could look at the address that missed. Two-segment strays like
+// /campania/<event id>/ match no route at all and land exactly here.
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { regionUrl } from '../lib/region/region-url.ts';
+import { strayEventPath } from '../lib/events/stray-event-path.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 
-// Astro serves this automatically for unmatched routes; on Cloudflare Pages the
-// prerendered 404.html is returned with a 404 status, so no manual status set is
-// needed here.
+const stray = strayEventPath(Astro.url.pathname);
+switch (stray) {
+  case undefined:
+    break;
+  default:
+    return Astro.redirect(stray, 301);
+}
 const home = regionUrl('en', DEFAULT_REGION);
 ---
 

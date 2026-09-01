@@ -19,15 +19,15 @@ describe('eventSitemapUrls', () => {
   test('one entry per locale, each listing every language version', () => {
     const urls = eventSitemapUrls([ev({ id: 'abc' })], TODAY, SITE);
     assert.deepEqual(urls.map((url) => url.loc), [
-      'https://dovego.it/event/abc/',
-      'https://dovego.it/it/event/abc/',
-      'https://dovego.it/ru/event/abc/',
+      'https://dovego.it/event/concerto-2026-08-20-abc/',
+      'https://dovego.it/it/event/concerto-2026-08-20-abc/',
+      'https://dovego.it/ru/event/concerto-2026-08-20-abc/',
     ]);
     assert.deepEqual(urls[0]?.alternates, [
-      { hreflang: 'en', href: 'https://dovego.it/event/abc/' },
-      { hreflang: 'it', href: 'https://dovego.it/it/event/abc/' },
-      { hreflang: 'ru', href: 'https://dovego.it/ru/event/abc/' },
-      { hreflang: 'x-default', href: 'https://dovego.it/event/abc/' },
+      { hreflang: 'en', href: 'https://dovego.it/event/concerto-2026-08-20-abc/' },
+      { hreflang: 'it', href: 'https://dovego.it/it/event/concerto-2026-08-20-abc/' },
+      { hreflang: 'ru', href: 'https://dovego.it/ru/event/concerto-2026-08-20-abc/' },
+      { hreflang: 'x-default', href: 'https://dovego.it/event/concerto-2026-08-20-abc/' },
     ]);
   });
 
@@ -56,8 +56,8 @@ describe('sitemapXml', () => {
     const xml = sitemapXml(eventSitemapUrls([ev({ id: 'abc' })], TODAY, SITE));
     assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?><urlset '));
     assert.ok(xml.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'));
-    assert.ok(xml.includes('<loc>https://dovego.it/event/abc/</loc>'));
-    assert.ok(xml.includes('<xhtml:link rel="alternate" hreflang="it" href="https://dovego.it/it/event/abc/"/>'));
+    assert.ok(xml.includes('<loc>https://dovego.it/event/concerto-2026-08-20-abc/</loc>'));
+    assert.ok(xml.includes('<xhtml:link rel="alternate" hreflang="it" href="https://dovego.it/it/event/concerto-2026-08-20-abc/"/>'));
     assert.ok(xml.endsWith('</urlset>'));
   });
 

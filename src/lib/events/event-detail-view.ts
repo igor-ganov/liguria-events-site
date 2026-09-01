@@ -41,7 +41,7 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
   const desc = descriptionOf(lang)(event);
   const descMeta = descriptionPlain(desc);
   const image = absoluteImage(event.img, site);
-  const url = canonicalUrl(lang, eventPath(event.id), site);
+  const url = canonicalUrl(lang, eventPath(event), site);
   const gallery = eventGallery(event);
   return {
     region: regionOf(event),

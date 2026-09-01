@@ -23,7 +23,7 @@ describe('eventRssItems', () => {
       SITE,
     );
     assert.deepEqual(items.map((item) => item.guid), ['sooner', 'later']);
-    assert.equal(items[0]?.link, 'https://dovego.it/event/sooner/');
+    assert.equal(items[0]?.link, 'https://dovego.it/event/concerto-2026-08-24-sooner/');
   });
 
   test('what has already happened is not news', () => {

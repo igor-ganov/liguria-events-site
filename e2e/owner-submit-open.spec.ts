@@ -81,13 +81,13 @@ test('the link handed back is the one friends should get, and can be sent in a t
   await page.locator('#event-form [name=startDate]').fill('2026-12-01');
   await page.locator('#event-form [name=venue]').fill('Palazzo Spinola');
   await page.locator('#event-form button[type=submit]').click();
-  await page.waitForURL(/\/event\/[0-9a-f]{12}\/\?created=1/);
+  await page.waitForURL(/\/event\/concerto-in-cortile-palazzo-spinola-2026-12-01-[0-9a-f]{12}\/\?created=1/);
 
   // The address bar carries a note to ourselves; the field the author copies
   // must not. Friends were being sent "?created=1" pasted into their chat.
   const shared = await page.locator('[data-new-event-url]').inputValue();
   expect(shared).not.toContain('created=1');
-  expect(shared).toMatch(/\/event\/[0-9a-f]{12}\/$/);
+  expect(shared).toMatch(/\/event\/concerto-in-cortile-palazzo-spinola-2026-12-01-[0-9a-f]{12}\/$/);
 
   // And there is a way into the apps people here actually use, which a desktop
   // browser cannot offer through the native sheet because it has none.

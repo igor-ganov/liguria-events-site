@@ -28,7 +28,7 @@ const descHtml = (desc: string): string =>
 export const feedCardHtml = (context: FeedContext, event: CompactEvent): string => {
   const { lang, ui, icons } = context;
   return (
-    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event.id))}">` +
+    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event))}">` +
     favButtonHtml(event.id, ui.nav.favorites) +
     feedCardThumb(event, icons) +
     `<div class="mini-body"><h4 class="mini-title">${escapeMarkup(titleOf(lang)(event))}</h4>` +

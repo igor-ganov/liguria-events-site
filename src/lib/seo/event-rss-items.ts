@@ -23,7 +23,7 @@ export const eventRssItems = (
     .slice(0, CAP)
     .map((event) => ({
       title: event.t,
-      link: canonicalUrl('en', eventPath(event.id), site),
+      link: canonicalUrl('en', eventPath(event), site),
       guid: event.id,
       pubDate: dateOf(event),
       description: descriptionPlain(event.d?.en ?? '').slice(0, 500),

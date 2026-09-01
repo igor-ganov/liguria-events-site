@@ -43,7 +43,7 @@ describe('eventDetailView', () => {
   test('the canonical URL and structured data are built from the same event', () => {
     const built = view(ev({ id: 'abc', v: 'Teatro' }), '2026-08-18');
     const json = JSON.parse(built.jsonLd.replace(/\\u003c/g, '<'));
-    assert.equal(json['url'], 'https://dovego.it/event/abc/');
+    assert.equal(json['url'], 'https://dovego.it/event/concerto-teatro-2026-08-20-abc/');
     assert.equal(json['name'], built.title);
     assert.equal(built.region, 'liguria');
   });

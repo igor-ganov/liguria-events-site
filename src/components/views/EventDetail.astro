@@ -47,7 +47,7 @@ const { region, title, desc, descHtml, descPreview, heroImage, cover, more, link
 const programme = programmeSessions(event, lang);
 ---
 
-<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event.id)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
+<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <p class="event-topbar">
@@ -55,7 +55,7 @@ const programme = programmeSessions(event, lang);
       <span class="event-share"><ShareButton ui={ui} title={title} /></span>
     </p>
     {justCreated && (
-      <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event.id), Astro.site)} title={title} unlisted={unlisted} />
+      <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event), Astro.site)} title={title} unlisted={unlisted} />
     )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && (

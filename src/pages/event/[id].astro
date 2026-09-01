@@ -8,7 +8,9 @@ import Layout from '../../layouts/Layout.astro';
 import EmptyState from '../../components/views/feed/EmptyState.astro';
 import EventDetail from '../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
+import { canonicalEventRedirect } from '../../lib/events/canonical-event-redirect.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
+import { eventIdOfPath } from '../../lib/events/event-id-of-path.ts';
 import { eventStatusCode } from '../../lib/events/event-status-code.ts';
 import { resolveEvent } from '../../lib/events/resolve-event.ts';
 import { DEFAULT_REGION } from '../../lib/region/default-region.ts';
@@ -24,9 +26,18 @@ const { event, editable, status, visibility, contacts } = await resolveEvent({
   userId: Astro.locals.user?.id,
   eventsUrl: EVENTS_URL,
 });
+// One event, one address: every other spelling that names it — a bare id, a
+// title since edited — is moved permanently to the current one.
+const canonical = canonicalEventRedirect('en', id, event, Astro.url.search);
+switch (canonical) {
+  case undefined:
+    break;
+  default:
+    return Astro.redirect(canonical, 301);
+}
 // 410 when one of our ids resolves to nothing: it existed and is permanently
 // over, which is what a search engine acts on. 404 stays for what never was.
-Astro.response.status = eventStatusCode(id, event !== undefined);
+Astro.response.status = eventStatusCode(eventIdOfPath(id), event !== undefined);
 const ui = await uiOf('en');
 ---
 

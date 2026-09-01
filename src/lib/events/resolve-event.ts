@@ -1,4 +1,5 @@
 import { archivedEvent } from './archived-event.ts';
+import { eventIdOfPath } from './event-id-of-path.ts';
 import { branch } from '../branch.ts';
 import { decodeEventList } from './decode-event-list.ts';
 import { eventForDetail } from './d1-published.ts';
@@ -15,6 +16,9 @@ export type ResolvedEvent = Readonly<{
 }>;
 
 export type ResolveInput = Readonly<{
+  /** The address segment as requested: a full slug, or one of the bare ids
+   *  every link used before. The event it names is read out of it here, so a
+   *  route cannot forget to. */
   id: string;
   corpus: readonly CompactEvent[];
   db: D1Database;
@@ -32,7 +36,8 @@ export type ResolveInput = Readonly<{
  * and `/{lang}/event` — and the archive step was added to one of them and
  * forgotten in the other, which 404'd two thirds of the sitemap.
  */
-export const resolveEvent = async (input: ResolveInput): Promise<ResolvedEvent> => {
+export const resolveEvent = async (raw: ResolveInput): Promise<ResolvedEvent> => {
+  const input = { ...raw, id: eventIdOfPath(raw.id) };
   const fromCorpus = input.corpus.find((event) => event.id === input.id);
   const row = await branch(fromCorpus === undefined && input.id !== '')(
     () => eventForDetail(input.db, input.id, input.userId),

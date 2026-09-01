@@ -6,9 +6,11 @@ import { COPY_LINK } from '../src/components/events/copy-link-selectors.ts';
 
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
-const anyEvent = async (request: { get: (url: string) => Promise<{ text: () => Promise<string> }> }) => {
+const anyEvent = async (request: { get: (url: string) => Promise<{ text: () => Promise<string> }> }): Promise<string> => {
   const xml = await (await request.get('/sitemap-events.xml')).text();
-  return (/\/event\/([a-z0-9]+)\//.exec(xml) ?? [])[1] ?? '';
+  // The whole address, not the id inside it: reaching an event by anything
+  // but its canonical address is a 301, and the panel asserts on that address.
+  return (/\/event\/([a-z0-9-]+)\//.exec(xml) ?? [])[1] ?? '';
 };
 
 test('a page reached normally does not shout about a link', async ({ page, request }) => {

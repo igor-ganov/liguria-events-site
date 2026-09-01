@@ -23,7 +23,7 @@ export const eventToDoc =
     id: event.id,
     lang,
     section: 'event',
-    url: localizedUrl(lang, eventPath(event.id)),
+    url: localizedUrl(lang, eventPath(event)),
     title: titleOf(lang)(event),
     description: join([event.v, event.a]),
     body: join([descriptionOf(lang)(event), catNames(ui)(event), event.v, event.a]),

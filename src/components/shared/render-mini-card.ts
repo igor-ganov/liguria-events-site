@@ -40,7 +40,7 @@ export const renderMiniCard = (event: CompactEvent, ui: Ui, lang: Locale): Templ
   const desc = descriptionPlain(descriptionOf(lang)(event));
   return html`
     <li>
-      <a class="mini-card" href=${localizedUrl(lang, eventPath(event.id))}>
+      <a class="mini-card" href=${localizedUrl(lang, eventPath(event))}>
         ${unsafeHTML(favButtonHtml(event.id, ui.nav.favorites))}
         ${renderThumb(event)}
         <div class="mini-body">

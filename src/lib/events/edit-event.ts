@@ -1,5 +1,6 @@
 import type { EventEnv } from './event-env.ts';
 import type { DeferredWork } from '../deferred-work.ts';
+import { eventSlug } from './event-slug.ts';
 import { isDefined } from '../is-defined.ts';
 import { moderateAndNotify } from '../moderation/moderate-and-notify.ts';
 import { parsedEventInput } from './parsed-event-input.ts';
@@ -32,7 +33,8 @@ const applyEdit = async (
       ctx.waitUntil(
         moderateAndNotify(env, { id, title: e.title, description: e.description, submitterEmail: user.email }),
       );
-      return Response.json({ ok: true, id, status: 'pending' });
+      // Retitling moves the event's address; the form follows it.
+      return Response.json({ ok: true, id, slug: eventSlug({ id, t: e.title, s: e.startDate, v: e.venue ?? undefined }), status: 'pending' });
     }),
   );
   return edited.at(0) ?? rejection();

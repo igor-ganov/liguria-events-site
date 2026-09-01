@@ -94,7 +94,7 @@ describe('feedCardTags', () => {
 describe('feedCardHtml', () => {
   test('builds the mini-card the feed already renders', () => {
     const html = feedCardHtml(context, event({ d: { en: 'A night of jazz.', it: '', ru: '' } }));
-    assert.ok(html.startsWith('<a class="mini-card" href="/event/e1/"'));
+    assert.ok(html.startsWith('<a class="mini-card" href="/event/concerto-2026-07-04-e1/"'));
     assert.ok(html.includes('<h4 class="mini-title">Concerto</h4>'));
     assert.ok(html.includes('<span class="mini-when">'));
     assert.ok(html.includes('<p class="mini-desc">A night of jazz.</p>'));
@@ -114,7 +114,7 @@ describe('feedCardHtml', () => {
   });
   test('a non-default locale links to its own page', () => {
     const html = feedCardHtml({ ...context, lang: 'it' }, event());
-    assert.ok(html.includes('href="/it/event/e1/"'));
+    assert.ok(html.includes('href="/it/event/concerto-2026-07-04-e1/"'));
   });
   test('escapes the title, so data cannot inject markup', () => {
     const html = feedCardHtml(context, event({ t: 'Rock & <b>roll</b>' }));

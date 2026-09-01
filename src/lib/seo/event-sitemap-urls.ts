@@ -40,9 +40,9 @@ export const eventSitemapUrls = (
 ): readonly SitemapUrl[] => [
   ...events.filter(isUpcoming(today)).flatMap((event) =>
     LOCALES.map((lang) => ({
-      loc: canonicalUrl(lang, eventPath(event.id), site),
+      loc: canonicalUrl(lang, eventPath(event), site),
       lastmod: stampOf(event, today),
-      alternates: alternateLinks(eventPath(event.id), site),
+      alternates: alternateLinks(eventPath(event), site),
     })),
   ),
   // Venue pages are server-rendered too, for the same reason — a venue with

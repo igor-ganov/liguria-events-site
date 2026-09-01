@@ -12,6 +12,12 @@ describe('eventRedirectPath', () => {
     assert.equal(eventRedirectPath('edit', 'abc123', ''), '/event/abc123/');
   });
 
+  test('an edit follows the address the endpoint answered with', () => {
+    // Retitling moves the event: its address carries its words. Going back to
+    // the address the form was opened at would land on a 301.
+    assert.equal(eventRedirectPath('edit', 'old-name-2026-12-05-abc123', 'new-name-2026-12-05-abc123'), '/event/new-name-2026-12-05-abc123/');
+  });
+
   test('create uses the id the API returned, not the form’s', () => {
     assert.equal(eventRedirectPath('create', 'stale', 'fresh'), '/event/fresh/?created=1');
   });

@@ -28,7 +28,7 @@ const renderPill =
         <a
           class="cal-pill"
           data-cat=${primaryCategory(event.c)}
-          href=${localizedUrl(lang, eventPath(event.id))}
+          href=${localizedUrl(lang, eventPath(event))}
           title=${title}
         >
           ${renderIcon(primaryCategory(event.c), 12)}

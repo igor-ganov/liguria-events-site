@@ -11,7 +11,7 @@ import type { Locale } from '../../lib/i18n/locales.ts';
 export const eventCard =
   (lang: Locale) =>
   (event: CompactEvent): EventPopup => ({
-    href: localizedUrl(lang, eventPath(event.id)),
+    href: localizedUrl(lang, eventPath(event)),
     image: event.img,
     title: titleOf(lang)(event),
     when: formatWhen(event),

@@ -6,8 +6,10 @@ export const prerender = false;
 import Layout from '../../../layouts/Layout.astro';
 import EventDetail from '../../../components/views/EventDetail.astro';
 import { cachedEvents } from '../../../data/cached-events.ts';
+import { canonicalEventRedirect } from '../../../lib/events/canonical-event-redirect.ts';
 import { EVENTS_URL } from '../../../data/events-url.ts';
 import EmptyState from '../../../components/views/feed/EmptyState.astro';
+import { eventIdOfPath } from '../../../lib/events/event-id-of-path.ts';
 import { eventStatusCode } from '../../../lib/events/event-status-code.ts';
 import { resolveEvent } from '../../../lib/events/resolve-event.ts';
 import { DEFAULT_REGION } from '../../../lib/region/default-region.ts';
@@ -30,7 +32,15 @@ const { event, editable, status, visibility, contacts } = await resolveEvent({
   userId: Astro.locals.user?.id,
   eventsUrl: EVENTS_URL,
 });
-Astro.response.status = eventStatusCode(id, event !== undefined);
+// One event, one address — see the unprefixed twin.
+const canonical = canonicalEventRedirect(lang, id, event, Astro.url.search);
+switch (canonical) {
+  case undefined:
+    break;
+  default:
+    return Astro.redirect(canonical, 301);
+}
+Astro.response.status = eventStatusCode(eventIdOfPath(id), event !== undefined);
 const ui = await uiOf(lang);
 ---
 

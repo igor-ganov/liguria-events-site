@@ -117,7 +117,7 @@ describe('eventRedirectPath', () => {
   test('an edit returns to the same event, at its canonical address', () => {
     // The trailing slash used to be missing here and nowhere else, so the
     // author's address bar disagreed with every link on the site.
-    assert.equal(eventRedirectPath('edit', 'ev1', 'ignored'), '/event/ev1/');
+    assert.equal(eventRedirectPath('edit', 'ev1', ''), '/event/ev1/');
   });
   test('a creation goes to the id the endpoint answered with, marked fresh', () => {
     // ?created is how the page knows to lead with the link rather than the

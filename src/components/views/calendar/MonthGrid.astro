@@ -40,7 +40,7 @@ const heading = dayHeading(ui);
             <a
               class="cal-pill"
               data-cat={primaryCategory(event.c)}
-              href={localizedUrl(lang, eventPath(event.id))}
+              href={localizedUrl(lang, eventPath(event))}
               title={titleOf(lang)(event)}
             >
               <Fragment set:html={iconSvg(primaryCategory(event.c), 12)} />
