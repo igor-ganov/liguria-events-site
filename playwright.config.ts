@@ -24,8 +24,25 @@ export default defineConfig({
   use: { trace: 'on-first-retry' },
   expect: { timeout: MAX_WAIT_MS },
   projects: [
-    { name: 'chromium', testIgnore: /owner-/, use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4399' } },
-    { name: 'owner', testMatch: /owner-.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], baseURL: OWNER_URL } },
+    // Service workers are BLOCKED here on purpose. A worker sitting in front of
+    // the network would answer requests these specs mock through page.route,
+    // and a mock that silently stops applying is a test that stops testing.
+    {
+      name: 'chromium',
+      testIgnore: [/owner-/, /pwa\.spec\.ts/],
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4399', serviceWorkers: 'block' },
+    },
+    {
+      name: 'owner',
+      testMatch: /owner-.*\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: OWNER_URL, serviceWorkers: 'block' },
+    },
+    // The one surface that wants the worker running: it is what is under test.
+    {
+      name: 'pwa',
+      testMatch: /pwa\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: 'http://localhost:4399', serviceWorkers: 'allow' },
+    },
   ],
   webServer: [
     {

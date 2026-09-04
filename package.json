@@ -6,9 +6,10 @@
   "description": "Static calendar & feed UI for Genoa events — Astro + Lit on GitHub Pages",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "build:dev": "cross-env SITE_URL=https://dev.dovego.it PUBLIC_FIXED_TODAY=2026-07-06 PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles PUBLIC_PMTILES_DETAIL_URL=https://tiles.dovego.it/liguria.pmtiles astro build",
-    "build:prod": "cross-env SITE_URL=https://dovego.it PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles PUBLIC_PMTILES_DETAIL_URL=https://tiles.dovego.it/liguria.pmtiles astro build",
+    "build": "bun run build:assets && astro build",
+    "build:assets": "bun run scripts/build-icons.ts && bun run scripts/build-sw.ts && bun run scripts/build-assetlinks.ts",
+    "build:dev": "cross-env SITE_URL=https://dev.dovego.it PUBLIC_FIXED_TODAY=2026-07-06 PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles PUBLIC_PMTILES_DETAIL_URL=https://tiles.dovego.it/liguria.pmtiles bun run build",
+    "build:prod": "cross-env SITE_URL=https://dovego.it PUBLIC_PMTILES_URL=https://tiles.dovego.it/italy.pmtiles PUBLIC_PMTILES_DETAIL_URL=https://tiles.dovego.it/liguria.pmtiles bun run build",
     "preview": "astro preview",
     "test": "bun test ./test",
     "test:e2e": "playwright test",

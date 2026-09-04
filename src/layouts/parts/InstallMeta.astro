@@ -1,0 +1,14 @@
+---
+// What makes the site installable, and what Apple reads instead.
+//
+// The manifest is the whole declaration on Android — name, icons, colours,
+// display mode — and it is also what Bubblewrap reads to generate the Play
+// Store wrapper, so a change here changes the app. Safari reads none of it and
+// wants the same facts as meta tags, which is why they are stated twice.
+---
+
+<link rel="manifest" href="/manifest.webmanifest" />
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Dove Go" />

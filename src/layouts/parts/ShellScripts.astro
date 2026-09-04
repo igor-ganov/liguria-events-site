@@ -42,6 +42,15 @@
 </script>
 
 <script>
+  // The service worker (offline page, asset cache) and the install offer.
+  // Registered once per document, not per SPA swap: the worker outlives both.
+  import { initInstallPrompt } from '../../components/pwa/init-install-prompt.ts';
+  import { registerServiceWorker } from '../../components/pwa/register-service-worker.ts';
+  registerServiceWorker();
+  initInstallPrompt();
+</script>
+
+<script>
   // pro-motion custom events: SPA pageviews, event views, favourites, outbound.
   import { initAnalytics } from '../../components/analytics/init-analytics.ts';
   initAnalytics();

@@ -13,3 +13,6 @@ scripts/.cache/
 test-results/
 playwright-report/
 out/
+
+# Bundled from src/sw by scripts/build-sw.ts
+public/sw.js

@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import FeedFilterInit from './FeedFilterInit.astro';
+import InstallMeta from './InstallMeta.astro';
 import ThemeInit from './ThemeInit.astro';
 import { alternateLinks } from '../../lib/seo/alternate-links.ts';
 import SiteFeeds from './SiteFeeds.astro';
@@ -42,6 +43,7 @@ const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 <link rel="preload" as="font" type="font/woff2" href="/fonts/rubik-latin.woff2" crossorigin />
 <link rel="preload" as="font" type="font/woff2" href="/fonts/fraunces-latin.woff2" crossorigin />
 <link rel="icon" type="image/svg+xml" href={icon} />
+<InstallMeta />
 <title>{title} · Dove Go</title>
 {needsMap && tiles && <link rel="preconnect" href={tiles} crossorigin />}
 {needsMap && tiles && <link rel="dns-prefetch" href={tiles} />}

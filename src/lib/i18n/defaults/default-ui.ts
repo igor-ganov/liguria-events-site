@@ -2,6 +2,7 @@ import { DEFAULT_AUTH_UI } from './default-auth-ui.ts';
 import { DEFAULT_CATALOG_UI } from './default-catalog-ui.ts';
 import { DEFAULT_LANDMARKS_UI } from './default-landmarks-ui.ts';
 import { DEFAULT_PLACES_UI } from './default-places-ui.ts';
+import { DEFAULT_REVIEWS_UI } from './default-reviews-ui.ts';
 import { DEFAULT_ROUTE_UI } from './default-route-ui.ts';
 import type { Ui } from '../ui-schema.ts';
 
@@ -14,11 +15,7 @@ export const DEFAULT_UI: Ui = {
   mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' },
   landmarks: DEFAULT_LANDMARKS_UI,
   places: DEFAULT_PLACES_UI,
-  reviews: {
-    title: 'Reviews', none: 'No reviews yet — be the first.', rating: 'Your rating',
-    comment: 'Add a comment (optional)', submit: 'Post review',
-    signIn: 'Sign in to leave a review', remove: 'Remove', yours: 'Your review',
-  },
+  reviews: DEFAULT_REVIEWS_UI,
   map: { retry: 'Retry', failed: "The map couldn't load — check your connection.", locate: 'Find my location' },
   auth: DEFAULT_AUTH_UI,
   chips: { free: 'Free only', gems: 'Hidden gems', made: 'Made here', clear: 'Clear' },
@@ -41,6 +38,7 @@ export const DEFAULT_UI: Ui = {
   badges: { free: 'free', gem: 'gem', made: 'made here' },
   subscribe: { note: '', calendar: '', rss: '' },
   share: { label: '', copied: '' },
+  install: { label: '', hint: '' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },
   eventForm: { title: '', description: '', image: '', categories: '', starts: '', addDate: '', removeDate: '', dateLabel: '', timeLabel: '', whatIsOn: '', whatIsOnHint: '', venue: '', address: '', addressHint: '', phone: '', website: '', freeEntry: '', mapLabel: '', mapHint: '', submitCreate: '', submitEdit: '', uploadImage: '', replaceImage: '' },
   contribute: { link: '', venue: '', empty: '', ownEvent: '', ownEventLink: '' },

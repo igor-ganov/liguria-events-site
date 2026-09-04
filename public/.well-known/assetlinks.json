@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "it.dovego.twa",
+      "sha256_cert_fingerprints": [
+        "1F:D1:C0:26:34:4D:21:7C:03:CC:63:9C:39:A9:27:17:E3:5C:B7:1E:AE:AB:94:BA:B2:1C:19:7C:4F:A3:EA:55"
+      ]
+    }
+  }
+]

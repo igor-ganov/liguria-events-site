@@ -16,6 +16,9 @@ const { ui, lang, generatedAt } = Astro.props;
   <p class="foot-contribute">
     <a href={localizedUrl(lang, "submit/")}>{ui.contribute.link}</a>
   </p>
+  <p class="foot-install">
+    <button type="button" data-install-app hidden title={ui.install.hint}>{ui.install.label}</button>
+  </p>
   <p class="foot-legal">
     <a href="/content-policy">Content policy</a> ·
     <a href="/terms">Terms</a> ·
