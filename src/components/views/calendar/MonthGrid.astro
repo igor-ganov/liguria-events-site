@@ -28,10 +28,15 @@ const kindOf = dayKindOf(monthKey, today);
 const heading = dayHeading(ui);
 ---
 
-<div class="cal-grid" role="grid" aria-label={title}>
-  {ui.weekdays.map((name) => <div class="cal-weekday" role="columnheader">{name}</div>)}
+<!-- No ARIA table here, deliberately. Below 44rem this grid becomes a list
+     of days and the columns stop existing, so table semantics would be true
+     half the time. Each cell instead carries its own date, read out at every
+     width — see .cal-day-label, which is hidden to the eye on wide screens
+     and never hidden from a screen reader. -->
+<div class="cal-grid" aria-label={title}>
+  {ui.weekdays.map((name) => <div class="cal-weekday" aria-hidden="true">{name}</div>)}
   {days.map((day) => (
-    <div class={DAY_CLASS[kindOf(day)] ?? 'cal-day'} role="gridcell">
+    <div class={DAY_CLASS[kindOf(day)] ?? 'cal-day'}>
       <span class="cal-num">{Number(day.slice(8, 10))}</span>
       <span class="cal-day-label">{heading(day)}</span>
       <ul class="cal-events">

@@ -1,13 +1,14 @@
 import { test, expect } from '@playwright/test';
 import corpus from './fixtures/corpus.json' with { type: 'json' };
 import { signInAsOwner } from './owner-fixture.ts';
+import type { BrowserContext, Page } from '@playwright/test';
 
 // The timeline edit mode lets the owner remove a stop — via the block's ✕ button
 // (desktop) or a left swipe (mobile) — both behind a confirmation dialog.
-const openTimeline = async (page: import('@playwright/test').Page, context: import('@playwright/test').BrowserContext) => {
+const openTimeline = async (page: Page, context: BrowserContext) => {
   await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const data = JSON.stringify({ mode: 'walking', dayIds: [{ day, ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'Del', data } });
   const id = (await created.json()).id;

@@ -41,7 +41,7 @@ const renderPill =
 export const renderDay =
   (host: CalendarHost) =>
   (day: string): TemplateResult => html`
-    <div class=${DAY_CLASS[dayKindOf(host.monthKey, host.today)(day)]} role="gridcell">
+    <div class=${DAY_CLASS[dayKindOf(host.monthKey, host.today)(day)]}>
       <span class="cal-num">${Number(day.slice(8, 10))}</span>
       <span class="cal-day-label">${dayHeading(host.ui)(day)}</span>
       <ul class="cal-events">

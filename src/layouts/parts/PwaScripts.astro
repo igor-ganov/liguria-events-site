@@ -1,0 +1,13 @@
+<script>
+  // The service worker (offline pages, asset cache), the install offer, and
+  // the bar that says a page came out of storage. Registered once per
+  // document, not per SPA swap: the worker outlives both. The bar is redrawn
+  // after a swap, because the new page may have come from somewhere else.
+  import { initInstallPrompt } from '../../components/pwa/init-install-prompt.ts';
+  import { initOfflineNotice } from '../../components/pwa/init-offline-notice.ts';
+  import { registerServiceWorker } from '../../components/pwa/register-service-worker.ts';
+  registerServiceWorker();
+  initInstallPrompt();
+  initOfflineNotice();
+  document.addEventListener('astro:page-load', initOfflineNotice);
+</script>

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // Measured on production before the gate existed: switching Places on from an
 // overview camera pulled four neighbouring region shards — 15.6 MB — and blocked
@@ -7,7 +8,7 @@ import { test, expect } from '@playwright/test';
 // layer now waits for a close enough camera; this guards that it stays that way.
 
 /** Every place-shard request the page has made so far. */
-const shardRequests = (page: import('@playwright/test').Page): Promise<readonly string[]> =>
+const shardRequests = (page: Page): Promise<readonly string[]> =>
   page.evaluate(() =>
     performance
       .getEntriesByType('resource')

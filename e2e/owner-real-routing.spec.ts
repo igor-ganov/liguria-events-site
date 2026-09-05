@@ -44,7 +44,7 @@ test('the owner editor upgrades a leg to real routing (cached, throttled)', asyn
     await r.fulfill({ contentType: 'application/json', body: JSON.stringify(PLAN) });
   });
 
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const data = JSON.stringify({ mode: 'walking', dayIds: [{ day, ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'Real routing', data } });
   const id = (await created.json()).id;

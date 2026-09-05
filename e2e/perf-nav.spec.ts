@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // Performance of ALL main pages and back-and-forth navigation under a throttled
 // (Fast-3G) connection. The point is twofold: nothing HANGS (each SPA transition
@@ -12,13 +13,13 @@ const FAST_3G = {
 };
 const BUDGET = 30_000; // a hang, not a slow page, fails the test
 
-const throttle = async (page: import('@playwright/test').Page): Promise<void> => {
+const throttle = async (page: Page): Promise<void> => {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Network.enable');
   await cdp.send('Network.emulateNetworkConditions', FAST_3G);
 };
 
-const settled = async (page: import('@playwright/test').Page): Promise<void> => {
+const settled = async (page: Page): Promise<void> => {
   await expect(page.locator('main')).toBeVisible({ timeout: BUDGET });
   await expect(page.locator('#nav-progress')).toHaveCSS('opacity', '0', { timeout: BUDGET }); // page-load fired
 };

@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import corpus from './fixtures/corpus.json' with { type: 'json' };
+import type { Page } from '@playwright/test';
 
 // Routes saved without logging in are anonymous. They are PUBLIC (read-only) for
 // anyone with the link, but editable ONLY by their author's device — which holds
 // the route + its secret edit token in localStorage.
-const DATA = JSON.stringify({ mode: 'walking', dayIds: [{ day: corpus.events[0].s, ids: ['e1', 'e2'] }], durations: {} });
+const DATA = JSON.stringify({ mode: 'walking', dayIds: [{ day: (corpus.events[0]?.s ?? ''), ids: ['e1', 'e2'] }], durations: {} });
 
-const routeCorpus = (page: import('@playwright/test').Page) =>
+const routeCorpus = (page: Page) =>
   page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
 test('anonymous route: a plain visitor gets read-only (no editor)', async ({ page }) => {

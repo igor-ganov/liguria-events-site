@@ -29,6 +29,7 @@ const ui = defineCollection({
     subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string() }),
     share: z.object({ label: z.string(), copied: z.string() }),
     install: z.object({ label: z.string(), hint: z.string() }),
+    offline: z.object({ notice: z.string(), retry: z.string() }),
     submitLead: z.object({ lead: z.string(), pointLink: z.string(), pointFree: z.string(), pointWho: z.string() }),
     eventForm: z.object({ title: z.string(), description: z.string(), image: z.string(), categories: z.string(), starts: z.string(), addDate: z.string(), removeDate: z.string(), dateLabel: z.string(), timeLabel: z.string(), whatIsOn: z.string(), whatIsOnHint: z.string(), venue: z.string(), address: z.string(), addressHint: z.string(), phone: z.string(), website: z.string(), freeEntry: z.string(), mapLabel: z.string(), mapHint: z.string(), submitCreate: z.string(), submitEdit: z.string(), uploadImage: z.string(), replaceImage: z.string() }),
     contribute: z.object({ link: z.string(), venue: z.string(), empty: z.string(), ownEvent: z.string(), ownEventLink: z.string() }),

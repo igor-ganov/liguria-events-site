@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 // Venue pages exist because the search demand we already appear for is
 // venue-shaped: "acquario di genova ferragosto", "acquario eventi genova".
@@ -7,7 +8,7 @@ import { test, expect } from '@playwright/test';
 
 // Venue pages are server-rendered, so they are advertised through the events
 // sitemap rather than the generated one.
-const aVenue = async (request: import('@playwright/test').APIRequestContext): Promise<string> => {
+const aVenue = async (request: APIRequestContext): Promise<string> => {
   const xml = await (await request.get('/sitemap-events.xml')).text();
   const paths = [...xml.matchAll(/<loc>https:\/\/dovego\.it(\/[^<]+)<\/loc>/g)]
     .map((m) => m[1] ?? '')
@@ -75,11 +76,15 @@ test('one event is one event, in every language', async ({ page, request }) => {
   const quanti = Number(/\d+/.exec(conteggio ?? '')?.[0] ?? 0);
   expect(quanti).toBeGreaterThan(0);
   // English says "event" for one and "events" for more; never "1 events".
-  expect(conteggio).toMatch(quanti === 1 ? /\b1 event\b/ : /\bevents\b/);
+  // A lookup on the count rather than a condition, so both forms are written
+  // out where a reader can see the pair.
+  const ENGLISH: Readonly<Record<number, RegExp>> = { 1: /\b1 event\b/ };
+  const ITALIAN: Readonly<Record<number, RegExp>> = { 1: /\b1 evento\b/ };
+  expect(conteggio).toMatch(ENGLISH[quanti] ?? /\bevents\b/);
 
   await page.goto(`/it${path}`);
   const italiano = await page.locator('.venue-sub').textContent();
-  expect(italiano).toMatch(quanti === 1 ? /\b1 evento\b/ : /\beventi\b/);
+  expect(italiano).toMatch(ITALIAN[quanti] ?? /\beventi\b/);
 
   // Russian needs a third form, which the dictionary supplies and pluralForm
   // picks — both covered in test/plural.test.ts. What this can still catch is

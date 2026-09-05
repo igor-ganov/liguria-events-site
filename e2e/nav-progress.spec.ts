@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // On a slow connection a ClientRouter navigation fetches the next page with no
 // feedback — it reads as a frozen tap. A top progress bar must appear the moment
 // navigation starts and complete on load, for forward AND back navigation.
-const slow = async (page: import('@playwright/test').Page, urlGlob: string, ms: number): Promise<void> => {
+const slow = async (page: Page, urlGlob: string, ms: number): Promise<void> => {
   await page.route(urlGlob, async (route) => {
     await new Promise((r) => setTimeout(r, ms));
     await route.continue();

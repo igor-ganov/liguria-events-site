@@ -1,3 +1,7 @@
+---
+import PwaScripts from './PwaScripts.astro';
+---
+
 <script>
   // Three-way theme cycle (light → dark → system) with circular reveal;
   // re-bound after SPA swap. data-theme = resolved scheme, data-theme-pref
@@ -41,14 +45,7 @@
   document.addEventListener('astro:page-load', initCopyLink);
 </script>
 
-<script>
-  // The service worker (offline page, asset cache) and the install offer.
-  // Registered once per document, not per SPA swap: the worker outlives both.
-  import { initInstallPrompt } from '../../components/pwa/init-install-prompt.ts';
-  import { registerServiceWorker } from '../../components/pwa/register-service-worker.ts';
-  registerServiceWorker();
-  initInstallPrompt();
-</script>
+<PwaScripts />
 
 <script>
   // pro-motion custom events: SPA pageviews, event views, favourites, outbound.

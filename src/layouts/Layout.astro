@@ -1,6 +1,7 @@
 ---
 import MobileMenu from '../components/MobileMenu.astro';
 import NavProgress from './parts/NavProgress.astro';
+import OfflineNotice from './parts/OfflineNotice.astro';
 import ShellScripts from './parts/ShellScripts.astro';
 import SigninDialog from './parts/SigninDialog.astro';
 import SiteFooter from './parts/SiteFooter.astro';
@@ -46,6 +47,7 @@ const uiData = JSON.stringify({ lang, ui });
   </head>
   <body>
     <NavProgress />
+    <OfflineNotice />
     <SiteHeader lang={lang} region={region} path={path} city={city} ui={ui} />
     {payload && <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />}
     <script is:inline type="application/json" id="ui-data" set:html={uiData} />

@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { isPainted } from './is-painted.ts';
+import type { Page } from '@playwright/test';
 
 // The create page on a phone. Both of these shipped: the page scrolled sideways
 // because two form fields would not shrink, and the map's zoom controls were
 // painted solid accent with no + or - visible.
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
-const ready = async (page: import('@playwright/test').Page): Promise<void> => {
+const ready = async (page: Page): Promise<void> => {
   await page.goto('/submit');
   await expect(page.locator('#event-form')).toHaveAttribute('data-ready', 'true');
 };
@@ -47,7 +48,9 @@ test('the map keeps its own zoom controls', async ({ page }) => {
     const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
     const probe = document.createElement('span');
     probe.style.color = accent;
-    document.body.append(probe);
+    // appendChild, not append: with node types in scope the union on `append`
+    // resolves to a fetch body and the call stops type-checking.
+    document.body.appendChild(probe);
     const asRgb = getComputedStyle(probe).color;
     probe.remove();
     return { bg: getComputedStyle(el).backgroundColor, accent: asRgb };

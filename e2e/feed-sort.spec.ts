@@ -18,9 +18,12 @@ test('feed defaults to By date (unique-first, no reflow) and Newest first orders
   // data-ord is ascending in the DOM AND the spans never decrease down the day
   // (a short one-night event never sits below a month-long run).
   const check = await page.evaluate(() => {
-    const ul = document.querySelector('.feed-list');
-    if (!ul) return { ordsAsc: true, spansAsc: true };
-    const lis = [...ul.querySelectorAll(':scope > li')].filter((li): li is HTMLElement => li instanceof HTMLElement);
+    // An absent list yields no rows, and the assertions below then say what is
+    // missing — which reads better than an early return that quietly passes.
+    const lis = [document.querySelector('.feed-list')]
+      .filter((list): list is Element => list !== undefined && list !== null)
+      .flatMap((list) => [...list.querySelectorAll(':scope > li')])
+      .filter((li): li is HTMLElement => li instanceof HTMLElement);
     const span = (li: HTMLElement) => Date.parse(li.dataset['end'] || li.dataset['start'] || '') - Date.parse(li.dataset['start'] || '') || 0;
     const asc = (xs: number[]) => xs.every((x, i) => i === 0 || x >= (xs[i - 1] ?? 0));
     return { ordsAsc: asc(lis.map((li) => Number(li.dataset['ord']))), spansAsc: asc(lis.map(span)) };
@@ -31,12 +34,15 @@ test('feed defaults to By date (unique-first, no reflow) and Newest first orders
   // Stamp creation times on the first three cards, far larger than any real
   // epoch-seconds `cr` in the corpus, so they deterministically float to the top.
   await page.evaluate(() => {
-    const ul = document.querySelector('.feed-list');
-    if (!ul) return;
     const stamps = ['1000000000000000', '3000000000000000', '2000000000000000'];
-    [...ul.querySelectorAll(':scope > li')].slice(0, 3).forEach((li, i) => {
-      if (li instanceof HTMLElement) li.dataset['created'] = stamps[i] ?? '';
-    });
+    [document.querySelector('.feed-list')]
+      .filter((list): list is Element => list !== undefined && list !== null)
+      .flatMap((list) => [...list.querySelectorAll(':scope > li')])
+      .filter((li): li is HTMLElement => li instanceof HTMLElement)
+      .slice(0, 3)
+      .forEach((li, index) => {
+        li.dataset['created'] = stamps[index] ?? '';
+      });
   });
 
   await page.locator('[data-feed-sort="created"]').click();
@@ -44,11 +50,12 @@ test('feed defaults to By date (unique-first, no reflow) and Newest first orders
 
   // Newest first: the three float to the top of the day group in descending order.
   const order = await page.evaluate(() => {
-    const ul = document.querySelector('.feed-list');
-    if (!ul) return [];
-    return [...ul.querySelectorAll(':scope > li')]
+    return [document.querySelector('.feed-list')]
+      .filter((list): list is Element => list !== undefined && list !== null)
+      .flatMap((list) => [...list.querySelectorAll(':scope > li')])
+      .filter((li): li is HTMLElement => li instanceof HTMLElement)
       .slice(0, 3)
-      .map((li) => (li instanceof HTMLElement ? li.dataset['created'] : ''));
+      .map((li) => li.dataset['created'] ?? '');
   });
   expect(order).toEqual(['3000000000000000', '2000000000000000', '1000000000000000']);
 });

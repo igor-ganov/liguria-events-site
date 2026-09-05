@@ -58,7 +58,12 @@ test('generator timeline: dragging a block body pins its start time and persists
 
   await page.locator('[data-route-view="timeline"]').click();
   await expect(page.locator('.tl-block')).toHaveCount(2);
-  const ids = () => page.evaluate(() => [...document.querySelectorAll('.tl-block')].map((b) => (b instanceof HTMLElement ? b.dataset['tlId'] : '')));
+  const ids = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.tl-block')]
+        .filter((block): block is HTMLElement => block instanceof HTMLElement)
+        .map((block) => block.dataset['tlId'] ?? ''),
+    );
   const before = await ids();
 
   // Grab the first block's BODY (its centre, clear of the top/bottom resize

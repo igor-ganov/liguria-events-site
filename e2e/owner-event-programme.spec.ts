@@ -1,12 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { signInAsOwner } from './owner-fixture.ts';
+import type { Page } from '@playwright/test';
 
 // A container event — a festival playing three evenings inside one month —
 // created through the real form, stored by the real worker in the real (local)
 // D1, and read back. What it must NOT do is claim the days in between.
 const PROGRAMME = ['2099-08-05', '2099-08-12', '2099-08-20'];
 
-const fillRow = async (page: import('@playwright/test').Page, index: number, date: string): Promise<void> => {
+const fillRow = async (page: Page, index: number, date: string): Promise<void> => {
   const row = page.locator('[data-programme-row]').nth(index);
   await row.locator('[data-session-date]').fill(date);
   await row.locator('[data-session-time]').fill('21:00');

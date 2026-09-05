@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // The map page was decomposed from one 800-line script into ~40 modules, and its
 // only prior coverage was "renders under Fast-3G without layout shift". These
@@ -10,12 +11,12 @@ const MAP = '/liguria/map/';
 
 /** The map is ready once its own markers are mounted — maplibre adds them to the
  *  canvas container, so their presence proves style load + clustering ran. */
-const markers = (page: import('@playwright/test').Page) => page.locator('.ev-marker');
+const markers = (page: Page) => page.locator('.ev-marker');
 
 /** The toolbar is wired to the (dynamically imported) map engine — until then its
  *  controls ship disabled, so a click would be swallowed. Waiting on the armed
  *  state is waiting on the app's own readiness, not on a duration. */
-const armed = (page: import('@playwright/test').Page) =>
+const armed = (page: Page) =>
   expect(page.locator('[data-map-filters]')).toHaveAttribute('data-armed', 'true', { timeout: 30_000 });
 
 test('event markers render and one opens a popup', async ({ page }) => {
@@ -63,10 +64,15 @@ test('the camera is written to the query so a shared link reopens the same view'
   await page.goto(MAP);
   await expect(markers(page).first()).toBeVisible({ timeout: 30_000 });
 
-  // Any interaction that settles the camera writes z + c.
-  await page.mouse.move(400, 300);
-  await page.mouse.wheel(0, -240);
-  await expect(page).toHaveURL(/[?&]z=\d+(\.\d+)?/, { timeout: 15_000 });
+  // A keypress rather than a wheel. A wheel is a stream of deltas the map
+  // may still be swallowing while it finishes its opening animation, and on a
+  // loaded machine it sometimes moved nothing at all — the URL then never
+  // gained a camera and the spec failed for a reason that was not the product.
+  // Zooming from the keyboard is one discrete event on a focused canvas.
+  const canvas = page.locator('canvas.maplibregl-canvas');
+  await canvas.focus();
+  await page.keyboard.press('Equal');
+  await expect(page).toHaveURL(/[?&]z=\d+(\.\d+)?/);
   // URLSearchParams percent-encodes the separator, so `c=44.4532%2C9.2302`.
   await expect(page).toHaveURL(/[?&]c=-?\d+\.\d+(%2C|,)-?\d+\.\d+/);
 });

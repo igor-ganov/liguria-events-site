@@ -10,7 +10,7 @@ test('clicking the map sets the base and the from/back legs appear', async ({ pa
   await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const data = JSON.stringify({ mode: 'walking', dayIds: [{ day, ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'Base map', data } });
   const id = (await created.json()).id;
@@ -32,7 +32,9 @@ test('clicking the map sets the base and the from/back legs appear', async ({ pa
   // fold and the click landed nowhere.
   await canvas.scrollIntoViewIfNeeded();
   const box = await canvas.boundingBox();
-  if (box) await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await Promise.all(
+    [box].filter((found) => found !== null).map((found) => page.mouse.click(found.x + found.width / 2, found.y + found.height / 2)),
+  );
 
   // The click set the base → departure + return legs render.
   await expect(page.locator('.route-leg--base')).toHaveCount(2, { timeout: 10_000 });

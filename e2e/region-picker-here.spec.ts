@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // The picker's phone sheet is anchored to the bottom of the screen, and the two
 // "here" shortcuts resolve a position to a row of that same list.
@@ -8,7 +9,7 @@ const PHONE = { width: 412, height: 915 };
 const GENOA = { latitude: 44.4074, longitude: 8.934 };
 const PALERMO = { latitude: 38.1157, longitude: 13.3615 };
 
-const openPicker = async (page: import('@playwright/test').Page): Promise<void> => {
+const openPicker = async (page: Page): Promise<void> => {
   await page.goto('/liguria/');
   // The picker marks itself bound once its script has wired the button. Clicking
   // before that lands on a control with no listener yet: the dialog stays shut

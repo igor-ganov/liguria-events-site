@@ -8,7 +8,7 @@ test('Download PDF saves a real .pdf file (not a print dialog)', async ({ page, 
   await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
 
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const data = JSON.stringify({ mode: 'walking', dayIds: [{ day, ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'PDF trip', data } });
   const id = (await created.json()).id;

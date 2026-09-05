@@ -75,7 +75,7 @@ const oneValueExport = {
 export default tseslint.config(
   { ignores: ['dist/**', '.astro/**', 'node_modules/**'] },
   {
-    files: ['src/**/*.ts', 'test/**/*.ts'],
+    files: ['src/**/*.ts', 'test/**/*.ts', 'e2e/**/*.ts'],
     extends: [tseslint.configs.recommended],
     plugins: { functional: { rules: { 'max-lines-no-imports': maxLinesNoImports, 'one-value-export': oneValueExport } } },
     rules: {
@@ -114,7 +114,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['test/**/*.ts'],
+    // A spec is a list of scenarios, not a module with an API: the size and
+    // one-export rules buy nothing there. The branching rules still apply —
+    // a condition in a test is a test that sometimes tests nothing.
+    files: ['test/**/*.ts', 'e2e/**/*.spec.ts'],
     rules: { 'functional/one-value-export': 'off', 'functional/max-lines-no-imports': 'off' },
   },
   {

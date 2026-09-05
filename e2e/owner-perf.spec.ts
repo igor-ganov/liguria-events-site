@@ -17,7 +17,7 @@ const log = (msg: string): void => void process.stdout.write(`${msg}\n`);
 test('authenticated route editor loads and navigates back and forth under Fast-3G', async ({ page, context }) => {
   await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
-  const data = JSON.stringify({ mode: 'walking', dayIds: [{ day: corpus.events[0].s, ids: ['e1', 'e2'] }], durations: {} });
+  const data = JSON.stringify({ mode: 'walking', dayIds: [{ day: (corpus.events[0]?.s ?? ''), ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'Perf', data } });
   const id = (await created.json()).id;
 

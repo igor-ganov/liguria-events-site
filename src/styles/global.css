@@ -389,6 +389,12 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .badge-pending { background: hsl(220 40% 92%); color: hsl(220 40% 40%); }
 .badge-rejected { background: hsl(2 80% 92%); color: hsl(2 65% 38%); }
 .site-head nav { display: flex; gap: 0.9rem; flex-wrap: wrap; align-items: center; font-size: 0.92rem; }
+/* Every navigation link is a target somebody has to hit, and a target's
+   size must not depend on how wide its word happens to render. "iCal"
+   measured 24px with Rubik and 22px in the fallback — under the WCAG 2.2
+   minimum whenever the face had not arrived yet, and a different answer
+   on a loaded machine than on an idle one. The floor removes both. */
+.site-head nav a { display: inline-flex; align-items: center; min-inline-size: 24px; min-block-size: 24px; }
 .theme-btn {
   width: 38px; height: 38px; display: grid; place-items: center;
   border: 1px solid var(--line); border-radius: 999px;
@@ -1063,13 +1069,23 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .cal-day { background: var(--surface); min-height: 7rem; padding: 0.4rem 0.45rem; }
 .cal-day--out { background: var(--surface-2); }
-.cal-day--out .cal-num { opacity: 0.45; }
+/* Not dimmed: at 0.45 the date drops to about 2:1 and stops being readable.
+   The cell's own background is what says the day belongs to the month next
+   door, and it says it without taking anything away from the text. */
+.cal-day--out .cal-num { color: var(--ink-2); }
 .cal-day--today .cal-num {
   background: var(--today-ring); color: var(--on-accent);
   border-radius: 999px; padding: 0.05rem 0.5rem;
 }
 .cal-num { display: inline-block; font-size: 0.8rem; font-weight: 700; color: var(--ink-2); }
-.cal-day-label { display: none; }
+/* Hidden from the eye on a wide screen, never from a screen reader: the
+   number alone ("3") says nothing without the day and the month, and the
+   grid's column headers are decorative. On the narrow layout below it
+   becomes visible text. */
+.cal-day-label {
+  position: absolute; width: 1px; height: 1px;
+  clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+}
 .cal-events { list-style: none; margin: 0.3rem 0 0; padding: 0; font-size: 0.78rem; }
 .cal-events li { margin: 0 0 0.25rem; }
 .cal-pill {
@@ -1094,7 +1110,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   .cal-day:not(:has(.cal-events li)) { display: none; }
   .cal-day--out:has(.cal-events li) { display: block; }
   .cal-num { display: none; }
-  .cal-day-label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink-2); margin-bottom: 0.2rem; }
+  .cal-day-label {
+    position: static; width: auto; height: auto; clip-path: none; overflow: visible;
+    display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink-2); margin-bottom: 0.2rem;
+  }
   .cal-day--today .cal-day-label { color: var(--accent-2); }
   .cal-events { font-size: 0.85rem; }
   .cal-pill { white-space: normal; }
@@ -1413,6 +1432,17 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 /* The install offer. It exists in the markup on every page but stays hidden
    until the browser fires beforeinstallprompt, so it is never a dead control
    on a platform that cannot install, or inside the installed app itself. */
+/* The offline bar. Full width at the very top, above the header, because it
+   is about the whole page and not about anything in it. */
+.offline-bar {
+  margin: 0;
+  padding: 0.55rem 1rem;
+  background: var(--accent-2);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
 .foot-install { margin: 0.6rem 0 0; }
 .foot-install button {
   font: inherit; font-weight: 600; color: var(--accent);

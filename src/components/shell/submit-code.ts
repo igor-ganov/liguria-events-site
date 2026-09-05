@@ -1,5 +1,6 @@
 import { AUTH_UI } from './auth-ui.ts';
 import { branch } from '../../lib/branch.ts';
+import { forgetCachedPages } from '../pwa/forget-cached-pages.ts';
 import { pendingEmail } from './pending-email.ts';
 import { setSigninStatus } from './set-signin-status.ts';
 import { verifyLanding } from './verify-landing.ts';
@@ -15,6 +16,9 @@ export const submitCode = async (form: HTMLFormElement): Promise<void> => {
   });
   const body: unknown = await res.json().catch(() => ({}));
   const landings = verifyLanding(res.ok, body);
+  // Somebody new is using this device: the pages kept for offline reading were
+  // stored for whoever was here before.
+  await Promise.all(landings.map(() => forgetCachedPages()));
   branch(landings.length > 0)(
     () =>
       landings.forEach((href) => {

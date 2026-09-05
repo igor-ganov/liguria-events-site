@@ -18,7 +18,8 @@ const transitionActive = (page: Page) =>
     document
       .getAnimations()
       .some((a) => {
-        const pe = a.effect instanceof KeyframeEffect ? a.effect.pseudoElement ?? '' : '';
+        const pe = [a.effect].filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
+          .map((effect) => effect.pseudoElement ?? '').at(0) ?? '';
         return pe.includes('view-transition');
       }),
   );
@@ -43,7 +44,8 @@ test('header stays out of the root snapshot during a ClientRouter transition', a
     const headerAnims = document
       .getAnimations()
       .filter((a) => {
-        const pe = a.effect instanceof KeyframeEffect ? a.effect.pseudoElement ?? '' : '';
+        const pe = [a.effect].filter((effect): effect is KeyframeEffect => effect instanceof KeyframeEffect)
+          .map((effect) => effect.pseudoElement ?? '').at(0) ?? '';
         return pe.includes(name);
       }).length;
     return { name, headerAnims };

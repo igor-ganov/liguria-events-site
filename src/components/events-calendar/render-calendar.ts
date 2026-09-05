@@ -14,10 +14,10 @@ export const renderCalendar = (host: CalendarHost): TemplateResult => {
       <h2>${title}</h2>
       <button class="nav-btn" @click=${host.ctl.next} aria-label=${host.ui.calNav.next}>›</button>
     </header>
-    <div class="cal-grid" role="grid" aria-label=${title}>
-      ${host.ui.weekdays.map(
-        (name) => html`<div class="cal-weekday" role="columnheader">${name}</div>`,
-      )}
+    <!-- No ARIA table: below 44rem this becomes a list of days and the
+         columns stop existing. Every cell carries its own date instead. -->
+    <div class="cal-grid" aria-label=${title}>
+      ${host.ui.weekdays.map((name) => html`<div class="cal-weekday" aria-hidden="true">${name}</div>`)}
       ${monthGrid(host.monthKey).flat().map(renderDay(host))}
     </div>
     ${renderOngoing(host)}

@@ -14,13 +14,19 @@
   --riga: #e9e6dd;
   --riga-forte: #d6d2c6;
   --testo: #20232a;
-  --tenue: #767b84;
+  /* 4.58:1 on the palest surface — secondary text carries dates, venues
+     and distances, so it has to clear AA for body text, not for decoration.
+     test/palette-contrast.test.ts fails the build if it stops clearing it. */
+  --tenue: #696e77;
   --filo: #33697a;
   --filo-scuro: #255465;
   --filo-velo: #e8f0f2;
-  --sosta: #c2703f;
+  /* 4.62:1 at worst across the surfaces and its own veil, and 5.35:1 under
+     white — so the one value works both as small text and as a fill with a
+     white caption. The earlier terracotta managed 3.19 as text. */
+  --sosta: #9c5a32;
   --sosta-velo: #f8ece4;
-  --gratis: #4a7b5c;
+  --gratis: #467557;
   --gratis-velo: #e9f2eb;
   --allarme: #a8452f;
   --su-filo: #ffffff;

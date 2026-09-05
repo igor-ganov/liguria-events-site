@@ -9,12 +9,19 @@ test('saving a route shows a shareable link and remembers it', async ({ page }) 
   await page.route('**/events.json*', (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }),
   );
-  await page.route('**/api/routes', (route) => {
-    if (route.request().method() === 'POST') {
-      return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: 'rt3st', url: '/route/rt3st', public: true }) });
-    }
-    return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ routes: [] }) });
-  });
+  // Saving answers with the new route, listing answers with an empty list.
+  // A lookup rather than a condition: the two answers are data, and reading
+  // them side by side is how you see that the shapes differ.
+  const ANSWER: Readonly<Record<string, unknown>> = {
+    POST: { id: 'rt3st', url: '/route/rt3st', public: true },
+    GET: { routes: [] },
+  };
+  await page.route('**/api/routes', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(ANSWER[route.request().method()] ?? ANSWER['GET']),
+    }),
+  );
 
   await page.goto('/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2'])));

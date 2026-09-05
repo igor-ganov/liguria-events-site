@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
+import { paletteOf } from '../src/lib/a11y/palette-of.ts';
+import { readFileSync } from 'node:fs';
 
 // The Filo design system, checked on the real pages rather than on the mockups.
 // Every assertion here is one that a silent regression would otherwise hide:
@@ -10,9 +12,13 @@ const token = (page: Page, name: string) =>
 
 test('the palette reaches the page', async ({ page }) => {
   await page.goto('/liguria/');
-  // Naming the token is not enough: it has to resolve and it has to be painted.
-  expect(await token(page, '--filo')).toBe('#33697a');
-  expect(await token(page, '--sosta')).toBe('#c2703f');
+  // Read from the stylesheet rather than written out here: a literal in a spec
+  // is a second source of truth, and it goes stale the first time a colour is
+  // corrected — which is exactly what happened when --sosta was darkened to
+  // clear contrast. What this proves is that the token resolves in the page.
+  const declared = paletteOf(readFileSync('src/styles/filo-tokens.css', 'utf8'), ':root');
+  expect(await token(page, '--filo')).toBe(declared['filo']);
+  expect(await token(page, '--sosta')).toBe(declared['sosta']);
   await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(251, 250, 247)');
 });
 
@@ -57,10 +63,13 @@ test('the thread runs down the feed and ends frayed', async ({ page }) => {
   await expect(page.locator('.capo')).toHaveCount(1);
   // The rope and the stops are drawn, not bordered.
   const disegni = await page.evaluate(() => {
-    const riga = document.querySelector('.fermata');
+    // querySelector answers with the platform's empty value; an absent element
+    // means an absent drawing, and the assertions below say so by name.
+    const riga = document.querySelector('.fermata') ?? document.createElement('div');
     const nodo = getComputedStyle(riga, '::before');
     return {
-      corda: getComputedStyle(document.querySelector('.percorso'), '::before').backgroundImage,
+      corda: getComputedStyle(document.querySelector('.percorso') ?? document.createElement('div'), '::before')
+        .backgroundImage,
       nodo: nodo.backgroundImage,
       // `top: 50%` resolves to half the row's height: the stop is placed by
       // the layout at the middle of its own card, so it cannot drift off it.

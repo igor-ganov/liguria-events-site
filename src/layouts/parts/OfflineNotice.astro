@@ -1,0 +1,13 @@
+---
+// The bar that appears when the device loses its signal, saying that what is
+// on screen came from storage and when it was stored.
+//
+// It is in the markup on every page and hidden until it is true: a bar that
+// has to be created before it can be shown is a bar that arrives after the
+// reader has already drawn their own conclusion about the empty page.
+//
+// role="status" rather than "alert": losing signal is worth announcing, not
+// worth interrupting whatever the reader was in the middle of hearing.
+---
+
+<p class="offline-bar" data-offline-notice role="status" aria-live="polite" hidden></p>

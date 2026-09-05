@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { signInAsOwner } from './owner-fixture.ts';
+import type { APIRequestContext } from '@playwright/test';
 
 // An event's address. `/event/154d29e7bff5/` told a reader nothing and told a
 // search engine nothing: the words people actually type — the name of the
@@ -7,7 +8,7 @@ import { signInAsOwner } from './owner-fixture.ts';
 // out. Every address minted before this is a bare id, so they all have to keep
 // working and say where they went.
 
-const anEventId = async (request: import('@playwright/test').APIRequestContext): Promise<string> => {
+const anEventId = async (request: APIRequestContext): Promise<string> => {
   const xml = await (await request.get('/sitemap-events.xml')).text();
   const id = /<loc>https:\/\/dovego\.it\/event\/[^<]*?([0-9a-f]{12})\/<\/loc>/.exec(xml)?.[1];
   expect(id, 'the sitemap carries no event').toBeDefined();

@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
 import corpus from './fixtures/corpus.json' with { type: 'json' };
 import { signInAsOwner } from './owner-fixture.ts';
+import type { BrowserContext, Page } from '@playwright/test';
 
 // Owner-editor day tools (#6 day window, #7 base) against the real worker.
-const ownerRoute = async (page: import('@playwright/test').Page, context: import('@playwright/test').BrowserContext, data: string) => {
+const ownerRoute = async (page: Page, context: BrowserContext, data: string) => {
   await signInAsOwner(page, context);
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }));
   const created = await page.request.post('/api/routes', { data: { name: 'Day tools', data } });
@@ -26,7 +27,7 @@ test('timeline day start recomputes an untimed stop', async ({ page, context }) 
 });
 
 test('a base in the payload renders the from/back legs', async ({ page, context }) => {
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const id = await ownerRoute(
     page,
     context,

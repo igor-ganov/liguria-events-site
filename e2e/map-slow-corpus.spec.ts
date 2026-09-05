@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // Regression guard. The event corpus is fetched as an asset, so on a real
 // connection the map's own `load` can fire BEFORE it arrives. Everything wired
@@ -6,7 +7,7 @@ import { test, expect } from '@playwright/test';
 // used to hang off `map.on('load')`, which by then had already fired: the map
 // came up, then froze behind a re-shown skeleton until the 9 s soft reveal, with
 // no markers. Delaying the corpus reproduces that ordering deterministically.
-const slowCorpus = (page: import('@playwright/test').Page, ms: number): Promise<void> =>
+const slowCorpus = (page: Page, ms: number): Promise<unknown> =>
   page.route('**/data/map-events.json', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, ms));
     await route.continue();

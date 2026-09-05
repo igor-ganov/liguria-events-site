@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // A filtered feed URL (a chosen day, category, free toggle, search) is served as
 // the FULL static list; the filter is a client pass. Without care the unfiltered
@@ -7,34 +8,36 @@ import { test, expect } from '@playwright/test';
 // list up front whenever the URL carries a filter, and reveals it the instant
 // init-feed has applied the filter. These tests lock that in.
 
-// Delay the JS chunks so init-feed runs late enough to OBSERVE the pre-paint
-// hidden window. A page's deferred module blocks page-load until it has been
-// fetched, so init-feed still runs — just later; nothing is skipped. Same
-// slow-network technique as nav-progress.spec.ts (a route delay, not a wait).
-const slowScripts = async (page: import('@playwright/test').Page): Promise<void> => {
-  await page.route('**/_astro/*.js', async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    await route.continue();
-  });
-};
+// Two facts, tested separately, so that neither has to be caught in a window.
+//
+// The earlier version delayed the feed script and then asserted the hidden
+// state and the revealed state in one run. That is a race by construction: on
+// a loaded machine the delayed chunks pushed the reveal past the wait ceiling
+// and the spec failed for being slow, while reading as a product that never
+// showed the list. Blocking the script entirely makes the first state
+// permanent; letting it run at full speed makes the second one immediate.
+const withoutScripts = (page: Page): Promise<unknown> =>
+  page.route('**/_astro/*.js', (route) => route.abort());
 
-test('a filtered feed URL hides the list until filtered — no unfiltered flash', async ({ page }) => {
-  await slowScripts(page);
+test('a filtered feed URL hides the list before any script runs', async ({ page }) => {
+  // The mark and the hiding come from an inline script in the head and from
+  // CSS, so they hold with the module chunks never arriving at all — which is
+  // exactly the window a reader on a slow connection sees.
+  await withoutScripts(page);
   await page.goto('/liguria/?cats=music', { waitUntil: 'commit' });
 
-  const html = page.locator('html');
-  const list = page.locator('[data-feed-list]');
+  await expect(page.locator('html')).toHaveClass(/feed-filtering/);
+  await expect(page.locator('[data-feed-list]')).toHaveCSS('visibility', 'hidden');
+});
 
-  // Before init-feed runs: the html is marked and the list is hidden, so the
-  // unfiltered static list is never painted.
-  await expect(html).toHaveClass(/feed-filtering/);
-  await expect(list).toHaveCSS('visibility', 'hidden');
+test('and shows it, filtered, once the feed script has run', async ({ page }) => {
+  // No artificial delay: the reveal is asserted at the speed the product runs,
+  // so this cannot fail for being slow.
+  await page.goto('/liguria/?cats=music');
 
-  // Once init-feed applies the filter, the mark is dropped and the list shown…
-  await expect(html).not.toHaveClass(/feed-filtering/);
-  await expect(list).toHaveCSS('visibility', 'visible');
+  await expect(page.locator('html')).not.toHaveClass(/feed-filtering/);
+  await expect(page.locator('[data-feed-list]')).toHaveCSS('visibility', 'visible');
 
-  // …with only matching cards visible — the unfiltered set is never shown.
   const cats = await page
     .locator('.feed-list > li:not([hidden])')
     .evaluateAll((els) => els.map((el) => el.getAttribute('data-cats') ?? ''));
@@ -43,11 +46,11 @@ test('a filtered feed URL hides the list until filtered — no unfiltered flash'
 });
 
 test('the default (unfiltered) feed is never hidden — it stays instant', async ({ page }) => {
-  await slowScripts(page);
+  // Again with no script at all: the point is that an unfiltered feed is
+  // readable before anything runs, not that it becomes readable afterwards.
+  await withoutScripts(page);
   await page.goto('/liguria/', { waitUntil: 'commit' });
 
-  // No filter params → not marked, and the list is visible from first paint,
-  // even while the (delayed) feed script has not yet run.
   await expect(page.locator('html')).not.toHaveClass(/feed-filtering/);
   await expect(page.locator('[data-feed-list]')).toBeVisible();
 });

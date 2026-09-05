@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // A container event happens ONLY on its programmed dates. The map's date filter
 // must honour that: a festival with evenings on the 5th, the 12th and the 20th
@@ -23,12 +24,12 @@ const base = {
 const container = { ...base, k: true, p: [{ date: '2099-08-05' }, { date: SESSION_DAY }, { date: '2099-08-20' }] };
 const standalone = base;
 
-const corpusOf = (event: unknown) => (page: import('@playwright/test').Page): Promise<void> =>
+const corpusOf = (event: unknown) => (page: Page): Promise<unknown> =>
   page.route('**/data/map-events.json', (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify([event]) }),
   );
 
-const openMap = async (page: import('@playwright/test').Page, day: string): Promise<void> => {
+const openMap = async (page: Page, day: string): Promise<void> => {
   await page.goto(`/liguria/map/?from=${day}&to=${day}`);
   // The map has finished its first draw — markers, if any, are on the canvas.
   await expect(page.locator('[data-map-canvas]')).toHaveAttribute('data-loading', 'false', {

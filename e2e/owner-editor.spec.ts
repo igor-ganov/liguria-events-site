@@ -12,7 +12,7 @@ test('owner adds a favourite POI, reorders, and the save persists to D1', async 
 
   // Create a route OWNED by the test user (e1 + e2 on their shared day). page.request
   // shares the context cookie and baseURL (so it authenticates as the owner).
-  const day = corpus.events[0].s;
+  const day = (corpus.events[0]?.s ?? '');
   const data = JSON.stringify({ mode: 'walking', dayIds: [{ day, ids: ['e1', 'e2'] }], durations: {} });
   const created = await page.request.post('/api/routes', { data: { name: 'Owner E2E', data } });
   const body = await created.json();
