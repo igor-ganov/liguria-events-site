@@ -81,7 +81,12 @@ badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }
 share: { label: "Condividi", copied: "Link copiato" }
 install: { label: "Installa l’app", hint: "Aggiungi Dove Go alla schermata Home" }
-offline: { notice: "Sei offline. Mostriamo quanto salvato {when}.", retry: "Riprova" }
+offline:
+  notice: "Nessuna connessione. Mostriamo quanto salvato {when}."
+  saved: "Mostriamo quanto salvato {when}."
+  updated: "È pronta una versione più recente."
+  reload: "Mostrala"
+  retry: "Riprova"
 outbox:
   queued: "Salvato su questo dispositivo. Sarà pubblicato appena torni online."
   waiting: "{count} in attesa di pubblicazione"

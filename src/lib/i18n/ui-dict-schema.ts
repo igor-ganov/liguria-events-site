@@ -44,7 +44,7 @@ export const UiDictSchema = Schema.Struct({
   subscribe: Schema.Struct({ note: Schema.String, calendar: Schema.String, rss: Schema.String }),
   share: Schema.Struct({ label: Schema.String, copied: Schema.String }),
   install: Schema.Struct({ label: Schema.String, hint: Schema.String }),
-  offline: Schema.Struct({ notice: Schema.String, retry: Schema.String }),
+  offline: Schema.Struct({ notice: Schema.String, saved: Schema.String, updated: Schema.String, reload: Schema.String, retry: Schema.String }),
   outbox: Schema.Struct({ queued: Schema.String, waiting: Schema.String, conflict: Schema.String, sent: Schema.String }),
   ...SubmitUiSchema,
   facets: Schema.Struct({ category: Schema.Struct({ title: Schema.String, description: Schema.String }), today: Schema.Struct({ title: Schema.String, description: Schema.String }), tomorrow: Schema.Struct({ title: Schema.String, description: Schema.String }), weekend: Schema.Struct({ title: Schema.String, description: Schema.String }), free: Schema.Struct({ title: Schema.String, description: Schema.String }) }),

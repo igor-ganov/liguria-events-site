@@ -1,3 +1,4 @@
+import { isCacheablePage } from './is-cacheable-page.ts';
 import { isDefined } from '../lib/is-defined.ts';
 import type { Strategy } from './strategy.ts';
 
@@ -36,9 +37,12 @@ const byPrefix = (path: string): Strategy | undefined =>
 /**
  * Which strategy answers this request.
  *
- * Pages are network-first because this site is server-rendered: a cached page
- * is an event whose time, place or existence may have changed since. The cache
- * is a fallback for when there is no network at all, never a first answer.
+ * Pages come from the device first. A navigation that waits for a server is a
+ * navigation that waits for the worst connection its reader has ever had, and
+ * on this site it waits for a page of a megabyte. The copy is shown at once,
+ * the network is asked behind it, and the reader is told how old what they are
+ * looking at is — which is what makes serving a stored page acceptable rather
+ * than a quiet lie.
  *
  * Anything unrecognised is left to the network. A service worker guessing at a
  * request it was not designed for is how a site starts serving yesterday.
@@ -48,5 +52,12 @@ export const strategyOf = (request: SwRequest, origin: string): Strategy =>
     ...[request].filter(({ method }) => method !== 'GET').map(() => NEVER),
     ...[new URL(request.url)].filter((url) => url.origin !== origin).map(() => NEVER),
     ...[byPrefix(new URL(request.url).pathname)].filter(isDefined),
-    ...[request].filter(({ mode }) => mode === 'navigate').map((): Strategy => 'network-first'),
+    // A navigation to a page that belongs to everybody. The two rules are the
+    // same rule: what may be SERVED from the device is what may be KEPT on it,
+    // and asking isCacheablePage here rather than repeating its list is what
+    // stops them drifting into disagreeing about /submit/.
+    ...[request]
+      .filter(({ mode }) => mode === 'navigate')
+      .filter(({ url }) => isCacheablePage(new URL(url).pathname))
+      .map((): Strategy => 'page-first'),
   ].at(0) ?? NEVER;

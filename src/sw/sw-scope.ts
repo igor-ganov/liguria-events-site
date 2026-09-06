@@ -16,9 +16,22 @@ export type SwFetchEvent = Readonly<{
 
 export type SwLifecycleEvent = Readonly<{ waitUntil: (work: Promise<unknown>) => void }>;
 
+/** A page talking to the worker. `source` is the page that spoke, and the only
+ *  one the answer belongs to. */
+export type SwMessageEvent = Readonly<{
+  data: unknown;
+  source: SwClient | undefined;
+  waitUntil: (work: Promise<unknown>) => void;
+}>;
+
+/** One open page. The worker answers through this — something newer behind
+ *  what is on screen, a copy confirmed current, or no connection at all. */
+export type SwClient = Readonly<{ postMessage: (message: unknown) => void }>;
+
 export type SwScope = Readonly<{
   addEventListener: {
     (type: 'fetch', listener: (event: SwFetchEvent) => void): void;
+    (type: 'message', listener: (event: SwMessageEvent) => void): void;
     (type: 'install' | 'activate', listener: (event: SwLifecycleEvent) => void): void;
   };
   skipWaiting: () => Promise<void>;

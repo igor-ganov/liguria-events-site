@@ -1,5 +1,6 @@
 import { cacheFirst } from './cache-first.ts';
 import { networkFirst } from './network-first.ts';
+import { pageFirst } from './page-first.ts';
 import { staleWhileRevalidate } from './stale-while-revalidate.ts';
 import { strategyOf } from './strategy-of.ts';
 import type { KeepAlive } from './keep-alive.ts';
@@ -8,6 +9,7 @@ import type { Strategy } from './strategy.ts';
 type Handler = (request: Request, keepAlive: KeepAlive) => Promise<Response>;
 
 const HANDLERS: Readonly<Record<Strategy, Handler | undefined>> = {
+  'page-first': pageFirst,
   'network-first': networkFirst,
   'cache-first': cacheFirst,
   'stale-while-revalidate': staleWhileRevalidate,

@@ -1,12 +1,7 @@
-import { CACHE_NAME } from './cache-name.ts';
-import { OFFLINE_URL } from './offline-url.ts';
+import { offlinePage } from './offline-page.ts';
 import { fromStore } from './from-store.ts';
 import { storePage } from './store-page.ts';
 import type { KeepAlive } from './keep-alive.ts';
-
-const offlinePage = async (): Promise<Response> =>
-  (await (await caches.open(CACHE_NAME)).match(OFFLINE_URL)) ??
-  new Response('Offline', { status: 503, headers: { 'content-type': 'text/plain' } });
 
 /**
  * Pages: the network answers, and what it answers is kept.

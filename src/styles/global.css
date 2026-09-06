@@ -1454,6 +1454,18 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   font-weight: 600;
   text-align: center;
 }
+/* The offer of a newer version. A button, not an automatic reload: swapping
+   the page under somebody halfway down it is not an improvement. */
+.offline-bar .bar-action {
+  margin-inline-start: 0.6rem;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
 .foot-install { margin: 0.6rem 0 0; }
 .foot-install button {
   font: inherit; font-weight: 600; color: var(--accent);

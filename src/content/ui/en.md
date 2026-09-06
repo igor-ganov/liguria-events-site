@@ -81,7 +81,12 @@ badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }
 share: { label: "Share", copied: "Link copied" }
 install: { label: "Install the app", hint: "Add Dove Go to your home screen" }
-offline: { notice: "You are offline. Showing what was saved {when}.", retry: "Try again" }
+offline:
+  notice: "No connection. Showing what was saved {when}."
+  saved: "Showing what was saved {when}."
+  updated: "A newer version is ready."
+  reload: "Show it"
+  retry: "Try again"
 outbox:
   queued: "Saved on this device. It will be published as soon as you are back online."
   waiting: "{count} waiting to be published"

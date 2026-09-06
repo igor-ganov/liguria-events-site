@@ -18,10 +18,17 @@ const nav = (path: string) => ({ method: 'GET', mode: 'navigate', url: `${ORIGIN
 const get = (path: string) => ({ method: 'GET', mode: 'no-cors', url: `${ORIGIN}${path}` });
 
 describe('strategyOf', () => {
-  test('a page is fetched from the network, with the cache only as a fallback', () => {
-    assert.equal(strategyOf(nav('/liguria/'), ORIGIN), 'network-first');
-    assert.equal(strategyOf(nav('/event/concerto-2026-12-05-51a5e3abbc8f/'), ORIGIN), 'network-first');
-    assert.equal(strategyOf(nav('/submit/'), ORIGIN), 'network-first');
+  test('a page comes from the device first, and the network catches up behind', () => {
+    // Reversed on 2026-09-07. Network-first made every navigation wait for a
+    // server — on a page of a megabyte, over whatever connection the reader
+    // happens to have — and left anything not yet visited missing entirely.
+    // That is a fallback, not an offline app.
+    assert.equal(strategyOf(nav('/liguria/'), ORIGIN), 'page-first');
+    assert.equal(strategyOf(nav('/event/concerto-2026-12-05-51a5e3abbc8f/'), ORIGIN), 'page-first');
+  });
+
+  test('a page rendered for one person is left to the network', () => {
+    assert.equal(strategyOf(nav('/submit/'), ORIGIN), 'network-only');
   });
 
   test('hashed and long-lived assets come from the cache', () => {

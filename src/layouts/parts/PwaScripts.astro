@@ -5,12 +5,15 @@
   // after a swap, because the new page may have come from somewhere else.
   import { initInstallPrompt } from '../../components/pwa/init-install-prompt.ts';
   import { initOutbox } from '../../components/events/init-outbox.ts';
-  import { initOfflineNotice } from '../../components/pwa/init-offline-notice.ts';
+  import { initFreshness } from '../../components/pwa/init-freshness.ts';
+  import { warmLinks } from '../../components/pwa/warm-links.ts';
   import { registerServiceWorker } from '../../components/pwa/register-service-worker.ts';
   registerServiceWorker();
   initInstallPrompt();
-  initOfflineNotice();
+  initFreshness();
+  warmLinks();
   initOutbox();
-  document.addEventListener('astro:page-load', initOfflineNotice);
+  document.addEventListener('astro:page-load', initFreshness);
+  document.addEventListener('astro:page-load', warmLinks);
   document.addEventListener('astro:page-load', initOutbox);
 </script>
