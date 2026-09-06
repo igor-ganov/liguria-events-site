@@ -63,19 +63,12 @@ test('the service worker installs and takes control of the page', async ({ page 
   expect(cached).toContain('/offline/');
 });
 
-test('with the network gone, a page is answered by the offline page', async ({ page, context }) => {
-  await page.goto('/liguria/');
-  await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
-
-  await context.setOffline(true);
-  await page.goto('/liguria/calendar/');
-  await expect(page.getByRole('heading', { name: 'No connection' })).toBeVisible();
-
-  // And back: the worker must not become the answer once the network returns.
-  await context.setOffline(false);
-  await page.goto('/liguria/calendar/');
-  await expect(page.getByRole('heading', { name: 'No connection' })).toHaveCount(0);
-});
+// Where the offline page fits now lives in offline-reading.spec.ts, with the
+// rest of the reading story. The test that stood here asserted the opposite of
+// what the app does today: it opened the calendar with the network gone and
+// demanded the offline page, which is what a reader used to get. The calendar
+// is on the device before anybody taps it now, so the offline page is only
+// ever the answer for a page that was never there.
 
 test('the site vouches for the Android app at the well-known path', async ({ request }) => {
   // Served from the site, checked by Android on first launch, and invisible

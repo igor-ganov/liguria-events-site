@@ -49,6 +49,22 @@ test('the next one comes off the device, and says how old it is', async ({ app, 
   await expect(app.find('.feed-list').first()).toBeVisible();
 });
 
+test('one visit is enough for the app to work without a signal', async ({ app, connection }) => {
+  // No reload here, deliberately. A reader opens the app once, walks into a
+  // tunnel, and opens it again: everything below has to have happened during
+  // that one visit. The worker takes control DURING the first load, so the
+  // load itself is not its to answer — what the device ends up holding comes
+  // from the warming that follows, and that must not depend on the page being
+  // controlled by the time it fires.
+  await app.open('/liguria/');
+  await connection.ready();
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/');
+
+  await connection.cut();
+  await app.open('/liguria/');
+  await expect(app.find('.feed-list').first()).toBeVisible();
+});
+
 test('a page nobody opened is fetched before anybody taps it', async ({ app, connection }) => {
   // The link is on the feed, so the worker is asked to have it ready. Without
   // this a reader who had opened the app once still had nothing but the single

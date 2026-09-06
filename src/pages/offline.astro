@@ -1,11 +1,13 @@
 ---
 // The page the service worker keeps for when there is no network at all.
 //
-// It deliberately does not use Layout: everything it renders has to be inside
-// this one file, because the moment it links a stylesheet or a script it is a
-// page that can only be shown when the thing it is standing in for works.
+// It deliberately does not use Layout: everything it needs is inlined into the
+// page itself, because the moment it links a stylesheet it is a page that can
+// only be shown when the thing it is standing in for works. The one script it
+// does load is precached under a fixed name for the same reason.
 export const prerender = true;
 import { OFFLINE_PIN } from '../lib/pwa/offline-pin.ts';
+import { OFFLINE_STYLES } from '../lib/pwa/offline-styles.ts';
 ---
 
 <!doctype html>
@@ -16,40 +18,17 @@ import { OFFLINE_PIN } from '../lib/pwa/offline-pin.ts';
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#fbfaf7" />
     <title>Offline · Dove Go</title>
-    <!-- Global, not scoped. Astro stamps a scoping attribute onto the markup
-         it renders, and the links on this page are created at runtime by
-         /offline.js — so a scoped rule for them matches nothing and they come
-         out as default browser links. -->
-    <style is:global>
-      :root { color-scheme: light dark; }
-      body {
-        margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 2rem;
-        font: 1rem/1.55 system-ui, sans-serif; text-align: center;
-        background: #fbfaf7; color: #16181c;
-      }
-      main { max-width: 22rem; display: grid; gap: 0.75rem; justify-items: center; }
-      svg { width: 4rem; height: 5rem; }
-      h1 { font-size: 1.35rem; margin: 0; }
-      p { margin: 0; opacity: 0.75; }
-      button {
-        margin-top: 0.5rem; padding: 0.6rem 1.4rem; border: 0; border-radius: 999px;
-        background: #f2822a; color: #fff; font: inherit; font-weight: 600; cursor: pointer;
-      }
-      .kept { display: grid; gap: 0.5rem; margin-top: 1.5rem; justify-items: center; }
-      .kept a { color: #9c5a32; font-weight: 600; }
-      @media (prefers-color-scheme: dark) {
-        body { background: #16181c; color: #f4f2ee; }
-        .kept a { color: #dd9463; }
-      }
-    </style>
+    <style is:global set:html={OFFLINE_STYLES}></style>
   </head>
   <body>
     <main>
       <Fragment set:html={OFFLINE_PIN} />
       <h1>No connection</h1>
-      <p>Dove Go needs the network to tell you what is on. The page will load as soon as you are back.</p>
+      <p>This one was never opened on this device, so there is no copy of it here.</p>
       <button type="button" onclick="location.reload()">Try again</button>
-      <nav class="kept" data-offline-list hidden aria-label="Available offline"></nav>
+      <nav class="kept" data-offline-list hidden aria-label="Available offline">
+        <p class="kept-lead">What is on the device:</p>
+      </nav>
     </main>
     <script type="module" src="/offline.js"></script>
   </body>
