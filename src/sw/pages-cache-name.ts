@@ -5,4 +5,7 @@
  * person using the device changes, and assets — which belong to nobody — have
  * no reason to be thrown away with them.
  */
-export const PAGES_CACHE = 'dovego-pages-v1';
+// v2: v1 held pages the site links to without their trailing slash, and one
+// of those was somebody's half-written event. A rename is how a mistake that
+// already shipped is taken back from the devices holding it.
+export const PAGES_CACHE = 'dovego-pages-v2';

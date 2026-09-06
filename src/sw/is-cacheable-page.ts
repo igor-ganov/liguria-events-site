@@ -5,6 +5,11 @@ const PRIVATE = ['/api/', '/auth/', '/og/', '/uploads/', '/admin'];
 const PERSONAL = ['/submit/', '/settings/'];
 const LOCALES = ['/it', '/ru'];
 
+/** The path as a folder, so the rules below need not care whether the site
+ *  wrote the trailing slash — it links to `/submit`, it redirects to
+ *  `/submit/`, and both are the same page belonging to the same person. */
+const asFolder = (path: string): string => `${path.split('?')[0]?.replace(/\/+$/, '') ?? path}/`;
+
 /** The path with a language prefix taken off, so one rule covers all three. */
 const unlocalized = (path: string): string =>
   LOCALES.filter((locale) => path.startsWith(`${locale}/`))
@@ -20,10 +25,10 @@ const unlocalized = (path: string): string =>
  * rendered for one person is left to the network, where it can be refused.
  */
 export const isCacheablePage = (path: string): boolean => {
-  const bare = unlocalized(path);
+  const bare = asFolder(unlocalized(path));
   return (
     !PRIVATE.some((prefix) => bare.startsWith(prefix)) &&
-    !PERSONAL.includes(bare) &&
+    !PERSONAL.some((prefix) => bare.startsWith(prefix)) &&
     !bare.includes('/edit/')
   );
 };

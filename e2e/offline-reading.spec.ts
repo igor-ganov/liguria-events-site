@@ -6,6 +6,7 @@
 // get fetched before they tap, so "not visited yet" stops meaning "gone".
 //
 // Nothing here is about writing — that is owner-offline-writing.spec.ts.
+import { PAGES_CACHE } from '../src/sw/pages-cache-name.ts';
 import { expect, test } from './kit/index.ts';
 import type { Page } from '@playwright/test';
 
@@ -13,14 +14,14 @@ import type { Page } from '@playwright/test';
  *  is handed over — under the fetch event's waitUntil, so it is guaranteed but
  *  not immediate — and a spec that reads it too early is testing the race. */
 const kept = (page: Page): Promise<string[]> =>
-  page.evaluate(async () => {
+  page.evaluate(async (wanted) => {
     const names = await caches.keys();
-    const found = names.filter((name) => name === 'dovego-pages-v1');
+    const found = names.filter((name) => name === wanted);
     const paths = await Promise.all(
       found.map(async (name) => (await (await caches.open(name)).keys()).map((r) => new URL(r.url).pathname)),
     );
     return paths.flat();
-  });
+  }, PAGES_CACHE);
 
 test('the first visit comes from the site, and says nothing about age', async ({ app, connection }) => {
   await app.open('/liguria/');
@@ -87,13 +88,13 @@ test('a page the device never had says so, and offers what it does have', async 
 
   // Everything but the feed is dropped, so the page opened next is one the
   // device certainly does not have — whatever warming happened to fetch.
-  await app.page.evaluate(async () => {
-    const cache = await caches.open('dovego-pages-v1');
+  await app.page.evaluate(async (name) => {
+    const cache = await caches.open(name);
     const keys = await cache.keys();
     await Promise.all(
       keys.filter((request) => !new URL(request.url).pathname.endsWith('/liguria/')).map((r) => cache.delete(r)),
     );
-  });
+  }, PAGES_CACHE);
 
   await connection.cut();
   await app.open('/liguria/calendar/');
@@ -114,8 +115,8 @@ test('when the site has something newer, the reader is offered it rather than sw
 
   // The stored copy is made to differ from what the site serves: the shape of
   // an event published since this reader last looked.
-  await app.page.evaluate(async () => {
-    const cache = await caches.open('dovego-pages-v1');
+  await app.page.evaluate(async (name) => {
+    const cache = await caches.open(name);
     const keys = await cache.keys();
     await Promise.all(
       keys
@@ -132,7 +133,7 @@ test('when the site has something newer, the reader is offered it rather than sw
           );
         }),
     );
-  });
+  }, PAGES_CACHE);
 
   await app.open('/liguria/');
 
@@ -167,5 +168,9 @@ test('a page rendered for one person is never kept', async ({ app, connection })
   await app.reload();
 
   await expect.poll(() => kept(app.page)).toContain('/liguria/');
-  expect((await kept(app.page)).filter((path) => path.includes('/submit/'))).toEqual([]);
+  // By substring, not by exact path: the site links to `/submit` without the
+  // trailing slash the page redirects to, and a check that only knew the
+  // slashed form watched a leak happen.
+  const personal = (await kept(app.page)).filter((path) => /submit|settings|admin|edit/.test(path));
+  expect(personal, 'pages belonging to one person').toEqual([]);
 });

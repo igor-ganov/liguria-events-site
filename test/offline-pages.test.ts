@@ -33,6 +33,15 @@ describe('isCacheablePage', () => {
     });
   });
 
+  test('written without its trailing slash it is the same page', () => {
+    // The site links to these without one, and the worker fetches links around
+    // a page before anybody taps them: a rule that only matched the slashed
+    // form put somebody's draft on a shared device.
+    ['/submit', '/settings', '/it/submit', '/ru/settings', '/submit/preview'].forEach((path) => {
+      assert.equal(isCacheablePage(path), false, path);
+    });
+  });
+
   test("an event being edited is its author's, not the device's", () => {
     assert.equal(isCacheablePage('/event/x-51a5e3abbc8f/edit/'), false);
   });
