@@ -85,6 +85,10 @@ test('and it offers what IS readable, rather than only saying no', async ({ app,
   // Asserted as a list rather than link by link: "Liguria" is a prefix of
   // "Liguria · Calendar", so asking for one by name finds both.
   await expect(app.find('[data-offline-list] a')).toHaveText(['Liguria', 'Liguria · Calendar']);
+  // And they look like the site's links. The page's styles are scoped by the
+  // build, and these anchors are created at runtime, so a scoped rule would
+  // match none of them and they would come out as default browser links.
+  await expect(app.find('[data-offline-list] a').first()).toHaveCSS('color', 'rgb(156, 90, 50)');
 });
 
 test('a page rendered for one person is never kept', async ({ app, connection }) => {
