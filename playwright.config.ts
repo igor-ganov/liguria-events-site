@@ -57,7 +57,7 @@ export default defineConfig({
     // and a mock that silently stops applying is a test that stops testing.
     {
       name: 'chromium',
-      testIgnore: [/owner-/, /pwa\.spec\.ts/, /ui-.*\.spec\.ts/, /offline-.*\.spec\.ts/],
+      testIgnore: [/owner-/, /[\\/]pwa\.spec\.ts$/, /[\\/]ui-[^\\/]*\.spec\.ts$/, /[\\/]offline-[^\\/]*\.spec\.ts$/],
       use: { ...devices['Desktop Chrome'], baseURL: STATIC_URL, serviceWorkers: 'block' },
     },
     {
@@ -68,7 +68,11 @@ export default defineConfig({
     // The surfaces that want the worker running: it is what is under test.
     {
       name: 'pwa',
-      testMatch: [/pwa\.spec\.ts/, /offline-.*\.spec\.ts/],
+      // Anchored to the start of the FILE NAME. Unanchored, `offline-` also
+      // matched owner-offline-writing.spec.ts, which then ran here against a
+      // static server with no API and failed four times a run for a reason
+      // that had nothing to do with what it tests.
+      testMatch: [/[\\/]pwa\.spec\.ts$/, /[\\/]offline-[^\\/]*\.spec\.ts$/],
       use: { ...devices['Desktop Chrome'], baseURL: STATIC_URL, serviceWorkers: 'allow' },
     },
     // Form factors. The same specs, at the four widths where a layout breaks:
@@ -76,7 +80,7 @@ export default defineConfig({
     // where a two-column layout first appears, and the desktop.
     ...FORM_FACTORS.map((factor) => ({
       name: `ui-${factor.name}`,
-      testMatch: /ui-.*\.spec\.ts/,
+      testMatch: /[\\/]ui-[^\\/]*\.spec\.ts$/,
       use: { ...factor.use, baseURL: STATIC_URL, serviceWorkers: 'block' as const },
     })),
   ],

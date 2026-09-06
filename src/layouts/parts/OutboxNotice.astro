@@ -1,0 +1,11 @@
+---
+// What the offline queue has to say: how many submissions are waiting to go
+// out, or which one was overtaken while it waited.
+//
+// On every page, not only on the form. Somebody who wrote an event with no
+// signal and closed the tab has to find out what became of it wherever they
+// next open the site, and a message that only exists on the page they have
+// left is a message they never see.
+---
+
+<p class="outbox-bar" data-outbox-notice role="status" aria-live="polite" hidden></p>

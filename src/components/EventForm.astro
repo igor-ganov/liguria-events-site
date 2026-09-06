@@ -16,8 +16,11 @@ type Props = Readonly<{
   lang?: Locale | undefined;
   eventId?: string | undefined;
   event?: Prefill | undefined;
+  /** The version being edited. Sent back with the change so an edit that sat
+   *  in the offline queue cannot overwrite a newer one without being asked. */
+  baseUpdatedAt?: string | undefined;
 }>;
-const { mode, lang = 'en', eventId, event } = Astro.props;
+const { mode, lang = 'en', eventId, event, baseUpdatedAt } = Astro.props;
 const ui = await uiOf(lang);
 const f = ui.eventForm;
 const v: Prefill = event ?? EMPTY_PREFILL;
@@ -27,7 +30,7 @@ const SUBMIT_LABEL: Record<Props['mode'], string> = {
 };
 ---
 
-<form id="event-form" class="submit-form" data-mode={mode} data-id={eventId} data-signin-note={ui.submitAuth.signin}>
+<form id="event-form" class="submit-form" data-mode={mode} data-id={eventId} data-base-updated={baseUpdatedAt} data-signin-note={ui.submitAuth.signin}>
   <label>{f.title}<input name="title" required maxlength="200" value={v.title} /></label>
   <label>{f.description}<textarea name="description" rows="4" set:text={v.description} /></label>
 

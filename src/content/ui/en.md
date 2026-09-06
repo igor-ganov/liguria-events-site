@@ -82,6 +82,11 @@ subscribe: { note: "Follow this place: add it to your calendar, or subscribe by 
 share: { label: "Share", copied: "Link copied" }
 install: { label: "Install the app", hint: "Add Dove Go to your home screen" }
 offline: { notice: "You are offline. Showing what was saved {when}.", retry: "Try again" }
+outbox:
+  queued: "Saved on this device. It will be published as soon as you are back online."
+  waiting: "{count} waiting to be published"
+  conflict: "“{title}” changed elsewhere while your edit was waiting, so it was not saved over. Open it to compare."
+  sent: "Published: “{title}”."
 submitLead: { lead: "Make an event and get a link to send to the people you want there.", pointLink: "You get an address you can paste into any chat.", pointFree: "Free, and you can start without an account.", pointWho: "You choose who sees it: only the people you send it to, or the whole city." }
 eventForm: { title: "Title", description: "Description", image: "Image", categories: "Categories", starts: "Starts", addDate: "Add a date", removeDate: "Remove this date", dateLabel: "Date", timeLabel: "Start time", whatIsOn: "What is on that day", whatIsOnHint: "What is on (optional)", venue: "Venue", address: "Address", addressHint: "Street, city", phone: "Phone", website: "Website", freeEntry: "Free entry", mapLabel: "Location on the map", mapHint: "Click the map to drop a pin — drag it to fine-tune.", submitCreate: "Submit for review", submitEdit: "Save changes", uploadImage: "Upload an image", replaceImage: "Replace image" }
 contribute: { link: "Add your event", venue: "Do you run {place}? Add your dates — listing is free.", empty: "Know something on in {place}? Add it.", ownEvent: "Getting your own people together?", ownEventLink: "Make an event — it takes a minute and it is free." }

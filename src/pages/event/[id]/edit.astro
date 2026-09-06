@@ -28,6 +28,6 @@ switch (event) {
     <a class="back-link" href={`/event/${id}`}>← Back</a>
     <h1>Edit event</h1>
     <p>Saving re-submits the event for review before the changes go live.</p>
-    <EventForm mode="edit" eventId={id} event={event} />
+    <EventForm mode="edit" eventId={id} event={event.values} baseUpdatedAt={event.updatedAt} />
   </section>
 </Layout>

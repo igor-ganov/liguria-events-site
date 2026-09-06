@@ -40,6 +40,7 @@ export const DEFAULT_UI: Ui = {
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },
   offline: { notice: '', retry: '' },
+  outbox: { queued: '', waiting: '', conflict: '', sent: '' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },
   eventForm: { title: '', description: '', image: '', categories: '', starts: '', addDate: '', removeDate: '', dateLabel: '', timeLabel: '', whatIsOn: '', whatIsOnHint: '', venue: '', address: '', addressHint: '', phone: '', website: '', freeEntry: '', mapLabel: '', mapHint: '', submitCreate: '', submitEdit: '', uploadImage: '', replaceImage: '' },
   contribute: { link: '', venue: '', empty: '', ownEvent: '', ownEventLink: '' },

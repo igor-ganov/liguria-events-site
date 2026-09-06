@@ -1,6 +1,8 @@
 import type { EventEnv } from './event-env.ts';
 import type { DeferredWork } from '../deferred-work.ts';
 import { eventSlug } from './event-slug.ts';
+import { writeEventEdit } from './write-event-edit.ts';
+import { jsonField } from '../json-field.ts';
 import { isDefined } from '../is-defined.ts';
 import { moderateAndNotify } from '../moderation/moderate-and-notify.ts';
 import { parsedEventInput } from './parsed-event-input.ts';
@@ -8,9 +10,14 @@ import type { AppUser } from '../auth/types.ts';
 
 const OWNER = 'SELECT submitter_id FROM events WHERE id = ?';
 
-const UPDATE = `UPDATE events SET title_en = ?, desc_en = ?, start_date = ?, end_date = ?, categories = ?,
-       venue = ?, address = ?, phone = ?, website = ?, cover_image = ?, lat = ?, lng = ?, free = ?,
-       sessions = ?, kind = ?, status = 'pending', updated_at = ? WHERE id = ? AND submitter_id = ?`;
+// The edit was overtaken while it waited. Answered rather than written, so the
+// author can see what changed and decide, instead of finding out later that
+// their save quietly undid somebody else's.
+const conflict = (): Response =>
+  Response.json(
+    { error: 'conflict', detail: 'This event changed while your edit was waiting.' },
+    { status: 409 },
+  );
 
 const LOG_SQL = 'INSERT INTO moderation_log (event_id, action, actor, reason, created_at) VALUES (?, ?, ?, ?, ?)';
 
@@ -23,12 +30,14 @@ const applyEdit = async (
 ): Promise<Response> => {
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
   const { accepted, rejection } = parsedEventInput(body);
+  const base = jsonField(body, 'baseUpdatedAt');
   const now = new Date().toISOString();
   const edited = await Promise.all(
     accepted.map(async (e) => {
-      await env.DB.prepare(UPDATE)
-        .bind(e.title, e.description, e.startDate, e.endDate, e.categoriesJson, e.venue, e.address, e.phone, e.website, e.cover, e.lat, e.lng, e.free, e.sessionsJson, e.kind, now, id, user.id)
-        .run();
+      switch (await writeEventEdit(env, e, base, now, id, user.id)) {
+        case 'conflict':
+          return conflict();
+      }
       await env.DB.prepare(LOG_SQL).bind(id, 'edited', `user:${user.handle}`, '', now).run();
       ctx.waitUntil(
         moderateAndNotify(env, { id, title: e.title, description: e.description, submitterEmail: user.email }),

@@ -4,10 +4,13 @@
   // document, not per SPA swap: the worker outlives both. The bar is redrawn
   // after a swap, because the new page may have come from somewhere else.
   import { initInstallPrompt } from '../../components/pwa/init-install-prompt.ts';
+  import { initOutbox } from '../../components/events/init-outbox.ts';
   import { initOfflineNotice } from '../../components/pwa/init-offline-notice.ts';
   import { registerServiceWorker } from '../../components/pwa/register-service-worker.ts';
   registerServiceWorker();
   initInstallPrompt();
   initOfflineNotice();
+  initOutbox();
   document.addEventListener('astro:page-load', initOfflineNotice);
+  document.addEventListener('astro:page-load', initOutbox);
 </script>

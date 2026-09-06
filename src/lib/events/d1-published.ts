@@ -11,3 +11,4 @@ export { publishedEvents } from './published-events.ts';
 export { publishedEventById } from './published-event-by-id.ts';
 export { eventForDetail } from './event-for-detail.ts';
 export { editableEventById } from './editable-event-by-id.ts';
+export type { EditableEvent } from './editable-event-by-id.ts';

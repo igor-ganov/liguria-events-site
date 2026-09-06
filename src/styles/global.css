@@ -1432,6 +1432,17 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 /* The install offer. It exists in the markup on every page but stays hidden
    until the browser fires beforeinstallprompt, so it is never a dead control
    on a platform that cannot install, or inside the installed app itself. */
+/* The queue's bar, under the offline one. It is about the author's own work
+   rather than about the network, so it is not painted as an alarm. */
+.outbox-bar {
+  margin: 0;
+  padding: 0.55rem 1rem;
+  background: var(--surface-2);
+  color: var(--ink);
+  border-block-end: 1px solid var(--line);
+  font-size: 0.85rem;
+  text-align: center;
+}
 /* The offline bar. Full width at the very top, above the header, because it
    is about the whole page and not about anything in it. */
 .offline-bar {
