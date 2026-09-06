@@ -8,6 +8,10 @@
 export type SwFetchEvent = Readonly<{
   request: Request;
   respondWith: (response: Promise<Response>) => void;
+  /** Keep the worker alive for work that outlives the response — storing a
+   *  page, for one. Without it the browser may stop the worker the moment the
+   *  response is handed over, and the copy is never written. */
+  waitUntil: (work: Promise<unknown>) => void;
 }>;
 
 export type SwLifecycleEvent = Readonly<{ waitUntil: (work: Promise<unknown>) => void }>;

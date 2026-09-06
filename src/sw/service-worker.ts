@@ -19,8 +19,24 @@ self.addEventListener('activate', (event: SwLifecycleEvent) => {
   event.waitUntil(dropOldCaches().then(() => self.clients.claim()));
 });
 
+/**
+ * Answer, and keep the worker alive for the writing that follows.
+ *
+ * waitUntil is called HERE, synchronously, while the event is still being
+ * dispatched — calling it later, from inside the promise that stores the page,
+ * throws and the copy is never written. That mistake looked exactly like a
+ * caching bug and cost five specs a run to find.
+ *
+ * The handlers hand their background work to `keeping`; this waits for the
+ * response first and then for all of it, so the browser may not stop the
+ * worker until the copy is on disk.
+ */
 self.addEventListener('fetch', (event: SwFetchEvent) => {
-  [respond(event.request, self.location.origin)]
+  const keeping: Promise<unknown>[] = [];
+  [respond(event.request, self.location.origin, (work) => void keeping.push(work))]
     .filter(isDefined)
-    .forEach((response) => event.respondWith(response));
+    .forEach((response) => {
+      event.respondWith(response);
+      event.waitUntil(response.then(() => Promise.all(keeping)));
+    });
 });

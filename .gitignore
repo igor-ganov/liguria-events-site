@@ -16,3 +16,4 @@ out/
 
 # Bundled from src/sw by scripts/build-sw.ts
 public/sw.js
+public/offline.js

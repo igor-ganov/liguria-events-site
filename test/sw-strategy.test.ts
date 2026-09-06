@@ -31,6 +31,12 @@ describe('strategyOf', () => {
     assert.equal(strategyOf(get('/icons/icon-192.png'), ORIGIN), 'cache-first');
   });
 
+  test("the offline page's own script comes from the cache", () => {
+    // Precached with the page. Left to the network it is fetched over a
+    // connection that, by the time anybody sees that page, is not there.
+    assert.equal(strategyOf(get('/offline.js'), ORIGIN), 'cache-first');
+  });
+
   test('the shard data is served from the cache and refreshed behind it', () => {
     assert.equal(strategyOf(get('/data/places-liguria.json'), ORIGIN), 'stale-while-revalidate');
   });

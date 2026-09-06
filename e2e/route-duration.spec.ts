@@ -14,6 +14,11 @@ test('route shows a duration per stop and honours a manual override', async ({ p
 
   await page.locator('[data-route-from]').fill('2099-07-10');
   await page.locator('[data-route-generate]').click();
+  // The itinerary is built before anything in it can be read. Without this the
+  // first assertion below waits on an input that does not exist yet, and on a
+  // loaded machine it can still not exist when the wait gives up — a failure
+  // about durations that is really about a route that had not been generated.
+  await expect(page.locator('.route-stop')).toHaveCount(2);
 
   const firstDuration = page.locator('.dur-input').first();
   await expect(firstDuration).toHaveValue('150'); // music default

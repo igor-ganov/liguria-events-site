@@ -2,9 +2,10 @@ import { cacheFirst } from './cache-first.ts';
 import { networkFirst } from './network-first.ts';
 import { staleWhileRevalidate } from './stale-while-revalidate.ts';
 import { strategyOf } from './strategy-of.ts';
+import type { KeepAlive } from './keep-alive.ts';
 import type { Strategy } from './strategy.ts';
 
-type Handler = (request: Request) => Promise<Response>;
+type Handler = (request: Request, keepAlive: KeepAlive) => Promise<Response>;
 
 const HANDLERS: Readonly<Record<Strategy, Handler | undefined>> = {
   'network-first': networkFirst,
@@ -17,5 +18,8 @@ const HANDLERS: Readonly<Record<Strategy, Handler | undefined>> = {
 };
 
 /** The response for a request, or nothing when the worker should stand aside. */
-export const respond = (request: Request, origin: string): Promise<Response> | undefined =>
-  HANDLERS[strategyOf(request, origin)]?.(request);
+export const respond = (
+  request: Request,
+  origin: string,
+  keepAlive: KeepAlive,
+): Promise<Response> | undefined => HANDLERS[strategyOf(request, origin)]?.(request, keepAlive);

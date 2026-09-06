@@ -9,4 +9,4 @@ import { OFFLINE_URL } from './offline-url.ts';
  * /offline/ is standalone with its styles inline — nothing it needs can be
  * missing from the cache, because it needs nothing.
  */
-export const PRECACHE_URLS: readonly string[] = [OFFLINE_URL, '/icons/icon-192.png'];
+export const PRECACHE_URLS: readonly string[] = [OFFLINE_URL, '/offline.js', '/icons/icon-192.png'];

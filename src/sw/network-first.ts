@@ -2,6 +2,7 @@ import { CACHE_NAME } from './cache-name.ts';
 import { OFFLINE_URL } from './offline-url.ts';
 import { fromStore } from './from-store.ts';
 import { storePage } from './store-page.ts';
+import type { KeepAlive } from './keep-alive.ts';
 
 const offlinePage = async (): Promise<Response> =>
   (await (await caches.open(CACHE_NAME)).match(OFFLINE_URL)) ??
@@ -18,10 +19,19 @@ const offlinePage = async (): Promise<Response> =>
  * What may be kept is decided by isCacheablePage, which keeps out everything
  * rendered for one person: this cache is shared by everyone on the device.
  */
-export const networkFirst = (request: Request): Promise<Response> =>
+export const networkFirst = (request: Request, keepAlive: KeepAlive): Promise<Response> =>
   fetch(request)
-    .then(async (response) => {
-      await storePage(request, response, Date.now());
+    .then((response) => {
+      // The copy is taken HERE, synchronously, before the response is handed
+      // over — once the page starts reading the body, clone() throws and the
+      // cache silently stays empty.
+      //
+      // The writing itself is handed to keepAlive rather than awaited: cloning
+      // and storing a page on every navigation would make the reader pay for
+      // tomorrow's offline visit with today's. Not awaiting it at all is not
+      // the alternative either — the browser may stop the worker the moment
+      // the response is handed over.
+      keepAlive(storePage(request, response.clone(), Date.now()));
       return response;
     })
     .catch(async () => (await fromStore(request)) ?? offlinePage());

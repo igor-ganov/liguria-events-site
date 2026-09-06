@@ -30,8 +30,11 @@ export const prerender = true;
         margin-top: 0.5rem; padding: 0.6rem 1.4rem; border: 0; border-radius: 999px;
         background: #f2822a; color: #fff; font: inherit; font-weight: 600; cursor: pointer;
       }
+      .kept { display: grid; gap: 0.5rem; margin-top: 1.5rem; justify-items: center; }
+      .kept a { color: #9c5a32; font-weight: 600; }
       @media (prefers-color-scheme: dark) {
         body { background: #16181c; color: #f4f2ee; }
+        .kept a { color: #dd9463; }
       }
     </style>
   </head>
@@ -44,6 +47,8 @@ export const prerender = true;
       <h1>No connection</h1>
       <p>Dove Go needs the network to tell you what is on. The page will load as soon as you are back.</p>
       <button type="button" onclick="location.reload()">Try again</button>
+      <nav class="kept" data-offline-list hidden aria-label="Available offline"></nav>
     </main>
+    <script type="module" src="/offline.js"></script>
   </body>
 </html>

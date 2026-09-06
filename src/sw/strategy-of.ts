@@ -15,6 +15,11 @@ const PREFIXES: readonly (readonly [string, Strategy])[] = [
   ['/admin/', NEVER],
   ['/og/', NEVER],
   ['/uploads/', NEVER],
+  // The offline page's own script. Precached with the page, and useless
+  // unless the worker also SERVES it: left to the network it is fetched from
+  // a connection that by definition is not there, and the page that was meant
+  // to offer what is readable offers nothing.
+  ['/offline.js', 'cache-first'],
   ['/_astro/', 'cache-first'],
   ['/font/', 'cache-first'],
   ['/fonts/', 'cache-first'],
