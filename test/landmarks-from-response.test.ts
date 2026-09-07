@@ -27,8 +27,10 @@ describe('landmarksFromResponse', () => {
   });
 
   test('a failed response body is never read', async () => {
+    // 404, because 500 now means the site could not be asked at all and is
+    // refused rather than read as empty — see shard-away.test.ts.
     let read = false;
-    const failed = new Response('{}', { status: 500 });
+    const failed = new Response('{}', { status: 404 });
     Object.defineProperty(failed, 'json', {
       value: async () => {
         read = true;

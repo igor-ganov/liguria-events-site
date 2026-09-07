@@ -39,7 +39,7 @@ export const DEFAULT_UI: Ui = {
   subscribe: { note: '', calendar: '', rss: '' },
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },
-  offline: { notice: '', saved: '', updated: '', reload: '', retry: '' },
+  offline: { notice: '', saved: '', updated: '', reload: '', retry: '', listAway: '' },
   outbox: { queued: '', waiting: '', conflict: '', sent: '' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },
   eventForm: { title: '', description: '', image: '', categories: '', starts: '', addDate: '', removeDate: '', dateLabel: '', timeLabel: '', whatIsOn: '', whatIsOnHint: '', venue: '', address: '', addressHint: '', phone: '', website: '', freeEntry: '', mapLabel: '', mapHint: '', submitCreate: '', submitEdit: '', uploadImage: '', replaceImage: '' },

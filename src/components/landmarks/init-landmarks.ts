@@ -7,6 +7,7 @@ import { landmarksState } from './landmarks-state.ts';
 import { loadLandmarks } from '../../lib/landmarks/load-landmarks.ts';
 import { prepare } from '../../lib/search/index.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
+import { sayListAway } from '../shared/say-list-away.ts';
 import { renderLandmarks } from './render-landmarks.ts';
 import { wireLandmarkControls } from './wire-landmark-controls.ts';
 import type { Landmark } from '../../lib/landmarks/landmark-schema.ts';
@@ -32,7 +33,9 @@ const start = (grid: HTMLElement): void => {
   grid.dataset['ready'] = 'true';
   const { lang, ui } = readUiIsland();
   grid.innerHTML = '<p class="lm-loading">…</p>';
-  void loadLandmarks(currentRegion(), lang).then((all) => show(all, lang, ui));
+  void loadLandmarks(currentRegion(), lang)
+    .then((all) => show(all, lang, ui))
+    .catch(() => sayListAway(grid, ui));
 };
 
 /** Wire the landmarks page: fetch the locale asset, then filter by kind + fuzzy

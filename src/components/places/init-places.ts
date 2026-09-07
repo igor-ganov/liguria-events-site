@@ -7,6 +7,7 @@ import { placeDoc } from './place-doc.ts';
 import { placesState } from './places-state.ts';
 import { prepare } from '../../lib/search/index.ts';
 import { readUiIsland } from '../shared/read-ui-island.ts';
+import { sayListAway } from '../shared/say-list-away.ts';
 import { renderPlaces } from './render-places.ts';
 import { wirePlaceControls } from './wire-place-controls.ts';
 import type { Place } from '../../lib/places/place-schema.ts';
@@ -32,7 +33,9 @@ const start = (grid: HTMLElement): void => {
   grid.dataset['ready'] = 'true';
   const { lang, ui } = readUiIsland();
   grid.innerHTML = '<p class="lm-loading">…</p>';
-  void loadPlaces(currentRegion(), lang).then((all) => show(all, lang, ui));
+  void loadPlaces(currentRegion(), lang)
+    .then((all) => show(all, lang, ui))
+    .catch(() => sayListAway(grid, ui));
 };
 
 /** Wire the places page: fetch the locale asset, then filter by category +

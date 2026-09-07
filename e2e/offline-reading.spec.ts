@@ -79,6 +79,21 @@ test('the map says it cannot draw, instead of spinning', async ({ app, connectio
   await expect(app.find('[data-map-retry]')).toBeVisible();
 });
 
+test('a list that is fetched when opened says why it is empty', async ({ app, connection }) => {
+  // Landmarks and places are megabytes downloaded when the page opens, not
+  // something to keep on a device for a tunnel. With no signal the grid is
+  // empty either way -- the difference is whether the reader is told, or left
+  // to read it as a region with nothing worth seeing in it.
+  await app.open('/liguria/');
+  await connection.ready();
+  await app.reload();
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/landmarks/');
+
+  await connection.cut();
+  await app.open('/liguria/landmarks/');
+  await expect(app.find('[data-lm-grid] [role="status"]')).toContainText(/no connection|when you open it/i);
+});
+
 // An event page cannot be part of this file. It is server-rendered from the
 // crawler corpus fetched at request time, which the local worker cannot reach,
 // so every event address answers 404 here and nothing is kept for it -- a test

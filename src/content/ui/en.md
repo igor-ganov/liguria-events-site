@@ -87,6 +87,7 @@ offline:
   updated: "A newer version is ready."
   reload: "Show it"
   retry: "Try again"
+  listAway: "This list is downloaded when you open it, and there is no connection. Everything opened before is still here."
 outbox:
   queued: "Saved on this device. It will be published as soon as you are back online."
   waiting: "{count} waiting to be published"

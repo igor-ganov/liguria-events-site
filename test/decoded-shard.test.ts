@@ -24,8 +24,10 @@ describe('decodedShard', () => {
   });
 
   test('never reads the body of a failed response', async () => {
+    // 404, because 500 now means the site could not be asked at all and is
+    // refused rather than read as empty — see shard-away.test.ts.
     let read = false;
-    const res = new Response('', { status: 500 });
+    const res = new Response('', { status: 404 });
     Object.defineProperty(res, 'json', {
       value: () => {
         read = true;
