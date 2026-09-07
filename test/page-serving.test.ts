@@ -14,6 +14,7 @@ import assert from 'node:assert/strict';
 import { freshnessLine } from '../src/lib/pwa/freshness-line.ts';
 import { freshnessOver } from '../src/lib/pwa/freshness-over.ts';
 import { stateRequest } from '../src/sw/state-request.ts';
+import { warmRequest } from '../src/sw/warm-request.ts';
 import { strategyOf } from '../src/sw/strategy-of.ts';
 import { warmable } from '../src/sw/warmable.ts';
 
@@ -67,10 +68,22 @@ describe('warmable', () => {
     assert.equal(warmable(links, ORIGIN).filter((url) => url === '/liguria/').length, 1);
   });
 
+  test('the events on the feed are not crowded out by the region switcher', () => {
+    // Every page carries a list of every region in its header, and those come
+    // first in the markup. Taking the first handful in document order meant a
+    // reader offline had eleven region feeds and not one of the events they
+    // were actually looking at.
+    const header = Array.from({ length: 20 }, (_, index) => `/region-${index}/`);
+    const events = Array.from({ length: 20 }, (_, index) => `/event/x-2026-12-05-${index}aaaaaaaaaa/`);
+    const warm = warmable([...header, ...events], ORIGIN);
+    assert.ok(warm.filter((path) => path.startsWith('/event/')).length >= 5, warm.join(' '));
+    assert.ok(warm.filter((path) => !path.startsWith('/event/')).length >= 5, warm.join(' '));
+  });
+
   test('a reader is not made to download the whole site', () => {
     // Warming is a courtesy on somebody's data plan, not a mirror.
     const many = Array.from({ length: 200 }, (_, index) => `/event/x-2026-12-05-${index}aaaaaaaaaa/`);
-    assert.ok(warmable(many, ORIGIN).length <= 12, String(warmable(many, ORIGIN).length));
+    assert.ok(warmable(many, ORIGIN).length <= 20, String(warmable(many, ORIGIN).length));
   });
 });
 
@@ -104,6 +117,20 @@ describe('freshnessLine', () => {
 
   test('once something newer has arrived, that is the thing worth saying', () => {
     assert.equal(freshnessLine(words, { from: 'store', age: '2 hours ago', updated: true }), 'A newer version is ready.');
+  });
+});
+
+describe('warmRequest into warmable', () => {
+  test('the events at the bottom of a long page are still reachable', () => {
+    // A feed carries four hundred links: the header repeats the navigation on
+    // every card, and the events themselves come last. Reading only the first
+    // few dozen meant a reader offline held the navigation and nothing else.
+    const links = [
+      ...Array.from({ length: 300 }, (_, index) => `/region-${index}/`),
+      '/event/fiera-2026-12-05-51a5e3abbc8f/',
+    ];
+    const warm = warmable(warmRequest({ kind: 'warm', links }), ORIGIN);
+    assert.ok(warm.includes('/event/fiera-2026-12-05-51a5e3abbc8f/'), warm.join(' '));
   });
 });
 

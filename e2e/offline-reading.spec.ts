@@ -65,6 +65,13 @@ test('one visit is enough for the app to work without a signal', async ({ app, c
   await expect(app.find('.feed-list').first()).toBeVisible();
 });
 
+// An event page cannot be part of this file. It is server-rendered from the
+// crawler corpus fetched at request time, which the local worker cannot reach,
+// so every event address answers 404 here and nothing is kept for it -- a test
+// asserting otherwise could only pass by measuring the environment. What the
+// warming has to get right is covered where it can be: warmRequest and
+// warmable in test/page-serving.test.ts, on a page with four hundred links.
+
 test('a page nobody opened is fetched before anybody taps it', async ({ app, connection }) => {
   // The link is on the feed, so the worker is asked to have it ready. Without
   // this a reader who had opened the app once still had nothing but the single

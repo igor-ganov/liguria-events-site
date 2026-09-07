@@ -1,3 +1,5 @@
+const LIMIT = 500;
+
 /**
  * The links a page asked the worker to have ready, read out of its message.
  *
@@ -12,4 +14,8 @@ export const warmRequest = (data: unknown): readonly string[] =>
     .map((message) => message['links'])
     .filter((links): links is readonly unknown[] => Array.isArray(links))
     .flatMap((links) => links.filter((link): link is string => typeof link === 'string'))
-    .slice(0, 40);
+    // Generous, because this is only a guard against a hostile page sending a
+    // million strings — what is actually worth fetching is decided afterwards.
+    // A feed carries four hundred links and the events are at the bottom of
+    // them: a tight cap here quietly meant only the header was ever warmed.
+    .slice(0, LIMIT);
