@@ -13,6 +13,8 @@ import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { freshnessLine } from '../src/lib/pwa/freshness-line.ts';
 import { freshnessOver } from '../src/lib/pwa/freshness-over.ts';
+import { assetImports } from '../src/sw/asset-imports.ts';
+import { pageAssets } from '../src/sw/page-assets.ts';
 import { stateRequest } from '../src/sw/state-request.ts';
 import { warmRequest } from '../src/sw/warm-request.ts';
 import { strategyOf } from '../src/sw/strategy-of.ts';
@@ -131,6 +133,69 @@ describe('warmRequest into warmable', () => {
     ];
     const warm = warmable(warmRequest({ kind: 'warm', links }), ORIGIN);
     assert.ok(warm.includes('/event/fiera-2026-12-05-51a5e3abbc8f/'), warm.join(' '));
+  });
+});
+
+describe('pageAssets', () => {
+  const html = [
+    '<html><head>',
+    '<link rel="stylesheet" href="/_astro/page.abc.css" />',
+    '<link rel="canonical" href="https://dovego.it/liguria/map/" />',
+    '<script type="module" src="/_astro/map.def.js"></script>',
+    '<script type="module" src="https://dovego.it/_astro/map.def.js"></script>',
+    '<script src="https://tiles.dovego.it/other.js"></script>',
+    '<img src="/uploads/a.jpg" />',
+    '</head></html>',
+  ].join('');
+
+  test('a stored page keeps what makes it work', () => {
+    // Without this the map page came off the device and sat on its loading
+    // skeleton: the file that starts the map had never been fetched.
+    const assets = pageAssets(html, ORIGIN);
+    assert.ok(assets.includes('/_astro/map.def.js'));
+    assert.ok(assets.includes('/_astro/page.abc.css'));
+  });
+
+  test('nothing off-site, nothing that is not a script or a stylesheet', () => {
+    const assets = pageAssets(html, ORIGIN);
+    assert.ok(!assets.some((path) => path.includes('tiles.dovego.it')));
+    assert.ok(!assets.includes('/liguria/map/'));
+    assert.ok(!assets.includes('/uploads/a.jpg'));
+  });
+
+  test('each file once, however it was written', () => {
+    assert.equal(pageAssets(html, ORIGIN).filter((path) => path === '/_astro/map.def.js').length, 1);
+  });
+});
+
+describe('assetImports', () => {
+  const code = [
+    'import{a as b}from"./chunk.DEF.js";',
+    'import"/_astro/side.GHI.js";',
+    'const later=()=>import("./engine.JKL.js");',
+    'import x from"https://cdn.example.com/thing.js";',
+    'const url="./style.MNO.css";',
+  ].join('');
+
+  test('what a module needs before it can run', () => {
+    // A chunk whose first import is missing fails as completely as one that
+    // was never fetched, and the page then behaves as if it had no scripts.
+    const found = assetImports(code, '/_astro/entry.ABC.js', ORIGIN);
+    assert.ok(found.includes('/_astro/chunk.DEF.js'));
+    assert.ok(found.includes('/_astro/side.GHI.js'));
+  });
+
+  test('what it only loads when asked is left to be asked for', () => {
+    // The map engine is a megabyte behind an `import()`. Fetching it on the
+    // chance of a tunnel is not a courtesy, and the page says so when it
+    // cannot reach it.
+    assert.ok(!assetImports(code, '/_astro/entry.ABC.js', ORIGIN).includes('/_astro/engine.JKL.js'));
+  });
+
+  test('nothing off-site, and nothing that is not a module', () => {
+    const found = assetImports(code, '/_astro/entry.ABC.js', ORIGIN);
+    assert.ok(!found.some((path) => path.includes('cdn.example.com')));
+    assert.ok(!found.some((path) => path.endsWith('.css')));
   });
 });
 

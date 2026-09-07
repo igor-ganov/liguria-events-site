@@ -65,6 +65,20 @@ test('one visit is enough for the app to work without a signal', async ({ app, c
   await expect(app.find('.feed-list').first()).toBeVisible();
 });
 
+test('the map says it cannot draw, instead of spinning', async ({ app, connection }) => {
+  // The page comes off the device like any other, but its tiles are not on it:
+  // that is a real limit, and a reader is owed it in seconds rather than after
+  // half a minute of a spinner that looks like the app is stuck.
+  await app.open('/liguria/');
+  await connection.ready();
+  await app.reload();
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/map/');
+
+  await connection.cut();
+  await app.open('/liguria/map/');
+  await expect(app.find('[data-map-retry]')).toBeVisible();
+});
+
 // An event page cannot be part of this file. It is server-rendered from the
 // crawler corpus fetched at request time, which the local worker cannot reach,
 // so every event address answers 404 here and nothing is kept for it -- a test

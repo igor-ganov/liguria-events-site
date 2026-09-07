@@ -1,3 +1,4 @@
+import { quickenFailure } from './quicken-failure.ts';
 import { setHidden } from '../../lib/dom/set-hidden.ts';
 import { whenMapReady } from './when-map-ready.ts';
 import type { MapContext } from './map-context.ts';
@@ -27,6 +28,7 @@ export const wireMapLoading = (context: MapContext): void => {
   canvas.dataset['loading'] = 'true';
   const soft = setTimeout(reveal(false), SOFT_REVEAL);
   const hard = setTimeout(reveal(true), HARD_FAIL);
+  const stopQuick = quickenFailure(context.map, reveal(true));
   // whenMapReady, not map.on('load'): this runs after the corpus fetch, so the
   // style may already have loaded — otherwise the skeleton stayed up until the
   // soft-reveal timer even though the map was live. See when-map-ready.ts.
@@ -34,6 +36,7 @@ export const wireMapLoading = (context: MapContext): void => {
     loaded = true;
     clearTimeout(soft);
     clearTimeout(hard);
+    stopQuick();
     canvas.dataset['loading'] = 'false';
     setHidden(retry, true);
   });

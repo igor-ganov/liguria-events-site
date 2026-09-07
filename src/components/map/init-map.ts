@@ -1,3 +1,4 @@
+import { failMap } from './fail-map.ts';
 import { isDefined } from '../../lib/is-defined.ts';
 
 /**
@@ -18,6 +19,8 @@ export const initMap = (): void => {
     .filter((canvas) => canvas.dataset['ready'] !== 'true')
     .forEach((canvas) => {
       canvas.dataset['ready'] = 'true';
-      void import('./start-map.ts').then(({ startMap }) => startMap(canvas));
+      void import('./start-map.ts')
+        .then(({ startMap }) => startMap(canvas))
+        .catch(() => failMap(canvas));
     });
 };
