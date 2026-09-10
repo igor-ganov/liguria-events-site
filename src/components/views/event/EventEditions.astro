@@ -1,0 +1,50 @@
+---
+import { eventPath } from '../../../lib/event-path.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import type { ArchivedEvent } from '../../../lib/events/archived-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+// An event that runs every year is one thing with many editions. Held apart,
+// each year's page was a dead end; linked, a reader who arrives at a feast
+// that is over can find the one that is coming, and every page stops being an
+// island for a crawler.
+type Props = Readonly<{ lang: Locale; heading: string; editions: readonly ArchivedEvent[] }>;
+const { lang, heading, editions } = Astro.props;
+---
+
+{editions.length > 0 && (
+<section class="event-editions">
+  <h2>{heading}</h2>
+  <ul>
+    {
+      editions.map((edition) => (
+        <li>
+          <a href={localizedUrl(lang, eventPath(edition))}>
+            {edition.s.slice(0, 4)} · {edition.t}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+)}
+
+<style>
+  .event-editions {
+    margin-top: 2rem;
+  }
+  .event-editions h2 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .event-editions ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .event-editions a {
+    color: var(--link, #9c5a32);
+    font-weight: 600;
+  }
+</style>

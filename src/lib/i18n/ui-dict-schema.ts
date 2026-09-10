@@ -38,7 +38,7 @@ export const UiDictSchema = Schema.Struct({
   cat: CatUiSchema,
   weekdays: Schema.Array(Schema.String),
   months: Schema.Array(Schema.String),
-  headings: Schema.Struct({ ongoing: Schema.String, sources: Schema.String, allEvents: Schema.String }),
+  headings: Schema.Struct({ ongoing: Schema.String, sources: Schema.String, allEvents: Schema.String, editions: Schema.String }),
   calNav: Schema.Struct({ prev: Schema.String, next: Schema.String }),
   badges: Schema.Struct({ free: Schema.String, gem: Schema.String, made: Schema.String }),
   subscribe: Schema.Struct({ note: Schema.String, calendar: Schema.String, rss: Schema.String }),

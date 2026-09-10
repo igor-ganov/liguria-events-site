@@ -15,7 +15,17 @@ const aVenue = async (request: APIRequestContext): Promise<string> => {
     .filter((path) => path.split('/').filter(Boolean).length === 3)
     .filter((path) => !/\/(calendar|event|landmark|place|map)\//.test(path));
   expect(paths.length).toBeGreaterThan(0);
-  return paths[0] ?? '';
+  // The first path in the sitemap is not necessarily a venue with anything on:
+  // the file's contents move as the corpus and the archive change, and a
+  // venue whose events have all passed reads as zero. Ask each candidate what
+  // it has and take the first that has something — the tests below are about
+  // how a busy venue page renders, not about which venue it happens to be.
+  for (const path of paths.slice(0, 8)) {
+    const html = await (await request.get(path)).text();
+    const count = Number(/class="venue-sub"[^>]*>[^<0-9]*(\d+)/.exec(html)?.[1] ?? 0);
+    if (count > 0) return path;
+  }
+  throw new Error(`no venue with events among ${paths.slice(0, 8).join(', ')}`);
 };
 
 test('a venue page lists that venue’s events and titles itself after it', async ({ page, request }) => {

@@ -75,7 +75,7 @@ cat:
   other: Varie
 weekdays: [Lun, Mar, Mer, Gio, Ven, Sab, Dom]
 months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Settembre, Ottobre, Novembre, Dicembre]
-headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' }
+headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' , editions: 'Altri anni'}
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }

@@ -23,7 +23,7 @@ const ui = defineCollection({
     cat: categoryLabels,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),
-    headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string() }),
+    headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string(), editions: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),
     subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string() }),

@@ -75,7 +75,7 @@ cat:
   other: Other
 weekdays: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 months: [January, February, March, April, May, June, July, August, September, October, November, December]
-headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events' }
+headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }

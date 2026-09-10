@@ -58,6 +58,13 @@ test('an event that is over wears the archive mark instead of a photograph', asy
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/og\/archive\.png/);
 });
 
+// The editions block cannot be tested from here. An edition has to be public
+// to be listed as one, and everything this harness can create is either
+// `pending` (a public submission awaiting moderation) or link-only, which is a
+// private invitation and must never surface as another year of anything. The
+// rule is covered in test/other-editions.test.ts, and the wiring is checked on
+// the live site, where yearly festivals actually exist.
+
 test('an upcoming event carries no such banner', async ({ page, context }) => {
   await signInAsOwner(page, context);
   const created = await page.request.post('/api/events/submit', {

@@ -33,7 +33,7 @@ export const DEFAULT_UI: Ui = {
     map: "Map of events in {place} — find what's on near you.",
   },
   ...DEFAULT_CATALOG_UI,
-  headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events' },
+  headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' },
   calNav: { prev: 'Previous month', next: 'Next month' },
   badges: { free: 'free', gem: 'gem', made: 'made here' },
   subscribe: { note: '', calendar: '', rss: '' },

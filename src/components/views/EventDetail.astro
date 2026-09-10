@@ -14,8 +14,10 @@ import EventTickets from './event/EventTickets.astro';
 import EventFacts from './event/EventFacts.astro';
 import EventProgramme from './event/EventProgramme.astro';
 import EventMapEmbed from './event/EventMapEmbed.astro';
+import EventEditions from './event/EventEditions.astro';
 import EventSources from './event/EventSources.astro';
 import { cityName } from '../../lib/region/city-name.ts';
+import { editionsOf } from '../../lib/events/editions-of.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { eventPath } from '../../lib/event-path.ts';
@@ -36,15 +38,14 @@ const ui = await uiOf(lang);
 // The address a crawler event carries lives on the event itself; only a
 // user-submitted one has a contact block. Structured data needs whichever is
 // there — an event with no address at all is rejected outright by Google.
-const view = eventDetailView({
-  lang,
-  event,
-  address: contacts?.address ?? event.a,
-  site: Astro.site,
-  today: isoToday(),
-});
+const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday() });
 const { region, title, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
 const programme = programmeSessions(event, lang);
+// The same feast in other years — the archive for the ones that are over, the
+// corpus for the one that is coming. A reader landing on a feast that has
+// happened wants next year's, and that is the direction the archive alone
+// cannot answer.
+const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
 ---
 
 <Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
@@ -76,6 +77,7 @@ const programme = programmeSessions(event, lang);
     {programme.length > 0 && <EventProgramme sessions={programme} lang={lang} />}
     {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
+    <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
     <EventSources links={links} heading={ui.headings.sources} />
     {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
   </article>

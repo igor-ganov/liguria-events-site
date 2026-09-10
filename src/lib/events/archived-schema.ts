@@ -9,6 +9,7 @@ const ArchivedSchema = Schema.Struct({
   v: Schema.optional(Schema.String),
   s: Schema.String,
   e: Schema.optional(Schema.String),
+  ct: Schema.optional(Schema.String),
   cr: Schema.optional(Schema.Number),
 });
 
