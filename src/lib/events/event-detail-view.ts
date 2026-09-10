@@ -1,10 +1,13 @@
 import { absoluteImage } from '../img/absolute-image.ts';
+import { branch } from '../branch.ts';
 import { clipText } from '../seo/clip-text.ts';
 import { socialImageUrl } from '../img/social-image-url.ts';
 import { canonicalUrl } from '../seo/canonical-url.ts';
 import { descriptionArticleHtml } from '../description/description-article-html.ts';
 import { descriptionOf } from './description-of.ts';
 import { descriptionPlain } from '../description/description-plain.ts';
+import { ARCHIVE_COVER } from './archive-cover-url.ts';
+import { archivedCover } from './archive-cover.ts';
 import { eventGallery } from './event-gallery.ts';
 import { eventJsonLd } from './event-jsonld.ts';
 import { eventLinks } from './event-links.ts';
@@ -43,6 +46,10 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
   const image = absoluteImage(event.img, site);
   const url = canonicalUrl(lang, eventPath(event), site);
   const gallery = eventGallery(event);
+  // Read once: what the page shows at the top and what a share of it shows
+  // both change when the night is over.
+  const passed = !isUpcoming(today)(event);
+  const shown = archivedCover(gallery, passed);
   return {
     region: regionOf(event),
     title,
@@ -51,15 +58,20 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
     descMeta,
     // An event with no photo of its own gets a card drawn from what it says —
     // title, when, where — rather than the same rectangle as everything else.
-    heroImage: socialImageUrl(event.img, site, `/og/${event.id}.png`),
+    // One that is over gets the archive mark, so a link shared today does not
+    // promise a square full of people that emptied a week ago.
+    heroImage: branch(passed)(
+      () => socialImageUrl(ARCHIVE_COVER, site, ARCHIVE_COVER),
+      () => socialImageUrl(event.img, site, `/og/${event.id}.png`),
+    ),
     descPreview: clipText(descMeta, 200),
-    cover: gallery[0],
-    more: gallery.slice(1),
+    cover: shown[0],
+    more: shown.slice(1),
     links: eventLinks(event),
     tickets: ticketUrl(event),
     // The page of an event that has happened is kept — the link somebody
     // shared has to keep working — so it must say so.
-    passed: !isUpcoming(today)(event),
+    passed,
     jsonLd: eventJsonLd({ event, title, desc: descMeta, image, address, url }),
     ...mapUrls(event),
   };

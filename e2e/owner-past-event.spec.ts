@@ -34,6 +34,30 @@ test('an event that has happened keeps its page, and says it is over', async ({ 
   await expect(page.locator('.event-passed a[data-passed-onward]')).toHaveAttribute('href', /\//);
 });
 
+test('an event that is over wears the archive mark instead of a photograph', async ({ page, context }) => {
+  // The page keeps working, and stops advertising a night that has been and
+  // gone: one shared picture in place of the photo, no credit under it (the
+  // picture is ours), and the same picture on a share of the link.
+  await signInAsOwner(page, context);
+  const created = await page.request.post('/api/events/submit', {
+    data: {
+      title: 'Sagra dell’Archivio 2019',
+      description: 'An evening long over.',
+      startDate: '2019-08-05',
+      categories: ['food'],
+      venue: 'Piazza di Prova',
+      image: 'https://www.mentelocale.it/repository/contenuti/horizontal/136204_half.jpg',
+    },
+  });
+  expect(created.ok()).toBe(true);
+  const id = (await created.json()).id;
+
+  await page.goto(`/event/${id}/`);
+  await expect(page.locator('.event-hero img')).toHaveAttribute('src', /\/og\/archive\.png/);
+  await expect(page.locator('.event-hero figcaption')).toHaveCount(0);
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/og\/archive\.png/);
+});
+
 test('an upcoming event carries no such banner', async ({ page, context }) => {
   await signInAsOwner(page, context);
   const created = await page.request.post('/api/events/submit', {

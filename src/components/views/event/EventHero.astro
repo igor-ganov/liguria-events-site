@@ -8,8 +8,12 @@ const { photo, title, photoBy } = Astro.props;
 
 <figure class="event-hero">
   <img src={resized(photo.image, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
-  <figcaption>
-    {photoBy}:{' '}
-    <a href={photo.href} target="_blank" rel="noopener">{photo.name}</a>
-  </figcaption>
+  {/* No credit for a picture of ours: the archive mark comes with no source,
+      and naming a newspaper under it would be a lie. */}
+  {photo.name !== '' && (
+    <figcaption>
+      {photoBy}:{' '}
+      <a href={photo.href} target="_blank" rel="noopener">{photo.name}</a>
+    </figcaption>
+  )}
 </figure>

@@ -30,8 +30,10 @@ const stampOf = (event: CompactEvent, fallback: string): string =>
  * are worth reading for two weeks, waiting for a crawler to find them by
  * following links is the difference between being in Google and not.
  *
- * Past events are left out: their pages no longer resolve once the corpus has
- * pruned them, and a sitemap full of 404s is worse than a smaller one.
+ * Past events are not here, but they are not left out either: they come from
+ * the collector's archive, which is a separate list — see
+ * archivedSitemapUrls. This one only ever sees what is still to come, because
+ * the corpus holds nothing else.
  */
 export const eventSitemapUrls = (
   events: readonly CompactEvent[],
