@@ -66,5 +66,12 @@ User-agent: meta-externalagent
 Disallow: /
 
 Sitemap: https://dovego.it/sitemap-index.xml
-# Event pages are server-rendered, so the generated index above cannot see them.
+# Event, venue and archive pages are server-rendered, so the generated index
+# above cannot see them. sitemap-events.xml is an index of the three files they
+# were split into: what is coming changes daily, venues rarely, the archive
+# never — and a crawler that takes a hundred URLs a day should spend them on
+# the first of those.
 Sitemap: https://dovego.it/sitemap-events.xml
+Sitemap: https://dovego.it/sitemap-upcoming.xml
+Sitemap: https://dovego.it/sitemap-places.xml
+Sitemap: https://dovego.it/sitemap-archive.xml

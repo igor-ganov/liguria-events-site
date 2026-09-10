@@ -76,6 +76,7 @@ cat:
 weekdays: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 months: [January, February, March, April, May, June, July, August, September, October, November, December]
 headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' }
+notify: { title: 'Daily notification', lead: 'One notification a morning: what is on today where you are. Nothing on, nothing sent.', on: 'Notify me', off: 'Stop notifying me', at: 'At', where: 'About: {value}', asked: 'Your browser will ask for permission.', refused: 'Your browser refused notifications. You can allow them in the site settings and try again.', done: 'Done. The first one arrives tomorrow morning.' }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }

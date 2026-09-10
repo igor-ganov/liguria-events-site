@@ -11,6 +11,7 @@ export const UI_ICON_PATHS = {
   gem: '<path d="M5 8h14l-7 13z"/><path d="M5 8 8 3.5h8L19 8"/><path d="M9 8l3 13 3-13M9 8l3-4.5L15 8"/>',
   ticket: '<path d="M4 7h16v3.2a1.8 1.8 0 0 0 0 3.6V17H4v-3.2a1.8 1.8 0 0 0 0-3.6z"/><path d="M10 7.5v9" stroke-dasharray="1.6 2"/>',
   clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  bell: '<path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5h-15S6 13 6 9z"/><path d="M10 18a2 2 0 0 0 4 0"/>',
   star: '<path d="M12 2.8l2.9 6 6.5.9-4.7 4.6 1.1 6.5L12 17.7 6.1 20.8l1.1-6.5L2.5 9.7l6.5-.9z"/>',
   phone: '<path d="M6.5 3.5H10l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5v3.5a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7 2 2 0 0 1 6.5 3.5z"/>',
   external: '<path d="M14 5h5v5M19 5l-8 8M17 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h5"/>',

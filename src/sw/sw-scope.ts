@@ -16,6 +16,17 @@ export type SwFetchEvent = Readonly<{
 
 export type SwLifecycleEvent = Readonly<{ waitUntil: (work: Promise<unknown>) => void }>;
 
+/** A push from our own sender. It carries nothing: what to show is fetched
+ *  when the worker wakes, which is fresher than anything we could have put in
+ *  the message. */
+export type SwPushEvent = Readonly<{ waitUntil: (work: Promise<unknown>) => void }>;
+
+/** Somebody tapping the notification. */
+export type SwNotificationEvent = Readonly<{
+  notification: Readonly<{ data: unknown; close: () => void }>;
+  waitUntil: (work: Promise<unknown>) => void;
+}>;
+
 /** A page talking to the worker. `source` is the page that spoke, and the only
  *  one the answer belongs to. */
 export type SwMessageEvent = Readonly<{
@@ -33,8 +44,13 @@ export type SwScope = Readonly<{
     (type: 'fetch', listener: (event: SwFetchEvent) => void): void;
     (type: 'message', listener: (event: SwMessageEvent) => void): void;
     (type: 'install' | 'activate', listener: (event: SwLifecycleEvent) => void): void;
+    (type: 'push', listener: (event: SwPushEvent) => void): void;
+    (type: 'notificationclick', listener: (event: SwNotificationEvent) => void): void;
   };
   skipWaiting: () => Promise<void>;
-  clients: Readonly<{ claim: () => Promise<void> }>;
+  clients: Readonly<{ claim: () => Promise<void>; openWindow: (url: string) => Promise<unknown> }>;
+  registration: Readonly<{
+    showNotification: (title: string, options: Record<string, unknown>) => Promise<void>;
+  }>;
   location: Readonly<{ origin: string }>;
 }>;

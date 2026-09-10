@@ -21,6 +21,7 @@ const ui: MenuUi = {
     ical: 'iCal',
   },
   contribute: { link: 'Add your event' },
+  notify: { title: 'Daily notification' },
 };
 const view = { width: 400, height: 800 };
 
@@ -44,10 +45,13 @@ describe('menuGroups', () => {
       ['/submit', '/it/liguria/', '/it/liguria/calendar/', '/it/liguria/map/'],
     );
   });
-  test('the last section links out, untouched by the locale', () => {
+  test('the last section carries the daily notification and the two links out', () => {
+    // The notification page is ours and takes the reader's language; the bot
+    // and the calendar feed are addresses that have no locale to take.
     assert.deepEqual(
       groups[2]?.links.map((l) => l.href),
       [
+        '/it/notifications/',
         'https://t.me/dovego_bot',
         'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics',
       ],

@@ -1,3 +1,4 @@
+import { localizedUrl } from '../i18n/localized-url.ts';
 import { regionUrl } from '../region/region-url.ts';
 import type { UiIconName } from '../icons/ui-icon-paths.ts';
 import type { Locale } from '../i18n/locales.ts';
@@ -13,6 +14,7 @@ export type MenuGroup = Readonly<{
 export type MenuUi = Readonly<{
   menu: Readonly<{ events: string; explore: string; more: string }>;
   contribute: Readonly<{ link: string }>;
+  notify: Readonly<{ title: string }>;
   nav: Readonly<{
     feed: string;
     calendar: string;
@@ -53,12 +55,9 @@ export const menuGroups = (lang: Locale, region: string, ui: MenuUi): readonly M
     label: ui.menu.more,
     favourites: false,
     links: [
+      { href: localizedUrl(lang, 'notifications/'), icon: 'bell', label: ui.notify.title },
       { href: 'https://t.me/dovego_bot', icon: 'bot', label: ui.nav.bot },
-      {
-        href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics',
-        icon: 'ical',
-        label: ui.nav.ical,
-      },
+      { href: 'https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics', icon: 'ical', label: ui.nav.ical },
     ],
   },
 ];

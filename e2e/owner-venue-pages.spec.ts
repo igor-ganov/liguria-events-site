@@ -9,7 +9,9 @@ import type { APIRequestContext } from '@playwright/test';
 // Venue pages are server-rendered, so they are advertised through the events
 // sitemap rather than the generated one.
 const aVenue = async (request: APIRequestContext): Promise<string> => {
-  const xml = await (await request.get('/sitemap-events.xml')).text();
+  // The venues live in the places sitemap: sitemap-events.xml is an index of
+  // the three files the old single list was split into.
+  const xml = await (await request.get('/sitemap-places.xml')).text();
   const paths = [...xml.matchAll(/<loc>https:\/\/dovego\.it(\/[^<]+)<\/loc>/g)]
     .map((m) => m[1] ?? '')
     .filter((path) => path.split('/').filter(Boolean).length === 3)
@@ -20,12 +22,15 @@ const aVenue = async (request: APIRequestContext): Promise<string> => {
   // venue whose events have all passed reads as zero. Ask each candidate what
   // it has and take the first that has something — the tests below are about
   // how a busy venue page renders, not about which venue it happens to be.
-  for (const path of paths.slice(0, 8)) {
-    const html = await (await request.get(path)).text();
-    const count = Number(/class="venue-sub"[^>]*>[^<0-9]*(\d+)/.exec(html)?.[1] ?? 0);
-    if (count > 0) return path;
-  }
-  throw new Error(`no venue with events among ${paths.slice(0, 8).join(', ')}`);
+  const counted = await Promise.all(
+    paths.slice(0, 8).map(async (path) => {
+      const html = await (await request.get(path)).text();
+      return { path, count: Number(/class="venue-sub"[^>]*>[^<0-9]*(\d+)/.exec(html)?.[1] ?? 0) };
+    }),
+  );
+  const busy = counted.filter((venue) => venue.count > 0).at(0);
+  expect(busy, `no venue with events among ${paths.slice(0, 8).join(', ')}`).toBeDefined();
+  return busy?.path ?? '';
 };
 
 test('a venue page lists that venue’s events and titles itself after it', async ({ page, request }) => {

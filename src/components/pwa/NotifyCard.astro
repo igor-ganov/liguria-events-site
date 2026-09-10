@@ -1,0 +1,40 @@
+---
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The daily notification, offered to anybody: the app has no sign-in, so this
+// cannot live behind the account page. The switch reflects what the browser
+// actually holds, checked on load — a reader who turned notifications off in
+// the system must not find this still saying "on".
+type Props = Readonly<{ ui: Ui; lang: string; vapidKey: string }>;
+const { ui, lang, vapidKey } = Astro.props;
+const HOURS = [7, 8, 9, 10, 12, 18, 20];
+---
+
+<section class="notify-card" data-notify data-lang={lang} data-vapid={vapidKey}>
+  <h2>{ui.notify.title}</h2>
+  <p class="muted">{ui.notify.lead}</p>
+  <p class="notify-where" data-notify-where hidden></p>
+  <fieldset class="notify-hours">
+    <legend>{ui.notify.at}</legend>
+    {HOURS.map((hour) => (
+      <label>
+        <input type="radio" name="notify-hour" value={hour} checked={hour === 9} data-notify-hour />
+        <span>{`${String(hour).padStart(2, '0')}:00`}</span>
+      </label>
+    ))}
+  </fieldset>
+  <p class="notify-row">
+    <button type="button" class="chip" data-notify-toggle aria-pressed="false">{ui.notify.on}</button>
+  </p>
+  <p class="notify-status" role="status" aria-live="polite" data-notify-status></p>
+</section>
+
+<style>
+  .notify-card { margin-top: 2rem; display: grid; gap: 0.5rem; }
+  .notify-card h2 { font-size: 1.05rem; margin: 0; }
+  .notify-row { display: flex; gap: 0.75rem; align-items: center; margin: 0.25rem 0 0; }
+  .notify-hours { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+  .notify-hours legend { float: left; margin-right: 0.6rem; padding: 0; }
+  .notify-hours label { display: inline-flex; gap: 0.3rem; align-items: center; min-height: 24px; }
+  .notify-status:empty { display: none; }
+</style>

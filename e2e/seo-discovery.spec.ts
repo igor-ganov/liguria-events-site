@@ -5,10 +5,11 @@ import { test, expect } from '@playwright/test';
 // was true — the event pages are server-rendered, so the generated sitemap could
 // not see a single one of them.
 
-test('robots.txt announces the events sitemap alongside the generated index', async ({ request }) => {
+test('robots.txt announces every sitemap the site keeps by hand', async ({ request }) => {
   const robots = await (await request.get('/robots.txt')).text();
-  expect(robots).toContain('Sitemap: https://dovego.it/sitemap-index.xml');
-  expect(robots).toContain('Sitemap: https://dovego.it/sitemap-events.xml');
+  ['sitemap-index.xml', 'sitemap-events.xml', 'sitemap-upcoming.xml', 'sitemap-places.xml', 'sitemap-archive.xml'].forEach(
+    (name) => expect(robots).toContain(`Sitemap: https://dovego.it/${name}`),
+  );
 });
 
 test('Google may use the site in its AI answers; the other scrapers may not', async ({ request }) => {
@@ -25,24 +26,44 @@ test('Google may use the site in its AI answers; the other scrapers may not', as
   expect(robots).toMatch(/User-agent: \*[\s\S]*?Allow: \//);
 });
 
-test('the events sitemap lists event pages, with hreflang for all three locales', async ({ request }) => {
+test('the old sitemap address is now an index of the three it was split into', async ({ request }) => {
+  // Google has had this address submitted since August; keeping it as an index
+  // hands over the split without anybody resubmitting anything.
   const res = await request.get('/sitemap-events.xml');
   expect(res.status()).toBe(200);
   expect(res.headers()['content-type']).toContain('xml');
   const xml = await res.text();
+  expect(xml).toContain('<sitemapindex');
+  ['sitemap-upcoming.xml', 'sitemap-places.xml', 'sitemap-archive.xml'].forEach((part) =>
+    expect(xml).toContain(`<loc>https://dovego.it/${part}</loc>`),
+  );
+});
 
+test('the upcoming sitemap lists event pages, with hreflang for all three locales', async ({ request }) => {
+  const res = await request.get('/sitemap-upcoming.xml');
+  expect(res.status()).toBe(200);
+  const xml = await res.text();
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? '');
   expect(locs.length).toBeGreaterThan(0);
-  // Event pages and venue pages are both server-rendered — a venue with nothing
-  // on is still a venue — so the generated sitemap cannot see either of them.
-  expect(locs.some((loc) => loc.includes('/event/'))).toBe(true);
-  expect(locs.some((loc) => !loc.includes('/event/'))).toBe(true);
+  expect(locs.every((loc) => loc.includes('/event/'))).toBe(true);
   // One entry per locale, each declaring the other two and the x-default.
   expect(locs.some((loc) => /\/it\/event\//.test(loc))).toBe(true);
   expect(locs.some((loc) => /\/ru\/event\//.test(loc))).toBe(true);
   expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
   expect(xml).toContain('hreflang="x-default"');
   expect(xml).toContain('<lastmod>');
+});
+
+test('venues have a sitemap of their own, and the archive another', async ({ request }) => {
+  // Split by how often each part changes: a crawler that takes a hundred URLs
+  // a day should spend them on what is new, not on two thousand finished pages.
+  const places = await (await request.get('/sitemap-places.xml')).text();
+  expect(places).toContain('<urlset');
+  expect(places.includes('/event/')).toBe(false);
+
+  const archive = await request.get('/sitemap-archive.xml');
+  expect(archive.status()).toBe(200);
+  expect((await archive.text()).includes('<urlset')).toBe(true);
 });
 
 test('the generated sitemap no longer spends itself on map views', async ({ request }) => {

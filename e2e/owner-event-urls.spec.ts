@@ -9,7 +9,7 @@ import type { APIRequestContext } from '@playwright/test';
 // working and say where they went.
 
 const anEventId = async (request: APIRequestContext): Promise<string> => {
-  const xml = await (await request.get('/sitemap-events.xml')).text();
+  const xml = await (await request.get('/sitemap-upcoming.xml')).text();
   const id = /<loc>https:\/\/dovego\.it\/event\/[^<]*?([0-9a-f]{12})\/<\/loc>/.exec(xml)?.[1];
   expect(id, 'the sitemap carries no event').toBeDefined();
   return id ?? '';
@@ -99,7 +99,7 @@ test('a real city page is not mistaken for a stray address', async ({ request })
 });
 
 test('the sitemap advertises addresses, not ids', async ({ request }) => {
-  const xml = await (await request.get('/sitemap-events.xml')).text();
+  const xml = await (await request.get('/sitemap-upcoming.xml')).text();
   const events = [...xml.matchAll(/<loc>https:\/\/dovego\.it\/(?:it\/|ru\/)?event\/([^<]+)\/<\/loc>/g)].map(
     (match) => match[1] ?? '',
   );

@@ -1,0 +1,25 @@
+---
+import { VAPID_PUBLIC_KEY } from '../lib/pwa/vapid-key.ts';
+import Layout from '../layouts/Layout.astro';
+import NotifyCard from '../components/pwa/NotifyCard.astro';
+import { DEFAULT_REGION } from '../lib/region/default-region.ts';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+// Offered to anybody: the app has no sign-in, so this cannot live behind the
+// account page. Everything on it happens in the browser — the page itself is
+// static, and the only thing the build puts in is the public half of the key
+// the browser subscribes with.
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+
+---
+
+<Layout lang={lang} region={DEFAULT_REGION} title={ui.notify.title} path="notifications/">
+  <h1>{ui.notify.title}</h1>
+  <NotifyCard ui={ui} lang={lang} vapidKey={VAPID_PUBLIC_KEY} />
+</Layout>
+
+<script>
+  import { initNotify } from '../components/pwa/init-notify.ts';
+  initNotify();
+</script>

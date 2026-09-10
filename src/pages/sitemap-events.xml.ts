@@ -1,30 +1,20 @@
-import { archivedEvents } from '../data/archived-events.ts';
-import { archivedSitemapUrls } from '../lib/seo/archived-sitemap-urls.ts';
-import { cachedEvents } from '../data/cached-events.ts';
-import { eventSitemapUrls } from '../lib/seo/event-sitemap-urls.ts';
-import { EVENTS_URL } from '../data/events-url.ts';
 import { isoToday } from '../lib/calendar/iso-today.ts';
-import { sitemapXml } from '../lib/seo/sitemap-xml.ts';
+import { sitemapIndexXml } from '../lib/seo/sitemap-index-xml.ts';
 import type { APIRoute } from 'astro';
 
-// A sitemap of its own, emitted at build time and announced from robots.txt
-// beside the generated one: @astrojs/sitemap walks the prerendered routes, and
-// event pages are deliberately server-rendered, so they can only get in here.
+// This address is what Google has had submitted since August, so it stays —
+// as an index of the three files it was split into. The split arrives without
+// anybody resubmitting anything, and a crawler can learn that the upcoming
+// events move daily while the archive does not.
 export const prerender = true;
 
-export const GET: APIRoute = async ({ site }) => {
-  const payload = await cachedEvents(EVENTS_URL);
+const PARTS = ['sitemap-upcoming.xml', 'sitemap-places.xml', 'sitemap-archive.xml'];
+
+export const GET: APIRoute = ({ site }) => {
   const today = isoToday();
-  // The archive belongs here for the same reason the upcoming events do: these
-  // pages exist and resolve, and a crawler keeps only what it is still offered.
-  const archived = await archivedEvents(EVENTS_URL);
+  const origin = site?.origin ?? 'https://dovego.it';
   return new Response(
-    sitemapXml([
-      ...eventSitemapUrls(payload.events, today, site),
-      ...archivedSitemapUrls(archived, site),
-    ]),
-    {
-      headers: { 'content-type': 'application/xml; charset=utf-8' },
-    },
+    sitemapIndexXml(PARTS.map((part) => ({ loc: `${origin}/${part}`, lastmod: today }))),
+    { headers: { 'content-type': 'application/xml; charset=utf-8' } },
   );
 };

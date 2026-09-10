@@ -12,6 +12,11 @@ test('route shows a duration per stop and honours a manual override', async ({ p
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2'])));
   await page.goto('/favorites/');
 
+  // The two saved events have to be on the page before the button is worth
+  // pressing: the click handler is wired by the same script that renders them,
+  // and on a loaded machine pressing first means generating nothing — which
+  // then fails as "no durations" thirteen seconds later.
+  await expect(page.locator('[data-fav-list] li')).toHaveCount(2);
   await page.locator('[data-route-from]').fill('2099-07-10');
   await page.locator('[data-route-generate]').click();
   // The itinerary is built before anything in it can be read. Without this the
