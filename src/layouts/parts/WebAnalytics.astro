@@ -1,25 +1,14 @@
----
-// Cloudflare Web Analytics. The site has been paying for this since 5 July and
-// receiving 20 pageloads a month from it: the zone's automatic injection does
-// not reach a response served by a Worker, so the beacon was never on the page
-// while the dashboard quietly showed a flat line.
-//
-// Cookieless, no cross-site identifier, nothing stored in the browser — which
-// is why it needs no consent banner and why it is the only analytics here.
-const TOKEN = 'f833c208ec95461b9d28ca255c477582';
----
-
-<script
-  is:inline
-  type="module"
-  src="https://static.cloudflareinsights.com/beacon.min.js"
-  data-cf-beacon={`{"token": "${TOKEN}"}`}
-></script>
-
 <!-- pro-motion first-party beacon (pm-collector Worker). Classic deferred
-     script on purpose: pm.js reads document.currentScript, which is null in
-     modules. Cookieless like the CF beacon above; custom events go through
-     src/components/analytics/track.ts. -->
+     script on purpose: pm.js reads document.currentScript, which is undefined
+     in modules. Cookieless — no cookie, no localStorage, no cross-site
+     identifier — which is why this page needs no consent banner. Custom events
+     go through src/components/analytics/track.ts.
+
+     Cloudflare Web Analytics used to sit here too and never recorded a single
+     pageload: its beacon posts to /cdn-cgi/rum on this origin, and the Worker
+     route answers that path with a 404, so every report was dropped. The
+     first-party beacon measures the same Web Vitals and more, on one script
+     instead of two. -->
 <script
   is:inline
   defer
