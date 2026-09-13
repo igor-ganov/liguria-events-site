@@ -11,7 +11,7 @@ describe('a shard the site could not be asked for', () => {
     // 504 is what the worker answers for a file it does not hold with no
     // connection. Read as empty, it told a reader in a tunnel that Liguria has
     // no landmarks.
-    expect(landmarksFromResponse(answer(504), 'liguria')).rejects.toThrow(/unreachable/);
+    await expect(landmarksFromResponse(answer(504), 'liguria')).rejects.toThrow(/unreachable/);
   });
 
   test('places refuse it too', () => {
