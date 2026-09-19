@@ -1,0 +1,51 @@
+---
+// The account-deletion page Google Play links to from the store listing. It has
+// to stand on its own: name the app, spell out the steps, and say what goes and
+// what stays — a paragraph inside the privacy policy does not satisfy that.
+import { ROOT_ONLY } from '../lib/i18n/root-only-locales.ts';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout lang="en" title="Delete your account" path="delete-account/" locales={ROOT_ONLY}>
+  <article class="legal">
+    <h1>Delete your Dove Go account</h1>
+    <p class="legal-meta">Applies to dovego.it and the Dove Go Android app</p>
+
+    <p>
+      Dove Go stores an account only for people who sign in to submit events. Browsing, the
+      calendar, the map and notifications need no account and store nothing about you on our side.
+    </p>
+
+    <h2>How to request deletion</h2>
+    <ol>
+      <li>
+        Email <a href="mailto:public@dovego.it?subject=Delete%20my%20account">public@dovego.it</a>
+        from the address you signed in with, with the subject “Delete my account”.
+      </li>
+      <li>We reply to confirm it is you, from the same address.</li>
+      <li>The account and its data are deleted within 30 days of that confirmation.</li>
+    </ol>
+
+    <h2>What is deleted</h2>
+    <ul>
+      <li>Your email address and the sign-in record attached to it.</li>
+      <li>Your saved events and any submission drafts.</li>
+      <li>Any push-notification subscription made from your devices.</li>
+    </ul>
+
+    <h2>What is kept</h2>
+    <ul>
+      <li>
+        Events you submitted that are already published stay online, without your name or email —
+        they describe a public event, and other people rely on them. Ask in the same email and we
+        will take yours down too.
+      </li>
+      <li>
+        Server logs and anonymous, aggregated usage counts, which carry no account identifier, for
+        up to 90 days.
+      </li>
+    </ul>
+
+    <p>See also our <a href="/privacy">Privacy Policy</a>.</p>
+  </article>
+</Layout>
