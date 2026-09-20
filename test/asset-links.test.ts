@@ -20,10 +20,10 @@ describe('assetLinks', () => {
 
   test('carries every certificate that may sign a build people install', () => {
     const [entry] = assetLinks();
-    // More than one is normal and correct: the key that signs a build here, and
-    // the key Google re-signs with once the app goes through Play App Signing.
+    // Two, now that the app is on Play: the upload key that signs a build here,
+    // and the key Google re-signs with, which is what a store install presents.
     // A missing fingerprint costs a release, so this asserts the shape of each.
-    assert.ok((entry?.target.sha256_cert_fingerprints.length ?? 0) >= 1);
+    assert.ok((entry?.target.sha256_cert_fingerprints.length ?? 0) >= 2);
     entry?.target.sha256_cert_fingerprints.forEach((fingerprint) => {
       assert.match(fingerprint, /^(?:[0-9A-F]{2}:){31}[0-9A-F]{2}$/, fingerprint);
     });
