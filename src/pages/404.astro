@@ -7,6 +7,7 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import { regionUrl } from '../lib/region/region-url.ts';
 import { strayEventPath } from '../lib/events/stray-event-path.ts';
+import { permanentRedirect } from '../lib/http/permanent-redirect.ts';
 import { DEFAULT_REGION } from '../lib/region/default-region.ts';
 
 const stray = strayEventPath(Astro.url.pathname);
@@ -14,7 +15,7 @@ switch (stray) {
   case undefined:
     break;
   default:
-    return Astro.redirect(stray, 301);
+    return permanentRedirect(stray);
 }
 const home = regionUrl('en', DEFAULT_REGION);
 ---

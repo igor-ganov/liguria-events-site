@@ -1,4 +1,5 @@
 import { branch } from '../../lib/branch.ts';
+import { reportFavorite } from '../analytics/report-favorite.ts';
 import { favMethod } from './fav-method.ts';
 import { favoritesState } from './favorites-state.ts';
 import { isDefined } from '../../lib/is-defined.ts';
@@ -23,6 +24,7 @@ const apply = (button: HTMLElement, id: string): void => {
   branch(turningOn)<void>(() => add(button, id), () => remove(id));
   persistFavorites();
   paintFavorites();
+  reportFavorite(turningOn);
   [turningOn]
     .filter(() => favoritesState.loggedIn)
     .forEach((on) => {
