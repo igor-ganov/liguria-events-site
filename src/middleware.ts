@@ -3,6 +3,7 @@ import { SESSION_COOKIE, sessionCookie } from './lib/auth/session.ts';
 import { authGate } from './lib/auth/auth-gate.ts';
 import { isDefined } from './lib/is-defined.ts';
 import { magicLinkLanding } from './lib/auth/magic-link-landing.ts';
+import { permanentRedirect } from './lib/http/permanent-redirect.ts';
 import { sessionUser } from './lib/auth/session-user.ts';
 import { strayEventPath } from './lib/events/stray-event-path.ts';
 
@@ -17,6 +18,18 @@ const SESSION_MAX_AGE = 7 * 24 * 3600;
  * it leaves /auth/verify as pure markup for the "link expired" case.
  */
 export const onRequest = defineMiddleware(async (ctx, next) => {
+  // Answered before any session work: an event id where a city slug belongs is
+  // a shape only crawlers ask for, tens of thousands of times a day. It names a
+  // real event, so it is moved to it rather than answered with a 404 — and the
+  // answer carries cache headers, so asking again costs nothing.
+  const stray = strayEventPath(ctx.url.pathname);
+  switch (stray) {
+    case undefined:
+      break;
+    default:
+      return permanentRedirect(stray);
+  }
+
   const env = ctx.locals.runtime?.env;
 
   const signin = await magicLinkLanding(env, ctx.url, Date.now());
@@ -37,10 +50,6 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   const bounce = [
     ...signin.map(({ target }) => ctx.redirect(target)),
     ...[authGate(ctx.url.pathname, ctx.locals.user)].filter(isDefined).map((to) => ctx.redirect(to)),
-    // An event id where a city slug belongs: a shape only crawlers ask for,
-    // tens of thousands of times a day. It names a real event, so it is moved
-    // to it rather than answered with a 404.
-    ...[strayEventPath(ctx.url.pathname)].filter(isDefined).map((to) => ctx.redirect(to, 301)),
   ];
   return bounce.at(0) ?? next();
 });
