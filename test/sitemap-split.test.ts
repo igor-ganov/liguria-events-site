@@ -5,7 +5,7 @@
 import { describe, expect, test } from 'bun:test';
 import { sitemapIndexXml } from '../src/lib/seo/sitemap-index-xml.ts';
 import { upcomingSitemapUrls } from '../src/lib/seo/upcoming-sitemap-urls.ts';
-import { placeSitemapUrls } from '../src/lib/seo/place-sitemap-urls.ts';
+import { facetSitemapUrls } from '../src/lib/seo/facet-sitemap-urls.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const SITE = new URL('https://dovego.it');
@@ -27,9 +27,13 @@ const events = [
 describe('upcomingSitemapUrls', () => {
   const urls = upcomingSitemapUrls(events, '2026-09-10', SITE);
 
-  test('the events still to come, in every language, and nothing else', () => {
-    expect(urls).toHaveLength(3);
-    expect(urls.every((url) => url.loc.includes('concerto-di-domani'))).toBe(true);
+  test('the events still to come, one row each, and nothing else', () => {
+    expect(urls).toHaveLength(1);
+    expect(urls[0]?.loc).toBe('https://dovego.it/it/event/concerto-di-domani-teatro-di-prova-2099-09-12-aaaaaaaaaaaa/');
+  });
+
+  test('and the row still declares the languages it has', () => {
+    expect(urls[0]?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'it', 'ru', 'x-default']);
   });
 
   test('a venue page is not an event and lives in the other file', () => {
@@ -37,11 +41,14 @@ describe('upcomingSitemapUrls', () => {
   });
 });
 
-describe('placeSitemapUrls', () => {
-  const urls = placeSitemapUrls(events, '2026-09-10', SITE);
+describe('facetSitemapUrls', () => {
+  const urls = facetSitemapUrls(events, '2099-09-12', SITE);
 
-  test('venues that have something on, in every language', () => {
-    expect(urls.some((url) => url.loc.includes('/liguria/genova/teatro-di-prova/'))).toBe(true);
+  // 2 553 venue pages, none indexed, none fetched: advertising them cost the
+  // pages Google does read their place in the queue.
+  test('a city facet, and not a venue page', () => {
+    expect(urls.some((url) => url.loc.includes('/it/liguria/genova/'))).toBe(true);
+    expect(urls.some((url) => url.loc.includes('/teatro-di-prova/'))).toBe(false);
   });
 
   test('and no event pages, which change on a different clock', () => {
@@ -53,7 +60,7 @@ describe('sitemapIndexXml', () => {
   const xml = sitemapIndexXml(
     [
       { loc: 'https://dovego.it/sitemap-upcoming.xml', lastmod: '2026-09-10' },
-      { loc: 'https://dovego.it/sitemap-archive.xml', lastmod: '2026-09-09' },
+      { loc: 'https://dovego.it/sitemap-places.xml', lastmod: '2026-09-09' },
     ],
   );
 

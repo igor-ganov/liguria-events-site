@@ -34,7 +34,10 @@
 # region may change, and a permanent redirect is one you must be prepared to
 # honour forever — which is precisely how "/" came to point, in every browser
 # that had visited, at a page that no longer existed.
-/                /liguria/                  302
+#
+# "/" itself is deliberately absent: it is the one address where the language is
+# chosen for the reader, from Accept-Language, and that needs the worker. See
+# src/lib/i18n/entry-path.ts.
 /calendar        /liguria/calendar/         302
 /map             /liguria/map/              302
 /it              /it/liguria/               302

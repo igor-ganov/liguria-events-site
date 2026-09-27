@@ -3,7 +3,7 @@ import { canonicalUrl } from './canonical-url.ts';
 import { eventPath } from '../event-path.ts';
 import { LOCALES } from '../i18n/locales.ts';
 import type { ArchivedEvent } from '../events/archived-schema.ts';
-import type { SitemapUrl } from './event-sitemap-urls.ts';
+import type { SitemapUrl } from './sitemap-url.ts';
 
 /** When the page was last written: the record's own stamp, else the day the
  *  event ended. Never today — telling a crawler that a page from August

@@ -1,4 +1,4 @@
-import type { SitemapUrl } from './event-sitemap-urls.ts';
+import type { SitemapUrl } from './sitemap-url.ts';
 
 const escapeXml = (value: string): string =>
   value
