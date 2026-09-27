@@ -1,8 +1,10 @@
 import { defineMiddleware } from 'astro:middleware';
+import { entryPath } from './lib/i18n/entry-path.ts';
 import { SESSION_COOKIE, sessionCookie } from './lib/auth/session.ts';
 import { authGate } from './lib/auth/auth-gate.ts';
 import { isDefined } from './lib/is-defined.ts';
 import { magicLinkLanding } from './lib/auth/magic-link-landing.ts';
+import { negotiatedRedirect } from './lib/http/negotiated-redirect.ts';
 import { permanentRedirect } from './lib/http/permanent-redirect.ts';
 import { sessionUser } from './lib/auth/session-user.ts';
 import { strayEventPath } from './lib/events/stray-event-path.ts';
@@ -28,6 +30,17 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
       break;
     default:
       return permanentRedirect(stray);
+  }
+
+  // The front door picks a language for a reader who has not picked one.
+  // public/_redirects used to send every visitor to the English region: the
+  // assets layer answers before the worker and cannot read a header.
+  const entry = entryPath(ctx.url.pathname, ctx.request.headers.get('accept-language') ?? undefined);
+  switch (entry) {
+    case undefined:
+      break;
+    default:
+      return negotiatedRedirect(entry);
   }
 
   const env = ctx.locals.runtime?.env;

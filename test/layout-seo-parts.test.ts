@@ -30,10 +30,11 @@ describe('alternateLinks', () => {
       ['en', 'it', 'ru', 'x-default'],
     );
   });
-  test('each row points at that locale, and x-default at the default one', () => {
+  // x-default is the answer to "none of the above", and the site speaks Italian.
+  test('each row points at that locale, and x-default at the language we speak', () => {
     assert.equal(links[0]?.href, 'https://dovego.it/liguria/');
     assert.equal(links[1]?.href, 'https://dovego.it/it/liguria/');
-    assert.equal(links[3]?.href, links[0]?.href);
+    assert.equal(links[3]?.href, links[1]?.href);
   });
 });
 
