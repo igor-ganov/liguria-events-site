@@ -23,16 +23,20 @@ describe('eventMonths', () => {
   });
 
   test('and runs one month past the last of them', () => {
-    expect(eventMonths([on('2026-10-04'), on('2026-12-31')], TODAY).at(-1)).toBe('2027-01');
+    expect(eventMonths([on('2026-10-04'), on('2026-11-30')], TODAY).at(-1)).toBe('2026-12');
+  });
+
+  // Something in the corpus runs until 2029. Following it built 804 month pages.
+  test('but no further ahead than the horizon, whatever the corpus announces', () => {
+    expect(eventMonths([on('2029-06-01')], TODAY).at(-1)).toBe('2026-12');
   });
 
   test('covers every month in between, with no gaps', () => {
-    expect(eventMonths([on('2026-11-01')], TODAY)).toEqual([
+    expect(eventMonths([on('2026-10-01')], TODAY)).toEqual([
       '2026-08',
       '2026-09',
       '2026-10',
       '2026-11',
-      '2026-12',
     ]);
   });
 
@@ -45,6 +49,6 @@ describe('eventMonths', () => {
   });
 
   test('a long event is counted by where it ends', () => {
-    expect(eventMonths([on('2026-09-01', '2026-11-30')], TODAY).at(-1)).toBe('2026-12');
+    expect(eventMonths([on('2026-09-01', '2026-10-31')], TODAY).at(-1)).toBe('2026-11');
   });
 });
