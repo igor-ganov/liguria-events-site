@@ -5,6 +5,7 @@ import FeedGroups from './feed/FeedGroups.astro';
 import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
 import SubscribeBar from './feed/SubscribeBar.astro';
+import TesterCall from '../testing/TesterCall.astro';
 import VenueHeader from './feed/VenueHeader.astro';
 import { cachedEvents } from '../../data/cached-events.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
@@ -38,7 +39,7 @@ const image = socialImageUrl(socialImage(events), Astro.site);
 
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
-  {venue === undefined && <h1 class="visually-hidden">{ui.nav.feed}</h1>}
+  {venue === undefined && <><h1 class="visually-hidden">{ui.nav.feed}</h1><TesterCall ui={ui} city={city} /></>}
   {venue !== undefined && (
     <VenueHeader
       lang={lang}

@@ -39,6 +39,7 @@ export const UiDictSchema = Schema.Struct({
   weekdays: Schema.Array(Schema.String),
   months: Schema.Array(Schema.String),
   notify: Schema.Struct({ title: Schema.String, lead: Schema.String, on: Schema.String, off: Schema.String, at: Schema.String, where: Schema.String, asked: Schema.String, refused: Schema.String, done: Schema.String }),
+  testers: Schema.Struct({ title: Schema.String, lead: Schema.String, join: Schema.String, install: Schema.String }),
   headings: Schema.Struct({ ongoing: Schema.String, sources: Schema.String, allEvents: Schema.String, editions: Schema.String }),
   calNav: Schema.Struct({ prev: Schema.String, next: Schema.String }),
   badges: Schema.Struct({ free: Schema.String, gem: Schema.String, made: Schema.String }),

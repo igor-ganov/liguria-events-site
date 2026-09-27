@@ -77,6 +77,7 @@ weekdays: [Lun, Mar, Mer, Gio, Ven, Sab, Dom]
 months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Settembre, Ottobre, Novembre, Dicembre]
 headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' , editions: 'Altri anni'}
 notify: { title: 'Notifica giornaliera', lead: 'Una notifica al mattino: cosa c’è oggi dove sei. Se non c’è nulla, non arriva nulla.', on: 'Avvisami', off: 'Non avvisarmi più', at: 'Alle', where: 'Su: {value}', asked: 'Il browser chiederà il permesso.', refused: 'Il browser ha rifiutato le notifiche. Puoi consentirle nelle impostazioni del sito e riprovare.', done: 'Fatto. La prima arriva domani mattina.' }
+testers: { title: 'Aiutaci a lanciare l’app', lead: 'L’app Android è in test chiuso. Google chiede dodici tester iscritti per quattordici giorni prima di poterla pubblicare: iscriversi richiede un minuto.', join: 'Unisciti ai tester', install: 'Poi installala' }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }

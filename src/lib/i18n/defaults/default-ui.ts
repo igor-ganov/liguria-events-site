@@ -1,3 +1,4 @@
+import { DEFAULT_APP_UI } from './default-app-ui.ts';
 import { DEFAULT_AUTH_UI } from './default-auth-ui.ts';
 import { DEFAULT_CATALOG_UI } from './default-catalog-ui.ts';
 import { DEFAULT_LANDMARKS_UI } from './default-landmarks-ui.ts';
@@ -33,15 +34,10 @@ export const DEFAULT_UI: Ui = {
     map: "Map of events in {place} — find what's on near you.",
   },
   ...DEFAULT_CATALOG_UI,
-  notify: { title: '', lead: '', on: '', off: '', at: '', where: '', asked: '', refused: '', done: '' },
+  ...DEFAULT_APP_UI,
   headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' },
   calNav: { prev: 'Previous month', next: 'Next month' },
   badges: { free: 'free', gem: 'gem', made: 'made here' },
-  subscribe: { note: '', calendar: '', rss: '' },
-  share: { label: '', copied: '' },
-  install: { label: '', hint: '' },
-  offline: { notice: '', saved: '', updated: '', reload: '', retry: '', listAway: '' },
-  outbox: { queued: '', waiting: '', conflict: '', sent: '' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },
   eventForm: { title: '', description: '', image: '', categories: '', starts: '', addDate: '', removeDate: '', dateLabel: '', timeLabel: '', whatIsOn: '', whatIsOnHint: '', venue: '', address: '', addressHint: '', phone: '', website: '', freeEntry: '', mapLabel: '', mapHint: '', submitCreate: '', submitEdit: '', uploadImage: '', replaceImage: '' },
   contribute: { link: '', venue: '', empty: '', ownEvent: '', ownEventLink: '' },

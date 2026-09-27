@@ -24,6 +24,7 @@ const ui = defineCollection({
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),
     notify: z.object({ title: z.string(), lead: z.string(), on: z.string(), off: z.string(), at: z.string(), where: z.string(), asked: z.string(), refused: z.string(), done: z.string() }),
+    testers: z.object({ title: z.string(), lead: z.string(), join: z.string(), install: z.string() }),
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string(), editions: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),

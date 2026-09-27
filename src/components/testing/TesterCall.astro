@@ -1,0 +1,35 @@
+---
+import { TESTER_CALL } from '../../lib/testing/tester-call.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The ask for testers, on the page people actually land on. Two links because
+// it is genuinely two steps — join the group, then opt in — and a reader who
+// only does the first gets no app and no idea why.
+// The placement rule lives here rather than at the call site: the ask belongs
+// where somebody lands, not repeated on every city page they click through.
+type Props = Readonly<{ ui: Ui; city?: string | undefined }>;
+const { ui, city } = Astro.props;
+---
+
+{TESTER_CALL.open && city === undefined && (
+  <aside class="tester-call" aria-label={ui.testers.title}>
+    <p class="tester-call-lead"><strong>{ui.testers.title}</strong> — {ui.testers.lead}</p>
+    <p class="tester-call-links">
+      <a class="chip" href={TESTER_CALL.group} rel="noopener" target="_blank">{ui.testers.join}</a>
+      <a class="chip" href={TESTER_CALL.optIn} rel="noopener" target="_blank">{ui.testers.install}</a>
+    </p>
+  </aside>
+)}
+
+<style>
+  .tester-call {
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line, #3a3a3a);
+    border-radius: 0.6rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .tester-call-lead { margin: 0; font-size: 0.95rem; }
+  .tester-call-links { margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+</style>
