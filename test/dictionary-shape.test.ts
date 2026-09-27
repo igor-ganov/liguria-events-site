@@ -52,3 +52,27 @@ describe('the two declarations of the dictionary', () => {
     });
   });
 });
+
+// The third place a word can go missing: declared in both schemas, absent from
+// one language's markdown. Nothing fails — that locale simply renders an empty
+// element, which is the same silent blank by another route.
+const LOCALES = ['en', 'it', 'ru'] as const;
+
+// From the runtime schema rather than the content config: the latter also
+// declares the collection itself, which is not a group of words.
+// Two spaces exactly: a group nested inside another is written deeper, and it
+// appears in the markdown inside its parent rather than at the start of a line.
+const DICT_GROUPS = [...RUNTIME.matchAll(/^ {2}(\w+): Schema\.Struct\(\{/gm)].map((m) => m[1] ?? '');
+
+const DICTS = await Promise.all(
+  LOCALES.map(async (locale) => ({ locale, text: await Bun.file(`src/content/ui/${locale}.md`).text() })),
+);
+
+describe('every language carries every group', () => {
+  DICTS.forEach(({ locale, text }) => {
+    test(`${locale} declares all of them`, () => {
+      const missing = DICT_GROUPS.filter((group) => !new RegExp(`^${group}:`, 'm').test(text));
+      assert.deepEqual(missing, [], `${locale} is missing: ${missing.join(', ')}`);
+    });
+  });
+});
