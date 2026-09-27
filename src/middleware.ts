@@ -1,5 +1,4 @@
 import { defineMiddleware } from 'astro:middleware';
-import { edgeCached } from './lib/http/edge-cached.ts';
 import { entryPath } from './lib/i18n/entry-path.ts';
 import { SESSION_COOKIE, sessionCookie } from './lib/auth/session.ts';
 import { authGate } from './lib/auth/auth-gate.ts';
@@ -65,16 +64,5 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     ...signin.map(({ target }) => ctx.redirect(target)),
     ...[authGate(ctx.url.pathname, ctx.locals.user)].filter(isDefined).map((to) => ctx.redirect(to)),
   ];
-  // Nothing above this line is cacheable: a redirect, a sign-in, a gate. What
-  // is left is a page, and a page that belongs to nobody can be served from the
-  // edge instead of rendered again for every crawler.
-  const runtime = ctx.locals.runtime;
-  return (
-    bounce.at(0) ??
-    (await edgeCached(
-      ctx.request,
-      (work) => runtime?.ctx?.waitUntil(work) ?? undefined,
-      () => Promise.resolve(next()),
-    ))
-  );
+  return bounce.at(0) ?? next();
 });
