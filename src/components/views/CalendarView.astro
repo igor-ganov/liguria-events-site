@@ -7,6 +7,8 @@ import { EVENTS_URL } from '../../data/events-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { monthTitle } from '../../lib/calendar/month-title.ts';
 import { addMonths } from '../../lib/calendar/add-months.ts';
+import { eventMonths } from '../../lib/calendar/event-months.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { ongoingInMonth } from '../../lib/events/ongoing-in-month.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { regionName } from '../../lib/region/region-name.ts';
@@ -26,6 +28,12 @@ const events = eventsOfRegion(payload.events, region);
 const title = monthTitle(ui)(monthKey);
 const ongoing = ongoingInMonth(monthKey)(events);
 const monthUrl = (m: string): string => regionUrl(lang, region, `calendar/${m}/`);
+// Only the months that were built: the range stops at last month, and a link to
+// the one before it is a 404 offered in our own markup.
+const built = eventMonths(events, isoToday());
+const neighbour = (delta: number): string | undefined =>
+  [addMonths(monthKey, delta)].filter((month) => built.includes(month)).at(0);
+const [previous, following] = [neighbour(-1), neighbour(1)];
 const placeName = regionName(region);
 const description = ui.seo.calendar.replace('{place}', placeName);
 ---
@@ -34,9 +42,15 @@ const description = ui.seo.calendar.replace('{place}', placeName);
   <h1 class="visually-hidden">{ui.nav.calendar}</h1>
 
   <header class="cal-head">
-    <a class="nav-btn" href={monthUrl(addMonths(monthKey, -1))} aria-label={ui.calNav.prev}>‹</a>
+    {previous !== undefined && (
+      <a class="nav-btn" href={monthUrl(previous)} aria-label={ui.calNav.prev}>‹</a>
+    )}
+    {previous === undefined && <span class="nav-btn nav-off" aria-hidden="true">‹</span>}
     <h2>{title}</h2>
-    <a class="nav-btn" href={monthUrl(addMonths(monthKey, 1))} aria-label={ui.calNav.next}>›</a>
+    {following !== undefined && (
+      <a class="nav-btn" href={monthUrl(following)} aria-label={ui.calNav.next}>›</a>
+    )}
+    {following === undefined && <span class="nav-btn nav-off" aria-hidden="true">›</span>}
   </header>
 
   <MonthGrid lang={lang} ui={ui} monthKey={monthKey} title={title} events={events} />

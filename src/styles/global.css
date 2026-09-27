@@ -1057,6 +1057,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   transition: border-color var(--speed);
 }
 .nav-btn:hover { border-color: var(--accent); }
+/* The edge of the built range: the arrow keeps its place in the row, without
+   offering a link to a month that was never built. */
+.nav-off { opacity: 0.35; cursor: default; }
+.nav-off:hover { border-color: var(--line); }
 
 .cal-grid {
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
