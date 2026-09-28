@@ -9,9 +9,7 @@
  * is a single edit rather than a hunt through templates.
  */
 export const TESTER_CALL = {
-  // Off until the group exists: creating it ends in a CAPTCHA, and a call to
-  // action pointing at a group that is not there yet is worse than no call.
-  open: false,
+  open: true,
   /** Joining the group is what makes somebody a tester; Play reads its roster. */
   group: 'https://groups.google.com/g/dovego-testers',
   /** Opting in is a second, separate step, and it only works once in the group. */
