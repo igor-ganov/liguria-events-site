@@ -1,7 +1,9 @@
+import { freshEnough } from './fresh-enough.ts';
 import { fromStore } from './from-store.ts';
 import { offlinePage } from './offline-page.ts';
 import { revalidate } from './revalidate.ts';
 import { trackOutcome } from './track-outcome.ts';
+import { STORED_AT } from './stored-at-header.ts';
 import { storePage } from './store-page.ts';
 import type { KeepAlive } from './keep-alive.ts';
 
@@ -13,21 +15,29 @@ import type { KeepAlive } from './keep-alive.ts';
  * navigation waits for a server, and the reader is told how old what they are
  * looking at is instead of being made to wait for something current.
  *
- * With no copy there is nothing to be quick about, so the network is awaited —
- * and its answer is kept, which is how the next visit is instant.
+ * With no copy, or one too old to still be this site, the network is awaited —
+ * and its answer is kept, which is how the next visit is instant. A copy past
+ * the ceiling is not thrown away: it is what the reader gets if the network has
+ * nothing to offer.
  */
 export const pageFirst = async (request: Request, keepAlive: KeepAlive): Promise<Response> => {
   const stored = await fromStore(request);
+  const storedMs = Number(stored?.headers.get(STORED_AT) ?? 0);
   return [stored]
     .filter((copy) => copy !== undefined)
+    .filter(() => freshEnough(storedMs, Date.now()))
     .map((copy) => {
       keepAlive(trackOutcome(request.url, revalidate(request, Date.now())));
       return copy;
     })
-    .at(0) ?? fetchAndKeep(request, keepAlive);
+    .at(0) ?? fetchAndKeep(request, keepAlive, stored);
 };
 
-const fetchAndKeep = async (request: Request, keepAlive: KeepAlive): Promise<Response> => {
+const fetchAndKeep = async (
+  request: Request,
+  keepAlive: KeepAlive,
+  stale: Response | undefined,
+): Promise<Response> => {
   const response = await fetch(request).catch(() => undefined);
   return [response]
     .filter((found) => found !== undefined)
@@ -35,8 +45,8 @@ const fetchAndKeep = async (request: Request, keepAlive: KeepAlive): Promise<Res
       keepAlive(storePage(request, found.clone(), Date.now()));
       return found;
     })
-    // No copy and no network. Without this the fetch simply rejects and the
-    // browser shows its own error page — over a device that may well hold the
-    // rest of the site, and with no way back to it.
-    .at(0) ?? offlinePage();
+    // No network. An old copy is still better than the browser's error page over
+    // a device that holds most of the site; with neither, the offline page is
+    // the only way back to the rest of it.
+    .at(0) ?? stale ?? offlinePage();
 };
