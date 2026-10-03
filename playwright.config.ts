@@ -11,8 +11,13 @@ import { defineConfig, devices } from '@playwright/test';
 //  • 'ui-*' → four widths, for the sweeps that check a page holds together.
 // The build runs in the first web server's command; globalSetup seeds the
 // local D1 the worker binds to.
-const OWNER_URL = 'http://127.0.0.1:4410';
-const STATIC_URL = 'http://localhost:4399';
+// Ports, not URLs, because a machine can refuse one: Windows reserves ranges for
+// Hyper-V without warning (4322-4421 on one of ours), and a hardcoded port turns
+// that into "the suite cannot start" with a stack trace from inside `serve`.
+const STATIC_PORT = Number(process.env.E2E_STATIC_PORT ?? 4399);
+const OWNER_PORT = Number(process.env.E2E_OWNER_PORT ?? 4410);
+const OWNER_URL = `http://127.0.0.1:${OWNER_PORT}`;
+const STATIC_URL = `http://localhost:${STATIC_PORT}`;
 
 // Four widths, chosen for where layouts actually break rather than for which
 // phones are popular: 320 is the narrowest screen still in use and the one no
@@ -92,8 +97,8 @@ export default defineConfig({
     // worker bundle mid-run. Both showed up as a timeout or an ECONNREFUSED in
     // a spec that had nothing to do with either.
     {
-      command: 'bun run build && bunx serve dist -l 4399',
-      url: 'http://localhost:4399/liguria/',
+      command: `bun run build && bunx serve dist -l ${STATIC_PORT}`,
+      url: `${STATIC_URL}/liguria/`,
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
     },
@@ -102,7 +107,7 @@ export default defineConfig({
       // file appearing, which is the only signal there is before the server it
       // belongs to can start.
       command:
-        'node e2e/wait-for-worker.mjs && bun x wrangler dev --local --ip 127.0.0.1 --port 4410 --var SESSION_SECRET:e2e-secret',
+        `node e2e/wait-for-worker.mjs && bun x wrangler dev --local --ip 127.0.0.1 --port ${OWNER_PORT} --var SESSION_SECRET:e2e-secret`,
       url: `${OWNER_URL}/api/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
