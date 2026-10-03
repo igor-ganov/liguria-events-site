@@ -30,19 +30,9 @@
 /it/genova/*     /it/liguria/:splat         301
 /ru/genova/*     /ru/liguria/:splat         301
 
-# The bare paths land in the default region. 302, deliberately: the default
-# region may change, and a permanent redirect is one you must be prepared to
-# honour forever — which is precisely how "/" came to point, in every browser
-# that had visited, at a page that no longer existed.
-#
-# "/" itself is deliberately absent: it is the one address where the language is
-# chosen for the reader, from Accept-Language, and that needs the worker. See
-# src/lib/i18n/entry-path.ts.
-/calendar        /liguria/calendar/         302
-/map             /liguria/map/              302
-/it              /it/liguria/               302
-/it/calendar     /it/liguria/calendar/      302
-/it/map          /it/liguria/map/           302
-/ru              /ru/liguria/               302
-/ru/calendar     /ru/liguria/calendar/      302
-/ru/map          /ru/liguria/map/           302
+# The bare paths — "/", "/calendar", "/map" and their language-prefixed twins —
+# are deliberately absent. They name neither a language nor a region, and both
+# have to be chosen per reader: the language from Accept-Language, the region
+# from where the reader is or where the events are. A rule here can read nothing
+# and so sent every visitor to one region, the one the site was founded in, long
+# after the site had stopped being about it. See src/lib/i18n/bare-entry.ts.

@@ -37,13 +37,15 @@ describe('preferredLocale', () => {
 });
 
 describe('entryPath', () => {
-  test('sends the front door to the default region in the reader language', () => {
-    expect(entryPath('/', 'ru,en;q=0.8')).toBe('/ru/liguria/');
-    expect(entryPath('/', undefined)).toBe('/it/liguria/');
-    expect(entryPath('/', 'en-US')).toBe('/liguria/');
+  // The region is decided by the caller now — from the reader's own location, or
+  // from where the events are. This file is about the language.
+  test('sends the front door to the region it was given, in the reader language', () => {
+    expect(entryPath('/', 'ru,en;q=0.8', 'lombardia')).toBe('/ru/lombardia/');
+    expect(entryPath('/', undefined, 'lombardia')).toBe('/it/lombardia/');
+    expect(entryPath('/', 'en-US', 'lombardia')).toBe('/lombardia/');
   });
   test('and leaves every other address alone', () => {
-    expect(entryPath('/liguria/', undefined)).toBeUndefined();
-    expect(entryPath('/it/', undefined)).toBeUndefined();
+    expect(entryPath('/liguria/', undefined, 'lombardia')).toBeUndefined();
+    expect(entryPath('/it/toscana/', undefined, 'lombardia')).toBeUndefined();
   });
 });

@@ -3,7 +3,7 @@ import type { Ui } from '../ui-schema.ts';
 /** English places copy for the #ui-data safety net. */
 export const DEFAULT_PLACES_UI: Ui['places'] = {
   title: 'Places',
-  intro: 'Where to go in Liguria — restaurants, bars, museums, gyms, entertainment and more.',
+  intro: 'Where to go in {place} — restaurants, bars, museums, gyms, entertainment and more.',
   empty: 'No places match.',
   search: 'Search places…',
   hours: 'Opening hours',

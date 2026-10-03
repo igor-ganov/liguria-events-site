@@ -1,5 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
+import { bareEntry } from './lib/i18n/bare-entry.ts';
 import { entryPath } from './lib/i18n/entry-path.ts';
+import { entryRegion } from './lib/region/entry-region.ts';
 import { SESSION_COOKIE, sessionCookie } from './lib/auth/session.ts';
 import { authGate } from './lib/auth/auth-gate.ts';
 import { isDefined } from './lib/is-defined.ts';
@@ -32,10 +34,27 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
       return permanentRedirect(stray);
   }
 
-  // The front door picks a language for a reader who has not picked one.
-  // public/_redirects used to send every visitor to the English region: the
-  // assets layer answers before the worker and cannot read a header.
-  const entry = entryPath(ctx.url.pathname, ctx.request.headers.get('accept-language') ?? undefined);
+  // A front door — "/", "/calendar", "/map" and their language-prefixed twins —
+  // names neither a language nor a region, so both are chosen here: the language
+  // from Accept-Language, the region from where the reader is or where the events
+  // are. public/_redirects did this and could do neither, so every reader landed
+  // in the region the site was founded in.
+  const bare = bareEntry(ctx.url.pathname);
+  const target = await Promise.all(
+    [bare]
+      .filter(isDefined)
+      .map(async () =>
+        entryPath(
+          ctx.url.pathname,
+          ctx.request.headers.get('accept-language') ?? undefined,
+          await entryRegion({
+            region: ctx.locals.runtime?.cf?.region,
+            country: ctx.locals.runtime?.cf?.country,
+          }),
+        ),
+      ),
+  );
+  const entry = target.filter(isDefined).at(0);
   switch (entry) {
     case undefined:
       break;

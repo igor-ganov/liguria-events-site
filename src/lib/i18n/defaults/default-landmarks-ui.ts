@@ -3,7 +3,7 @@ import type { Ui } from '../ui-schema.ts';
 /** English landmarks copy for the #ui-data safety net. */
 export const DEFAULT_LANDMARKS_UI: Ui['landmarks'] = {
   title: 'Landmarks',
-  intro: 'Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.',
+  intro: 'Places worth seeing across {place}, gathered from Wikipedia and OpenStreetMap.',
   more: 'Read on Wikipedia',
   empty: 'No landmarks match.',
   search: 'Search landmarks…',

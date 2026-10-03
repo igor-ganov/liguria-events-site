@@ -12,7 +12,7 @@ import EmptyState from '../../../components/views/feed/EmptyState.astro';
 import { eventIdOfPath } from '../../../lib/events/event-id-of-path.ts';
 import { eventStatusCode } from '../../../lib/events/event-status-code.ts';
 import { resolveEvent } from '../../../lib/events/resolve-event.ts';
-import { DEFAULT_REGION } from '../../../lib/region/default-region.ts';
+import { LEGACY_REGION } from '../../../lib/region/legacy-region.ts';
 import { regionUrl } from '../../../lib/region/region-url.ts';
 import { uiOf } from '../../../lib/i18n/ui-of.ts';
 import { LOCALES } from '../../../lib/i18n/locales.ts';
@@ -51,7 +51,7 @@ const ui = await uiOf(lang);
       <EmptyState
         heading={ui.gone.heading}
         note={ui.gone.note}
-        href={regionUrl(lang, DEFAULT_REGION)}
+        href={regionUrl(lang, LEGACY_REGION)}
         label={ui.gone.onward}
       />
     </Layout>
