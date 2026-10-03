@@ -55,15 +55,12 @@ describe('public/_redirects', () => {
   // is exactly the kind of thing that changes — and when it did, every browser
   // that had cached it went on following the old answer to a page that no
   // longer existed.
-  // "/" is answered by the worker, which reads Accept-Language before choosing
-  // a language. A rule here would win and hand every reader English.
-  test('the front door is not decided at the assets layer', () => {
-    assert.equal(sourceOf('/'), undefined);
-  });
-
-  test('the default-region redirects are temporary', () => {
-    for (const source of ['/calendar', '/map', '/it', '/ru']) {
-      assert.equal(sourceOf(source)?.status, 302, `source: ${source}`);
+  // Every front door is answered by the worker, which reads the reader's
+  // language and location before choosing. A rule here would win and hand all of
+  // them the same language and the same region.
+  test('no front door is decided at the assets layer', () => {
+    for (const source of ['/', '/calendar', '/map', '/it', '/it/calendar', '/ru', '/ru/map']) {
+      assert.equal(sourceOf(source), undefined, `source: ${source}`);
     }
   });
 

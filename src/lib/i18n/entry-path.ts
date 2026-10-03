@@ -1,20 +1,22 @@
-import { branch } from '../branch.ts';
-import { DEFAULT_REGION } from '../region/default-region.ts';
+import { bareEntry } from './bare-entry.ts';
 import { preferredLocale } from './preferred-locale.ts';
 import { regionUrl } from '../region/region-url.ts';
 
 /**
- * Where the front door leads, or undefined for every other address.
+ * Where a front door leads, or undefined for every other address.
  *
- * The site has no page at "/", and which region and language it opens on are
- * both decisions rather than facts — so this is a 302, and it depends on the
- * reader's Accept-Language, which is why it cannot live in public/_redirects.
+ * Three decisions meet here and none of them is a constant: the page comes from
+ * the address, the language from Accept-Language unless the address names one,
+ * and the region from the reader's own location or, failing that, from where the
+ * events are. All of it is a 302, because every one of those answers can change
+ * between two visits.
  */
 export const entryPath = (
   pathname: string,
   acceptLanguage: string | undefined,
+  region: string,
 ): string | undefined =>
-  branch(['', '/'].includes(pathname))(
-    () => regionUrl(preferredLocale(acceptLanguage), DEFAULT_REGION),
-    () => undefined,
-  );
+  [bareEntry(pathname)]
+    .filter((entry) => entry !== undefined)
+    .map((entry) => regionUrl(entry.lang ?? preferredLocale(acceptLanguage), region, entry.page))
+    .at(0);

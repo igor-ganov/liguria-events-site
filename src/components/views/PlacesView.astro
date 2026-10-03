@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { regionName } from '../../lib/region/region-name.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { PLACE_CATEGORIES } from '../../lib/places/place-categories.ts';
 import { placeIcon } from '../../lib/places/place-icon.ts';
@@ -8,13 +9,16 @@ import type { Locale } from '../../lib/i18n/locales.ts';
 type Props = Readonly<{ lang: Locale; region: string }>;
 const { lang, region } = Astro.props;
 const ui = await uiOf(lang);
+// The copy names the region it is about: these pages exist for all twenty, and
+// the text said Liguria on every one of them.
+const intro = ui.places.intro.replace('{place}', regionName(region));
 ---
 
 <Layout lang={lang} region={region} title={ui.places.title} path={`${region}/places/`}>
   <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
   <section class="lm-head">
     <h1>{ui.places.title}</h1>
-    <p class="lm-intro">{ui.places.intro}</p>
+    <p class="lm-intro">{intro}</p>
   </section>
 
   <div class="lm-search">

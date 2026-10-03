@@ -4,9 +4,9 @@ export type ToastKey = 'outside' | 'denied' | 'error' | 'zoomIn';
 
 const MSG: Readonly<Record<ToastKey, Readonly<Record<string, string>>>> = {
   outside: {
-    en: 'You are outside the map area (Genoa / Liguria).',
-    it: 'Sei fuori dall’area della mappa (Genova / Liguria).',
-    ru: 'Вы вне области карты (Генуя / Лигурия).',
+    en: 'You are outside the map area (Italy).',
+    it: 'Sei fuori dall’area della mappa (Italia).',
+    ru: 'Вы вне области карты (Италия).',
   },
   denied: {
     en: 'Location access is blocked — allow it in the browser.',

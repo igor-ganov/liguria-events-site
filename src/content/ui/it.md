@@ -4,7 +4,7 @@ search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla 
 mapLayers: { events: 'Eventi', landmarks: 'Luoghi', places: 'Locali' }
 places:
   title: Locali e attività
-  intro: Dove andare in Liguria — ristoranti, bar, musei, palestre, divertimento e altro, per turisti e residenti.
+  intro: Dove andare in {place} — ristoranti, bar, musei, palestre, divertimento e altro, per turisti e residenti.
   empty: Nessun risultato.
   search: Cerca locali…
   hours: Orari di apertura
@@ -49,7 +49,7 @@ auth:
   passkeyFailed: Accesso con passkey non riuscito — usa la tua email.
 landmarks:
   title: Luoghi d'interesse
-  intro: Luoghi da vedere in Liguria, raccolti da Wikipedia e OpenStreetMap.
+  intro: Luoghi da vedere in {place}, raccolti da Wikipedia e OpenStreetMap.
   more: Leggi su Wikipedia
   empty: Nessun luogo corrisponde.
   search: Cerca luoghi…

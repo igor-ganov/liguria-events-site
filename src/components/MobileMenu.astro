@@ -8,11 +8,11 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 import ThemeToggle from './ThemeToggle.astro';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 import { menuGroups } from '../lib/menu/menu-groups.ts';
-import { DEFAULT_REGION } from '../lib/region/default-region.ts';
+import { LEGACY_REGION } from '../lib/region/legacy-region.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; path: string; region?: string }>;
-const { lang, path, region = DEFAULT_REGION } = Astro.props;
+const { lang, path, region = LEGACY_REGION } = Astro.props;
 const ui = await uiOf(lang);
 const groups = menuGroups(lang, region, ui);
 ---

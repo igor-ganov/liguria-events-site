@@ -4,7 +4,7 @@ search: { placeholder: 'Search events…', none: 'No events match your search.' 
 mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' }
 places:
   title: Places
-  intro: Where to go in Liguria — restaurants, bars, museums, gyms, entertainment and more, for visitors and locals alike.
+  intro: Where to go in {place} — restaurants, bars, museums, gyms, entertainment and more, for visitors and locals alike.
   empty: No places match.
   search: Search places…
   hours: Opening hours
@@ -49,7 +49,7 @@ auth:
   passkeyFailed: Passkey sign-in failed — use your email instead.
 landmarks:
   title: Landmarks
-  intro: Places worth seeing across Liguria, gathered from Wikipedia and OpenStreetMap.
+  intro: Places worth seeing across {place}, gathered from Wikipedia and OpenStreetMap.
   more: Read on Wikipedia
   empty: No landmarks match.
   search: Search landmarks…
