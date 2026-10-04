@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { facetOf } from '../src/lib/events/facet-of.ts';
 import type { APIRequestContext } from '@playwright/test';
 
 // Venue pages exist because the search demand we already appear for is
@@ -10,12 +11,21 @@ import type { APIRequestContext } from '@playwright/test';
 // sitemap rather than the generated one.
 const aVenue = async (request: APIRequestContext): Promise<string> => {
   // The venues live in the places sitemap: sitemap-events.xml is an index of
-  // the three files the old single list was split into.
+  // the files the old single list was split into.
+  //
+  // Every loc in it is the Italian address now — one entry per page, the other
+  // languages as hreflang alternates — so the locale segment comes off before
+  // the shape of a venue path can be recognised at all. The page answers at
+  // either address; the sitemap says which one is canonical.
   const xml = await (await request.get('/sitemap-places.xml')).text();
   const paths = [...xml.matchAll(/<loc>https:\/\/dovego\.it(\/[^<]+)<\/loc>/g)]
     .map((m) => m[1] ?? '')
+    .map((path) => path.replace(/^\/(it|ru)\//, '/'))
     .filter((path) => path.split('/').filter(Boolean).length === 3)
-    .filter((path) => !/\/(calendar|event|landmark|place|map)\//.test(path));
+    .filter((path) => !/\/(calendar|event|landmark|place|map)\//.test(path))
+    // The same file carries a city's today, its weekend and one page per
+    // category. They are three segments too, and none of them is a venue.
+    .filter((path) => facetOf(path.split('/').filter(Boolean).at(-1) ?? '') === undefined);
   expect(paths.length).toBeGreaterThan(0);
   // The first path in the sitemap is not necessarily a venue with anything on:
   // the file's contents move as the corpus and the archive change, and a
@@ -38,8 +48,9 @@ test('a venue page lists that venue’s events and titles itself after it', asyn
   const response = await page.goto(path);
   expect(response?.status()).toBe(200);
 
-  // The title is the question people type, not "<venue> — Feed".
-  await expect(page).toHaveTitle(/What.s on at /);
+  // The title is the question people type, not "<venue> — Feed", and it names
+  // the town: half the venues in the corpus share a name with another town's.
+  await expect(page).toHaveTitle(/What.s on at .+ in .+/);
   // Somebody arriving from a search for the venue must see the venue first,
   // not a filter bar above an unexplained list.
   await expect(page.locator('.venue-head h1')).toBeVisible();
@@ -49,8 +60,11 @@ test('a venue page lists that venue’s events and titles itself after it', asyn
   const cards = page.locator('.feed-list > li');
   expect(await cards.count()).toBeGreaterThan(0);
 
-  // Every card belongs to this venue: the page would be a lie otherwise.
-  const venue = (await page.title()).replace(/^What.s on at /, '').replace(/ · Dove Go$/, '').trim();
+  // Every card belongs to this venue: the page would be a lie otherwise. The
+  // name comes from the heading rather than from the title, which carries the
+  // town as well — and some venues are named after an address with a comma and
+  // a house number in it, so there is nothing to parse a title back into.
+  const venue = (await page.locator('.venue-head h1').innerText()).trim();
   const venues = await cards.evaluateAll((els) =>
     els.map((el) => el.textContent?.replace(/\s+/g, ' ') ?? ''),
   );
@@ -80,7 +94,11 @@ test('a venue page asks the venue itself for its dates', async ({ page }) => {
   await page.goto('/liguria/genova/teatro-carlo-felice/');
   const invite = page.locator('.venue-invite a');
   await expect(invite).toContainText('Teatro Carlo Felice');
-  await expect(invite).toHaveAttribute('href', '/submit/');
+  // It leads to the page that tells a venue what it gets — its dates kept
+  // current, and its programme on its own site in one line of HTML — and it
+  // carries the venue, so the code shown there is this venue's. It used to go
+  // straight to the submit form, which asked for work before offering any.
+  await expect(invite).toHaveAttribute('href', '/venues/?venue=liguria/genova/teatro-carlo-felice');
 });
 
 test('one event is one event, in every language', async ({ page, request }) => {

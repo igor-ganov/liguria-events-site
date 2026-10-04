@@ -7,9 +7,13 @@ import { test, expect } from '@playwright/test';
 
 test('robots.txt announces every sitemap the site keeps by hand', async ({ request }) => {
   const robots = await (await request.get('/robots.txt')).text();
-  ['sitemap-index.xml', 'sitemap-events.xml', 'sitemap-upcoming.xml', 'sitemap-places.xml', 'sitemap-archive.xml'].forEach(
-    (name) => expect(robots).toContain(`Sitemap: https://dovego.it/${name}`),
+  ['sitemap-index.xml', 'sitemap-events.xml', 'sitemap-upcoming.xml', 'sitemap-places.xml'].forEach((name) =>
+    expect(robots).toContain(`Sitemap: https://dovego.it/${name}`),
   );
+  // The archive is not among them, on purpose: 3 345 finished pages were a
+  // third of everything we offered a crawler that fetches a dozen a day. The
+  // file is still served for whoever asks — nothing advertises it.
+  expect(robots).not.toContain('sitemap-archive.xml');
 });
 
 test('Google may use the site in its AI answers; the other scrapers may not', async ({ request }) => {
@@ -34,23 +38,35 @@ test('the old sitemap address is now an index of the three it was split into', a
   expect(res.headers()['content-type']).toContain('xml');
   const xml = await res.text();
   expect(xml).toContain('<sitemapindex');
-  ['sitemap-upcoming.xml', 'sitemap-places.xml', 'sitemap-archive.xml'].forEach((part) =>
+  ['sitemap-upcoming.xml', 'sitemap-places.xml'].forEach((part) =>
     expect(xml).toContain(`<loc>https://dovego.it/${part}</loc>`),
   );
+  // Not the archive: the index is what a crawler is asked to spend its day on.
+  expect(xml).not.toContain('sitemap-archive.xml');
 });
 
-test('the upcoming sitemap lists event pages, with hreflang for all three locales', async ({ request }) => {
+test('the upcoming sitemap lists each event once, in Italian, with the other two as alternates', async ({ request }) => {
   const res = await request.get('/sitemap-upcoming.xml');
   expect(res.status()).toBe(200);
   const xml = await res.text();
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? '');
   expect(locs.length).toBeGreaterThan(0);
-  expect(locs.every((loc) => loc.includes('/event/'))).toBe(true);
-  // One entry per locale, each declaring the other two and the x-default.
-  expect(locs.some((loc) => /\/it\/event\//.test(loc))).toBe(true);
-  expect(locs.some((loc) => /\/ru\/event\//.test(loc))).toBe(true);
+  // ONE entry per page, and it is the Italian one. Three locs per event made
+  // the same page compete with itself for a crawl budget of a dozen fetches a
+  // day, and the site is read in Italy.
+  expect(locs.every((loc) => /\/it\/event\//.test(loc))).toBe(true);
+  const alternates = [...xml.matchAll(/hreflang="([a-z-]+)" href="([^"]+)"/g)].map((m) => ({
+    lang: m[1] ?? '',
+    href: m[2] ?? '',
+  }));
+  // The other two languages are alternates of that entry, which is what
+  // hreflang is for — the pages still exist and still say so.
+  expect(alternates.some((link) => link.lang === 'en' && /dovego\.it\/event\//.test(link.href))).toBe(true);
+  expect(alternates.some((link) => link.lang === 'ru' && /\/ru\/event\//.test(link.href))).toBe(true);
+  // x-default is the Italian page too: a reader whose language we do not serve
+  // gets the one the site is written for, not English by alphabet.
+  expect(alternates.some((link) => link.lang === 'x-default' && /\/it\/event\//.test(link.href))).toBe(true);
   expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
-  expect(xml).toContain('hreflang="x-default"');
   expect(xml).toContain('<lastmod>');
 });
 
@@ -83,11 +99,15 @@ test('a feed page carries a link-preview image on our own origin', async ({ page
 });
 
 test('the analytics beacon is on the page, not just configured in the dashboard', async ({ page }) => {
-  // It was configured on 5 July and reported 20 pageloads in a month: the
-  // zone's automatic injection never reached a Worker-rendered response, so
-  // the dashboard showed a flat line and nothing said why.
+  // Cloudflare's own was configured on 5 July and reported 20 pageloads in a
+  // month — its zone-level injection never reached a Worker-rendered response —
+  // and it was dropped for a first-party collector that counts the same visits
+  // with no third party and nothing to consent to.
   await page.goto('/liguria/genova/');
-  const beacon = page.locator('script[data-cf-beacon]');
+  const beacon = page.locator('script[data-project]');
   await expect(beacon).toHaveCount(1);
-  await expect(beacon).toHaveAttribute('src', /cloudflareinsights\.com\/beacon/);
+  await expect(beacon).toHaveAttribute('data-project', 'dovego-it');
+  await expect(beacon).toHaveAttribute('src', /pm-collector\..*\/pm\.js/);
+  // And nothing third-party came back with it.
+  await expect(page.locator('script[data-cf-beacon]')).toHaveCount(0);
 });

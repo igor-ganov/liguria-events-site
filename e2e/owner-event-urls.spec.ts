@@ -10,7 +10,10 @@ import type { APIRequestContext } from '@playwright/test';
 
 const anEventId = async (request: APIRequestContext): Promise<string> => {
   const xml = await (await request.get('/sitemap-upcoming.xml')).text();
-  const id = /<loc>https:\/\/dovego\.it\/event\/[^<]*?([0-9a-f]{12})\/<\/loc>/.exec(xml)?.[1];
+  // The canonical address carries the locale: one entry per page, in Italian,
+  // with the other two languages as hreflang alternates. The id is the same
+  // twelve characters at either address, which is the whole point of it.
+  const id = /<loc>https:\/\/dovego\.it\/(?:it\/|ru\/)?event\/[^<]*?([0-9a-f]{12})\/<\/loc>/.exec(xml)?.[1];
   expect(id, 'the sitemap carries no event').toBeDefined();
   return id ?? '';
 };
