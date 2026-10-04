@@ -78,6 +78,7 @@ months: [January, February, March, April, May, June, July, August, September, Oc
 headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' }
 notify: { title: 'Daily notification', lead: 'One notification a morning: what is on today where you are. Nothing on, nothing sent.', on: 'Notify me', off: 'Stop notifying me', at: 'At', where: 'About: {value}', asked: 'Your browser will ask for permission.', refused: 'Your browser refused notifications. You can allow them in the site settings and try again.', done: 'Done. The first one arrives tomorrow morning.' }
 testers: { title: 'Help launch the app', lead: 'The Android app is in closed testing. Google wants twelve testers signed up for fourteen days before it can go public — joining takes a minute.', join: 'Join the testers', install: 'Then install it' }
+progress: { roadmap: 'Roadmap', roadmapLead: 'What we are building, what comes next, and what has already shipped.', releases: 'Release notes', releasesLead: 'New features as they ship, each with a place to try it.', now: 'In progress', next: 'Next', later: 'Later', done: 'Shipped', example: 'See it' }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }

@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import RoadmapView from '../components/progress/RoadmapView.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.progress.roadmap} description={ui.progress.roadmapLead} path="roadmap/">
+  <RoadmapView ui={ui} lang={lang} />
+</Layout>

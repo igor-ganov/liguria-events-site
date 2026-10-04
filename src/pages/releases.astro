@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ReleasesView from '../components/progress/ReleasesView.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.progress.releases} description={ui.progress.releasesLead} path="releases/">
+  <ReleasesView ui={ui} lang={lang} />
+</Layout>

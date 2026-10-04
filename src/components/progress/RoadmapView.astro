@@ -1,0 +1,37 @@
+---
+import { byStage } from '../../lib/progress/by-stage.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { longDate } from '../../lib/progress/long-date.ts';
+import { ROADMAP } from '../../lib/progress/roadmap.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The roadmap, one section per stage. A stage with nothing in it is left out
+// rather than announced: "Later" with an empty list reads as a promise that
+// was forgotten.
+type Props = Readonly<{ ui: Ui; lang: Locale }>;
+const { ui, lang } = Astro.props;
+const groups = byStage(ROADMAP).filter((group) => group.items.length > 0);
+---
+
+<section class="progress">
+  <h1>{ui.progress.roadmap}</h1>
+  <p class="progress-lead">
+    {ui.progress.roadmapLead}
+    <a href={localizedUrl(lang, 'releases/')}>{ui.progress.releases}</a>
+  </p>
+  {groups.map((group) => (
+    <section class="progress-stage" data-stage={group.stage}>
+      <h2>{ui.progress[group.stage]}</h2>
+      <ul class="progress-list">
+        {group.items.map((item) => (
+          <li>
+            <h3>{item.title[lang]}</h3>
+            <p>{item.note[lang]}</p>
+            {item.shipped !== undefined && <time datetime={item.shipped}>{longDate(lang, item.shipped)}</time>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</section>

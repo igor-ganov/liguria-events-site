@@ -1,0 +1,15 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import RoadmapView from '../../components/progress/RoadmapView.astro';
+import { LOCALES } from '../../lib/i18n/locales.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+
+export const getStaticPaths = () => LOCALES.filter((loc) => loc !== 'en').map((lang) => ({ params: { lang } }));
+
+const lang = LOCALES.find((loc) => loc === Astro.params.lang) ?? 'en';
+const ui = await uiOf(lang);
+---
+
+<Layout lang={lang} title={ui.progress.roadmap} description={ui.progress.roadmapLead} path="roadmap/">
+  <RoadmapView ui={ui} lang={lang} />
+</Layout>

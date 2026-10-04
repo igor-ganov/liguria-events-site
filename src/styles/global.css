@@ -294,6 +294,25 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .foot-legal a { color: var(--ink-2); }
 
 /* Legal / policy pages */
+/* ══ roadmap + release notes ════════════════════════════════════════ */
+.foot-progress { font-size: 0.85rem; }
+.progress { max-width: 42rem; margin: 2.5rem auto; padding: 0 1.25rem; }
+.progress h1 { font-size: 2rem; margin: 0 0 0.4rem; }
+.progress-lead { color: var(--ink-2); margin: 0 0 1.6rem; }
+.progress a:not(.chip) { color: var(--accent); }
+.progress-stage > h2 {
+  font-family: var(--font-body); font-size: 0.74rem; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+  margin: 2rem 0 0.2rem;
+}
+.progress-stage[data-stage='done'] > h2 { color: var(--free); }
+.progress-stage[data-stage='later'] > h2 { color: var(--ink-2); }
+.progress-list { list-style: none; margin: 0; padding: 0; }
+.progress-list > li, .progress-release { padding: 0.9rem 0; border-top: 1px solid var(--line); }
+.progress-list h3, .progress-release h2 { font-size: 1.15rem; margin: 0 0 0.2rem; }
+.progress-list p, .progress-release p { margin: 0; color: var(--ink-2); }
+.progress time { font-size: 0.8rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.progress-release .chip { display: inline-block; margin-top: 0.55rem; text-decoration: none; }
 .legal { max-width: 42rem; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.65; }
 .legal h1 { font-size: 1.8rem; margin: 0 0 0.3rem; }
 .legal h2 { font-size: 1.2rem; margin: 1.8rem 0 0.5rem; }

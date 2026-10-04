@@ -1,0 +1,29 @@
+---
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { longDate } from '../../lib/progress/long-date.ts';
+import { RELEASES } from '../../lib/progress/releases.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The release notes, newest first. Every entry ends in a link to a page where
+// the feature can be seen working, in the reader's own language — a note that
+// only describes is a note nobody checks.
+type Props = Readonly<{ ui: Ui; lang: Locale }>;
+const { ui, lang } = Astro.props;
+---
+
+<section class="progress">
+  <h1>{ui.progress.releases}</h1>
+  <p class="progress-lead">
+    {ui.progress.releasesLead}
+    <a href={localizedUrl(lang, 'roadmap/')}>{ui.progress.roadmap}</a>
+  </p>
+  {RELEASES.map((release) => (
+    <article class="progress-release">
+      <time datetime={release.date}>{longDate(lang, release.date)}</time>
+      <h2>{release.title[lang]}</h2>
+      <p>{release.body[lang]}</p>
+      <a class="chip" href={localizedUrl(lang, release.example.slice(1))}>{ui.progress.example}</a>
+    </article>
+  ))}
+</section>
