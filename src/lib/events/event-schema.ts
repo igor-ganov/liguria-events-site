@@ -46,6 +46,8 @@ export const EventSchema = Schema.Struct({
   rg: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
+  /** Photographs the source page itself carried, beyond the cover (ph = photos). */
+  ph: Schema.optional(Schema.Array(Schema.String)),
   /** Attendance length in minutes, when the source stated one (AC-duration). */
   du: Schema.optional(Schema.Number),
   /** Cheapest ticket price in euro, when a source stated one. */

@@ -325,3 +325,47 @@
   font-size: 0.92rem;
   line-height: 1.45;
 }
+
+/* ── the photographs ─────────────────────────────────────────────────
+   One strip to swipe through, each picture nearly as wide as the screen so
+   the next one shows at the edge and says there is more. No script: the
+   browser snaps, and the strip scrolls inside itself, never the page. */
+.event-gallery {
+  list-style: none;
+  margin: 0;
+  padding: 0.9rem 0;
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  border-bottom: 1px solid var(--line);
+}
+.event-gallery li {
+  flex: none;
+  width: min(78%, 22rem);
+  scroll-snap-align: start;
+}
+.event-gallery figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: var(--surface-2);
+}
+.event-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.event-gallery figcaption {
+  position: absolute;
+  left: 0.4rem;
+  bottom: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: rgb(12 20 24 / 0.72);
+  color: #fff;
+  font-size: 0.66rem;
+}

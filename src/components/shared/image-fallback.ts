@@ -12,7 +12,7 @@ import { isEventImage } from './is-event-image.ts';
 // width) as well as after, so a scan complements the listener.
 const scan = (): void => {
   document
-    .querySelectorAll<HTMLImageElement>('img.mini-thumb, .event-hero img')
+    .querySelectorAll<HTMLImageElement>('img.mini-thumb, img.photo-card-pic, .event-hero img, .gallery-photo img')
     .forEach((img) => {
       [img].filter((el) => el.complete && el.naturalWidth === 0).forEach(degradeImage);
     });

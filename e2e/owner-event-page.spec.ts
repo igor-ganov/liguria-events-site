@@ -8,6 +8,9 @@
 import { expect, test } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
 
+// The same address the build reads the corpus from; import.meta.env is not there under Node.
+const EVENTS_URL = process.env['EVENTS_URL'] ?? 'https://liguria-events-bot.igor-ganov.workers.dev/events.json';
+
 type Wire = Readonly<{ id: string; h?: string; img?: string; e?: string; k?: boolean; p?: readonly { date: string }[] }>;
 
 const corpus = async (request: APIRequestContext): Promise<readonly Wire[]> =>
@@ -87,5 +90,28 @@ test('on a phone the photograph runs edge to edge and nothing runs off the side'
   const cover = await page.locator('.event-cover').boundingBox();
   expect(Math.round(cover?.x ?? -1)).toBe(0);
   expect(Math.round(cover?.width ?? 0)).toBe(390);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('the other photographs are one strip that scrolls inside itself', async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  // The map corpus is trimmed to what a map needs and carries no photographs, so
+  // the event is picked from the full corpus the worker itself reads its pages from.
+  const payload: { events: readonly { id: string; s: string; e?: string; img?: string; ph?: readonly string[]; l?: readonly { image?: string }[] }[] } =
+    await (await request.get(EVENTS_URL)).json();
+  const today = new Date().toISOString().slice(0, 10);
+  const all = payload.events.filter((candidate) => (candidate.e ?? candidate.s) >= today);
+  const several = all.find(
+    (candidate) => candidate.img !== undefined && ((candidate.ph ?? []).length > 0 || (candidate.l ?? []).some((link) => link.image !== undefined)),
+  );
+  expect(several, 'the corpus holds no event with more than one photograph').toBeDefined();
+  await page.goto(`/event/${several?.id ?? ''}/`);
+  const strip = page.locator('.event-gallery');
+  await expect(strip.locator('li').first()).toBeVisible();
+  await expect(strip.locator('figcaption').first()).not.toBeEmpty();
+  // The cover says how many there are in all.
+  const shown = await strip.locator('li').count();
+  await expect(page.locator('.event-cover-count')).toContainText(String(shown + 1));
+  // The strip scrolls; the page does not.
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
 });

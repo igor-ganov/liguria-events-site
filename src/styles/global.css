@@ -1263,15 +1263,6 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.72rem;
 }
 .event-hero figcaption a { color: #fff; text-decoration: underline; }
-/* Multi-source gallery: the extra source photos under the hero, each attributed
-   to and linking back to its source. */
-.event-gallery-more { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.6rem 0 0; }
-.gallery-photo { margin: 0; flex: 1 1 8rem; min-width: 7rem; max-width: 12rem; }
-.gallery-photo img {
-  width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
-  border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
-}
-.gallery-photo figcaption { margin-top: 0.25rem; font-size: 0.7rem; color: var(--ink-2); }
 .event-page h1 { margin: 1rem 0 0.4rem; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02em; line-height: 1.2; }
 .map-link { margin-left: 0.5rem; font-size: 0.82rem; color: var(--accent); white-space: nowrap; }
 .map-link:hover { text-decoration: underline; }
