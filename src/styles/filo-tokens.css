@@ -30,6 +30,12 @@
   --gratis-velo: #e9f2eb;
   --allarme: #a8452f;
   --su-filo: #ffffff;
+  /* The veil laid over a photograph where words sit on it, and how strong it
+     is there. Not themed: a photograph is the same picture in both. White on
+     a white photograph through it is 7.3:1 — test/photo-card.test.ts holds
+     the number. */
+  --velo: #0c1a1f;
+  --velo-forza: 0.74;
 
   --shadow-sm: 0 1px 2px rgb(32 35 42 / 0.05);
   --shadow-md: 0 4px 16px -6px rgb(32 35 42 / 0.16);

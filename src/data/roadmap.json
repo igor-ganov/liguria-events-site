@@ -1,7 +1,8 @@
 [
   {
     "id": "feed-photo-cards",
-    "stage": "now",
+    "stage": "done",
+    "shipped": "2026-10-04",
     "title": {
       "en": "A feed you can read by its pictures",
       "it": "Un feed che si legge dalle foto",
@@ -199,6 +200,62 @@
       "en": "Every theatre, museum and club with three or more events has its own page.",
       "it": "Ogni teatro, museo e locale con almeno tre eventi ha la sua pagina.",
       "ru": "У каждого театра, музея и клуба с тремя и более событиями есть своя страница."
+    }
+  },
+  {
+    "id": "city-digest",
+    "stage": "later",
+    "title": {
+      "en": "A weekly email for your city",
+      "it": "Un’email settimanale per la tua città",
+      "ru": "Еженедельное письмо о вашем городе"
+    },
+    "note": {
+      "en": "The best of the week ahead, once a week, for the city you choose.",
+      "it": "Il meglio della settimana in arrivo, una volta a settimana, per la città che scegli.",
+      "ru": "Лучшее на предстоящую неделю — раз в неделю, по выбранному городу."
+    }
+  },
+  {
+    "id": "follow",
+    "stage": "later",
+    "title": {
+      "en": "Follow a venue or a kind of event",
+      "it": "Segui un luogo o un tipo di evento",
+      "ru": "Подписка на площадку или тип событий"
+    },
+    "note": {
+      "en": "Get told when your theatre announces something new, or when a concert you would like appears.",
+      "it": "Ricevi un avviso quando il tuo teatro annuncia qualcosa di nuovo o quando compare un concerto che ti piacerebbe.",
+      "ru": "Уведомление, когда ваш театр объявляет новое или появляется концерт, который вам понравится."
+    }
+  },
+  {
+    "id": "seasonal-guides",
+    "stage": "later",
+    "title": {
+      "en": "Seasonal guides",
+      "it": "Guide stagionali",
+      "ru": "Сезонные подборки"
+    },
+    "note": {
+      "en": "Autumn food festivals, Christmas markets, New Year’s Eve: one page for each season’s question.",
+      "it": "Sagre d’autunno, mercatini di Natale, Capodanno: una pagina per ogni domanda di stagione.",
+      "ru": "Осенние сагры, рождественские ярмарки, Новый год — по странице на каждый сезонный вопрос."
+    }
+  },
+  {
+    "id": "venue-widget",
+    "stage": "later",
+    "title": {
+      "en": "Your programme on your own site",
+      "it": "Il tuo programma sul tuo sito",
+      "ru": "Ваша афиша на вашем сайте"
+    },
+    "note": {
+      "en": "A block venues can place on their own website that always shows what is coming up.",
+      "it": "Un riquadro che i luoghi possono mettere sul proprio sito e che mostra sempre i prossimi eventi.",
+      "ru": "Блок, который площадка ставит на свой сайт: он всегда показывает ближайшие события."
     }
   }
 ]

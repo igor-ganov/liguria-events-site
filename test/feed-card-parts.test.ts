@@ -56,7 +56,7 @@ describe('feedCardAttrs', () => {
 describe('feedCardThumb', () => {
   test('renders the cover when there is one', () => {
     const html = feedCardThumb(event({ img: 'https://img.test/a.jpg' }), icons);
-    assert.ok(html.startsWith('<img class="mini-thumb"'));
+    assert.ok(html.startsWith('<img class="photo-card-pic"'));
     assert.ok(html.includes('src="https://img.test/a.jpg"'));
     assert.ok(html.includes('data-cat="music"'));
     assert.ok(html.includes('loading="lazy"'));
@@ -64,13 +64,13 @@ describe('feedCardThumb', () => {
   test('falls back to the category glyph', () => {
     assert.equal(
       feedCardThumb(event(), icons),
-      '<div class="mini-thumb--empty" data-cat="music"><svg id="music"/></div>',
+      '<span class="photo-card-blank" data-cat="music"><svg id="music"/></span>',
     );
   });
   test('a category with no glyph still renders its box', () => {
     assert.equal(
       feedCardThumb(event({ c: ['sport'] }), icons),
-      '<div class="mini-thumb--empty" data-cat="sport"></div>',
+      '<span class="photo-card-blank" data-cat="sport"></span>',
     );
   });
   test('escapes the cover URL', () => {
@@ -92,14 +92,14 @@ describe('feedCardTags', () => {
 });
 
 describe('feedCardHtml', () => {
-  test('builds the mini-card the feed already renders', () => {
+  test('builds the photo card the feed already renders', () => {
     const html = feedCardHtml(context, event({ d: { en: 'A night of jazz.', it: '', ru: '' } }));
-    assert.ok(html.startsWith('<a class="mini-card" href="/event/concerto-2026-07-04-e1/"'));
-    assert.ok(html.includes('<h4 class="mini-title">Concerto</h4>'));
-    assert.ok(html.includes('<span class="mini-when">'));
-    assert.ok(html.includes('<p class="mini-desc">A night of jazz.</p>'));
-    assert.ok(html.includes('<div class="mini-tags">'));
-    assert.ok(html.endsWith('</div></div></a>'));
+    assert.ok(html.startsWith('<a class="photo-card" href="/event/concerto-2026-07-04-e1/"'));
+    assert.ok(html.includes('<h4 class="mini-title photo-card-title">Concerto</h4>'));
+    assert.ok(html.includes('<span class="photo-card-when">'));
+    assert.ok(html.includes('<p class="mini-desc" hidden>A night of jazz.</p>'));
+    assert.ok(html.includes('<header class="photo-card-top">'));
+    assert.ok(html.endsWith('</footer></a>'));
   });
   test('omits the description paragraph when the event has none', () => {
     assert.ok(!feedCardHtml(context, event()).includes('mini-desc'));
