@@ -15,6 +15,9 @@ import EventWhere from './event/EventWhere.astro';
 import EventMapEmbed from './event/EventMapEmbed.astro';
 import EventEditions from './event/EventEditions.astro';
 import EventSources from './event/EventSources.astro';
+import PlaceReviews from './place/PlaceReviews.astro';
+import { placeReviewSummary } from '../../lib/places/reviews.ts';
+import { reviewSubjectOf } from '../../lib/events/review-subject-of.ts';
 import { cityName } from '../../lib/region/city-name.ts';
 import { editionsOf } from '../../lib/events/editions-of.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
@@ -39,10 +42,14 @@ const ui = await uiOf(lang);
 // The address a crawler event carries lives on the event itself; only a
 // user-submitted one has a contact block. Structured data needs whichever is
 // there — an event with no address at all is rejected outright by Google.
-const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday() });
+// Read here, once, because two things need it before the reviews section
+// renders: the rating tile at the top and the structured data in the head.
+const subject = reviewSubjectOf(event);
+const rating = await placeReviewSummary(Astro.locals.runtime.env.DB, subject);
+const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday(), rating });
 const { region, title, seoTitle, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
 const leaves = upcomingLeaves(programmeLeaves(event, lang), isoToday());
-const tiles = eventTiles({ event, lang, labels: ui.eventPage });
+const tiles = eventTiles({ event, lang, labels: { ...ui.eventPage, reviews: ui.reviews.title }, rating });
 // The same feast in other years — the archive for the ones that are over, the
 // corpus for the one that is coming. A reader landing on a feast that has
 // happened wants next year's, and that is the direction the archive alone
@@ -60,15 +67,7 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
       <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event), Astro.site)} title={title} unlisted={unlisted} />
     )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
-    {passed && (
-      <EventPassed
-        lang={lang}
-        region={region}
-        city={cityName(event.ct ?? '')}
-        label={ui.passedNote}
-        allLabel={ui.headings.allEvents}
-      />
-    )}
+    {passed && <EventPassed lang={lang} region={region} city={cityName(event.ct ?? '')} label={ui.passedNote} allLabel={ui.headings.allEvents} />}
     <EventCover event={event} title={title} cover={cover} photos={more.length + 1} ui={ui} />
     <EventTiles tiles={tiles} />
     <EventActions event={event} title={title} tickets={tickets} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
@@ -78,8 +77,17 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
     {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
     {desc !== '' && <section class="event-desc" set:html={descHtml} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
+    <PlaceReviews subject={subject} region={region} ui={ui} />
     <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
     <EventSources links={links} heading={ui.headings.sources} />
     {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
   </article>
 </Layout>
+
+<script>
+  import { initPlaceReviews } from '../../components/places/init-place-reviews.ts';
+  // Run for this visit and for every later navigation: a ClientRouter swap
+  // brings a new reviews section that has not been wired yet.
+  initPlaceReviews();
+  document.addEventListener('astro:page-load', initPlaceReviews);
+</script>

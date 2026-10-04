@@ -4,23 +4,24 @@ import { branch } from '../../../lib/branch.ts';
 import { placeReviewSummary, placeReviewList } from '../../../lib/places/reviews.ts';
 import { myReviewOf } from '../../../lib/places/my-review-of.ts';
 import { reviewStars } from '../../../lib/places/review-stars.ts';
-import type { Place } from '../../../lib/places/place-schema.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
 // Our own reviews (D1): summary + recent list, and the caller's own review if
 // signed in. A row of five star icons, the first `n` lit — rendered server-side.
-type Props = Readonly<{ place: Place; ui: Ui }>;
-const { place, ui } = Astro.props;
+// The thing reviewed is named by `subject` — a place's open-data id or an
+// event's `evt:` key — so one section serves both pages.
+type Props = Readonly<{ subject: string; region: string; ui: Ui }>;
+const { subject, region, ui } = Astro.props;
 const db = Astro.locals.runtime.env.DB;
 const user = Astro.locals.user;
 const [summary, reviews, mine] = await Promise.all([
-  placeReviewSummary(db, place.id),
-  placeReviewList(db, place.id),
-  myReviewOf(db, place.id, user?.id),
+  placeReviewSummary(db, subject),
+  placeReviewList(db, subject),
+  myReviewOf(db, subject, user?.id),
 ]);
 ---
 
-<section class="place-reviews" data-rv data-place={place.id} data-region={place.region}>
+<section class="place-reviews" id="reviews" data-rv data-place={subject} data-region={region}>
   <h2>
     {ui.reviews.title}
     {summary.count > 0 && (

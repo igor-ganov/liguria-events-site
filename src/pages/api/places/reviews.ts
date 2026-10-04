@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { isActiveMember } from '../../../lib/auth/is-active-member.ts';
 import { isDefined } from '../../../lib/is-defined.ts';
-import { isPlaceId } from '../../../lib/places/is-place-id.ts';
+import { isReviewSubject } from '../../../lib/places/is-review-subject.ts';
 import { memberDenial } from '../../../lib/auth/member-denial.ts';
 import { placeReviewsView } from '../../../lib/places/place-reviews-view.ts';
 import { removePlaceReview } from '../../../lib/places/remove-place-review.ts';
@@ -13,7 +13,7 @@ export const prerender = false;
 export const GET: APIRoute = async ({ url, locals }) => {
   const place = url.searchParams.get('place') ?? '';
   const views = await Promise.all(
-    [place].filter(isPlaceId).map((placeId) => placeReviewsView(locals.runtime.env.DB, placeId, locals.user)),
+    [place].filter(isReviewSubject).map((placeId) => placeReviewsView(locals.runtime.env.DB, placeId, locals.user)),
   );
   return views.at(0) ?? Response.json({ error: 'invalid place' }, { status: 400 });
 };

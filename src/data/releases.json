@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-05",
+    "roadmap": "ratings-comments",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "Rate an event and say how it was",
+      "it": "Vota un evento e racconta com’è andata",
+      "ru": "Оцените событие и расскажите, как всё прошло"
+    },
+    "body": {
+      "en": "Every event page now has reviews: sign in, give it one to five stars and add a line if you like. The average appears at the top of the page once somebody has rated.",
+      "it": "Ogni pagina evento ora ha le recensioni: accedi, dai da una a cinque stelle e aggiungi una riga se vuoi. La media compare in cima alla pagina appena qualcuno ha votato.",
+      "ru": "На каждой странице события теперь есть отзывы: войдите, поставьте от одной до пяти звёзд и, если хотите, добавьте пару слов. Средняя оценка появляется вверху страницы, как только кто-то оценил."
+    }
+  },
+  {
+    "date": "2026-10-05",
     "roadmap": "photo-galleries",
     "example": "/liguria/genova/",
     "title": {

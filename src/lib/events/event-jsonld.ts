@@ -2,8 +2,10 @@ import { eventDateTime } from '../seo/event-datetime.ts';
 import { eventStartLd } from './event-start-ld.ts';
 import { eventOffersLd } from './event-offers-ld.ts';
 import { eventPlaceLd } from './event-place-ld.ts';
+import { eventRatingLd } from './event-rating-ld.ts';
 import { eventSubEventsLd } from './event-subevents-ld.ts';
 import type { CompactEvent } from './event-schema.ts';
+import type { ReviewSummary } from '../places/place-review-types.ts';
 
 type Params = Readonly<{
   event: CompactEvent;
@@ -12,6 +14,7 @@ type Params = Readonly<{
   image: string | undefined;
   address: string | undefined;
   url: string;
+  rating?: ReviewSummary | undefined;
 }>;
 
 type Json = Record<string, unknown>;
@@ -27,7 +30,7 @@ const clean = (obj: Json): Json =>
 /** schema.org Event JSON-LD; `<` is escaped so the string is safe in a
  *  `<script type="application/ld+json">` body. */
 export const eventJsonLd = (params: Params): string => {
-  const { event, title, desc, image, address, url } = params;
+  const { event, title, desc, image, address, url, rating } = params;
   const place = eventPlaceLd(event, address);
   return JSON.stringify(
     clean({
@@ -46,6 +49,7 @@ export const eventJsonLd = (params: Params): string => {
       location: place,
       offers: eventOffersLd(event, url),
       subEvent: eventSubEventsLd(event, title, place),
+      aggregateRating: eventRatingLd(rating),
     }),
   ).replace(/</g, '\\u003c');
 };

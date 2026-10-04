@@ -1,4 +1,4 @@
-import { isPlaceId } from './is-place-id.ts';
+import { isReviewSubject } from './is-review-subject.ts';
 import { isRating } from './is-rating.ts';
 import { REGION_GEO } from '../region/region-bounds.ts';
 import type { ReviewInput } from './review-input.ts';
@@ -12,7 +12,7 @@ const invalidRating = (): Response =>
  *  region, then the rating. Undefined means the review may be written. */
 export const reviewDenial = (input: ReviewInput): Response | undefined =>
   [
-    ...[input].filter((review) => !isPlaceId(review.place)).map(invalidPlace),
+    ...[input].filter((review) => !isReviewSubject(review.place)).map(invalidPlace),
     ...[input].filter((review) => !(review.region in REGION_GEO)).map(invalidRegion),
     ...[input].filter((review) => !isRating(review.rating)).map(invalidRating),
   ].at(0);
