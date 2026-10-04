@@ -167,3 +167,9 @@
 .photo-card .photo-card-top .badge-made {
   background: #33697a;
 }
+
+/* The other hours a thing starts that day, beside the first one. */
+.photo-card-more {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}

@@ -62,3 +62,57 @@ describe('expandSessions', () => {
     assert.deepEqual(expandSessions([e], today), [e]);
   });
 });
+
+// A guided visit that leaves at ten, eleven and twenty past two is one thing to
+// go to with three times to choose from. Shown as three cards it reads as three
+// events, and with the same photograph on each it reads as a broken page.
+describe('several sessions of one thing on one day', () => {
+  const visit = ev({
+    id: 'v',
+    s: '2026-10-03',
+    e: '2026-10-04',
+    h: '10:00',
+    k: true,
+    p: [
+      { date: '2026-10-03', time: '10:00', title: 'Cittadella di Campi' },
+      { date: '2026-10-03', time: '14:30', title: 'Cittadella di Campi' },
+      { date: '2026-10-04', title: 'Ponte Monumentale' },
+      { date: '2026-10-04', time: '14:20', title: 'Ponte Monumentale' },
+      { date: '2026-10-04', time: '11:00', title: 'Ponte Monumentale' },
+      { date: '2026-10-04', time: '16:00', title: 'Rifugio antiaereo' },
+    ],
+  });
+  const out = expandSessions([visit], '2026-10-01');
+
+  test('become one occurrence per day and title', () => {
+    assert.deepEqual(
+      out.map((o) => `${o.s} ${o.t}`),
+      ['2026-10-03 Cittadella di Campi', '2026-10-04 Ponte Monumentale', '2026-10-04 Rifugio antiaereo'],
+    );
+  });
+
+  test('carrying every time it starts, in order', () => {
+    assert.deepEqual(out[0]?.hs, ['10:00', '14:30']);
+    assert.deepEqual(out[1]?.hs, ['11:00', '14:20']);
+  });
+
+  test('led by the earliest, which is what the day is sorted by', () => {
+    assert.equal(out[0]?.h, '10:00');
+    assert.equal(out[1]?.h, '11:00');
+  });
+
+  test('a single session carries no list: there is nothing to choose between', () => {
+    assert.equal(out[2]?.hs, undefined);
+    assert.equal(out[2]?.h, '16:00');
+  });
+
+  test('the same title on another day stays its own occurrence', () => {
+    const twice = ev({ id: 'w', k: true, p: [{ date: '2026-10-03', time: '10:00', title: 'A' }, { date: '2026-10-04', time: '10:00', title: 'A' }] });
+    assert.equal(expandSessions([twice], '2026-10-01').length, 2);
+  });
+
+  test('the same hour listed twice is said once', () => {
+    const doubled = ev({ id: 'd', k: true, p: [{ date: '2026-10-03', time: '10:00' }, { date: '2026-10-03', time: '10:00' }, { date: '2026-10-03', time: '12:00' }] });
+    assert.deepEqual(expandSessions([doubled], '2026-10-01')[0]?.hs, ['10:00', '12:00']);
+  });
+});

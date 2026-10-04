@@ -75,3 +75,17 @@ test('nothing runs off the side of the screen', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test('a day shows one thing once, however many times it starts', async ({ page }) => {
+  // A visit leaving at ten, eleven and twenty past two used to be three cards
+  // with one photograph. It is one card carrying three hours.
+  const repeats = await page.locator('.feed-group').evaluateAll((days) =>
+    days.flatMap((day) => {
+      const seen = [...day.querySelectorAll('.feed-list > li')].map(
+        (row) => `${row.getAttribute('data-id') ?? ''}|${row.querySelector('.mini-title')?.textContent ?? ''}`,
+      );
+      return seen.filter((key, index) => seen.indexOf(key) !== index).map((key) => `${day.getAttribute('data-day') ?? ''} ${key}`);
+    }),
+  );
+  expect(repeats).toEqual([]);
+});

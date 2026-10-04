@@ -9,6 +9,16 @@ const hour = (event: CompactEvent): string =>
     () => `<b>${escapeMarkup(event.h ?? '')}</b>`,
   );
 
+// The other hours the same thing starts that day. The first is already set
+// large; repeating it here would make three starts read as four.
+const more = (event: CompactEvent): string => {
+  const rest = (event.hs ?? []).slice(1);
+  return branch(rest.length === 0)(
+    () => '',
+    () => `<span class="photo-card-more">${escapeMarkup(rest.join(' · '))}</span>`,
+  );
+};
+
 const run = (event: CompactEvent): string =>
   branch(event.e === undefined)(
     () => '',
@@ -16,6 +26,7 @@ const run = (event: CompactEvent): string =>
   );
 
 /** The hour, set large because under a day heading it is the one number a
- *  reader is looking for, and the run of dates when the event has one. */
+ *  reader is looking for; the other hours it starts that day; and the run of
+ *  dates when the event has one. */
 export const feedCardWhen = (event: CompactEvent): string =>
-  `<span class="photo-card-when">${hour(event)}${run(event)}</span>`;
+  `<span class="photo-card-when">${hour(event)}${more(event)}${run(event)}</span>`;

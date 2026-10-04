@@ -123,3 +123,15 @@ describe('the card built in the browser', () => {
     assert.ok(!html.includes('<img'));
   });
 });
+
+describe('a card for something that starts several times a day', () => {
+  test('shows the first hour large and the rest beside it', () => {
+    const html = feedCardHtml(context, event({ h: '10:00', hs: ['10:00', '11:00', '14:20'] }));
+    assert.match(html, /<b>10:00<\/b>/);
+    assert.match(html, /photo-card-more[^>]*>11:00 · 14:20</);
+  });
+
+  test('shows nothing beside a single hour', () => {
+    assert.ok(!feedCardHtml(context, event({ h: '10:00' })).includes('photo-card-more'));
+  });
+});

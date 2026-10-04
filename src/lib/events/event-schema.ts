@@ -37,6 +37,9 @@ export const EventSchema = Schema.Struct({
   a: Schema.optional(Schema.String),
   g: Schema.optional(Schema.Tuple(Schema.Number, Schema.Number)),
   h: Schema.optional(Schema.String),
+  /** Every hour it starts on its day, when there is more than one. Never on
+   *  the wire: it is filled in when a programme is folded into occurrences. */
+  hs: Schema.optional(Schema.Array(Schema.String)),
   /** City slug (province capital) — the crawler's geocoding anchor. */
   ct: Schema.optional(Schema.String),
   /** Region slug — the slice the site is browsed by. */

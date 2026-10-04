@@ -678,7 +678,7 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
   );
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
 }
-.photo-card-when { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.photo-card-when { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1rem 0.5rem; font-size: 0.8rem; font-variant-numeric: tabular-nums; }
 .photo-card-when b {
   font-family: var(--font-display); font-weight: 500; font-size: 1.5rem;
   line-height: 1; letter-spacing: -0.02em;
