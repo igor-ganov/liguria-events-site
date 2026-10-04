@@ -1,0 +1,34 @@
+---
+import CityVenues from './CityVenues.astro';
+import SubscribeBar from './SubscribeBar.astro';
+import VenuePast from './VenuePast.astro';
+import type { CityVenue } from '../../../lib/events/venues-in-city.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+import type { VenueView } from '../../../lib/events/feed-events.ts';
+
+// Everything below the feed, in one place: what has already happened here, the
+// other venues in town, and the invitation to be told about the next one. It is
+// its own component because the page above it is the feed, and a template that
+// ends in four conditionals is read for its logic rather than its shape.
+type Props = Readonly<{
+  lang: Locale;
+  region: string;
+  city?: string | undefined;
+  venue?: VenueView | undefined;
+  today: string;
+  placeName: string;
+  title: string;
+  cityVenues: readonly CityVenue[];
+  site: URL | undefined;
+  ui: Ui;
+}>;
+const { lang, region, city, venue, today, placeName, title, cityVenues, site, ui } = Astro.props;
+---
+
+{venue !== undefined && <VenuePast city={city ?? ''} slug={venue.slug} today={today} ui={ui} />}
+{cityVenues.length > 0 && (
+  <CityVenues lang={lang} heading={ui.seo.venuesHere.replace('{place}', placeName)} venues={cityVenues} />
+)}
+<p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
+<SubscribeBar region={region} city={city} site={site} ui={ui} title={title} />
