@@ -1,3 +1,4 @@
+import { placeToken } from '../../lib/region/place-token.ts';
 import { regionAt } from '../../lib/region/region-at.ts';
 
 /** Eight seconds is longer than a fix takes indoors and short enough that a
@@ -26,5 +27,5 @@ export const pushPlace = async (fallback: string): Promise<string> => {
     .map((found) => regionAt([found.coords.latitude, found.coords.longitude]))
     .filter((region) => region !== '')
     .map((region) => `region:${region}`)
-    .at(0) ?? fallback;
+    .at(0) ?? placeToken(fallback);
 };
