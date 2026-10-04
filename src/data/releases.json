@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-05",
+    "roadmap": "report-and-claim",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "Report a problem, or claim your event",
+      "it": "Segnala un problema o rivendica il tuo evento",
+      "ru": "Сообщить о проблеме или заявить права на событие"
+    },
+    "body": {
+      "en": "Two buttons at the bottom of every event page. Each opens a conversation with us that you can follow under “My requests”, add details and screenshots to, and reply in. For now the conversation itself is in English.",
+      "it": "Due pulsanti in fondo a ogni pagina evento. Ognuno apre una conversazione con noi che puoi seguire in “My requests”, completare con dettagli e schermate e a cui puoi rispondere. Per ora la conversazione è in inglese.",
+      "ru": "Две кнопки внизу каждой страницы события. Каждая открывает переписку с нами: её видно в разделе «My requests», туда можно добавить подробности и скриншоты и ответить. Пока сама переписка на английском."
+    }
+  },
+  {
+    "date": "2026-10-05",
     "roadmap": "ratings-comments",
     "example": "/liguria/genova/",
     "title": {

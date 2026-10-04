@@ -1,0 +1,30 @@
+---
+import { eventOwnerOf } from '../../../lib/tickets/event-owner-of.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// The two ways a reader can talk to us about an event: something is wrong with
+// it, or it is theirs. Both are plain links to one form, carrying the event in
+// the address, so they work with no script and survive being opened in a new
+// tab. Once a claim has been approved the page says so, and stops offering to
+// take the event over a second time.
+type Props = Readonly<{ event: CompactEvent; title: string; ui: Ui }>;
+const { event, title, ui } = Astro.props;
+const owner = await eventOwnerOf(Astro.locals.runtime.env.DB, event.id);
+const link = (kind: string): string => `/tickets/new/?${new URLSearchParams({ kind, event: event.id, title })}`;
+---
+
+<nav class="event-feedback" aria-label={ui.eventPage.report}>
+  <a class="chip" href={link('report')} rel="nofollow" data-feedback="report">
+    <Fragment set:html={uiIcon('bell', 15)} />
+    {ui.eventPage.report}
+  </a>
+  {owner === undefined && (
+    <a class="chip" href={link('claim')} rel="nofollow" data-feedback="claim">
+      <Fragment set:html={uiIcon('key', 15)} />
+      {ui.eventPage.claim}
+    </a>
+  )}
+  {owner !== undefined && <span class="event-managed" data-feedback="managed">{ui.eventPage.managed}</span>}
+</nav>

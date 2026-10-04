@@ -7,6 +7,7 @@ import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventActions from './event/EventActions.astro';
 import EventCover from './event/EventCover.astro';
+import EventFeedback from './event/EventFeedback.astro';
 import EventGallery from './event/EventGallery.astro';
 import EventPassed from '../events/EventPassed.astro';
 import EventProgramme from './event/EventProgramme.astro';
@@ -80,6 +81,7 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
     <PlaceReviews subject={subject} region={region} ui={ui} />
     <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
     <EventSources links={links} heading={ui.headings.sources} />
+    <EventFeedback event={event} title={title} ui={ui} />
     {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
   </article>
 </Layout>

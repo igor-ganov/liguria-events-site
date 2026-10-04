@@ -1,0 +1,50 @@
+---
+import { actionsFor } from '../../lib/tickets/actions-for.ts';
+import type { Ticket, TicketMessage } from '../../lib/tickets/ticket-types.ts';
+import type { TicketAction } from '../../lib/tickets/actions-for.ts';
+
+// The conversation, oldest message first, then the reply form, then — for the
+// staff only — the decisions the thread still allows. Every control is a plain
+// form post answered by a redirect back here, so the page needs no script.
+type Props = Readonly<{ ticket: Ticket; messages: readonly TicketMessage[]; admin: boolean }>;
+const { ticket, messages, admin } = Astro.props;
+const KIND: Readonly<Record<Ticket['kind'], string>> = { report: 'Problem', claim: 'Ownership' };
+const ACTION: Readonly<Record<TicketAction, string>> = { approve: 'Approve: hand the event over', resolve: 'Mark resolved', reject: 'Reject' };
+const actions = [ticket].filter(() => admin).flatMap(actionsFor);
+// Our side of the conversation speaks as the site, not as whoever was on duty.
+const author = (message: TicketMessage): string => ['Dove Go'].filter(() => message.staff === 1).at(0) ?? `@${message.handle}`;
+---
+
+<header class="ticket-head">
+  <span class="ticket-kind">{KIND[ticket.kind]}</span>
+  <span class="ticket-status" data-status={ticket.status}>{ticket.status}</span>
+  <h1><a href={`/event/${ticket.eventId}/`}>{ticket.eventTitle}</a></h1>
+  <p class="muted">Opened by @{ticket.handle} on {ticket.createdAt.slice(0, 10)}</p>
+</header>
+
+<ol class="ticket-thread">
+  {messages.map((message) => (
+    <li data-staff={message.staff === 1}>
+      <p class="ticket-who"><strong>{author(message)}</strong> <time datetime={message.createdAt}>{message.createdAt.slice(0, 16).replace('T', ' ')}</time></p>
+      {message.body !== '' && <p class="ticket-body">{message.body}</p>}
+      {message.attachment && <a class="ticket-file" href={message.attachment} target="_blank" rel="noopener"><img src={message.attachment} alt="Attached screenshot" loading="lazy" /></a>}
+    </li>
+  ))}
+</ol>
+
+<form class="ticket-form" method="post" action={`/api/tickets/${ticket.id}`} enctype="multipart/form-data" data-astro-reload>
+  <label for="ticket-reply">Add a message</label>
+  <textarea id="ticket-reply" name="body" rows="4" maxlength="4000"></textarea>
+  <label for="ticket-file">Attach a screenshot (optional)</label>
+  <input id="ticket-file" type="file" name="file" accept="image/png,image/jpeg,image/webp" />
+  <button type="submit" class="account-signin">Send</button>
+</form>
+
+{actions.length > 0 && (
+  <form class="ticket-actions" method="post" action="/api/admin/ticket" data-astro-reload>
+    <input type="hidden" name="id" value={ticket.id} />
+    {actions.map((action) => (
+      <button type="submit" name="action" value={action} class="chip" data-action={action}>{ACTION[action]}</button>
+    ))}
+  </form>
+)}

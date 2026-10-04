@@ -5,7 +5,7 @@ import { authGate } from '../src/lib/auth/auth-gate.ts';
 
 describe('needsAuth', () => {
   test('gates the protected sections and anything under them', () => {
-    for (const path of ['/admin', '/settings', '/admin/users', '/settings/passkeys']) {
+    for (const path of ['/admin', '/settings', '/tickets', '/admin/users', '/settings/passkeys', '/tickets/new']) {
       assert.equal(needsAuth(path), true, path);
     }
   });

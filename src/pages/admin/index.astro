@@ -21,6 +21,7 @@ const events = await listEventsByStatus(env.DB, ['pending', 'held', 'published',
     <nav class="admin-tabs">
       <a href="/admin/" aria-current="page">Moderation</a>
       <a href="/admin/users/">Users</a>
+      <a href="/admin/tickets/">Tickets</a>
     </nav>
     <h1>Moderation</h1>
     <p>{events.length} event(s). Newest first.</p>

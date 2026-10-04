@@ -1,0 +1,26 @@
+---
+import type { Ticket } from '../../lib/tickets/ticket-types.ts';
+
+// A list of threads: what each is about, what kind it is, where it stands. The
+// staff desk also shows who opened each; a reader's own list has no need to.
+type Props = Readonly<{ tickets: readonly Ticket[]; showAuthor?: boolean; empty: string }>;
+const { tickets, showAuthor = false, empty } = Astro.props;
+const KIND: Readonly<Record<Ticket['kind'], string>> = { report: 'Problem', claim: 'Ownership' };
+---
+
+{tickets.length === 0 && <p class="muted">{empty}</p>}
+{tickets.length > 0 && (
+  <ul class="ticket-list">
+    {tickets.map((ticket) => (
+      <li data-status={ticket.status}>
+        <a href={`/tickets/${ticket.id}/`}>
+          <span class="ticket-kind">{KIND[ticket.kind]}</span>
+          <strong>{ticket.eventTitle}</strong>
+          {showAuthor && <span class="ticket-author">@{ticket.handle}</span>}
+          <span class="ticket-status" data-status={ticket.status}>{ticket.status}</span>
+          <time datetime={ticket.updatedAt}>{ticket.updatedAt.slice(0, 10)}</time>
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
