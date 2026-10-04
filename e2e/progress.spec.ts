@@ -10,6 +10,7 @@ import { ROADMAP } from '../src/lib/progress/roadmap.ts';
 
 const FIRST_NOW = ROADMAP.find((item) => item.stage === 'now');
 const NEWEST = RELEASES[0];
+const OLDEST = [...ROADMAP].filter((item) => item.stage === 'done').sort((a, b) => (a.shipped ?? '').localeCompare(b.shipped ?? ''))[0];
 
 test('the roadmap answers and is cut into stages', async ({ page }) => {
   const response = await page.goto('/roadmap/');
@@ -19,6 +20,24 @@ test('the roadmap answers and is cut into stages', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 2, name: 'Next' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'Shipped' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 3, name: FIRST_NOW?.title.en ?? '' })).toBeVisible();
+});
+
+test('the roadmap is a path: what is behind, where we are, what is ahead', async ({ page }) => {
+  // The order IS the content. A list that put the present first read as a
+  // backlog; the line has to run forward in time and mark the point reached.
+  await page.goto('/roadmap/');
+  const order = await page.locator('[data-journey]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-journey') ?? ''));
+  const run = order.filter((stage, index) => stage !== order[index - 1]);
+  const ahead = ['now', 'next', 'later'].filter((stage) => order.includes(stage));
+  expect(run).toEqual(['done', 'here', ...ahead]);
+  await expect(page.locator('[data-journey="here"]')).toHaveText('We are here');
+  await expect(page.locator('[data-journey="done"]').first().getByRole('heading')).toHaveText(OLDEST?.title.en ?? '');
+});
+
+test('the path travelled is also drawn as one bar, with its numbers', async ({ page }) => {
+  await page.goto('/roadmap/');
+  const done = ROADMAP.filter((item) => item.stage === 'done').length;
+  await expect(page.getByRole('img', { name: new RegExp(`^${done} Shipped`) })).toBeVisible();
 });
 
 test('a stage with nothing in it is not announced', async ({ page }) => {

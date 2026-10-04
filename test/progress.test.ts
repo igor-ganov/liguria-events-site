@@ -33,16 +33,17 @@ describe('the roadmap', () => {
     assert.deepEqual(wrong.map((item) => item.id), []);
   });
 
-  test('groups by stage in the order a reader wants: the present first', () => {
+  test('groups by stage in the order the path is walked: behind us, here, ahead', () => {
     const groups = byStage(ROADMAP);
+    assert.deepEqual(groups.map((group) => group.stage), ['done', 'now', 'next', 'later']);
     assert.deepEqual(groups.map((group) => group.stage), STAGES);
     assert.equal(groups.flatMap((group) => group.items).length, ROADMAP.length);
   });
 
-  test('lists what shipped newest first', () => {
+  test('lists what shipped oldest first, so the line reads forward in time', () => {
     const shipped = byStage(ROADMAP).find((group) => group.stage === 'done')?.items ?? [];
     const dates = shipped.map((item) => item.shipped ?? '');
-    assert.deepEqual(dates, [...dates].sort().reverse());
+    assert.deepEqual(dates, [...dates].sort());
   });
 });
 

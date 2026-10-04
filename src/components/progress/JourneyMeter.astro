@@ -1,0 +1,22 @@
+---
+import type { StageCount } from '../../lib/progress/stage-counts.ts';
+
+// The whole path as one bar: a segment per stage, as wide as the stage has
+// milestones. It is a picture of a few numbers, so it is exposed as an image
+// whose name IS those numbers, and the same numbers are printed underneath for
+// everyone who can see it.
+type Props = Readonly<{ counts: readonly StageCount[] }>;
+const { counts } = Astro.props;
+const spoken = counts.map((entry) => `${entry.count} ${entry.label}`).join(', ');
+---
+
+<figure class="journey-meter">
+  <p class="journey-bar" role="img" aria-label={spoken}>
+    {counts.map((entry) => <span data-stage={entry.stage} style={`flex-grow:${entry.count}`} />)}
+  </p>
+  <figcaption aria-hidden="true">
+    {counts.map((entry) => (
+      <span data-stage={entry.stage}><b>{entry.count}</b> {entry.label}</span>
+    ))}
+  </figcaption>
+</figure>
