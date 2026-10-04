@@ -31,6 +31,8 @@ export const DEFAULT_UI: Ui = {
     venueCount: { other: '' },
     venueTitle: '',
     venuesHere: 'Venues in {place}',
+    pastHere: 'Previously here',
+    pastNote: 'The most recent dates we have on record at this venue.',
     venue: '',
     feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.",
     calendar: "Event calendar for {place} — what's on, day by day.",

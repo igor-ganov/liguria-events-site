@@ -1592,6 +1592,25 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .city-venues a:hover { color: var(--accent); }
 .city-venues-count { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
 
+/* ══ what has already happened at a venue ═══════════════════════════ */
+/* Dates, not links: these pages still answer, but they are kept out of the
+   sitemaps on purpose and a link from here would put them back in a crawler's
+   way. Quieter than the feed above it — it is evidence the place is alive, not
+   an invitation. */
+.venue-past { margin: 1.6rem 0 0.8rem; }
+.venue-past h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.2rem; }
+.venue-past-note { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.6rem; }
+.venue-past ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.venue-past li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; }
+.venue-past-when {
+  color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums;
+  flex: 0 0 11rem;
+}
+.venue-past-what { color: var(--ink); }
+@media (max-width: 30rem) {
+  .venue-past-when { flex-basis: 100%; }
+}
+
 /* ══ venues: the page a place lands on from its own page ════════════ */
 .venues { max-width: 46rem; margin: 0 auto; padding: 1.2rem 0 2.4rem; }
 .venues h1 { font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 0.6rem; }

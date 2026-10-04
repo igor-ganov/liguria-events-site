@@ -1,16 +1,15 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
+import FeedFoot from './feed/FeedFoot.astro';
 import FeedGroups from './feed/FeedGroups.astro';
 import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
-import SubscribeBar from './feed/SubscribeBar.astro';
 import TesterCall from '../testing/TesterCall.astro';
 import VenueHeader from './feed/VenueHeader.astro';
 import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
-import CityVenues from './feed/CityVenues.astro';
 import { feedPageView } from '../../lib/events/feed-page-view.ts';
 import type { FeedProps } from './feed/feed-props.ts';
 
@@ -55,11 +54,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
       invite={ui.contribute.empty.replace('{place}', placeName)}
     />
   )}
-  {cityVenues.length > 0 && (
-    <CityVenues lang={lang} heading={ui.seo.venuesHere.replace('{place}', placeName)} venues={cityVenues} />
-  )}
-  <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
-  <SubscribeBar region={region} city={city} site={Astro.site} ui={ui} title={title} />
+  <FeedFoot lang={lang} region={region} city={city} venue={venue} today={today} placeName={placeName} title={title} cityVenues={cityVenues} site={Astro.site} ui={ui} />
 </Layout>
 
 <script is:inline type="application/json" id="icons-data" set:html={categoryIconsJson()} />

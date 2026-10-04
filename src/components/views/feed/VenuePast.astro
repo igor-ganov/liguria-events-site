@@ -1,0 +1,37 @@
+---
+import { cachedArchive } from '../../../data/cached-archive.ts';
+import { dayWithYear } from '../../../lib/calendar/day-with-year.ts';
+import { EVENTS_URL } from '../../../data/events-url.ts';
+import { pastAtVenue } from '../../../lib/events/past-at-venue.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// A venue with an empty fortnight ahead reads as a place where nothing ever
+// happens, which is the opposite of what the page is for: somebody arriving
+// from a search for the theatre itself wants to know it is alive. The corpus
+// holds only what is still to come, so this is the collector's archive.
+//
+// Deliberately text, not links. Those pages still answer — a shared link has
+// to keep working — but they are kept out of the sitemaps on purpose: 3 345
+// finished pages were a third of everything we advertised to a crawler that
+// takes a hundred URLs a day. Linking them from a page Google does keep would
+// put them straight back in its way.
+type Props = Readonly<{ city: string; slug: string; today: string; ui: Ui }>;
+const { city, slug, today, ui } = Astro.props;
+const past = pastAtVenue(await cachedArchive(EVENTS_URL), { city, slug, today });
+const label = dayWithYear(ui);
+---
+
+{past.length > 0 && (
+  <section class="venue-past" aria-labelledby="venue-past-heading">
+    <h2 id="venue-past-heading">{ui.seo.pastHere}</h2>
+    <p class="venue-past-note">{ui.seo.pastNote}</p>
+    <ul>
+      {past.map((event) => (
+        <li>
+          <span class="venue-past-when">{label(event.s, event.e)}</span>
+          <span class="venue-past-what">{event.t}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
