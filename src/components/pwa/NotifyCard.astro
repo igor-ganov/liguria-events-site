@@ -5,12 +5,15 @@ import type { Ui } from '../../lib/i18n/ui-schema.ts';
 // cannot live behind the account page. The switch reflects what the browser
 // actually holds, checked on load — a reader who turned notifications off in
 // the system must not find this still saying "on".
-type Props = Readonly<{ ui: Ui; lang: string; vapidKey: string }>;
-const { ui, lang, vapidKey } = Astro.props;
+// `place` is what the subscription falls back to when the reader declines the
+// location prompt — which is most readers. Without it the sender was handed an
+// empty place and answered with the whole country.
+type Props = Readonly<{ ui: Ui; lang: string; vapidKey: string; place: string }>;
+const { ui, lang, vapidKey, place } = Astro.props;
 const HOURS = [7, 8, 9, 10, 12, 18, 20];
 ---
 
-<section class="notify-card" data-notify data-lang={lang} data-vapid={vapidKey}>
+<section class="notify-card" data-notify data-lang={lang} data-vapid={vapidKey} data-place={place}>
   <h2>{ui.notify.title}</h2>
   <p class="muted">{ui.notify.lead}</p>
   <p class="notify-where" data-notify-where hidden></p>

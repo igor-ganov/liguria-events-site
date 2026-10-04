@@ -1,21 +1,34 @@
 ---
+// Rendered per request, like its English twin: the subscription needs a place to
+// fall back to when the reader declines the location prompt, and the only honest
+// one is the region the request came from. A prerendered page cannot know it.
+export const prerender = false;
 import { VAPID_PUBLIC_KEY } from '../../lib/pwa/vapid-key.ts';
 import Layout from '../../layouts/Layout.astro';
 import NotifyCard from '../../components/pwa/NotifyCard.astro';
+import { entryRegion } from '../../lib/region/entry-region.ts';
+import { isLocale } from '../../lib/i18n/is-locale.ts';
 import { LEGACY_REGION } from '../../lib/region/legacy-region.ts';
-import { LOCALES } from '../../lib/i18n/locales.ts';
+import { placeToken } from '../../lib/region/place-token.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 
-export const getStaticPaths = () => LOCALES.filter((loc) => loc !== 'en').map((lang) => ({ params: { lang } }));
-
-const lang = LOCALES.find((loc) => loc === Astro.params.lang) ?? 'en';
-const ui = await uiOf(lang);
-
+// A segment that is not one of our languages is not this page: /liguria/
+// notifications would otherwise render an English card at a second address.
+const locale = [Astro.params.lang ?? ''].filter(isLocale).at(0);
+switch (locale) {
+  case undefined:
+    return Astro.redirect('/notifications', 308);
+}
+const ui = await uiOf(locale);
+const region = await entryRegion({
+  region: Astro.locals.runtime?.cf?.region,
+  country: Astro.locals.runtime?.cf?.country,
+});
 ---
 
-<Layout lang={lang} region={LEGACY_REGION} title={ui.notify.title} path="notifications/">
+<Layout lang={locale} region={LEGACY_REGION} title={ui.notify.title} path="notifications/">
   <h1>{ui.notify.title}</h1>
-  <NotifyCard ui={ui} lang={lang} vapidKey={VAPID_PUBLIC_KEY} />
+  <NotifyCard ui={ui} lang={locale} vapidKey={VAPID_PUBLIC_KEY} place={placeToken(region)} />
 </Layout>
 
 <script>

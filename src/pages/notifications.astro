@@ -2,21 +2,30 @@
 import { VAPID_PUBLIC_KEY } from '../lib/pwa/vapid-key.ts';
 import Layout from '../layouts/Layout.astro';
 import NotifyCard from '../components/pwa/NotifyCard.astro';
+import { entryRegion } from '../lib/region/entry-region.ts';
 import { LEGACY_REGION } from '../lib/region/legacy-region.ts';
+import { placeToken } from '../lib/region/place-token.ts';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 
 // Offered to anybody: the app has no sign-in, so this cannot live behind the
-// account page. Everything on it happens in the browser — the page itself is
-// static, and the only thing the build puts in is the public half of the key
-// the browser subscribes with.
+// account page. Rendered per request rather than built: the subscription needs
+// a place to fall back to when the reader declines the location prompt, and the
+// only honest one is the region the request came from.
+export const prerender = false;
 const lang = 'en' as const;
 const ui = await uiOf(lang);
+// The reader's own region, from where the request came — the fallback for a
+// subscription when the location prompt is declined.
+const region = await entryRegion({
+  region: Astro.locals.runtime?.cf?.region,
+  country: Astro.locals.runtime?.cf?.country,
+});
 
 ---
 
 <Layout lang={lang} region={LEGACY_REGION} title={ui.notify.title} path="notifications/">
   <h1>{ui.notify.title}</h1>
-  <NotifyCard ui={ui} lang={lang} vapidKey={VAPID_PUBLIC_KEY} />
+  <NotifyCard ui={ui} lang={lang} vapidKey={VAPID_PUBLIC_KEY} place={placeToken(region)} />
 </Layout>
 
 <script>
