@@ -1,0 +1,24 @@
+---
+// Every photograph of the event after the cover, as one strip to swipe through:
+// the ones its own source page carried, then the cover of each other source.
+// Each is credited to and links back to where it came from.
+import { largeCover } from '../../../lib/img/large-cover.ts';
+import { resized } from '../../../lib/img/resized.ts';
+import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
+
+type Props = Readonly<{ photos: readonly GalleryPhoto[]; photoBy: string }>;
+const { photos, photoBy } = Astro.props;
+---
+
+<ul class="event-gallery">
+  {photos.map((photo) => (
+    <li class="gallery-photo">
+      <figure>
+        <a href={photo.href} target="_blank" rel="noopener">
+          <img src={resized(largeCover(photo.image), 800)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+        </a>
+        <figcaption>{photoBy}: {photo.name}</figcaption>
+      </figure>
+    </li>
+  ))}
+</ul>

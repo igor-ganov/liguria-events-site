@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-10-05",
+    "roadmap": "photo-galleries",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "More photographs on event pages",
+      "it": "Più fotografie nelle pagine evento",
+      "ru": "Больше фотографий на страницах событий"
+    },
+    "body": {
+      "en": "Where a source publishes several photographs of an event, its page now shows them all as a strip to swipe through, each credited to its source. The first source is visitgenoa; more will follow.",
+      "it": "Quando una fonte pubblica più fotografie di un evento, la sua pagina ora le mostra tutte in una striscia da scorrere, ognuna con il credito della fonte. La prima fonte è visitgenoa; ne seguiranno altre.",
+      "ru": "Если источник публикует несколько фотографий события, его страница теперь показывает их все лентой, которую можно листать, с указанием источника у каждой. Первый источник — visitgenoa, остальные добавим следом."
+    }
+  },
+  {
     "date": "2026-10-04",
     "roadmap": "event-page",
     "example": "/liguria/genova/",

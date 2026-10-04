@@ -7,7 +7,7 @@ import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventActions from './event/EventActions.astro';
 import EventCover from './event/EventCover.astro';
-import EventGalleryMore from './event/EventGalleryMore.astro';
+import EventGallery from './event/EventGallery.astro';
 import EventPassed from '../events/EventPassed.astro';
 import EventProgramme from './event/EventProgramme.astro';
 import EventTiles from './event/EventTiles.astro';
@@ -72,11 +72,11 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
     <EventCover event={event} title={title} cover={cover} photos={more.length + 1} ui={ui} />
     <EventTiles tiles={tiles} />
     <EventActions event={event} title={title} tickets={tickets} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
+    {more.length > 0 && <EventGallery photos={more} photoBy={ui.photoBy} />}
     {leaves.length > 0 && <EventProgramme leaves={leaves} heading={ui.eventPage.programme} />}
     <EventWhere event={event} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
     {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
     {desc !== '' && <section class="event-desc" set:html={descHtml} />}
-    {more.length > 0 && <EventGalleryMore photos={more} photoBy={ui.photoBy} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
     <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
     <EventSources links={links} heading={ui.headings.sources} />

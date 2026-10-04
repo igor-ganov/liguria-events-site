@@ -1,11 +1,12 @@
+import { BRAND_MARK } from '../../lib/img/brand-mark.ts';
 import { iconSvg } from '../../lib/icons/icon-svg.ts';
 import { toCategory } from '../../lib/events/to-category.ts';
 
 /** Marks an image already handled, so a second `error` cannot degrade twice. */
 const FALLEN = 'imgFallback';
 
-/** Swap a dead feed thumbnail for the same clean category tile an image-less
- *  event already gets, so the row keeps its shape. */
+/** Swap a dead small thumbnail (calendar, favourites) for the same clean
+ *  category tile an image-less event already gets, so the row keeps its shape. */
 const replaceWithTile = (img: HTMLImageElement): void => {
   const category = toCategory(img.dataset['cat']);
   const tile = document.createElement('div');
@@ -15,12 +16,25 @@ const replaceWithTile = (img: HTMLImageElement): void => {
   img.replaceWith(tile);
 };
 
-// Ordered rules, first match wins — the same order the guard chain ran in:
-// a dead gallery thumbnail drops itself and leaves the rest of the strip; a
-// dead detail hero drops the whole figure (no cover beats a broken one).
+/** The mark of the site on its own ground — exactly what an event that never
+ *  had a photograph is given, so a dead picture and a missing one look alike. */
+const brandBlank = (className: string): HTMLElement => {
+  const blank = document.createElement('span');
+  blank.className = className;
+  blank.innerHTML = BRAND_MARK;
+  return blank;
+};
+
+// Ordered rules, first match wins. A dead gallery photo drops itself and leaves
+// the rest of the strip. A dead cover — on the event page or on a feed card —
+// becomes the mark of the site, because the words sit on it and need a ground.
+// A hero outside an event cover (a landmark) is dropped: no picture beats a
+// broken one there, and nothing is written on it.
 const RULES: readonly Readonly<{ selector: string; apply: (img: HTMLImageElement) => void }>[] = [
   { selector: '.gallery-photo', apply: (img) => img.closest('.gallery-photo')?.remove() },
+  { selector: '.event-cover .event-hero', apply: (img) => img.closest('.event-hero')?.replaceWith(brandBlank('event-cover-blank')) },
   { selector: '.event-hero', apply: (img) => img.closest('.event-hero')?.remove() },
+  { selector: '.photo-card-pic', apply: (img) => img.replaceWith(brandBlank('photo-card-blank')) },
 ];
 
 /** Degrade a broken event picture so a dead URL never paints as a broken glyph. */
