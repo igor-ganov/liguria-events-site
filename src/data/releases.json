@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-04",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "The feed is now photographs",
+      "it": "Il feed ora è fatto di fotografie",
+      "ru": "Лента теперь из фотографий"
+    },
+    "body": {
+      "en": "Every event is a full-width photograph with its time, title and place on it, edge to edge with no gaps. On a wide screen the cards form a mosaic.",
+      "it": "Ogni evento è una fotografia a tutta larghezza con ora, titolo e luogo sopra, senza spazi. Su uno schermo largo le schede formano un mosaico.",
+      "ru": "Каждое событие — фотография во всю ширину с временем, названием и местом, без зазоров. На широком экране карточки складываются в мозаику."
+    }
+  },
+  {
+    "date": "2026-10-04",
     "roadmap": "progress-pages",
     "example": "/roadmap/",
     "title": {

@@ -1,11 +1,13 @@
 import { branch } from '../../lib/branch.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
+import { descriptionPlain } from '../../lib/description/description-plain.ts';
 import { escapeMarkup } from '../../lib/escape-markup.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { feedCardTags } from './feed-card-tags.ts';
 import { feedCardThumb } from './feed-card-thumb.ts';
-import { formatWhen } from '../../lib/events/format-when.ts';
+import { feedCardVenue } from './feed-card-venue.ts';
+import { feedCardWhen } from './feed-card-when.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -17,26 +19,29 @@ const badge = (on: boolean, className: string, label: string): string =>
     () => '',
   );
 
+// Not shown, and still in the document: the search reads the rendered cards,
+// so a description taken out of the markup would be taken out of the search.
 const descHtml = (desc: string): string =>
   branch(desc === '')(
     () => '',
-    () => `<p class="mini-desc">${escapeMarkup(desc)}</p>`,
+    () => `<p class="mini-desc" hidden>${escapeMarkup(desc)}</p>`,
   );
 
-/** A card matching the server-rendered markup, for an event published since the
- *  build — the same DOM the filter and the search index already read. */
+/** The feed card: a photograph with the hour, the title and the place on it.
+ *  ONE builder for the server-rendered feed and for an event published since
+ *  the build, so the two can never drift apart. */
 export const feedCardHtml = (context: FeedContext, event: CompactEvent): string => {
   const { lang, ui, icons } = context;
   return (
-    `<a class="mini-card" href="${localizedUrl(lang, eventPath(event))}">` +
+    `<a class="photo-card" href="${localizedUrl(lang, eventPath(event))}">` +
     favButtonHtml(event.id, ui.nav.favorites) +
     feedCardThumb(event, icons) +
-    `<div class="mini-body"><h4 class="mini-title">${escapeMarkup(titleOf(lang)(event))}</h4>` +
-    `<span class="mini-when">${escapeMarkup(formatWhen(event))}</span>` +
-    descHtml(descriptionOf(lang)(event)) +
-    `<div class="mini-tags">${feedCardTags(event, ui, icons)}` +
+    `<header class="photo-card-top">${feedCardTags(event, ui, icons)}` +
     `${badge(event.f === true, 'badge-free', ui.badges.free)}` +
     `${badge(event.x === true, 'badge-gem', ui.badges.gem)}` +
-    `${badge(event.pl === true, 'badge-made', ui.badges.made)}</div></div></a>`
+    `${badge(event.pl === true, 'badge-made', ui.badges.made)}</header>` +
+    `<footer class="photo-card-text">${feedCardWhen(event)}` +
+    `<h4 class="mini-title photo-card-title">${escapeMarkup(titleOf(lang)(event))}</h4>` +
+    `${feedCardVenue(event)}${descHtml(descriptionPlain(descriptionOf(lang)(event)))}</footer></a>`
   );
 };

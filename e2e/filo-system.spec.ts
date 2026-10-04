@@ -61,27 +61,23 @@ test('the thread runs down the feed and ends frayed', async ({ page }) => {
   // One thread per page: two would stop being a route and become decoration.
   await expect(percorso).toHaveCount(1);
   await expect(page.locator('.capo')).toHaveCount(1);
-  // The rope and the stops are drawn, not bordered.
+  // The rope is drawn, not bordered.
   const disegni = await page.evaluate(() => {
     // querySelector answers with the platform's empty value; an absent element
     // means an absent drawing, and the assertions below say so by name.
     const riga = document.querySelector('.fermata') ?? document.createElement('div');
-    const nodo = getComputedStyle(riga, '::before');
     return {
       corda: getComputedStyle(document.querySelector('.percorso') ?? document.createElement('div'), '::before')
         .backgroundImage,
-      nodo: nodo.backgroundImage,
-      // `top: 50%` resolves to half the row's height: the stop is placed by
-      // the layout at the middle of its own card, so it cannot drift off it.
-      alto: Number.parseFloat(nodo.top),
-      mezzaRiga: riga.getBoundingClientRect().height / 2,
-      spostamento: nodo.translate,
+      nodo: getComputedStyle(riga, '::before').display,
     };
   });
   expect(disegni.corda).toContain('svg');
-  expect(disegni.nodo).toContain('svg');
-  expect(Math.abs(disegni.alto - disegni.mezzaRiga)).toBeLessThanOrEqual(1);
-  expect(disegni.spostamento).toContain('-50%');
+  // The feed has no stops since its cards became photographs laid out as a
+  // grid: a stop marks one moment on the line, and a row of three cards has no
+  // one moment to mark. The line stays beside the days; the stops would be
+  // decoration, which is the thing this design system forbids itself.
+  expect(disegni.nodo).toBe('none');
 });
 
 test('the thread is drawn as far as it has been read, and no further', async ({ page }) => {

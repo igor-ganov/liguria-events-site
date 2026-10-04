@@ -107,3 +107,63 @@
     display: none;
   }
 }
+
+/* ══ The feed as photographs ════════════════════════════════════════
+   Cards edge to edge, no gaps between them or beside them. A grid, so a wide
+   screen gets several photographs across at the size the sources actually
+   serve rather than one stretched to a metre.
+   These rules live here, after the thread, because they take the lane away
+   on a phone — written anywhere earlier, the thread would put it back. */
+.percorso .feed-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+}
+/* No stops in this feed. A stop marks one moment on the line, and a row of
+   several cards has no one moment to mark; on a phone the lane itself is
+   gone. The line stays beside the days where there is room for it. */
+.percorso .feed-list > .fermata::before {
+  display: none;
+}
+/* On a phone the lane goes too: the photographs take the whole width. */
+@media (max-width: 43.99rem) {
+  .percorso {
+    padding-left: 0;
+    margin-inline: calc(-1 * var(--page-pad));
+  }
+  .percorso::before,
+  .percorso .velo-filo,
+  .percorso .capo {
+    display: none;
+  }
+  .percorso .feed-group h3 {
+    padding-inline: 0.9rem;
+  }
+}
+
+/* Chips on a photograph. The drawn ring is made for paper; on a picture it
+   disappears, so here a chip is a dark pill that carries its own ground. */
+.photo-card .photo-card-top .cat-tag,
+.photo-card .photo-card-top [class^='badge-'] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem;
+  border: 0;
+  border-image: none;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #fff;
+  background: rgb(12 20 24 / 0.66);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.photo-card .photo-card-top .badge-free {
+  background: #2f5c40;
+}
+.photo-card .photo-card-top .badge-gem {
+  background: #8a4b24;
+}
+.photo-card .photo-card-top .badge-made {
+  background: #33697a;
+}

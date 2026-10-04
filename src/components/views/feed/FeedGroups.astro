@@ -1,5 +1,6 @@
 ---
-import MiniCard from '../../shared/MiniCard.astro';
+import { categoryIcons } from '../../../lib/icons/category-icons.ts';
+import { feedCardHtml } from '../../feed/feed-card-html.ts';
 import { feedItemAttrs } from '../../../lib/events/feed-item-attrs.ts';
 import { stopClass } from '../../percorso/stop-class.ts';
 import type { DayGroup } from '../../../lib/events/feed-day-groups.ts';
@@ -13,6 +14,9 @@ type Props = Readonly<{
   lang: Locale;
 }>;
 const { groups, heading, ui, lang } = Astro.props;
+// The card is built by the same function the browser uses for an event
+// published since the build. Two renderers of one card drift; one cannot.
+const context = { lang, ui, icons: categoryIcons(), today: '' };
 ---
 
 {groups.map(([day, events]) => (
@@ -21,7 +25,7 @@ const { groups, heading, ui, lang } = Astro.props;
     <ul class="feed-list">
       {events.map((event) => (
         <li class={stopClass(event.pl === true)} {...feedItemAttrs(event)}>
-          <MiniCard event={event} ui={ui} lang={lang} />
+          <Fragment set:html={feedCardHtml(context, event)} />
         </li>
       ))}
     </ul>
