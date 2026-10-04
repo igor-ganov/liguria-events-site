@@ -3,6 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedFoot from './feed/FeedFoot.astro';
 import FeedGroups from './feed/FeedGroups.astro';
+import FeedPicks from '../feed/FeedPicks.astro';
 import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
 import TesterCall from '../testing/TesterCall.astro';
@@ -39,6 +40,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
     <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
   )}
 
+  {venue === undefined && facet === undefined && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
   <Filo city={city ?? ''} today={today} hasDays={groups.length > 0}>

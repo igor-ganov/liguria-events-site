@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-05",
+    "roadmap": "picks",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "Event of the day, the week and the month",
+      "it": "Evento del giorno, della settimana e del mese",
+      "ru": "Событие дня, недели и месяца"
+    },
+    "body": {
+      "en": "Every region and city page now opens with three highlights to swipe between and a strip of what else starts this week.",
+      "it": "Ogni pagina di regione e di città ora si apre con tre eventi in evidenza da sfogliare e una striscia di ciò che inizia questa settimana.",
+      "ru": "Каждая страница региона и города теперь открывается тремя главными событиями, которые можно листать, и лентой того, что ещё начинается на этой неделе."
+    }
+  },
+  {
+    "date": "2026-10-05",
     "roadmap": "report-and-claim",
     "example": "/liguria/genova/",
     "title": {

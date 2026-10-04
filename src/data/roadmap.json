@@ -88,7 +88,8 @@
   },
   {
     "id": "picks",
-    "stage": "next",
+    "stage": "done",
+    "shipped": "2026-10-05",
     "title": {
       "en": "Event of the day, the week and the month",
       "it": "Evento del giorno, della settimana e del mese",
