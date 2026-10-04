@@ -1,4 +1,5 @@
 ---
+import { largeCover } from '../../../lib/img/large-cover.ts';
 import { resized } from '../../../lib/img/resized.ts';
 import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
 
@@ -7,7 +8,7 @@ const { photo, title, photoBy } = Astro.props;
 ---
 
 <figure class="event-hero">
-  <img src={resized(photo.image, 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+  <img src={resized(largeCover(photo.image), 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
   {/* No credit for a picture of ours: the archive mark comes with no source,
       and naming a newspaper under it would be a lie. */}
   {photo.name !== '' && (

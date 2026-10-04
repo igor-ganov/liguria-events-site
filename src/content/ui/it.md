@@ -80,6 +80,7 @@ headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti
 notify: { title: 'Notifica giornaliera', lead: 'Una notifica al mattino: cosa c’è oggi dove sei. Se non c’è nulla, non arriva nulla.', on: 'Avvisami', off: 'Non avvisarmi più', at: 'Alle', where: 'Su: {value}', asked: 'Il browser chiederà il permesso.', refused: 'Il browser ha rifiutato le notifiche. Puoi consentirle nelle impostazioni del sito e riprovare.', done: 'Fatto. La prima arriva domani mattina.' }
 testers: { title: 'Aiutaci a lanciare l’app', lead: 'L’app Android è in test chiuso. Google chiede dodici tester iscritti per quattordici giorni prima di poterla pubblicare: iscriversi richiede un minuto.', join: 'Unisciti ai tester', install: 'Poi installala' }
 progress: { roadmap: 'Roadmap', roadmapLead: 'A cosa stiamo lavorando, cosa viene dopo e cosa è già uscito.', releases: 'Note di rilascio', releasesLead: 'Le novità man mano che escono, ognuna con un posto dove provarla.', now: 'In corso', next: 'In arrivo', later: 'Più avanti', done: 'Fatto', example: 'Guarda', here: 'Siamo qui' }
+eventPage: { starts: "inizio", dates: "date", duration: "durata", price: "da", website: "Sito", call: "Chiama", directions: "Indicazioni", programme: "Programma", where: "Dove", actions: "Azioni" }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }

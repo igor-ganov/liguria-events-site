@@ -1,28 +1,29 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import type { EventDetailProps } from './event-detail-props.ts';
-import ShareButton from '../share/ShareButton.astro';
 import OwnEventInvite from '../events/OwnEventInvite.astro';
 import { keepOutOfSearch } from '../../lib/events/keep-out-of-search.ts';
 import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
-import EventHero from './event/EventHero.astro';
+import EventActions from './event/EventActions.astro';
+import EventCover from './event/EventCover.astro';
 import EventGalleryMore from './event/EventGalleryMore.astro';
 import EventPassed from '../events/EventPassed.astro';
-import EventTags from './event/EventTags.astro';
-import EventTickets from './event/EventTickets.astro';
-import EventFacts from './event/EventFacts.astro';
 import EventProgramme from './event/EventProgramme.astro';
+import EventTiles from './event/EventTiles.astro';
+import EventWhere from './event/EventWhere.astro';
 import EventMapEmbed from './event/EventMapEmbed.astro';
 import EventEditions from './event/EventEditions.astro';
 import EventSources from './event/EventSources.astro';
 import { cityName } from '../../lib/region/city-name.ts';
 import { editionsOf } from '../../lib/events/editions-of.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
+import { eventTiles } from '../../lib/events/event-tiles.ts';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { programmeSessions } from '../../lib/events/programme-sessions.ts';
+import { programmeLeaves } from '../../lib/events/programme-leaves.ts';
+import { upcomingLeaves } from '../../lib/events/upcoming-leaves.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 
@@ -40,7 +41,8 @@ const ui = await uiOf(lang);
 // there — an event with no address at all is rejected outright by Google.
 const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday() });
 const { region, title, seoTitle, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
-const programme = programmeSessions(event, lang);
+const leaves = upcomingLeaves(programmeLeaves(event, lang), isoToday());
+const tiles = eventTiles({ event, lang, labels: ui.eventPage });
 // The same feast in other years — the archive for the ones that are over, the
 // corpus for the one that is coming. A reader landing on a feast that has
 // happened wants next year's, and that is the direction the archive alone
@@ -53,7 +55,6 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
   <article class="event-page">
     <p class="event-topbar">
       <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
-      <span class="event-share"><ShareButton ui={ui} title={title} /></span>
     </p>
     {justCreated && (
       <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event), Astro.site)} title={title} unlisted={unlisted} />
@@ -68,14 +69,14 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
         allLabel={ui.headings.allEvents}
       />
     )}
-    {cover && <EventHero photo={cover} title={title} photoBy={ui.photoBy} />}
-    {more.length > 0 && <EventGalleryMore photos={more} photoBy={ui.photoBy} />}
-    <EventTags event={event} title={title} ui={ui} />
-    {tickets && <EventTickets href={tickets} label={ui.tickets} />}
-    <EventFacts event={event} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
-    {desc !== '' && <div class="event-desc" set:html={descHtml} />}
-    {programme.length > 0 && <EventProgramme sessions={programme} lang={lang} />}
+    <EventCover event={event} title={title} cover={cover} photos={more.length + 1} ui={ui} />
+    <EventTiles tiles={tiles} />
+    <EventActions event={event} title={title} tickets={tickets} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
+    {leaves.length > 0 && <EventProgramme leaves={leaves} heading={ui.eventPage.programme} />}
+    <EventWhere event={event} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
     {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
+    {desc !== '' && <section class="event-desc" set:html={descHtml} />}
+    {more.length > 0 && <EventGalleryMore photos={more} photoBy={ui.photoBy} />}
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
     <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
     <EventSources links={links} heading={ui.headings.sources} />

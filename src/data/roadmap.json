@@ -30,7 +30,8 @@
   },
   {
     "id": "event-page",
-    "stage": "next",
+    "stage": "done",
+    "shipped": "2026-10-04",
     "title": {
       "en": "An event page you can take in at a glance",
       "it": "Una pagina evento che si capisce a colpo d’occhio",

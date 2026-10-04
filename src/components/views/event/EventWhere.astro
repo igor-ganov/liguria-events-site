@@ -1,0 +1,33 @@
+---
+import { crawlerAddress } from '../../../lib/events/crawler-address.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// Where it is: the venue, the address under it, and the way to a map. The
+// address a person typed in wins over the one a crawler found; the crawler one
+// is shown only when it says more than the venue name already does.
+type Props = Readonly<{
+  event: CompactEvent;
+  contacts: EventContacts | undefined;
+  mapSearchUrl: string | undefined;
+  ui: Ui;
+}>;
+const { event, contacts, mapSearchUrl, ui } = Astro.props;
+const address = contacts?.address ?? crawlerAddress(event, contacts?.address);
+---
+
+<section class="event-where">
+  <h2>{ui.eventPage.where}</h2>
+  <address>
+    <span class="event-where-pin" set:html={uiIcon('pin', 22)} />
+    <span class="event-where-text">
+      {event.v !== undefined && <b>{event.v}</b>}
+      {address !== undefined && <span>{address}</span>}
+      {mapSearchUrl && (
+        <a class="map-link" href={mapSearchUrl} target="_blank" rel="noopener">↗ {ui.mapLink}</a>
+      )}
+    </span>
+  </address>
+</section>

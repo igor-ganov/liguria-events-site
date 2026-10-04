@@ -1,0 +1,38 @@
+---
+import EventHero from './EventHero.astro';
+import { BRAND_MARK } from '../../../lib/img/brand-mark.ts';
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// The top of the page: the photograph with the name of the event on it, the
+// way the feed card that led here looked. An event that came with no picture
+// gets the mark of the site — never a stand-in that says something about the
+// event nobody checked.
+type Props = Readonly<{ event: CompactEvent; title: string; cover: GalleryPhoto | undefined; photos: number; ui: Ui }>;
+const { event, title, cover, photos, ui } = Astro.props;
+---
+
+<header class="event-cover">
+  {cover !== undefined && <EventHero photo={cover} title={title} photoBy={ui.photoBy} />}
+  {cover === undefined && <span class="event-cover-blank" set:html={BRAND_MARK} />}
+  <p class="event-cover-tags">
+    {event.c.map((category) => (
+      <span class="cat-tag" data-cat={category}>
+        <Fragment set:html={iconSvg(category, 13)} />
+        {ui.cat[category]}
+      </span>
+    ))}
+    {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+    {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+    {photos > 1 && (
+      <span class="event-cover-count">
+        <Fragment set:html={uiIcon('photo', 13)} />
+        {photos}
+      </span>
+    )}
+  </p>
+  <h1>{title}</h1>
+</header>

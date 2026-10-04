@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-04",
+    "roadmap": "event-page",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "A new event page",
+      "it": "Una nuova pagina evento",
+      "ru": "Новая страница события"
+    },
+    "body": {
+      "en": "Open any event: its name is on the photograph, the date, hour and length are figures on tiles, the programme is a row of calendar leaves, and directions, favourites and sharing are one row of buttons.",
+      "it": "Apri un evento qualsiasi: il nome è sulla fotografia, data, ora e durata sono cifre su riquadri, il programma è una fila di foglietti di calendario, e indicazioni, preferiti e condivisione sono una fila di pulsanti.",
+      "ru": "Откройте любое событие: название стоит на фотографии, дата, время и длительность — цифрами на плитках, программа — рядом календарных листков, а маршрут, избранное и «поделиться» — одним рядом кнопок."
+    }
+  },
+  {
+    "date": "2026-10-04",
     "roadmap": "venue-widget",
     "example": "/venues/",
     "title": {

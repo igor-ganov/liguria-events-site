@@ -55,26 +55,22 @@ describe('feedCardAttrs', () => {
 
 describe('feedCardThumb', () => {
   test('renders the cover when there is one', () => {
-    const html = feedCardThumb(event({ img: 'https://img.test/a.jpg' }), icons);
+    const html = feedCardThumb(event({ img: 'https://img.test/a.jpg' }));
     assert.ok(html.startsWith('<img class="photo-card-pic"'));
     assert.ok(html.includes('src="https://img.test/a.jpg"'));
     assert.ok(html.includes('data-cat="music"'));
     assert.ok(html.includes('loading="lazy"'));
   });
-  test('falls back to the category glyph', () => {
-    assert.equal(
-      feedCardThumb(event(), icons),
-      '<span class="photo-card-blank" data-cat="music"><svg id="music"/></span>',
-    );
+  test('falls back to the mark of the site, not to a picture picked by category', () => {
+    const html = feedCardThumb(event());
+    assert.ok(html.startsWith('<span class="photo-card-blank"><svg class="brand-mark"'));
+    assert.ok(!html.includes('<img'));
   });
-  test('a category with no glyph still renders its box', () => {
-    assert.equal(
-      feedCardThumb(event({ c: ['sport'] }), icons),
-      '<span class="photo-card-blank" data-cat="sport"></span>',
-    );
+  test('the fallback is the same whatever the category', () => {
+    assert.equal(feedCardThumb(event({ c: ['sport'] })), feedCardThumb(event({ c: ['music'] })));
   });
   test('escapes the cover URL', () => {
-    assert.ok(feedCardThumb(event({ img: 'a"onerror="x' }), icons).includes('a&quot;onerror=&quot;x'));
+    assert.ok(feedCardThumb(event({ img: 'a"onerror="x' })).includes('a&quot;onerror=&quot;x'));
   });
 });
 

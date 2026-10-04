@@ -35,7 +35,7 @@ export const feedCardHtml = (context: FeedContext, event: CompactEvent): string 
   return (
     `<a class="photo-card" href="${localizedUrl(lang, eventPath(event))}">` +
     favButtonHtml(event.id, ui.nav.favorites) +
-    feedCardThumb(event, icons) +
+    feedCardThumb(event) +
     `<header class="photo-card-top">${feedCardTags(event, ui, icons)}` +
     `${badge(event.f === true, 'badge-free', ui.badges.free)}` +
     `${badge(event.x === true, 'badge-gem', ui.badges.gem)}` +

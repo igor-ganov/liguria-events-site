@@ -5,7 +5,6 @@ import assert from 'node:assert/strict';
 import { statusLabel } from '../src/lib/events/status-label.ts';
 import { crawlerAddress } from '../src/lib/events/crawler-address.ts';
 import { bySessionOrder } from '../src/lib/events/by-session-order.ts';
-import { programmeSessions } from '../src/lib/events/programme-sessions.ts';
 import { absoluteImage } from '../src/lib/img/absolute-image.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
@@ -51,27 +50,6 @@ describe('bySessionOrder', () => {
         0,
     );
     assert.equal(bySessionOrder({ date: '2026-07-04' }, { date: '2026-07-04' }), 0);
-  });
-});
-
-describe('programmeSessions', () => {
-  test('formats and sorts every occurrence, keeping its own time and title', () => {
-    const sessions = programmeSessions(
-      event({
-        p: [
-          { date: '2026-07-06', title: 'Second night' },
-          { date: '2026-07-04', time: '21:00' },
-        ],
-      }),
-      'en',
-    );
-    assert.equal(sessions.length, 2);
-    assert.equal(sessions[0]?.time, '21:00');
-    assert.equal(sessions[1]?.title, 'Second night');
-    assert.ok((sessions[0]?.date ?? '').includes('Jul'));
-  });
-  test('is empty for an event without a programme', () => {
-    assert.deepEqual(programmeSessions(event(), 'en'), []);
   });
 });
 

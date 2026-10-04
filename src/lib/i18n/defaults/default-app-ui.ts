@@ -6,6 +6,7 @@ export const DEFAULT_APP_UI = {
   notify: { title: '', lead: '', on: '', off: '', at: '', where: '', asked: '', refused: '', done: '' },
   testers: { title: '', lead: '', join: '', install: '' },
   progress: { roadmap: '', roadmapLead: '', releases: '', releasesLead: '', now: '', next: '', later: '', done: '', example: '', here: '' },
+  eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "" },
   subscribe: { note: '', calendar: '', rss: '' },
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },
