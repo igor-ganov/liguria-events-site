@@ -1,0 +1,204 @@
+[
+  {
+    "id": "feed-photo-cards",
+    "stage": "now",
+    "title": {
+      "en": "A feed you can read by its pictures",
+      "it": "Un feed che si legge dalle foto",
+      "ru": "Лента, которую читают по фотографиям"
+    },
+    "note": {
+      "en": "Each event becomes one full-width photograph with its time, title and place on top, with no gaps between cards.",
+      "it": "Ogni evento diventa una fotografia a tutta larghezza con ora, titolo e luogo sopra, senza spazi tra le schede.",
+      "ru": "Каждое событие — фотография во всю ширину, поверх которой время, название и место; зазоров между карточками нет."
+    }
+  },
+  {
+    "id": "android-public",
+    "stage": "now",
+    "title": {
+      "en": "The Android app on Google Play, for everyone",
+      "it": "L’app Android su Google Play, per tutti",
+      "ru": "Android-приложение в Google Play для всех"
+    },
+    "note": {
+      "en": "The app is in closed testing. It opens to everybody once Google’s testing period is served.",
+      "it": "L’app è in test chiuso. Sarà aperta a tutti al termine del periodo di prova richiesto da Google.",
+      "ru": "Приложение на закрытом тесте. Оно откроется всем, когда закончится срок тестирования, которого требует Google."
+    }
+  },
+  {
+    "id": "event-page",
+    "stage": "next",
+    "title": {
+      "en": "An event page you can take in at a glance",
+      "it": "Una pagina evento che si capisce a colpo d’occhio",
+      "ru": "Страница события, понятная с одного взгляда"
+    },
+    "note": {
+      "en": "Dates, times, the programme and contacts as numbers, tiles and buttons instead of lines of text.",
+      "it": "Date, orari, programma e contatti come numeri, riquadri e pulsanti invece di righe di testo.",
+      "ru": "Даты, время, программа и контакты — цифрами, плитками и кнопками вместо строк текста."
+    }
+  },
+  {
+    "id": "photo-galleries",
+    "stage": "next",
+    "title": {
+      "en": "A photo gallery for every event",
+      "it": "Una galleria di foto per ogni evento",
+      "ru": "Галерея фотографий у каждого события"
+    },
+    "note": {
+      "en": "Several photographs per event, gathered from every source that writes about it and credited to each.",
+      "it": "Più fotografie per evento, raccolte da tutte le fonti che ne parlano, ognuna con il suo credito.",
+      "ru": "Несколько фотографий на событие, собранных со всех источников, которые о нём пишут, с указанием каждого."
+    }
+  },
+  {
+    "id": "ratings-comments",
+    "stage": "next",
+    "title": {
+      "en": "Ratings and comments",
+      "it": "Voti e commenti",
+      "ru": "Оценки и комментарии"
+    },
+    "note": {
+      "en": "Say how it was, and read what others thought before you go.",
+      "it": "Racconta com’è andata e leggi cosa ne pensano gli altri prima di andarci.",
+      "ru": "Расскажите, как всё прошло, и прочитайте мнения других перед тем, как идти."
+    }
+  },
+  {
+    "id": "report-and-claim",
+    "stage": "next",
+    "title": {
+      "en": "Report a problem, or claim your event",
+      "it": "Segnala un problema o rivendica il tuo evento",
+      "ru": "Сообщить о проблеме или заявить права на событие"
+    },
+    "note": {
+      "en": "Two buttons on every event. Each opens a request you can follow, add files to and discuss with us from your account; a confirmed organiser takes over the event.",
+      "it": "Due pulsanti su ogni evento. Ognuno apre una richiesta che puoi seguire, completare con file e discutere con noi dal tuo account; l’organizzatore confermato prende in gestione l’evento.",
+      "ru": "Две кнопки на каждом событии. Каждая открывает обращение, которое видно в личном кабинете: его можно дополнить файлами и обсудить с нами; подтверждённый организатор получает событие в управление."
+    }
+  },
+  {
+    "id": "picks",
+    "stage": "next",
+    "title": {
+      "en": "Event of the day, the week and the month",
+      "it": "Evento del giorno, della settimana e del mese",
+      "ru": "Событие дня, недели и месяца"
+    },
+    "note": {
+      "en": "One event picked out at the top of the page, and weekly selections to flick through.",
+      "it": "Un evento in evidenza in cima alla pagina e selezioni settimanali da sfogliare.",
+      "ru": "Одно выбранное событие вверху страницы и недельные подборки, которые можно листать."
+    }
+  },
+  {
+    "id": "regional-channels",
+    "stage": "next",
+    "title": {
+      "en": "A Telegram channel for each region",
+      "it": "Un canale Telegram per ogni regione",
+      "ru": "Telegram-канал для каждого региона"
+    },
+    "note": {
+      "en": "Daily picks for your own region instead of one channel for the whole country.",
+      "it": "Segnalazioni quotidiane per la tua regione invece di un solo canale per tutto il Paese.",
+      "ru": "Ежедневные события вашего региона вместо одного канала на всю страну."
+    }
+  },
+  {
+    "id": "progress-pages",
+    "stage": "done",
+    "shipped": "2026-10-04",
+    "title": {
+      "en": "A public roadmap and release notes",
+      "it": "Roadmap e note di rilascio pubbliche",
+      "ru": "Открытый план и заметки о выпусках"
+    },
+    "note": {
+      "en": "What we are building and what has shipped, kept up to date as it happens.",
+      "it": "Cosa stiamo costruendo e cosa è già uscito, aggiornato man mano.",
+      "ru": "Что мы делаем и что уже вышло — обновляется по мере работы."
+    }
+  },
+  {
+    "id": "android-test",
+    "stage": "done",
+    "shipped": "2026-09-28",
+    "title": {
+      "en": "The Android app, in closed testing",
+      "it": "L’app Android, in test chiuso",
+      "ru": "Android-приложение на закрытом тесте"
+    },
+    "note": {
+      "en": "Join the testers’ group to install it today.",
+      "it": "Unisciti al gruppo dei tester per installarla oggi.",
+      "ru": "Вступите в группу тестеров, чтобы установить его сегодня."
+    }
+  },
+  {
+    "id": "installable",
+    "stage": "done",
+    "shipped": "2026-09-04",
+    "title": {
+      "en": "Install the site on your phone, read it offline",
+      "it": "Installa il sito sul telefono e leggilo offline",
+      "ru": "Сайт ставится на телефон и читается без сети"
+    },
+    "note": {
+      "en": "Pages you have opened stay readable without a connection.",
+      "it": "Le pagine che hai aperto restano leggibili senza connessione.",
+      "ru": "Открытые страницы остаются доступны без подключения."
+    }
+  },
+  {
+    "id": "share-links",
+    "stage": "done",
+    "shipped": "2026-08-25",
+    "title": {
+      "en": "Share any page, with a picture",
+      "it": "Condividi qualsiasi pagina, con una foto",
+      "ru": "Поделиться любой страницей — с картинкой"
+    },
+    "note": {
+      "en": "A share button on every feed and event, and a real photograph in the link preview.",
+      "it": "Un pulsante di condivisione su ogni feed ed evento e una vera fotografia nell’anteprima del link.",
+      "ru": "Кнопка «поделиться» на каждой ленте и событии и настоящая фотография в превью ссылки."
+    }
+  },
+  {
+    "id": "time-pages",
+    "stage": "done",
+    "shipped": "2026-08-24",
+    "title": {
+      "en": "Today, tomorrow, this weekend, free",
+      "it": "Oggi, domani, questo weekend, gratis",
+      "ru": "Сегодня, завтра, выходные, бесплатно"
+    },
+    "note": {
+      "en": "A page for each, in every city.",
+      "it": "Una pagina per ciascuno, in ogni città.",
+      "ru": "Отдельная страница для каждого, в каждом городе."
+    }
+  },
+  {
+    "id": "venue-pages",
+    "stage": "done",
+    "shipped": "2026-08-23",
+    "title": {
+      "en": "What is on at a venue",
+      "it": "Cosa c’è in programma in un luogo",
+      "ru": "Что идёт на площадке"
+    },
+    "note": {
+      "en": "Every theatre, museum and club with three or more events has its own page.",
+      "it": "Ogni teatro, museo e locale con almeno tre eventi ha la sua pagina.",
+      "ru": "У каждого театра, музея и клуба с тремя и более событиями есть своя страница."
+    }
+  }
+]

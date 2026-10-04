@@ -1,0 +1,92 @@
+[
+  {
+    "date": "2026-10-04",
+    "roadmap": "progress-pages",
+    "example": "/roadmap/",
+    "title": {
+      "en": "Roadmap and release notes",
+      "it": "Roadmap e note di rilascio",
+      "ru": "План и заметки о выпусках"
+    },
+    "body": {
+      "en": "Two new pages: what we are working on, and this list of what has shipped — each entry with a link where you can try it.",
+      "it": "Due nuove pagine: a cosa stiamo lavorando e questo elenco di ciò che è uscito, ogni voce con un link per provarla.",
+      "ru": "Две новые страницы: над чем мы работаем и этот список вышедшего — у каждой записи ссылка, где это можно попробовать."
+    }
+  },
+  {
+    "date": "2026-09-28",
+    "roadmap": "android-test",
+    "example": "/liguria/",
+    "title": {
+      "en": "Android app: the closed test is open",
+      "it": "App Android: aperto il test chiuso",
+      "ru": "Android-приложение: открыт закрытый тест"
+    },
+    "body": {
+      "en": "Region pages now carry an invitation to test the app: join the group, then install it from Google Play.",
+      "it": "Le pagine delle regioni ora invitano a provare l’app: unisciti al gruppo e installala da Google Play.",
+      "ru": "На страницах регионов появилось приглашение в тест: вступите в группу и установите приложение из Google Play."
+    }
+  },
+  {
+    "date": "2026-09-04",
+    "roadmap": "installable",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "Install Dove Go on your phone",
+      "it": "Installa Dove Go sul telefono",
+      "ru": "Dove Go ставится на телефон"
+    },
+    "body": {
+      "en": "Add the site to your home screen from the footer. Pages you have opened keep working without a connection.",
+      "it": "Aggiungi il sito alla schermata Home dal piè di pagina. Le pagine che hai aperto continuano a funzionare senza connessione.",
+      "ru": "Добавьте сайт на главный экран из подвала страницы. Открытые страницы продолжают работать без сети."
+    }
+  },
+  {
+    "date": "2026-08-25",
+    "roadmap": "share-links",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "Share button and link previews",
+      "it": "Pulsante di condivisione e anteprime dei link",
+      "ru": "Кнопка «поделиться» и превью ссылок"
+    },
+    "body": {
+      "en": "Every feed and event has a share button, and a link sent to a friend arrives with the event’s photograph.",
+      "it": "Ogni feed ed evento ha un pulsante di condivisione, e un link inviato a un amico arriva con la foto dell’evento.",
+      "ru": "У каждой ленты и события есть кнопка «поделиться», а отправленная другу ссылка приходит с фотографией события."
+    }
+  },
+  {
+    "date": "2026-08-24",
+    "roadmap": "time-pages",
+    "example": "/liguria/genova/weekend/",
+    "title": {
+      "en": "Pages for today, tomorrow, the weekend and free events",
+      "it": "Pagine per oggi, domani, il weekend e gli eventi gratuiti",
+      "ru": "Страницы «сегодня», «завтра», «выходные» и «бесплатно»"
+    },
+    "body": {
+      "en": "Each city has a page for every one of them, always showing the right day.",
+      "it": "Ogni città ha una pagina per ciascuno, sempre aggiornata al giorno giusto.",
+      "ru": "В каждом городе есть страница для каждого из них, всегда на правильный день."
+    }
+  },
+  {
+    "date": "2026-08-23",
+    "roadmap": "venue-pages",
+    "example": "/liguria/genova/teatro-ivo-chiesa/",
+    "title": {
+      "en": "Venue pages",
+      "it": "Pagine dei luoghi",
+      "ru": "Страницы площадок"
+    },
+    "body": {
+      "en": "See everything coming up at one theatre, museum or club on a single page.",
+      "it": "Tutto ciò che è in programma in un teatro, museo o locale su un’unica pagina.",
+      "ru": "Всё, что идёт в одном театре, музее или клубе, на одной странице."
+    }
+  }
+]

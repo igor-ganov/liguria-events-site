@@ -1,0 +1,42 @@
+---
+import JourneyMeter from './JourneyMeter.astro';
+import { byStage } from '../../lib/progress/by-stage.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { longDate } from '../../lib/progress/long-date.ts';
+import { ROADMAP } from '../../lib/progress/roadmap.ts';
+import { stageCounts } from '../../lib/progress/stage-counts.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The roadmap as a path: one line running forward in time, a milestone per
+// item, and a marker at the point reached. What is behind is drawn solid, what
+// is ahead dashed — the page should be readable from the line alone.
+// A stage with nothing in it is left out rather than announced.
+type Props = Readonly<{ ui: Ui; lang: Locale }>;
+const { ui, lang } = Astro.props;
+const groups = byStage(ROADMAP).filter((group) => group.items.length > 0);
+---
+
+<section class="progress">
+  <h1>{ui.progress.roadmap}</h1>
+  <p class="progress-lead">
+    {ui.progress.roadmapLead}
+    <a href={localizedUrl(lang, 'releases/')}>{ui.progress.releases}</a>
+  </p>
+  <JourneyMeter counts={stageCounts(groups, ui.progress)} />
+  {groups.map((group) => (
+    <section class="journey" data-stage={group.stage}>
+      <h2>{ui.progress[group.stage]}</h2>
+      <ol>
+        {group.items.map((item) => (
+          <li data-journey={group.stage}>
+            {item.shipped !== undefined && <time datetime={item.shipped}>{longDate(lang, item.shipped)}</time>}
+            <h3>{item.title[lang]}</h3>
+            <p>{item.note[lang]}</p>
+          </li>
+        ))}
+      </ol>
+      {group.stage === 'done' && <p class="journey-here" data-journey="here">{ui.progress.here}</p>}
+    </section>
+  ))}
+</section>
