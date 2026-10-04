@@ -16,6 +16,7 @@ import { isUpcoming } from './is-upcoming.ts';
 import { mapQuery } from './map-query.ts';
 import { regionOf } from '../region/region-of.ts';
 import { ticketUrl } from './ticket-link.ts';
+import { eventSeoTitle } from './event-seo-title.ts';
 import { titleOf } from './title-of.ts';
 import type { CompactEvent } from './event-schema.ts';
 import type { Locale } from '../i18n/locales.ts';
@@ -53,6 +54,10 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
   return {
     region: regionOf(event),
     title,
+    // The tab and the search result carry the city and the day; the heading on
+    // the page stays the event's own name. The queries that reach this site name
+    // a place and a year, and the title said neither.
+    seoTitle: eventSeoTitle(event, title, lang),
     desc,
     descHtml: descriptionArticleHtml(desc),
     descMeta,

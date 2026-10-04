@@ -7,6 +7,7 @@ import { localizedUrl } from '../i18n/localized-url.ts';
 import { placeLabel } from '../region/place-label.ts';
 import { regionUrl } from '../region/region-url.ts';
 import { venuePath } from './venue-path.ts';
+import { venueSeo } from './venue-seo.ts';
 import type { CompactEvent } from './event-schema.ts';
 import type { FeedScope } from './feed-events.ts';
 import type { Locale } from '../i18n/locales.ts';
@@ -26,7 +27,9 @@ export const feedViewModel = ({ lang, scope, events, today, ui }: Input) => {
   const placeName = scope.venue?.name ?? placeLabel(scope.region, scope.city);
   const seo = facetSeo(scope, ui) ?? branch(scope.venue === undefined)(
     () => ({ title: `${placeName} — ${ui.nav.feed}`, description: ui.seo.feed }),
-    () => ({ title: ui.seo.venueTitle.replace('{place}', placeName), description: ui.seo.venue }),
+    // A venue's head names its town: the queries that reach this site carry
+    // one, and the title used to carry only the venue's name.
+    () => venueSeo(ui.seo, placeName, scope.city ?? ''),
   );
   return {
     events: shown,

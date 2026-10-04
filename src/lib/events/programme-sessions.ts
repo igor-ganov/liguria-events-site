@@ -1,8 +1,7 @@
 import { bySessionOrder } from './by-session-order.ts';
 import type { CompactEvent } from './event-schema.ts';
+import { BCP47 } from '../i18n/bcp47.ts';
 import type { Locale } from '../i18n/locales.ts';
-
-const SESSION_LOCALE: Record<Locale, string> = { en: 'en-GB', it: 'it-IT', ru: 'ru-RU' };
 
 /** One programme row: the formatted date plus the session's own time/title. */
 export type ProgrammeSession = Readonly<{
@@ -19,7 +18,7 @@ export const programmeSessions = (
   event: CompactEvent,
   lang: Locale,
 ): readonly ProgrammeSession[] => {
-  const format = new Intl.DateTimeFormat(SESSION_LOCALE[lang], {
+  const format = new Intl.DateTimeFormat(BCP47[lang], {
     weekday: 'short',
     day: '2-digit',
     month: 'short',

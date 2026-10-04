@@ -1487,3 +1487,18 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .empty-invite a:hover { text-decoration: underline; }
 .event-topbar { display: flex; align-items: center; gap: 0.8rem; margin: 0 0 0.6rem; }
 .event-share { margin-left: auto; }
+
+/* ══ venues of a city ═══════════════════════════════════════════════ */
+/* A list of links from a page Google keeps to the pages it does not. Quiet by
+   design: it is navigation at the foot of a feed, not a second feed. */
+.city-venues { margin: 1.6rem 0 0.8rem; }
+.city-venues h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; }
+.city-venues ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; }
+.city-venues li {
+  display: flex; align-items: baseline; gap: 0.3rem;
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.25rem 0.7rem;
+  background: var(--surface);
+}
+.city-venues a { color: var(--ink); text-decoration: none; }
+.city-venues a:hover { color: var(--accent); }
+.city-venues-count { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
