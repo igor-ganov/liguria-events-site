@@ -39,7 +39,7 @@ const ui = await uiOf(lang);
 // user-submitted one has a contact block. Structured data needs whichever is
 // there — an event with no address at all is rejected outright by Google.
 const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday() });
-const { region, title, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
+const { region, title, seoTitle, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
 const programme = programmeSessions(event, lang);
 // The same feast in other years — the archive for the ones that are over, the
 // corpus for the one that is coming. A reader landing on a feast that has
@@ -48,7 +48,7 @@ const programme = programmeSessions(event, lang);
 const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
 ---
 
-<Layout lang={lang} region={region} title={title} description={descPreview || title} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
+<Layout lang={lang} region={region} title={seoTitle} description={descPreview || seoTitle} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
     <p class="event-topbar">

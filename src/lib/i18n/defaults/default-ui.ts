@@ -28,6 +28,7 @@ export const DEFAULT_UI: Ui = {
   seo: {
     venueCount: { other: '' },
     venueTitle: '',
+    venuesHere: 'Venues in {place}',
     venue: '',
     feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.",
     calendar: "Event calendar for {place} — what's on, day by day.",

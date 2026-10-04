@@ -6,6 +6,7 @@ import { CatUiSchema } from './cat-ui-schema.ts';
 import { LandmarksUiSchema } from './landmarks-ui-schema.ts';
 import { PlacesUiSchema } from './places-ui-schema.ts';
 import { ReviewsUiSchema } from './reviews-ui-schema.ts';
+import { SeoUiSchema } from './seo-ui-schema.ts';
 import { RouteUiSchema } from './route-ui-schema.ts';
 
 /** Every string the UI renders. The multi-line sections live in their own
@@ -25,15 +26,7 @@ export const UiDictSchema = Schema.Struct({
   sort: Schema.Struct({ label: Schema.String, date: Schema.String, created: Schema.String }),
   route: RouteUiSchema,
   menu: Schema.Struct({ events: Schema.String, explore: Schema.String, more: Schema.String }),
-  seo: Schema.Struct({
-    venueCount: Schema.Struct({
-      one: Schema.optional(Schema.String),
-      few: Schema.optional(Schema.String),
-      many: Schema.optional(Schema.String),
-      other: Schema.String,
-    }),
-    venueTitle: Schema.String,
-    venue: Schema.String, feed: Schema.String, calendar: Schema.String, map: Schema.String }),
+  seo: SeoUiSchema,
   eventForm: EventFormSchema,
   cat: CatUiSchema,
   weekdays: Schema.Array(Schema.String),

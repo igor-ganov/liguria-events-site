@@ -1,0 +1,24 @@
+---
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import type { CityVenue } from '../../../lib/events/venues-in-city.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+// The crawl path to the long tail. Of 96 event pages sampled in a week, 17 were
+// in the index: the pages a reader reaches by scrolling a feed are the pages a
+// crawler reaches last. A venue list is a short, honest set of links from a page
+// Google already keeps — the city — to the pages it does not.
+type Props = Readonly<{ lang: Locale; heading: string; venues: readonly CityVenue[] }>;
+const { lang, heading, venues } = Astro.props;
+---
+
+<nav class="city-venues" aria-labelledby="city-venues-heading">
+  <h2 id="city-venues-heading">{heading}</h2>
+  <ul>
+    {venues.map((venue) => (
+      <li>
+        <a href={localizedUrl(lang, venue.path)}>{venue.name}</a>
+        <span class="city-venues-count">{venue.count}</span>
+      </li>
+    ))}
+  </ul>
+</nav>

@@ -7,16 +7,11 @@ import EmptyState from './feed/EmptyState.astro';
 import SubscribeBar from './feed/SubscribeBar.astro';
 import TesterCall from '../testing/TesterCall.astro';
 import VenueHeader from './feed/VenueHeader.astro';
-import { cachedEvents } from '../../data/cached-events.ts';
-import { EVENTS_URL } from '../../data/events-url.ts';
 import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
-import { dayHeading } from '../../lib/calendar/day-heading.ts';
-import { feedViewModel } from '../../lib/events/feed-view-model.ts';
-import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
-import { socialImage } from '../../lib/events/social-image.ts';
-import { socialImageUrl } from '../../lib/img/social-image-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import CityVenues from './feed/CityVenues.astro';
+import { feedPageView } from '../../lib/events/feed-page-view.ts';
 import type { FeedProps } from './feed/feed-props.ts';
 
 type Props = FeedProps;
@@ -27,29 +22,22 @@ const ui = await uiOf(lang);
 // layout shift). Filtering is show/hide on the client — no re-render, and no
 // Lit/Effect runtime on this page. A city or venue page pre-filters here, so
 // there is no client-side flash from region → city.
-const payload = await cachedEvents(EVENTS_URL);
-const today = given ?? isoToday();
-const view = feedViewModel({ lang, scope: { region, city, venue, facet, today }, events: payload.events, today, ui });
-const { events, groups, placeName, title, description, path, onward } = view;
-const heading = dayHeading(ui);
-// A shared link with no picture arrives as a grey rectangle, so every feed
-// page takes the cover of its soonest event, cropped to preview size.
-const image = socialImageUrl(socialImage(events), Astro.site);
+const view = await feedPageView({
+  lang,
+  scope: { region, city, venue, facet },
+  today: given,
+  site: Astro.site,
+  ui,
+});
+const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd } = view;
 ---
 
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
+  {venueLd !== undefined && <script is:inline type="application/ld+json" set:html={venueLd} />}
   {venue === undefined && <><h1 class="visually-hidden">{ui.nav.feed}</h1><TesterCall ui={ui} city={city} /></>}
   {venue !== undefined && (
-    <VenueHeader
-      lang={lang}
-      region={region}
-      city={city ?? ''}
-      name={venue.name}
-      count={events.length}
-      label={ui.seo.venueCount}
-      invite={ui.contribute.venue}
-    />
+    <VenueHeader lang={lang} region={region} city={city ?? ''} name={venue.name} count={events.length} ui={ui} />
   )}
 
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
@@ -66,6 +54,9 @@ const image = socialImageUrl(socialImage(events), Astro.site);
       label={ui.nothingHere.onward}
       invite={ui.contribute.empty.replace('{place}', placeName)}
     />
+  )}
+  {cityVenues.length > 0 && (
+    <CityVenues lang={lang} heading={ui.seo.venuesHere.replace('{place}', placeName)} venues={cityVenues} />
   )}
   <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
   <SubscribeBar region={region} city={city} site={Astro.site} ui={ui} title={title} />
