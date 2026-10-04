@@ -12,11 +12,15 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // opened on a filter bar and a list, and never said where it was about.
 // It takes the dictionary rather than two strings out of it: a component that
 // knows which copy it needs is one fewer thing for the page to thread through.
-type Props = Readonly<{ lang: Locale; region: string; city: string; name: string; count: number; ui: Ui }>;
-const { lang, region, city, name, count, ui } = Astro.props;
+type Props = Readonly<{ lang: Locale; region: string; city: string; slug: string; name: string; count: number; ui: Ui }>;
+const { lang, region, city, slug, name, count, ui } = Astro.props;
 const place = cityName(city);
 const { venueCount: label } = ui.seo;
 const invite = ui.contribute.venue;
+// The invite used to go to the submit form. It goes to the page that tells a
+// venue what it gets — its dates kept current, and its programme on its own
+// site — and carries the venue, so the code shown there is its own.
+const invited = localizedUrl(lang, `venues/?venue=${region}/${city}/${slug}`);
 ---
 
 <header class="venue-head">
@@ -28,6 +32,6 @@ const invite = ui.contribute.venue;
   <h1>{name}</h1>
   <p class="venue-sub">{countText(lang, label, count, place)}</p>
   <p class="venue-invite">
-    <a href={localizedUrl(lang, "submit/")}>{invite.replace('{place}', name)}</a>
+    <a href={invited}>{invite.replace('{place}', name)}</a>
   </p>
 </header>

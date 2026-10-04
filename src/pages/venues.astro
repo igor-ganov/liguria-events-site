@@ -1,0 +1,10 @@
+---
+// Served per request: the snippet is built for the venue in ?venue=, so the page
+// hands each venue its own code rather than an example.
+export const prerender = false;
+import VenuesView from '../components/views/VenuesView.astro';
+
+const venue = Astro.url.searchParams.get('venue') ?? '';
+---
+
+<VenuesView lang="en" venue={venue} />

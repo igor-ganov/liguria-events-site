@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+import VenuesView from '../../components/views/VenuesView.astro';
+import { isLocale } from '../../lib/i18n/is-locale.ts';
+
+// The venue reading this is in Italy and its site is in Italian; a page that
+// only existed in English would be the submit-form mistake again.
+const { lang = '' } = Astro.params;
+const locale = [lang].filter(isLocale).at(0);
+switch (locale) {
+  case undefined:
+    return Astro.redirect('/venues', 308);
+}
+const venue = Astro.url.searchParams.get('venue') ?? '';
+---
+
+<VenuesView lang={locale} venue={venue} />

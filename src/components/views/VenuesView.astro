@@ -1,0 +1,49 @@
+---
+// The page a venue lands on from the invite on its own page: what it gets, and
+// the two lines it can paste. Server-rendered because the snippet is built for
+// the venue in the query — a page that hands somebody somebody else's code is
+// worse than no page.
+import Layout from '../../layouts/Layout.astro';
+import { embedSnippet } from '../../lib/embed/embed-snippet.ts';
+import { embedTarget } from '../../lib/embed/embed-target.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+type Props = Readonly<{ lang: Locale; venue: string }>;
+const { lang, venue } = Astro.props;
+const ui = await uiOf(lang);
+const target = embedTarget(venue);
+const shown = [target].filter((found) => found !== undefined).map(() => venue).at(0) ?? '';
+const snippet = embedSnippet(shown || 'liguria/genova/teatro-carlo-felice', Astro.site);
+const embedSrc = `/embed/${shown || 'liguria/genova/teatro-carlo-felice'}/`;
+---
+
+<Layout lang={lang} title={ui.venues.title} description={ui.venues.lead} path="venues/">
+  <article class="venues">
+    <h1>{ui.venues.title}</h1>
+    <p class="venues-lead">{ui.venues.lead}</p>
+
+    <h2>{ui.venues.stepsHeading}</h2>
+    <ol class="venues-steps">
+      <li>{ui.venues.stepPage}</li>
+      <li>{ui.venues.stepDates}</li>
+      <li>{ui.venues.stepWidget}</li>
+    </ol>
+
+    <h2>{ui.venues.widgetHeading}</h2>
+    <p>{ui.venues.widgetLead}</p>
+    {shown === '' && <p class="venues-pick">{ui.venues.pick}</p>}
+
+    <p class="venues-label">{ui.venues.scriptLabel}</p>
+    <pre class="venues-code"><code>{snippet.script}</code></pre>
+
+    <p class="venues-label">{ui.venues.plainLabel}</p>
+    <pre class="venues-code"><code>{snippet.plain}</code></pre>
+
+    <p class="venues-label">{ui.venues.preview}</p>
+    <iframe class="venues-frame" src={embedSrc} title={ui.venues.widgetHeading} loading="lazy"></iframe>
+
+    <p class="venues-cta"><a href={localizedUrl(lang, 'submit/')}>{ui.venues.submit}</a></p>
+  </article>
+</Layout>

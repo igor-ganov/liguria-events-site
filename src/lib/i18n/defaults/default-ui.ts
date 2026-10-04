@@ -5,6 +5,7 @@ import { DEFAULT_LANDMARKS_UI } from './default-landmarks-ui.ts';
 import { DEFAULT_PLACES_UI } from './default-places-ui.ts';
 import { DEFAULT_REVIEWS_UI } from './default-reviews-ui.ts';
 import { DEFAULT_ROUTE_UI } from './default-route-ui.ts';
+import { DEFAULT_VENUES_UI } from './default-venues-ui.ts';
 import type { Ui } from '../ui-schema.ts';
 
 /** The English strings every page falls back to. The sections that carry their
@@ -25,6 +26,7 @@ export const DEFAULT_UI: Ui = {
   sort: { label: 'Sort', date: 'By date', created: 'Newest first' },
   route: DEFAULT_ROUTE_UI,
   menu: { events: "What's on", explore: 'Explore', more: 'More' },
+  venues: DEFAULT_VENUES_UI,
   seo: {
     venueCount: { other: '' },
     venueTitle: '',
