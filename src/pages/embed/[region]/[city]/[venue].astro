@@ -1,0 +1,32 @@
+---
+// Served into somebody else's website, so it is a document of its own: no site
+// chrome, no fonts, no analytics, twenty lines of CSS. Not prerendered — a
+// venue's programme changes daily and this is read from the venue's own page.
+export const prerender = false;
+import { cachedEvents } from '../../../../data/cached-events.ts';
+import { canonicalUrl } from '../../../../lib/seo/canonical-url.ts';
+import { embedHtml } from '../../../../lib/embed/embed-html.ts';
+import { embedRows } from '../../../../lib/embed/embed-rows.ts';
+import { embedTarget } from '../../../../lib/embed/embed-target.ts';
+import { ENTRY_LOCALE } from '../../../../lib/i18n/entry-locale.ts';
+import { EVENTS_URL } from '../../../../data/events-url.ts';
+import { isoToday } from '../../../../lib/calendar/iso-today.ts';
+import { venuePath } from '../../../../lib/events/venue-path.ts';
+import { venueView } from '../../../../lib/events/venue-view.ts';
+
+const { region = '', city = '', venue = '' } = Astro.params;
+const target = embedTarget(`${region}/${city}/${venue}`);
+const payload = await cachedEvents(EVENTS_URL);
+const rows =
+  [target]
+    .filter((found) => found !== undefined)
+    .map((found) => embedRows(payload.events, found, isoToday(), Astro.site))
+    .at(0) ?? [];
+const name = venueView(payload.events, region, city, venue).name;
+const page = canonicalUrl(ENTRY_LOCALE, venuePath(region, city, venue), Astro.site);
+// A widget belongs to the page that frames it, and to no search index.
+Astro.response.headers.set('x-robots-tag', 'noindex');
+Astro.response.headers.set('cache-control', 'public, max-age=900');
+---
+
+<Fragment set:html={embedHtml(name, rows, page)} />

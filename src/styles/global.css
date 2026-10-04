@@ -1633,3 +1633,26 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .city-venues a { color: var(--ink); text-decoration: none; }
 .city-venues a:hover { color: var(--accent); }
 .city-venues-count { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+
+/* ══ venues: the page a place lands on from its own page ════════════ */
+.venues { max-width: 46rem; margin: 0 auto; padding: 1.2rem 0 2.4rem; }
+.venues h1 { font-size: clamp(1.5rem, 4vw, 2rem); margin: 0 0 0.6rem; }
+.venues h2 { font-size: 1.1rem; margin: 1.8rem 0 0.6rem; }
+.venues-lead { color: var(--ink-2); margin: 0 0 1rem; }
+.venues-steps { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; }
+.venues-label { font-weight: 600; margin: 1.2rem 0 0.4rem; }
+.venues-pick { color: var(--ink-2); font-size: 0.92rem; }
+.venues-code {
+  margin: 0; padding: 0.7rem 0.8rem; overflow-x: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2);
+  font-size: 0.82rem; line-height: 1.5;
+}
+.venues-frame {
+  width: 100%; min-height: 220px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--surface); display: block;
+}
+.venues-cta { margin-top: 1.6rem; }
+.venues-cta a {
+  display: inline-block; padding: 0.6rem 1.1rem; border-radius: 999px;
+  background: var(--accent); color: #fff; font-weight: 600; text-decoration: none;
+}

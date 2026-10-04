@@ -37,7 +37,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
   {venueLd !== undefined && <script is:inline type="application/ld+json" set:html={venueLd} />}
   {venue === undefined && <><h1 class="visually-hidden">{ui.nav.feed}</h1><TesterCall ui={ui} city={city} /></>}
   {venue !== undefined && (
-    <VenueHeader lang={lang} region={region} city={city ?? ''} name={venue.name} count={events.length} ui={ui} />
+    <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
   )}
 
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
