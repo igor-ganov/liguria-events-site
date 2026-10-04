@@ -1,0 +1,20 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { EventTile } from '../../../lib/events/event-tile.ts';
+
+// The facts of the event as figures: a glyph, the number, and one word under it
+// saying what the number is. As many tiles as there are facts — the row divides
+// itself, so two tiles are as composed as five.
+type Props = Readonly<{ tiles: readonly EventTile[] }>;
+const { tiles } = Astro.props;
+---
+
+<ul class="event-tiles">
+  {tiles.map((tile) => (
+    <li data-tile={tile.key} data-long={tile.value.length > 7}>
+      <Fragment set:html={uiIcon(tile.icon, 18)} />
+      <b>{tile.value}</b>
+      <span>{tile.label}</span>
+    </li>
+  ))}
+</ul>

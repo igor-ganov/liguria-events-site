@@ -117,9 +117,9 @@ describe('the card built in the browser', () => {
     assert.match(feedCardHtml(context, event()), /class="mini-title photo-card-title">Concerto</);
   });
 
-  test('draws a field in the colour of its category when there is no cover', () => {
+  test('shows the mark of the site when the event came with no cover', () => {
     const html = feedCardHtml(context, event());
-    assert.ok(html.includes('class="photo-card-blank" data-cat="music"'));
+    assert.ok(html.includes('<span class="photo-card-blank"><svg class="brand-mark"'));
     assert.ok(!html.includes('<img'));
   });
 });

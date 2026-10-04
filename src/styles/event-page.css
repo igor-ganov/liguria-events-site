@@ -1,0 +1,327 @@
+/* ══ The event page ═════════════════════════════════════════════════
+   Loaded last, after the hand-drawn layer: several things here (the share
+   button, the chips on the photograph) undo a drawn frame that is right on
+   paper and wrong on a picture.
+
+   The page reads top to bottom as: the photograph with the name on it, the
+   facts as figures, what you can do, when exactly, where — and only then the
+   prose. Everything above the prose is meant to be taken in without reading. */
+
+/* ── the cover ───────────────────────────────────────────────────── */
+.event-cover {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 26rem;
+  min-height: 15rem;
+  border-radius: var(--radius-lg);
+  background: #1b2226;
+  color: #fff;
+}
+.event-cover .event-hero {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.event-cover .event-hero img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+/* The credit moves to the top corner: the bottom belongs to the name. */
+.event-cover .event-hero figcaption {
+  top: 0.6rem;
+  right: 0.6rem;
+  bottom: auto;
+}
+.event-cover-tags {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.7rem;
+  right: 40%;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+/* The veil is the heading's own ground, as on the feed card: every line of a
+   long name sits on it at full strength, and the fade above carries no words. */
+.event-cover h1 {
+  --fade: 3rem;
+  margin: 0;
+  padding: var(--fade) 1rem 1rem;
+  color: #fff;
+  font-size: clamp(1.6rem, 6vw, 2.3rem);
+  font-weight: 500;
+  line-height: 1.04;
+  text-wrap: balance;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--velo) 92%, transparent) 0,
+    color-mix(in srgb, var(--velo) calc(var(--velo-forza) * 100%), transparent) calc(100% - var(--fade)),
+    transparent 100%
+  );
+}
+
+/* ── no photograph: the mark of the site ─────────────────────────── */
+.event-cover-blank,
+.photo-card .photo-card-blank {
+  --brand-mark-wave: #255465;
+  display: grid;
+  place-items: center;
+  background: #255465;
+  color: #fbfaf7;
+}
+.event-cover-blank {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+.event-cover-blank .brand-mark,
+.photo-card .photo-card-blank .brand-mark {
+  width: auto;
+  height: 34%;
+  opacity: 0.92;
+  /* Lifted clear of the words, which take the lower half. */
+  translate: 0 -38%;
+}
+
+/* ── the facts, as figures ───────────────────────────────────────── */
+.event-tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.event-tiles li {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.8rem 0.3rem 0.7rem;
+  text-align: center;
+  background: var(--bg);
+}
+.event-tiles svg {
+  color: var(--accent);
+}
+.event-tiles b {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.event-tiles span {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* ── what you can do ─────────────────────────────────────────────── */
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 0.3rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.event-actions .event-action,
+.event-actions .share-button {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  min-width: 3.8rem;
+  margin: 0;
+  padding: 0.2rem;
+  border: 0;
+  border-image: none;
+  border-radius: 0.6rem;
+  background: none;
+  box-shadow: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.event-actions .share-button::after {
+  display: none;
+}
+.event-action-ring,
+.event-actions .share-button > svg {
+  box-sizing: border-box;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--filo-velo);
+  color: var(--accent);
+}
+.event-action-ring {
+  display: grid;
+  place-items: center;
+}
+.event-actions .share-button > svg {
+  padding: 0.8rem;
+}
+.event-action--lead .event-action-ring {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.event-actions .event-fav svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+}
+.event-actions .event-fav[aria-pressed='true'] {
+  color: var(--ink);
+}
+.event-actions .event-fav[aria-pressed='true'] .event-action-ring {
+  background: hsl(350 78% 52%);
+  color: #fff;
+}
+.event-actions .event-fav[aria-pressed='true'] svg {
+  fill: currentColor;
+}
+.event-actions :is(.event-action, .share-button):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── when exactly: the programme as calendar leaves ──────────────── */
+.event-programme,
+.event-where {
+  margin: 0;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.event-programme h2,
+.event-where h2 {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.event-leaves {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.3rem;
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.event-leaves li {
+  flex: none;
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 0.15rem;
+  min-width: 4rem;
+  max-width: 9.5rem;
+  padding: 0.4rem 0.55rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  text-align: center;
+}
+.event-leaves time {
+  display: grid;
+  justify-items: center;
+}
+.event-leaves small {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.event-leaves b {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.05;
+}
+.leaf-times {
+  font-size: 0.74rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.leaf-title {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: var(--ink-2);
+}
+
+/* ── where ───────────────────────────────────────────────────────── */
+.event-where address {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-style: normal;
+}
+.event-where-pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 0.75rem;
+  background: var(--filo-velo);
+  color: var(--accent-2);
+}
+.event-where-text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.event-where-text b {
+  font-weight: 500;
+}
+.event-where-text span {
+  font-size: 0.86rem;
+  color: var(--ink-2);
+}
+.event-where .map-link {
+  justify-self: start;
+  margin-left: 0;
+}
+.event-page .event-desc {
+  margin-top: 1.1rem;
+}
+
+/* On a phone the photograph runs edge to edge, as it did in the feed. */
+@media (max-width: 43.99rem) {
+  .event-cover {
+    width: auto;
+    margin-inline: calc(-1 * var(--page-pad));
+    border-radius: 0;
+  }
+}
+
+/* A figure too long for its tile (a run across months) is set smaller rather
+   than cut: a date missing its last digits is worse than a small one. */
+.event-tiles li[data-long]:not([data-long='false']) b {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}

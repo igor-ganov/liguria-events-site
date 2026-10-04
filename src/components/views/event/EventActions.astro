@@ -1,0 +1,56 @@
+---
+import ShareButton from '../../share/ShareButton.astro';
+import { HEART } from '../../../lib/favorites/fav-button.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// What a reader can DO about the event, as one row of buttons instead of a
+// list of links: buy, look it up, ring, get there, keep it, pass it on. The
+// first is the one the event exists to have pressed, so it is the filled one.
+// A button appears only for something the event actually has.
+type Props = Readonly<{
+  event: CompactEvent;
+  title: string;
+  tickets: string | undefined;
+  contacts: EventContacts | undefined;
+  mapSearchUrl: string | undefined;
+  ui: Ui;
+}>;
+const { event, title, tickets, contacts, mapSearchUrl, ui } = Astro.props;
+const phone = contacts?.phone;
+const website = contacts?.website;
+---
+
+<nav class="event-actions" aria-label={ui.eventPage.actions}>
+  {tickets && (
+    <a class="event-action event-action--lead" href={tickets} target="_blank" rel="noopener">
+      <span class="event-action-ring" set:html={uiIcon('ticket', 20)} />
+      {ui.tickets}
+    </a>
+  )}
+  {website && (
+    <a class="event-action" href={website} target="_blank" rel="noopener">
+      <span class="event-action-ring" set:html={uiIcon('globe', 20)} />
+      {ui.eventPage.website}
+    </a>
+  )}
+  {phone && (
+    <a class="event-action" href={`tel:${phone.replace(/\s+/g, '')}`}>
+      <span class="event-action-ring" set:html={uiIcon('phone', 20)} />
+      {ui.eventPage.call}
+    </a>
+  )}
+  {mapSearchUrl && (
+    <a class="event-action" href={mapSearchUrl} target="_blank" rel="noopener">
+      <span class="event-action-ring" set:html={uiIcon('route', 20)} />
+      {ui.eventPage.directions}
+    </a>
+  )}
+  <button type="button" class="event-action event-fav" data-fav-toggle data-fav-id={event.id} aria-pressed="false">
+    <span class="event-action-ring" set:html={HEART} />
+    {ui.nav.favorites}
+  </button>
+  <ShareButton ui={ui} title={title} />
+</nav>

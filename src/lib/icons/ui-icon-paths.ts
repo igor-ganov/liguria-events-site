@@ -18,6 +18,12 @@ export const UI_ICON_PATHS = {
   wiki: '<path d="M3 7h4M4.5 7l4 10 3.5-8 3.5 8 4-10M17 7h4"/><path d="M10 7h4"/>',
   plus: '<circle cx="12" cy="12" r="8.5"/><path d="M12 8.5v7M8.5 12h7" stroke-linecap="round"/>',
   key: '<circle cx="8" cy="8" r="4.5"/><path d="M11.2 11.2 20 20M17 17l2-2M14.5 14.5l2-2"/>',
+  layers: '<path d="M12 4l8.5 4.5L12 13 3.5 8.5z"/><path d="M3.5 13 12 17.5 20.5 13"/>',
+  timer: '<circle cx="12" cy="13.5" r="7"/><path d="M12 10v3.5l2.2 1.6M9.5 3.5h5M12 3.5v3"/>',
+  euro: '<path d="M17.5 7.2a6.5 6.5 0 1 0 0 9.6M4.5 10.5h9M4.5 13.5h8"/>',
+  globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/>',
+  route: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/>',
+  photo: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4 17l5-4 4 3 3-2.5 4 3.5"/>',
 } as const;
 
 export type UiIconName = keyof typeof UI_ICON_PATHS;

@@ -143,7 +143,10 @@
 /* Chips on a photograph. The drawn ring is made for paper; on a picture it
    disappears, so here a chip is a dark pill that carries its own ground. */
 .photo-card .photo-card-top .cat-tag,
-.photo-card .photo-card-top [class^='badge-'] {
+.photo-card .photo-card-top [class^='badge-'],
+.event-cover .event-cover-tags .cat-tag,
+.event-cover .event-cover-tags [class^='badge-'],
+.event-cover .event-cover-count {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -158,10 +161,12 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-.photo-card .photo-card-top .badge-free {
+.photo-card .photo-card-top .badge-free,
+.event-cover .event-cover-tags .badge-free {
   background: #2f5c40;
 }
-.photo-card .photo-card-top .badge-gem {
+.photo-card .photo-card-top .badge-gem,
+.event-cover .event-cover-tags .badge-gem {
   background: #8a4b24;
 }
 .photo-card .photo-card-top .badge-made {

@@ -660,8 +660,6 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .photo-card-pic, .photo-card-blank { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 .photo-card-pic { object-fit: cover; transition: transform 0.5s var(--mano); }
 .photo-card:hover .photo-card-pic { transform: scale(1.03); }
-.photo-card-blank { display: grid; place-items: center; background: hsl(var(--hue, 30) 28% 30%); color: #fff; }
-.photo-card-blank svg { width: 34%; height: 34%; opacity: 0.2; stroke-width: 1.1; }
 .photo-card-top {
   position: absolute; top: 0.6rem; left: 0.7rem; right: 3rem;
   display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center;
@@ -1274,24 +1272,7 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
 }
 .gallery-photo figcaption { margin-top: 0.25rem; font-size: 0.7rem; color: var(--ink-2); }
-/* "Buy tickets" call-to-action, shown only when a ticket-vendor link exists. */
-.event-tickets {
-  display: inline-flex; align-items: center; gap: 0.4rem; margin: 0 0 1.1rem;
-  padding: 0.5rem 1rem; border-radius: var(--radius-md); font-weight: 700;
-  color: var(--on-accent); background: hsl(var(--hue, 30) 70% 42%);
-  text-decoration: none; box-shadow: var(--shadow-sm); transition: transform var(--speed), box-shadow var(--speed);
-}
-.event-tickets:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .event-page h1 { margin: 1rem 0 0.4rem; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02em; line-height: 1.2; }
-.event-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
-.event-facts {
-  display: grid; gap: 0.45rem; margin: 0 0 1.1rem; padding: 0.9rem 1rem;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
-  font-size: 0.95rem;
-}
-.event-facts div { display: flex; gap: 0.55rem; align-items: baseline; }
-.event-facts dt { color: var(--ink-2); font-size: 0.8rem; min-width: 4.2rem; }
-.event-facts dd { margin: 0; }
 .map-link { margin-left: 0.5rem; font-size: 0.82rem; color: var(--accent); white-space: nowrap; }
 .map-link:hover { text-decoration: underline; }
 .event-map { margin: 1.1rem 0 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
@@ -1347,20 +1328,6 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .desc-sec[data-sec='getting-there'] .desc-list,
 .desc-sec[data-sec='when'] .desc-list { margin-bottom: 0; }
 
-.event-programme { margin-top: 1.5rem; }
-.event-programme h2 {
-  font-size: 0.95rem; color: var(--ink-2);
-  text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 0.5rem;
-}
-.event-programme ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
-.event-programme li {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.55rem;
-  padding: 0.4rem 0.7rem; border: 1px solid var(--line);
-  border-radius: 0.5rem; background: var(--surface);
-}
-.event-programme .prog-date { font-weight: 600; min-width: 6.5rem; }
-.event-programme .prog-time { color: var(--accent); font-variant-numeric: tabular-nums; }
-.event-programme .prog-title { color: var(--ink-2); flex: 1 1 12rem; }
 .event-sources { margin-top: 1.3rem; }
 .event-sources h2 { font-size: 0.95rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }
 .event-sources ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
