@@ -81,6 +81,7 @@ notify: { title: 'Daily notification', lead: 'One notification a morning: what i
 testers: { title: 'Help launch the app', lead: 'The Android app is in closed testing. Google wants twelve testers signed up for fourteen days before it can go public — joining takes a minute.', join: 'Join the testers', install: 'Then install it' }
 progress: { roadmap: 'Roadmap', roadmapLead: 'What we are building, what comes next, and what has already shipped.', releases: 'Release notes', releasesLead: 'New features as they ship, each with a place to try it.', now: 'In progress', next: 'Next', later: 'Later', done: 'Shipped', example: 'See it', here: 'We are here' }
 eventPage: { starts: "starts", dates: "dates", duration: "lasts", price: "from", website: "Website", call: "Call", directions: "Directions", programme: "Programme", where: "Where", actions: "Actions", report: "Report a problem", claim: "This is my event", managed: "Managed by its organiser" }
+picks: { title: "Highlights", day: "Event of the day", week: "Event of the week", month: "Event of the month", thisWeek: "This week" }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }

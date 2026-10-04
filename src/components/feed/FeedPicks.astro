@@ -1,0 +1,59 @@
+---
+import { categoryIcons } from '../../lib/icons/category-icons.ts';
+import { eventPath } from '../../lib/event-path.ts';
+import { expandSessions } from '../../lib/events/expand-sessions.ts';
+import { feedCardHtml } from './feed-card-html.ts';
+import { largeCover } from '../../lib/img/large-cover.ts';
+import { LOCALE_TAG } from '../../lib/i18n/locale-tag.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import { picksOf } from '../../lib/picks/picks-of.ts';
+import { titleOf } from '../../lib/events/title-of.ts';
+import type { CompactEvent } from '../../lib/events/event-schema.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+// The top of a feed: the event of the day, of the week and of the month as
+// three large cards to swipe between, then a strip of what else starts this
+// week. Chosen by rule (see picks-of.ts), not by hand; a period with nothing
+// worth picking simply has no card.
+type Props = Readonly<{ events: readonly CompactEvent[]; today: string; ui: Ui; lang: Locale }>;
+const { events, today, ui, lang } = Astro.props;
+const picks = picksOf(expandSessions(events, today), today);
+const context = { lang, ui, icons: categoryIcons(), today };
+const heroes = [
+  { label: ui.picks.day, event: picks.day },
+  { label: ui.picks.week, event: picks.week },
+  { label: ui.picks.month, event: picks.month },
+].flatMap(({ label, event }) => [event].filter((found) => found !== undefined).map((found) => ({ label, event: found })));
+const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
+  new Intl.DateTimeFormat(LOCALE_TAG[lang], { ...part, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+---
+
+{heroes.length > 0 && (
+  <section class="picks" aria-label={ui.picks.title}>
+    <ol class="picks-heroes">
+      {heroes.map(({ label, event }) => (
+        <li class="pick-hero" data-pick>
+          <span class="pick-label">{label}</span>
+          <Fragment set:html={feedCardHtml(context, event)} />
+        </li>
+      ))}
+    </ol>
+    {picks.strip.length > 0 && (
+      <>
+      <h2 class="picks-heading">{ui.picks.thisWeek}</h2>
+      <ul class="picks-strip">
+        {picks.strip.map((event) => (
+          <li class="gallery-photo">
+            <a class="pick-tile" href={localizedUrl(lang, eventPath(event))}>
+              <img src={largeCover(event.img ?? '')} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+              <b><small>{dayOf(event.s, { weekday: 'short' })}</small>{dayOf(event.s, { day: 'numeric' })}</b>
+              <span>{titleOf(lang)(event)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      </>
+    )}
+  </section>
+)}

@@ -90,9 +90,12 @@ test('the thread is drawn as far as it has been read, and no further', async ({ 
   // clipping it against a column forty thousand pixels tall.
   const cima = () => velo.evaluate((n) => Math.round(n.getBoundingClientRect().top));
   const schermo = page.viewportSize()?.height ?? 720;
-  const prima = await cima();
-  expect(prima).toBeGreaterThan(schermo * 0.5);
-  expect(prima).toBeLessThan(schermo);
+  // The feed no longer opens the page: the highlights come first, so the rope
+  // begins a screen down. The promise is about the rope once it is being read,
+  // so the reading starts where the rope does.
+  await page.locator('.percorso').evaluate((n) => n.scrollIntoView({ block: 'start' }));
+  await expect.poll(cima).toBeLessThan(schermo);
+  expect(await cima()).toBeGreaterThan(schermo * 0.5);
 
   await page.evaluate(() => scrollTo({ top: 6000 }));
   await expect.poll(cima).toBeGreaterThan(schermo * 0.5);

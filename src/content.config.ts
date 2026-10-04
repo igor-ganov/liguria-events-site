@@ -27,6 +27,7 @@ const ui = defineCollection({
     testers: z.object({ title: z.string(), lead: z.string(), join: z.string(), install: z.string() }),
     progress: z.object({ roadmap: z.string(), roadmapLead: z.string(), releases: z.string(), releasesLead: z.string(), now: z.string(), next: z.string(), later: z.string(), done: z.string(), example: z.string(), here: z.string() }),
     eventPage: z.object({ starts: z.string(), dates: z.string(), duration: z.string(), price: z.string(), website: z.string(), call: z.string(), directions: z.string(), programme: z.string(), where: z.string(), actions: z.string(), report: z.string(), claim: z.string(), managed: z.string() }),
+    picks: z.object({ title: z.string(), day: z.string(), week: z.string(), month: z.string(), thisWeek: z.string() }),
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string(), editions: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),

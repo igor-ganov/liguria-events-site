@@ -7,6 +7,7 @@ export const DEFAULT_APP_UI = {
   testers: { title: '', lead: '', join: '', install: '' },
   progress: { roadmap: '', roadmapLead: '', releases: '', releasesLead: '', now: '', next: '', later: '', done: '', example: '', here: '' },
   eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "" },
+  picks: { title: "", day: "", week: "", month: "", thisWeek: "" },
   subscribe: { note: '', calendar: '', rss: '' },
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },

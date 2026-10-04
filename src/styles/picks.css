@@ -1,0 +1,160 @@
+/* ══ Highlights at the top of a feed ════════════════════════════════
+   Three large cards to swipe between — the event of the day, of the week, of
+   the month — and under them a strip of small ones. The large cards are the
+   feed's own photo card, taller, with one word over it saying why it is here.
+   On a phone they snap one per screen; with room they sit side by side. */
+.picks {
+  margin: 0 0 1rem;
+}
+.picks-heroes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.pick-hero {
+  position: relative;
+  flex: none;
+  width: 100%;
+  scroll-snap-align: start;
+}
+.pick-hero .photo-card {
+  aspect-ratio: 4 / 5;
+  max-height: 28rem;
+}
+.pick-hero .photo-card .photo-card-title {
+  font-size: 1.5rem;
+  -webkit-line-clamp: 3;
+}
+/* The label takes the corner the chips had; the chips step down under it. */
+.pick-label {
+  position: absolute;
+  z-index: 3;
+  top: 0.6rem;
+  left: 0.7rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  background: #9c5a32;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+.pick-hero .photo-card-top {
+  top: 2.5rem;
+}
+.picks-heading {
+  margin: 0;
+  padding: 0.9rem 0.9rem 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.picks-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.9rem 0.3rem;
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.picks-strip li {
+  flex: none;
+  scroll-snap-align: start;
+}
+.pick-tile {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  overflow: hidden;
+  width: 8.25rem;
+  aspect-ratio: 3 / 4;
+  border-radius: 0.75rem;
+  background: #1b2226;
+  color: #fff;
+  text-decoration: none;
+}
+.pick-tile img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The whole tile is veiled, lightly at the top for the date and fully at the
+   bottom for the title: both sit on the picture and both are small. */
+.pick-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--velo) 92%, transparent) 0,
+    color-mix(in srgb, var(--velo) calc(var(--velo-forza) * 100%), transparent) 100%
+  );
+}
+.pick-tile b {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.pick-tile small {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.pick-tile span {
+  position: absolute;
+  left: 0.55rem;
+  right: 0.55rem;
+  bottom: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pick-tile:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (min-width: 44rem) {
+  .picks-heroes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .pick-hero .photo-card {
+    aspect-ratio: 4 / 3;
+  }
+  .picks-heading,
+  .picks-strip {
+    padding-inline: 0;
+  }
+}
+/* On a phone the highlights run edge to edge, like the feed under them. */
+@media (max-width: 43.99rem) {
+  .picks {
+    margin-inline: calc(-1 * var(--page-pad));
+  }
+}
