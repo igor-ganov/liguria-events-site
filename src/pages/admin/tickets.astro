@@ -1,0 +1,36 @@
+---
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import TicketList from '../../components/tickets/TicketList.astro';
+import { allTickets } from '../../lib/tickets/all-tickets.ts';
+
+const user = Astro.locals.user;
+// Admins only — every other visitor gets a flat 403, no desk at all.
+switch (user?.role) {
+  case 'admin':
+    break;
+  default:
+    return new Response('Forbidden — admins only.', { status: 403 });
+}
+const tickets = await allTickets(Astro.locals.runtime.env.DB);
+const waiting = tickets.filter((ticket) => ticket.status === 'open').length;
+---
+
+<Layout lang="en" title="Tickets" path="admin/tickets/">
+  <section class="admin">
+    <nav class="admin-tabs">
+      <a href="/admin/">Moderation</a>
+      <a href="/admin/users/">Users</a>
+      <a href="/admin/tickets/" aria-current="page">Tickets</a>
+    </nav>
+    <h1>Tickets</h1>
+    <p>{tickets.length} request(s), {waiting} waiting for an answer. Waiting first.</p>
+    <TicketList tickets={tickets} showAuthor={true} empty="No requests yet." />
+  </section>
+</Layout>
+
+<style>
+  .admin-tabs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+  .admin-tabs a { text-decoration: none; padding: 0.25rem 0.5rem; border-radius: 0.375rem; }
+  .admin-tabs a[aria-current] { background: var(--surface-2, #eee); font-weight: 600; }
+</style>

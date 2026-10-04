@@ -1,0 +1,19 @@
+---
+import { ROOT_ONLY } from '../../lib/i18n/root-only-locales.ts';
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import TicketList from '../../components/tickets/TicketList.astro';
+import { ticketsOfUser } from '../../lib/tickets/tickets-of-user.ts';
+
+// A reader's own requests. The path is behind the auth gate, so there is a
+// user by the time this runs; the empty id is only what the type asks for.
+const tickets = await ticketsOfUser(Astro.locals.runtime.env.DB, Astro.locals.user?.id ?? '');
+---
+
+<Layout lang="en" title="My requests" path="tickets/" locales={ROOT_ONLY} noindex={true}>
+  <section class="ticket-card">
+    <h1>My requests</h1>
+    <p class="muted">What you reported or claimed, and what we answered. Open one to add details or a screenshot.</p>
+    <TicketList tickets={tickets} empty="Nothing yet. The two buttons under any event open a request." />
+  </section>
+</Layout>

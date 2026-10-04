@@ -1,0 +1,53 @@
+---
+import { ROOT_ONLY } from '../../lib/i18n/root-only-locales.ts';
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import { TICKET_KINDS } from '../../lib/tickets/ticket-types.ts';
+import type { TicketKind } from '../../lib/tickets/ticket-types.ts';
+
+// The form a reader lands on from the two buttons under an event. Everything it
+// needs arrives in the address — which event, and which of the two requests —
+// so the page works with no script at all: it is one form and one post.
+const query = Astro.url.searchParams;
+const kind: TicketKind = TICKET_KINDS.find((candidate) => candidate === query.get('kind')) ?? 'report';
+const event = query.get('event') ?? '';
+const title = query.get('title') ?? '';
+
+const COPY: Readonly<Record<TicketKind, Readonly<{ heading: string; lead: string; label: string }>>> = {
+  report: {
+    heading: 'Report a problem',
+    lead: 'A wrong date, a cancelled show, a picture that is not of this event — tell us what is off and we will fix it.',
+    label: 'What is wrong?',
+  },
+  claim: {
+    heading: 'This is my event',
+    lead: 'If you organise this event, we will hand its page over to you once we have confirmed it.',
+    label: 'Who are you, and how can we confirm it?',
+  },
+};
+const copy = COPY[kind];
+---
+
+<Layout lang="en" title={copy.heading} path="tickets/new/" locales={ROOT_ONLY} noindex={true}>
+  <section class="ticket-card">
+    <h1>{copy.heading}</h1>
+    <p class="ticket-about">About: <strong>{title}</strong></p>
+    <p class="muted">{copy.lead}</p>
+    {kind === 'claim' && (
+      <ul class="ticket-ways">
+        <li>Write from an address on the official site of the event or its venue, and name that address here.</li>
+        <li>Or point us to the contact the source of this listing prints: we will write to it.</li>
+        <li>Or put a short code we send you on the official page of the event.</li>
+        <li>Or attach a document or a screenshot in the conversation that follows.</li>
+      </ul>
+    )}
+    <form class="ticket-form" method="post" action="/api/tickets" data-astro-reload>
+      <input type="hidden" name="kind" value={kind} />
+      <input type="hidden" name="event" value={event} />
+      <input type="hidden" name="title" value={title} />
+      <label for="ticket-body">{copy.label}</label>
+      <textarea id="ticket-body" name="body" rows="6" maxlength="4000" required></textarea>
+      <button type="submit" class="account-signin">Send</button>
+    </form>
+  </section>
+</Layout>

@@ -25,6 +25,7 @@ const rows = userRows(users, submissions, rootAdmins(env), me?.id ?? '');
     <nav class="admin-tabs">
       <a href="/admin/">Moderation</a>
       <a href="/admin/users/" aria-current="page">Users</a>
+      <a href="/admin/tickets/">Tickets</a>
     </nav>
     <h1>Users</h1>
     <p>{users.length} account(s). Newest first.</p>

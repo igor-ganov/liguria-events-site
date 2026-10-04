@@ -1,0 +1,26 @@
+---
+import { ROOT_ONLY } from '../../lib/i18n/root-only-locales.ts';
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+import TicketThread from '../../components/tickets/TicketThread.astro';
+import { mayReadTicket } from '../../lib/tickets/may-read-ticket.ts';
+import { ticketMessages } from '../../lib/tickets/ticket-messages.ts';
+import { ticketOf } from '../../lib/tickets/ticket-of.ts';
+
+// One thread. A thread the caller may not read answers exactly as one that
+// does not exist — 404 both times — so an id cannot be probed for.
+const db = Astro.locals.runtime.env.DB;
+const user = Astro.locals.user;
+const found = await ticketOf(db, Astro.params.id ?? '');
+const ticket = [found].find((candidate) => candidate !== undefined && mayReadTicket(user, candidate));
+const messages = await Promise.all([ticket].filter((candidate) => candidate !== undefined).map((candidate) => ticketMessages(db, candidate.id)));
+Astro.response.status = [404].filter(() => ticket === undefined).at(0) ?? 200;
+---
+
+<Layout lang="en" title={ticket?.eventTitle ?? 'Request not found'} path={`tickets/${Astro.params.id ?? ''}/`} locales={ROOT_ONLY} noindex={true}>
+  <section class="ticket-card">
+    <p class="event-topbar"><a class="back-link" href="/tickets/">← My requests</a></p>
+    {ticket === undefined && <h1>Request not found</h1>}
+    {ticket !== undefined && <TicketThread ticket={ticket} messages={messages.at(0) ?? []} admin={user?.role === 'admin'} />}
+  </section>
+</Layout>

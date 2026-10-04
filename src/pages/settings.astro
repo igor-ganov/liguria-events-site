@@ -29,6 +29,8 @@ const passkeys = await passkeysOf(Astro.locals.runtime.env.DB)(user);
       <span id="passkey-status" class="passkey-status" role="status" aria-live="polite"></span>
     </section>
 
+    <p><a href="/tickets/">My requests</a></p>
+
     <button type="button" class="link-btn" data-signout>Sign out</button>
   </section>
 </Layout>
