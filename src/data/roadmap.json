@@ -246,7 +246,8 @@
   },
   {
     "id": "venue-widget",
-    "stage": "later",
+    "stage": "done",
+    "shipped": "2026-10-04",
     "title": {
       "en": "Your programme on your own site",
       "it": "Il tuo programma sul tuo sito",

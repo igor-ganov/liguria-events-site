@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-04",
+    "roadmap": "venue-widget",
+    "example": "/venues/",
+    "title": {
+      "en": "A programme widget for venues",
+      "it": "Un widget del programma per i luoghi",
+      "ru": "Виджет афиши для площадок"
+    },
+    "body": {
+      "en": "A venue can put one line on its own website and show its next events there, always up to date. The page gives the code for your venue.",
+      "it": "Un luogo può inserire una riga sul proprio sito e mostrare lì i prossimi eventi, sempre aggiornati. La pagina fornisce il codice per il tuo luogo.",
+      "ru": "Площадка добавляет одну строку на свой сайт и показывает там ближайшие события, всегда актуальные. На странице — готовый код для вашей площадки."
+    }
+  },
+  {
+    "date": "2026-10-04",
     "roadmap": "feed-photo-cards",
     "example": "/liguria/genova/",
     "title": {
