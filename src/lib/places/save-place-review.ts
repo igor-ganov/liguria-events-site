@@ -1,4 +1,4 @@
-import { isPlaceId } from './is-place-id.ts';
+import { isReviewSubject } from './is-review-subject.ts';
 import { reviewDenial } from './review-denial.ts';
 import { reviewInput } from './review-input.ts';
 import { upsertPlaceReview } from './reviews.ts';
@@ -10,7 +10,7 @@ import type { ReviewInput } from './review-input.ts';
  *  not — nothing is written in that case. */
 const store = async (db: D1Database, user: AppUser, input: ReviewInput): Promise<Response> => {
   const stored = await Promise.all(
-    [input.place].filter(isPlaceId).map(async (placeId) => {
+    [input.place].filter(isReviewSubject).map(async (placeId) => {
       await upsertPlaceReview(db, {
         placeId,
         region: input.region,

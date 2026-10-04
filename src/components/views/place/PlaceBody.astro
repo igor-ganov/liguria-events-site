@@ -40,7 +40,7 @@ const sources = placeSources(place);
 <PlaceFacts place={place} lang={lang} region={region} ui={ui} />
 {place.desc && <p class="event-desc">{place.desc}</p>}
 
-<PlaceReviews place={place} ui={ui} />
+<PlaceReviews subject={place.id} region={place.region} ui={ui} />
 
 <figure class="event-map">
   <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />

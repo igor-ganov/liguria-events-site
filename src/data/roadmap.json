@@ -59,7 +59,8 @@
   },
   {
     "id": "ratings-comments",
-    "stage": "next",
+    "stage": "done",
+    "shipped": "2026-10-05",
     "title": {
       "en": "Ratings and comments",
       "it": "Voti e commenti",

@@ -19,6 +19,7 @@ import { ticketUrl } from './ticket-link.ts';
 import { eventSeoTitle } from './event-seo-title.ts';
 import { titleOf } from './title-of.ts';
 import type { CompactEvent } from './event-schema.ts';
+import type { ReviewSummary } from '../places/place-review-types.ts';
 import type { Locale } from '../i18n/locales.ts';
 
 type Input = Readonly<{
@@ -27,6 +28,7 @@ type Input = Readonly<{
   address: string | undefined;
   site: URL | undefined;
   today: string;
+  rating?: ReviewSummary | undefined;
 }>;
 
 const mapUrls = (event: CompactEvent) => {
@@ -40,7 +42,7 @@ const mapUrls = (event: CompactEvent) => {
 /** Everything the event page renders, derived in one place so the component
  *  stays markup. The description is light Markdown: the body renders it as a
  *  structured article, meta and structured data get the plain-text form. */
-export const eventDetailView = ({ lang, event, address, site, today }: Input) => {
+export const eventDetailView = ({ lang, event, address, site, today, rating }: Input) => {
   const title = titleOf(lang)(event);
   const desc = descriptionOf(lang)(event);
   const descMeta = descriptionPlain(desc);
@@ -77,7 +79,7 @@ export const eventDetailView = ({ lang, event, address, site, today }: Input) =>
     // The page of an event that has happened is kept — the link somebody
     // shared has to keep working — so it must say so.
     passed,
-    jsonLd: eventJsonLd({ event, title, desc: descMeta, image, address, url }),
+    jsonLd: eventJsonLd({ event, title, desc: descMeta, image, address, url, rating }),
     ...mapUrls(event),
   };
 };

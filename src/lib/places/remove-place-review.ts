@@ -1,5 +1,5 @@
 import { deletePlaceReview } from './reviews.ts';
-import { isPlaceId } from './is-place-id.ts';
+import { isReviewSubject } from './is-review-subject.ts';
 
 /** Remove the caller's own review for a place; a malformed id is refused and
  *  nothing is deleted. */
@@ -9,7 +9,7 @@ export const removePlaceReview = async (
   place: string,
 ): Promise<Response> => {
   const removed = await Promise.all(
-    [place].filter(isPlaceId).map(async (placeId) => {
+    [place].filter(isReviewSubject).map(async (placeId) => {
       await deletePlaceReview(db, userId, placeId);
       return Response.json({ ok: true });
     }),
