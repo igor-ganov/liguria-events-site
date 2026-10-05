@@ -18,6 +18,7 @@ VALUES ('e2e-admin', 'admin@test.local', 'e2eadmin', 'admin', '2026-01-01T00:00:
 
 -- Every run starts with no requests and no event handed over, in the order the
 -- foreign keys allow.
+DELETE FROM claim_codes;
 DELETE FROM event_owners;
 DELETE FROM ticket_messages;
 DELETE FROM tickets;

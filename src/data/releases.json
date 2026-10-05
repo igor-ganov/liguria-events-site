@@ -4,6 +4,21 @@
     "roadmap": "report-and-claim",
     "example": "/liguria/genova/",
     "title": {
+      "en": "Prove an event is yours with a code",
+      "it": "Dimostra che un evento è tuo con un codice",
+      "ru": "Подтверждение владения событием по коду"
+    },
+    "body": {
+      "en": "After you claim an event we send a six-digit code to the organiser’s official address. Enter it in the conversation and the event is yours at once, with nobody left to wait for.",
+      "it": "Dopo la tua richiesta inviamo un codice di sei cifre all’indirizzo ufficiale dell’organizzatore. Inseriscilo nella conversazione e l’evento è subito tuo, senza altre attese.",
+      "ru": "После заявки мы отправляем шестизначный код на официальный адрес организатора. Введите его в переписке — и событие сразу ваше, ждать больше некого."
+    }
+  },
+  {
+    "date": "2026-10-05",
+    "roadmap": "report-and-claim",
+    "example": "/liguria/genova/",
+    "title": {
       "en": "An organiser can edit their event",
       "it": "L'organizzatore può modificare il suo evento",
       "ru": "Организатор может редактировать своё событие"

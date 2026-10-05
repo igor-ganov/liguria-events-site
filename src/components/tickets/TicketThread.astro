@@ -32,6 +32,8 @@ const author = (message: TicketMessage): string => ['Dove Go'].filter(() => mess
   ))}
 </ol>
 
+<slot />
+
 <form class="ticket-form" method="post" action={`/api/tickets/${ticket.id}`} enctype="multipart/form-data" data-astro-reload>
   <label for="ticket-reply">Add a message</label>
   <textarea id="ticket-reply" name="body" rows="4" maxlength="4000"></textarea>

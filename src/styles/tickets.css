@@ -174,3 +174,43 @@
   font-size: 0.82rem;
   color: var(--free);
 }
+/* The code that proves a claim: one short field, wide-set digits, and under it
+   the line that says what it is for — or why the last one did not work. */
+.claim-code-send,
+.claim-code-enter {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--riga-forte);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+.ticket-form input[type='email'],
+.ticket-form input[name='code'] {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--riga-forte);
+  border-radius: 0.6rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+.ticket-form input[name='code'] {
+  width: 11rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.25em;
+  font-variant-numeric: tabular-nums;
+}
+.ticket-form input[type='email']:focus-visible,
+.ticket-form input[name='code']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.claim-code-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.claim-code-note[role='alert'] {
+  color: var(--allarme);
+  font-weight: 500;
+}

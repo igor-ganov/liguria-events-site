@@ -1,0 +1,15 @@
+---
+// For the staff, on a claim that is still open: send a code to an address
+// taken from the organiser's own page. Typing the address is the decision —
+// whoever reads that mailbox will be able to take the event.
+type Props = Readonly<{ ticketId: string }>;
+const { ticketId } = Astro.props;
+---
+
+<form class="ticket-form claim-code-send" method="post" action="/api/admin/claim-code" data-astro-reload>
+  <input type="hidden" name="id" value={ticketId} />
+  <label for="claim-address">Send a code to the organiser's official address</label>
+  <input id="claim-address" type="email" name="address" required maxlength="254" autocomplete="off" placeholder="info@…" />
+  <p class="muted">Take it from the event's own site or source page, never from this conversation.</p>
+  <button type="submit" class="chip" data-action="send-code">Send the code</button>
+</form>
