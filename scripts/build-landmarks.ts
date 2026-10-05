@@ -16,6 +16,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { REGION_GEO } from '../src/lib/region/region-bounds.ts';
 import { commonsImg } from '../src/lib/img/commons-img.ts';
 import { isJunkImage } from '../src/lib/img/is-junk-image.ts';
+import { retried } from './lib/retried.ts';
 
 const UA = 'DoveGo-landmarks/1.0 (https://dovego.it; igor.ganov@gmail.com)';
 // One region per invocation (CI matrixes over all 20); no arg → every region.
@@ -336,7 +337,9 @@ const wikiTag = (tags: Record<string, string>): { lang: Lang; title: string } | 
 
 const build = async (region: string): Promise<Landmark[]> => {
   console.log('· querying Wikidata…');
-  const wd = await fetchWikidata(region).catch((e: unknown) => {
+  // The query service answers 200 and then breaks off mid-document when it
+  // runs out of time, which reads as a JSON error; a moment later it answers.
+  const wd = await retried({ attempts: 4, waitMs: 20_000 })(() => fetchWikidata(region)).catch((e: unknown) => {
     console.error('  Wikidata failed:', e);
     return new Map<string, WdEntry>();
   });
