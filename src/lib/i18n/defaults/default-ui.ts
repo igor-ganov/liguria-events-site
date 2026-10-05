@@ -41,7 +41,7 @@ export const DEFAULT_UI: Ui = {
   },
   ...DEFAULT_CATALOG_UI,
   ...DEFAULT_APP_UI,
-  headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' },
+  headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years', alsoHere: '{place}: what else is on' },
   calNav: { prev: 'Previous month', next: 'Next month' },
   badges: { free: 'free', gem: 'gem', made: 'made here' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },

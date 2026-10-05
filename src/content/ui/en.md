@@ -78,11 +78,11 @@ weekdays: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 months: [January, February, March, April, May, June, July, August, September, October, November, December]
 monthsIn: [January, February, March, April, May, June, July, August, September, October, November, December]
 lead: { line: "{place}, {window}: {events} — {cats}.", events: { one: "1 event coming up", other: "{n} events coming up" }, now: "Today: {today}. This weekend: {weekend}." }
-headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' }
+headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years', alsoHere: '{place}: what else is on' }
 notify: { title: 'Daily notification', lead: 'One notification a morning: what is on today where you are. Nothing on, nothing sent.', on: 'Notify me', off: 'Stop notifying me', at: 'At', where: 'About: {value}', asked: 'Your browser will ask for permission.', refused: 'Your browser refused notifications. You can allow them in the site settings and try again.', done: 'Done. The first one arrives tomorrow morning.' }
 testers: { title: 'Help launch the app', lead: 'The Android app is in closed testing. Google wants twelve testers signed up for fourteen days before it can go public — joining takes a minute.', join: 'Join the testers', install: 'Then install it' }
 progress: { roadmap: 'Roadmap', roadmapLead: 'What we are building, what comes next, and what has already shipped.', releases: 'Release notes', releasesLead: 'New features as they ship, each with a place to try it.', now: 'In progress', next: 'Next', later: 'Later', done: 'Shipped', example: 'See it', here: 'We are here' }
-eventPage: { starts: "starts", dates: "dates", duration: "lasts", price: "from", website: "Website", call: "Call", directions: "Directions", programme: "Programme", where: "Where", actions: "Actions", report: "Report a problem", claim: "This is my event", managed: "Managed by its organiser" }
+eventPage: { starts: "starts", dates: "dates", duration: "lasts", price: "from", website: "Website", call: "Call", directions: "Directions", programme: "Programme", where: "Where", actions: "Actions", report: "Report a problem", claim: "This is my event", managed: "Managed by its organiser", allInCity: "{place}: all events", venuePage: "{place}: what is on there" }
 picks: { title: "Highlights", day: "Event of the day", week: "Event of the week", month: "Event of the month", thisWeek: "This week" }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }

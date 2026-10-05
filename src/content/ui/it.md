@@ -78,11 +78,11 @@ weekdays: [Lun, Mar, Mer, Gio, Ven, Sab, Dom]
 months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Settembre, Ottobre, Novembre, Dicembre]
 monthsIn: [gennaio, febbraio, marzo, aprile, maggio, giugno, luglio, agosto, settembre, ottobre, novembre, dicembre]
 lead: { line: "{place}, {window}: {events} — {cats}.", events: { one: "1 evento in programma", other: "{n} eventi in programma" }, now: "Oggi: {today}. Questo fine settimana: {weekend}." }
-headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' , editions: 'Altri anni'}
+headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' , editions: 'Altri anni', alsoHere: "{place}: cos'altro c'è"}
 notify: { title: 'Notifica giornaliera', lead: 'Una notifica al mattino: cosa c’è oggi dove sei. Se non c’è nulla, non arriva nulla.', on: 'Avvisami', off: 'Non avvisarmi più', at: 'Alle', where: 'Su: {value}', asked: 'Il browser chiederà il permesso.', refused: 'Il browser ha rifiutato le notifiche. Puoi consentirle nelle impostazioni del sito e riprovare.', done: 'Fatto. La prima arriva domani mattina.' }
 testers: { title: 'Aiutaci a lanciare l’app', lead: 'L’app Android è in test chiuso. Google chiede dodici tester iscritti per quattordici giorni prima di poterla pubblicare: iscriversi richiede un minuto.', join: 'Unisciti ai tester', install: 'Poi installala' }
 progress: { roadmap: 'Roadmap', roadmapLead: 'A cosa stiamo lavorando, cosa viene dopo e cosa è già uscito.', releases: 'Note di rilascio', releasesLead: 'Le novità man mano che escono, ognuna con un posto dove provarla.', now: 'In corso', next: 'In arrivo', later: 'Più avanti', done: 'Fatto', example: 'Guarda', here: 'Siamo qui' }
-eventPage: { starts: "inizio", dates: "date", duration: "durata", price: "da", website: "Sito", call: "Chiama", directions: "Indicazioni", programme: "Programma", where: "Dove", actions: "Azioni", report: "Segnala un problema", claim: "Questo evento è mio", managed: "Gestito dal suo organizzatore" }
+eventPage: { starts: "inizio", dates: "date", duration: "durata", price: "da", website: "Sito", call: "Chiama", directions: "Indicazioni", programme: "Programma", where: "Dove", actions: "Azioni", report: "Segnala un problema", claim: "Questo evento è mio", managed: "Gestito dal suo organizzatore", allInCity: "{place}: tutti gli eventi", venuePage: "{place}: il programma" }
 picks: { title: "In evidenza", day: "Evento del giorno", week: "Evento della settimana", month: "Evento del mese", thisWeek: "Questa settimana" }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }

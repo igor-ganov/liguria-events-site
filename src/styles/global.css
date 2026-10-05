@@ -1642,3 +1642,15 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   display: inline-block; padding: 0.6rem 1.1rem; border-radius: 999px;
   background: var(--accent); color: #fff; font-weight: 600; text-decoration: none;
 }
+
+/* ══ what else is on near an event ══════════════════════════════════ */
+/* The way onward from a page that has been read: its town, its venue, and the
+   few things happening around the same date. The page used to end in a link to
+   the whole region, which is where the reader started. */
+.event-also { margin: 1.6rem 0 0.8rem; }
+.event-also h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.6rem; }
+.event-also ul { list-style: none; margin: 0 0 0.8rem; padding: 0; display: grid; gap: 0.4rem; }
+.event-also li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; }
+.event-also li a { color: var(--ink); }
+.event-also-when { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.event-also-onward { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin: 0; font-size: 0.9rem; }
