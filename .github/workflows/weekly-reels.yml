@@ -31,9 +31,14 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      # ffmpeg is preinstalled on ubuntu-latest; assert it rather than discover
-      # its absence three minutes into an encode.
-      - run: ffmpeg -version | head -1
+      # ffmpeg is not on the runner image any more, so it is installed when it is
+      # missing. The check that follows has no pipe in it: the old one ended in
+      # `| head -1`, which succeeded whether ffmpeg was there or not, and the
+      # job then failed in the encode every Monday for five weeks.
+      - name: ffmpeg
+        run: |
+          command -v ffmpeg > /dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
+          ffmpeg -version > /dev/null
       - name: Build
         run: bun run scripts/growth/build-reel.ts "${{ inputs.cities || 'top:5' }}" out/reels
       - uses: actions/upload-artifact@v4
