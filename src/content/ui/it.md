@@ -76,6 +76,8 @@ cat:
   other: Varie
 weekdays: [Lun, Mar, Mer, Gio, Ven, Sab, Dom]
 months: [Gennaio, Febbraio, Marzo, Aprile, Maggio, Giugno, Luglio, Agosto, Settembre, Ottobre, Novembre, Dicembre]
+monthsIn: [gennaio, febbraio, marzo, aprile, maggio, giugno, luglio, agosto, settembre, ottobre, novembre, dicembre]
+lead: { line: "{place}, {window}: {events} — {cats}.", events: { one: "1 evento in programma", other: "{n} eventi in programma" }, now: "Oggi: {today}. Questo fine settimana: {weekend}." }
 headings: { ongoing: 'In corso questo mese', sources: 'Fonti', allEvents: 'Tutti gli eventi' , editions: 'Altri anni'}
 notify: { title: 'Notifica giornaliera', lead: 'Una notifica al mattino: cosa c’è oggi dove sei. Se non c’è nulla, non arriva nulla.', on: 'Avvisami', off: 'Non avvisarmi più', at: 'Alle', where: 'Su: {value}', asked: 'Il browser chiederà il permesso.', refused: 'Il browser ha rifiutato le notifiche. Puoi consentirle nelle impostazioni del sito e riprovare.', done: 'Fatto. La prima arriva domani mattina.' }
 testers: { title: 'Aiutaci a lanciare l’app', lead: 'L’app Android è in test chiuso. Google chiede dodici tester iscritti per quattordici giorni prima di poterla pubblicare: iscriversi richiede un minuto.', join: 'Unisciti ai tester', install: 'Poi installala' }

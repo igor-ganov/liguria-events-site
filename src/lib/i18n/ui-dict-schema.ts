@@ -4,6 +4,7 @@ import { EventFormSchema } from './event-form-schema.ts';
 import { AuthUiSchema } from './auth-ui-schema.ts';
 import { CatUiSchema } from './cat-ui-schema.ts';
 import { LandmarksUiSchema } from './landmarks-ui-schema.ts';
+import { LeadUiSchema } from './lead-ui-schema.ts';
 import { PlacesUiSchema } from './places-ui-schema.ts';
 import { ReviewsUiSchema } from './reviews-ui-schema.ts';
 import { SeoUiSchema } from './seo-ui-schema.ts';
@@ -33,6 +34,11 @@ export const UiDictSchema = Schema.Struct({
   cat: CatUiSchema,
   weekdays: Schema.Array(Schema.String),
   months: Schema.Array(Schema.String),
+  // The same months as they are read inside a sentence: lowercase in Italian,
+  // genitive in Russian. A heading's "Ottobre" is a different word from a
+  // date's "5 ottobre".
+  monthsIn: Schema.Array(Schema.String),
+  lead: LeadUiSchema,
   notify: Schema.Struct({ title: Schema.String, lead: Schema.String, on: Schema.String, off: Schema.String, at: Schema.String, where: Schema.String, asked: Schema.String, refused: Schema.String, done: Schema.String }),
   testers: Schema.Struct({ title: Schema.String, lead: Schema.String, join: Schema.String, install: Schema.String }),
   progress: Schema.Struct({ roadmap: Schema.String, roadmapLead: Schema.String, releases: Schema.String, releasesLead: Schema.String, now: Schema.String, next: Schema.String, later: Schema.String, done: Schema.String, example: Schema.String, here: Schema.String }),

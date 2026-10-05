@@ -76,6 +76,8 @@ cat:
   other: Other
 weekdays: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 months: [January, February, March, April, May, June, July, August, September, October, November, December]
+monthsIn: [January, February, March, April, May, June, July, August, September, October, November, December]
+lead: { line: "{place}, {window}: {events} — {cats}.", events: { one: "1 event coming up", other: "{n} events coming up" }, now: "Today: {today}. This weekend: {weekend}." }
 headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years' }
 notify: { title: 'Daily notification', lead: 'One notification a morning: what is on today where you are. Nothing on, nothing sent.', on: 'Notify me', off: 'Stop notifying me', at: 'At', where: 'About: {value}', asked: 'Your browser will ask for permission.', refused: 'Your browser refused notifications. You can allow them in the site settings and try again.', done: 'Done. The first one arrives tomorrow morning.' }
 testers: { title: 'Help launch the app', lead: 'The Android app is in closed testing. Google wants twelve testers signed up for fourteen days before it can go public — joining takes a minute.', join: 'Join the testers', install: 'Then install it' }
