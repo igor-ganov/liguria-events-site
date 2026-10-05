@@ -1,9 +1,14 @@
 ---
 import { ROOT_ONLY } from '../../lib/i18n/root-only-locales.ts';
 export const prerender = false;
+import ClaimCodeEnter from '../../components/tickets/ClaimCodeEnter.astro';
+import ClaimCodeSend from '../../components/tickets/ClaimCodeSend.astro';
 import Layout from '../../layouts/Layout.astro';
 import TicketThread from '../../components/tickets/TicketThread.astro';
+import { claimCodeOf } from '../../lib/tickets/claim-code-of.ts';
+import { mayEnterCode } from '../../lib/tickets/may-enter-code.ts';
 import { mayReadTicket } from '../../lib/tickets/may-read-ticket.ts';
+import { maySendCode } from '../../lib/tickets/may-send-code.ts';
 import { ticketMessages } from '../../lib/tickets/ticket-messages.ts';
 import { ticketOf } from '../../lib/tickets/ticket-of.ts';
 
@@ -14,6 +19,11 @@ const user = Astro.locals.user;
 const found = await ticketOf(db, Astro.params.id ?? '');
 const ticket = [found].find((candidate) => candidate !== undefined && mayReadTicket(user, candidate));
 const messages = await Promise.all([ticket].filter((candidate) => candidate !== undefined).map((candidate) => ticketMessages(db, candidate.id)));
+const code = await claimCodeOf(db, ticket?.id ?? '');
+const admin = user?.role === 'admin';
+// The staff send a code; the claimant types it in. Never both on one screen.
+const sending = [ticket].filter((candidate) => candidate !== undefined).filter((candidate) => admin && maySendCode(candidate, code));
+const entering = [ticket].filter((candidate) => candidate !== undefined).filter((candidate) => code !== undefined && mayEnterCode(user, candidate));
 Astro.response.status = [404].filter(() => ticket === undefined).at(0) ?? 200;
 ---
 
@@ -21,6 +31,11 @@ Astro.response.status = [404].filter(() => ticket === undefined).at(0) ?? 200;
   <section class="ticket-card">
     <p class="event-topbar"><a class="back-link" href="/tickets/">← My requests</a></p>
     {ticket === undefined && <h1>Request not found</h1>}
-    {ticket !== undefined && <TicketThread ticket={ticket} messages={messages.at(0) ?? []} admin={user?.role === 'admin'} />}
+    {ticket !== undefined && (
+      <TicketThread ticket={ticket} messages={messages.at(0) ?? []} admin={admin}>
+        {entering.map((mine) => <ClaimCodeEnter ticketId={mine.id} address={code?.address ?? ''} outcome={Astro.url.searchParams.get('code') ?? ''} />)}
+        {sending.map((open) => <ClaimCodeSend ticketId={open.id} />)}
+      </TicketThread>
+    )}
   </section>
 </Layout>

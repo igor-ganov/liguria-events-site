@@ -1,0 +1,19 @@
+---
+// For the claimant, once a code has been sent: where it went and a field to
+// type it into. A note says why the last attempt did not work.
+type Props = Readonly<{ ticketId: string; address: string; outcome: string }>;
+const { ticketId, address, outcome } = Astro.props;
+const NOTE: Readonly<Record<string, string>> = {
+  wrong: 'That is not the code we sent. Check it and try again.',
+  spent: 'This code can no longer be used. Ask us here for a new one.',
+};
+const ROLE: Readonly<Record<string, 'alert'>> = { wrong: 'alert', spent: 'alert' };
+const note = NOTE[outcome];
+---
+
+<form class="ticket-form claim-code-enter" method="post" action={`/api/tickets/${ticketId}/code`} data-astro-reload>
+  <label for="claim-code">Code sent to {address}</label>
+  <input id="claim-code" type="text" name="code" required inputmode="numeric" pattern="\s*[0-9]{6}\s*" maxlength="12" autocomplete="one-time-code" aria-describedby="claim-code-note" />
+  <p id="claim-code-note" class="claim-code-note" role={ROLE[outcome]}>{note ?? 'Six digits. Entering them makes this event yours.'}</p>
+  <button type="submit" class="account-signin" data-action="enter-code">Confirm</button>
+</form>

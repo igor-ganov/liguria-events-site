@@ -1,8 +1,6 @@
 import { actionsFor } from './actions-for.ts';
-import { addTicketMessage } from './add-ticket-message.ts';
-import { adoptEvent } from './adopt-event.ts';
-import { adoptionRow } from './adoption-row.ts';
-import { grantEventOwner } from './grant-event-owner.ts';
+import { approvalStatements } from './approval-statements.ts';
+import { dropClaimCode } from './drop-claim-code.ts';
 import { seeOther } from './see-other.ts';
 import { setTicketStatus } from './set-ticket-status.ts';
 import { notifyTicket } from './notify-ticket.ts';
@@ -13,24 +11,15 @@ import type { NotifyEnv } from './notify-ticket.ts';
 import type { Ticket } from './ticket-types.ts';
 import type { TicketAction } from './actions-for.ts';
 
-const APPROVED = 'Approved. This event is now yours.';
-
 type Statements = Readonly<Record<TicketAction, readonly D1PreparedStatement[]>>;
 
-// What each decision writes. Approving a claim hands the event over, says so in
-// the thread and closes it, all in one batch: an event handed over with the
-// thread still open, or the reverse, is a state nobody can explain later.
+// What each decision writes. Whatever is decided, a code that was waiting for
+// the thread dies with the decision: a claim turned down by hand must not be
+// approvable by a letter that is still in somebody's mailbox.
 const statements = (db: D1Database, admin: AppUser, ticket: Ticket, now: string, crawled: CompactEvent | undefined): Statements => ({
-  approve: [
-    // A crawled event is copied under its organiser so that they can edit it.
-    // One that is not in the corpus is either theirs already or gone.
-    ...[crawled].filter((event) => event !== undefined).map((event) => adoptEvent(db, adoptionRow(event, ticket.userId, now))),
-    grantEventOwner(db, ticket, admin.id, now),
-    addTicketMessage(db, { ticketId: ticket.id, authorId: admin.id, staff: true, body: APPROVED, attachment: undefined }, now),
-    setTicketStatus(db, ticket.id, 'resolved', now),
-  ],
-  resolve: [setTicketStatus(db, ticket.id, 'resolved', now)],
-  reject: [setTicketStatus(db, ticket.id, 'rejected', now)],
+  approve: approvalStatements(db, admin.id, ticket, now, crawled),
+  resolve: [setTicketStatus(db, ticket.id, 'resolved', now), dropClaimCode(db, ticket.id)],
+  reject: [setTicketStatus(db, ticket.id, 'rejected', now), dropClaimCode(db, ticket.id)],
 });
 
 const notAllowed = (): Response => Response.json({ error: 'invalid action' }, { status: 400 });
