@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-05",
+    "roadmap": "report-and-claim",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "An organiser can edit their event",
+      "it": "L'organizzatore può modificare il suo evento",
+      "ru": "Организатор может редактировать своё событие"
+    },
+    "body": {
+      "en": "Once we confirm an event is yours, its page offers you the editor: change the title, the dates, the description and the picture, and everyone sees your version instead of the one we collected.",
+      "it": "Quando confermiamo che un evento è tuo, la sua pagina ti offre l'editor: cambia titolo, date, descrizione e immagine, e tutti vedono la tua versione al posto di quella raccolta da noi.",
+      "ru": "Когда мы подтверждаем, что событие ваше, на его странице появляется редактор: меняйте название, даты, описание и картинку — все увидят вашу версию вместо собранной нами."
+    }
+  },
+  {
+    "date": "2026-10-05",
     "roadmap": "picks",
     "example": "/liguria/genova/",
     "title": {

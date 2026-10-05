@@ -9,7 +9,7 @@ import { toCompact } from './to-compact.ts';
  *  and the sitemap and RSS builders read the same helper. */
 export const publishedEvents = async (db: D1Database): Promise<Record<string, unknown>[]> => {
   const rows = await db
-    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE status = 'published' AND visibility = 'public' ORDER BY start_date LIMIT 500`)
+    .prepare(`SELECT ${EVENT_COLUMNS} FROM events WHERE status = 'published' AND visibility = 'public' AND origin = 'user' ORDER BY start_date LIMIT 500`)
     .all<EventRow>();
   return (rows.results ?? []).map(toCompact);
 };

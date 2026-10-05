@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
+import { cachedEvents } from '../../../data/cached-events.ts';
 import { decideTicket } from '../../../lib/tickets/decide-ticket.ts';
+import { EVENTS_URL } from '../../../data/events-url.ts';
 import { isAdmin } from '../../../lib/admin/is-admin.ts';
 import { isDefined } from '../../../lib/is-defined.ts';
 import { ticketOf } from '../../../lib/tickets/ticket-of.ts';
@@ -17,8 +19,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     [locals.user].filter(isAdmin).map(async (admin) => {
       const form = await request.formData().catch(() => new FormData());
       const ticket = await ticketOf(db, trimmedString(form.get('id'), 40));
+      // The event as the crawler has it today, for the copy an approval makes.
+      const corpus = await cachedEvents(EVENTS_URL).catch(() => ({ events: [] }));
       const decided = await Promise.all(
-        [ticket].filter(isDefined).map((found) => decideTicket(locals.runtime.env, locals.runtime.ctx, admin, found, trimmedString(form.get('action'), 20))),
+        [ticket].filter(isDefined).map((found) =>
+          decideTicket(locals.runtime.env, locals.runtime.ctx, admin, found, trimmedString(form.get('action'), 20), corpus.events.find((event) => event.id === found.eventId)),
+        ),
       );
       return decided.at(0) ?? notFound();
     }),
