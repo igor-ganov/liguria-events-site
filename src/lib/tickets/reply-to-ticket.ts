@@ -5,10 +5,15 @@ import { setTicketStatus } from './set-ticket-status.ts';
 import { statusAfter } from './status-after.ts';
 import { storeTicketFile } from './store-ticket-file.ts';
 import { trimmedString } from '../trimmed-string.ts';
+import { notifyTicket } from './notify-ticket.ts';
 import type { AppUser } from '../auth/types.ts';
+import type { DeferredWork } from '../deferred-work.ts';
+import type { NotifyEnv } from './notify-ticket.ts';
 import type { Ticket } from './ticket-types.ts';
 
-type Env = Readonly<{ DB: D1Database; UPLOADS: R2Bucket }>;
+type Env = NotifyEnv & Readonly<{ UPLOADS: R2Bucket }>;
+
+const MOVE = ['reader-wrote', 'staff-wrote'] as const;
 
 const nothingSaid = (): Response => Response.json({ error: 'invalid body' }, { status: 400 });
 
@@ -18,7 +23,7 @@ const nothingSaid = (): Response => Response.json({ error: 'invalid body' }, { s
  * A message with neither words nor a picture is refused: it would be an empty
  * line in a conversation. The message and the new state are written together.
  */
-export const replyToTicket = async (env: Env, user: AppUser, ticket: Ticket, request: Request): Promise<Response> => {
+export const replyToTicket = async (env: Env, ctx: DeferredWork, user: AppUser, ticket: Ticket, request: Request): Promise<Response> => {
   const form = await request.formData().catch(() => new FormData());
   const body = trimmedString(form.get('body'), 4000);
   const files = await Promise.all(acceptedUpload(form.get('file')).map((upload) => storeTicketFile(env.UPLOADS, upload)));
@@ -32,6 +37,7 @@ export const replyToTicket = async (env: Env, user: AppUser, ticket: Ticket, req
         addTicketMessage(env.DB, { ticketId: ticket.id, authorId: user.id, staff, body, attachment }, now),
         setTicketStatus(env.DB, ticket.id, statusAfter(ticket.status, staff), now),
       ]);
+      notifyTicket(env, ctx, ticket, MOVE[Number(staff)] ?? 'reader-wrote', body);
       return seeOther(`/tickets/${ticket.id}/`);
     }),
   );

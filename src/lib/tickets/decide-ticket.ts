@@ -3,7 +3,10 @@ import { addTicketMessage } from './add-ticket-message.ts';
 import { grantEventOwner } from './grant-event-owner.ts';
 import { seeOther } from './see-other.ts';
 import { setTicketStatus } from './set-ticket-status.ts';
+import { notifyTicket } from './notify-ticket.ts';
 import type { AppUser } from '../auth/types.ts';
+import type { DeferredWork } from '../deferred-work.ts';
+import type { NotifyEnv } from './notify-ticket.ts';
 import type { Ticket } from './ticket-types.ts';
 import type { TicketAction } from './actions-for.ts';
 
@@ -28,11 +31,13 @@ const notAllowed = (): Response => Response.json({ error: 'invalid action' }, { 
 
 /** Carry out the decision an admin made on a thread, when the thread allows
  *  it: a report cannot be approved, and a closed thread offers nothing. */
-export const decideTicket = async (db: D1Database, admin: AppUser, ticket: Ticket, action: string): Promise<Response> => {
+export const decideTicket = async (env: NotifyEnv, ctx: DeferredWork, admin: AppUser, ticket: Ticket, action: string): Promise<Response> => {
+  const db = env.DB;
   const allowed = actionsFor(ticket).filter((candidate) => candidate === action);
   const done = await Promise.all(
     allowed.map(async (chosen) => {
       await db.batch([...statements(db, admin, ticket, new Date().toISOString())[chosen]]);
+      notifyTicket(env, ctx, ticket, 'decided', `Decision: ${chosen}.`);
       return seeOther(`/tickets/${ticket.id}/`);
     }),
   );

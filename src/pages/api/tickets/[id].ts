@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     [locals.user].filter(isActiveMember).map(async (user) => {
       const ticket = await ticketOf(env.DB, params.id ?? '');
       const readable = [ticket].filter(isDefined).filter((found) => mayReadTicket(user, found));
-      const written = await Promise.all(readable.map((found) => replyToTicket(env, user, found, request)));
+      const written = await Promise.all(readable.map((found) => replyToTicket(env, locals.runtime.ctx, user, found, request)));
       return written.at(0) ?? notFound();
     }),
   );
