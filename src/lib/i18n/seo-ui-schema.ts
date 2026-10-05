@@ -11,6 +11,7 @@ export const SeoUiSchema = Schema.Struct({
     other: Schema.String,
   }),
   venueTitle: Schema.String,
+  feedTitle: Schema.String,
   venuesHere: Schema.String,
   pastHere: Schema.String,
   pastNote: Schema.String,
