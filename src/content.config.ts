@@ -23,6 +23,8 @@ const ui = defineCollection({
     cat: categoryLabels,
     weekdays: z.array(z.string()).length(7),
     months: z.array(z.string()).length(12),
+    monthsIn: z.array(z.string()).length(12),
+    lead: z.object({ line: z.string(), events: z.object({ one: z.string().optional(), few: z.string().optional(), many: z.string().optional(), other: z.string() }), now: z.string() }),
     notify: z.object({ title: z.string(), lead: z.string(), on: z.string(), off: z.string(), at: z.string(), where: z.string(), asked: z.string(), refused: z.string(), done: z.string() }),
     testers: z.object({ title: z.string(), lead: z.string(), join: z.string(), install: z.string() }),
     progress: z.object({ roadmap: z.string(), roadmapLead: z.string(), releases: z.string(), releasesLead: z.string(), now: z.string(), next: z.string(), later: z.string(), done: z.string(), example: z.string(), here: z.string() }),

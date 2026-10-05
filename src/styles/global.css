@@ -1592,6 +1592,15 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .city-venues a:hover { color: var(--accent); }
 .city-venues-count { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
 
+/* ══ what a feed says about itself ══════════════════════════════════ */
+/* One quiet line between the header and the filters. It is the first sentence
+   on the page for a reader with no styles — and for an assistant, which reads
+   the same thing. */
+.feed-lead {
+  color: var(--muted); font-size: 0.85rem; line-height: 1.45;
+  margin: 0.2rem 0 0.8rem; max-width: 62ch; text-wrap: pretty;
+}
+
 /* ══ what has already happened at a venue ═══════════════════════════ */
 /* Dates, not links: these pages still answer, but they are kept out of the
    sitemaps on purpose and a link from here would put them back in a crawler's

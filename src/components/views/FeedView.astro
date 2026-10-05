@@ -3,10 +3,10 @@ import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedFoot from './feed/FeedFoot.astro';
 import FeedGroups from './feed/FeedGroups.astro';
+import FeedHead from './feed/FeedHead.astro';
 import FeedPicks from '../feed/FeedPicks.astro';
 import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
-import TesterCall from '../testing/TesterCall.astro';
 import VenueHeader from './feed/VenueHeader.astro';
 import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
@@ -29,13 +29,13 @@ const view = await feedPageView({
   site: Astro.site,
   ui,
 });
-const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd } = view;
+const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd, lead } = view;
 ---
 
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   {venueLd !== undefined && <script is:inline type="application/ld+json" set:html={venueLd} />}
-  {venue === undefined && <><h1 class="visually-hidden">{ui.nav.feed}</h1><TesterCall ui={ui} city={city} /></>}
+  {venue === undefined && <FeedHead title={title} lead={lead} city={city} ui={ui} />}
   {venue !== undefined && (
     <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
   )}

@@ -7,7 +7,7 @@ const partsOf =
   (ui: Ui) =>
   (iso: string): Parts => {
     const [year = '', month = '', day = ''] = iso.split('-');
-    return { day: Number(day), month: ui.months[Number(month) - 1] ?? '', year };
+    return { day: Number(day), month: ui.monthsIn[Number(month) - 1] ?? '', year };
   };
 
 const full = (parts: Parts): string => `${parts.day} ${parts.month} ${parts.year}`;
@@ -17,9 +17,13 @@ const full = (parts: Parts): string => `${parts.day} ${parts.month} ${parts.year
  *
  * The feed's own headings carry no year, which is right for a page about the
  * next fortnight and wrong for the archive: it spans seasons, and "12
- * Settembre" for something that happened last year reads as this year. Only
- * what changes between the two ends is repeated. Pure, no Intl, like every
- * other date label here.
+ * settembre" for something that happened last year reads as this year. Only
+ * what changes between the two ends is repeated.
+ *
+ * The month comes from monthsIn, not months: this label is read inside a
+ * sentence, where Italian wants "5 ottobre" and Russian wants the genitive
+ * "5 октября" — a heading's "Ottobre" and "Октябрь" are a different word.
+ * Pure, no Intl, like every other date label here.
  */
 export const dayWithYear =
   (ui: Ui) =>

@@ -1,0 +1,23 @@
+---
+import TesterCall from '../../testing/TesterCall.astro';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// What a feed page says before its cards.
+//
+// The heading used to be the word "Eventi" — on every feed, in every town — and
+// the first readable thing on the page was the region picker: every region and
+// every city with a count beside it. Read as plain text, which is how an
+// assistant and a search engine read a page, a city feed began with four
+// hundred words of navigation and never said where it was about.
+//
+// The heading is still hidden — the site header names the chosen town, and a
+// second title above the filter bar would be a change to the design rather
+// than to what the page says. It names the place now, which is the part that
+// was wrong: "Eventi" was the heading of two thousand different pages.
+type Props = Readonly<{ title: string; lead: string; city?: string | undefined; ui: Ui }>;
+const { title, lead, city, ui } = Astro.props;
+---
+
+<h1 class="visually-hidden">{title}</h1>
+{lead !== '' && <p class="feed-lead">{lead}</p>}
+<TesterCall ui={ui} city={city} />
