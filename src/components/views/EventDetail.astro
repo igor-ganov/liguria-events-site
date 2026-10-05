@@ -14,12 +14,14 @@ import EventProgramme from './event/EventProgramme.astro';
 import EventTiles from './event/EventTiles.astro';
 import EventWhere from './event/EventWhere.astro';
 import EventMapEmbed from './event/EventMapEmbed.astro';
+import EventAlso from './event/EventAlso.astro';
 import EventEditions from './event/EventEditions.astro';
 import EventSources from './event/EventSources.astro';
 import PlaceReviews from './place/PlaceReviews.astro';
 import { placeReviewSummary } from '../../lib/places/reviews.ts';
 import { reviewSubjectOf } from '../../lib/events/review-subject-of.ts';
 import { cityName } from '../../lib/region/city-name.ts';
+import { alsoOn } from '../../lib/events/also-on.ts';
 import { editionsOf } from '../../lib/events/editions-of.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
 import { eventTiles } from '../../lib/events/event-tiles.ts';
@@ -56,6 +58,9 @@ const tiles = eventTiles({ event, lang, labels: { ...ui.eventPage, reviews: ui.r
 // happened wants next year's, and that is the direction the archive alone
 // cannot answer.
 const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
+// What else is on in the same town around the same date. The page offered the
+// whole region and other years of itself, and nothing else.
+const also = await alsoOn(event, isoToday());
 ---
 
 <Layout lang={lang} region={region} title={seoTitle} description={descPreview || seoTitle} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
@@ -80,6 +85,7 @@ const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
     <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
     <PlaceReviews subject={subject} region={region} ui={ui} />
     <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
+    <EventAlso lang={lang} event={event} also={also} ui={ui} />
     <EventSources links={links} heading={ui.headings.sources} />
     <EventFeedback event={event} title={title} ui={ui} />
     {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}

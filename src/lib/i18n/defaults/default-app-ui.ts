@@ -6,7 +6,7 @@ export const DEFAULT_APP_UI = {
   notify: { title: '', lead: '', on: '', off: '', at: '', where: '', asked: '', refused: '', done: '' },
   testers: { title: '', lead: '', join: '', install: '' },
   progress: { roadmap: '', roadmapLead: '', releases: '', releasesLead: '', now: '', next: '', later: '', done: '', example: '', here: '' },
-  eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "" },
+  eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "", allInCity: "", venuePage: "" },
   picks: { title: "", day: "", week: "", month: "", thisWeek: "" },
   subscribe: { note: '', calendar: '', rss: '', telegram: '' },
   share: { label: '', copied: '' },

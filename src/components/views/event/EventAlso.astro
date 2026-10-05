@@ -1,0 +1,57 @@
+---
+import { dayWithYear } from '../../../lib/calendar/day-with-year.ts';
+import { cityName } from '../../../lib/region/city-name.ts';
+import { eventPath } from '../../../lib/event-path.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { slugify } from '../../../lib/slugify.ts';
+import { titleOf } from '../../../lib/events/title-of.ts';
+import { venuePath } from '../../../lib/events/venue-path.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// Where a reader goes when the page they came for is read. It offered the whole
+// region and other years of itself, and nothing else — not its own town, not
+// its own venue, not the concert on the next street that night. For a crawler
+// it is the same gap: the only path to an event page was scrolling a feed, and
+// 17 of 96 sampled pages were in the index.
+//
+// Every label puts the place first and takes no preposition: one template has
+// to serve "Genova", "Teatro Carlo Felice" and "Liguria", and Italian and
+// Russian each want something different in front of them.
+type Props = Readonly<{ lang: Locale; event: CompactEvent; also: readonly CompactEvent[]; ui: Ui }>;
+const { lang, event, also, ui } = Astro.props;
+const region = event.rg ?? '';
+const city = event.ct ?? '';
+const place = [city].filter((named) => named !== '').map(cityName).at(0) ?? region;
+const venue = event.v ?? '';
+const when = dayWithYear(ui);
+---
+
+{(also.length > 0 || city !== '') && (
+  <section class="event-also">
+    <h2>{ui.headings.alsoHere.replace('{place}', place)}</h2>
+    {also.length > 0 && (
+      <ul>
+        {also.map((one) => (
+          <li>
+            <a href={localizedUrl(lang, eventPath(one))}>{titleOf(lang)(one)}</a>
+            <span class="event-also-when">{when(one.s, one.e)}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+    <p class="event-also-onward">
+      {city !== '' && (
+        <a href={localizedUrl(lang, `${region}/${city}/`)}>
+          {ui.eventPage.allInCity.replace('{place}', cityName(city))}
+        </a>
+      )}
+      {city !== '' && venue !== '' && (
+        <a href={localizedUrl(lang, venuePath(region, city, slugify(venue)))}>
+          {ui.eventPage.venuePage.replace('{place}', venue)}
+        </a>
+      )}
+    </p>
+  </section>
+)}
