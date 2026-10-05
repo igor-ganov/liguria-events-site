@@ -86,7 +86,7 @@ eventPage: { starts: "starts", dates: "dates", duration: "lasts", price: "from",
 picks: { title: "Highlights", day: "Event of the day", week: "Event of the week", month: "Event of the month", thisWeek: "This week" }
 calNav: { prev: 'Previous month', next: 'Next month' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
-subscribe: { note: "Follow this place: add it to your calendar, or subscribe by RSS.", calendar: "Add to calendar", rss: "RSS" }
+subscribe: { note: "Follow this place: add it to your calendar or subscribe by RSS — or read what is on across Italy every morning on Telegram.", calendar: "Add to calendar", rss: "RSS", telegram: "Daily on Telegram" }
 share: { label: "Share", copied: "Link copied" }
 install: { label: "Install the app", hint: "Add Dove Go to your home screen" }
 offline:
