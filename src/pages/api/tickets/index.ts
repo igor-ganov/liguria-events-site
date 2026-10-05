@@ -10,7 +10,7 @@ export const prerender = false;
  *  before the form is read. */
 export const POST: APIRoute = async ({ request, locals }) => {
   const opened = await Promise.all(
-    [locals.user].filter(isActiveMember).map((user) => openTicket(locals.runtime.env.DB, user, request)),
+    [locals.user].filter(isActiveMember).map((user) => openTicket(locals.runtime.env, locals.runtime.ctx, user, request)),
   );
   return opened.at(0) ?? memberDenial(locals.user);
 };

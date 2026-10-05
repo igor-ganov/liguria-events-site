@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       const form = await request.formData().catch(() => new FormData());
       const ticket = await ticketOf(db, trimmedString(form.get('id'), 40));
       const decided = await Promise.all(
-        [ticket].filter(isDefined).map((found) => decideTicket(db, admin, found, trimmedString(form.get('action'), 20))),
+        [ticket].filter(isDefined).map((found) => decideTicket(locals.runtime.env, locals.runtime.ctx, admin, found, trimmedString(form.get('action'), 20))),
       );
       return decided.at(0) ?? notFound();
     }),
