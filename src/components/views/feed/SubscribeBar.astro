@@ -1,14 +1,20 @@
 ---
 import ShareButton from '../../share/ShareButton.astro';
 import { subscribeLinks } from '../../../lib/seo/subscribe-links.ts';
+import { TELEGRAM_CHANNEL } from '../../../lib/channel/telegram-channel.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
 // A calendar subscription is the stickiest thing this site can offer: it keeps
 // working without the reader ever coming back. It was declared in the head,
 // where no reader looks, and nowhere on the page itself.
+//
+// The Telegram channel is here for the opposite reason: it posts a digest every
+// morning and the site linked it from nowhere at all, so it had two
+// subscribers. The navigation offers the bot — a different thing, which answers
+// questions and does not arrive on its own.
 type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui; title: string }>;
 const { region, city, site, ui, title } = Astro.props;
-const { note, calendar, rss } = ui.subscribe;
+const { note, calendar, rss, telegram } = ui.subscribe;
 const [feedRss, feedIcs] = subscribeLinks(region, site, city);
 ---
 
@@ -25,6 +31,12 @@ const [feedRss, feedIcs] = subscribeLinks(region, site, city);
       <path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1.5"></circle>
     </svg>
     {rss}
+  </a>
+  <a href={TELEGRAM_CHANNEL} rel="nofollow noopener" target="_blank">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <path d="M21 4 3 11l5 2 2 6 3-4 5 3 3-14Z"></path><path d="m8 13 9-6-6 8"></path>
+    </svg>
+    {telegram}
   </a>
   <ShareButton ui={ui} title={title} />
 </aside>

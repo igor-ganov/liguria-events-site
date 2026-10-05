@@ -33,7 +33,7 @@ const ui = defineCollection({
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string(), editions: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),
-    subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string() }),
+    subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string(), telegram: z.string() }),
     share: z.object({ label: z.string(), copied: z.string() }),
     install: z.object({ label: z.string(), hint: z.string() }),
     offline: z.object({ notice: z.string(), saved: z.string(), updated: z.string(), reload: z.string(), retry: z.string(), listAway: z.string() }),

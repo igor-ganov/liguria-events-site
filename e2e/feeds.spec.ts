@@ -54,7 +54,11 @@ test('subscribing is offered on the page, not only in the head', async ({ page }
   await page.goto('/liguria/genova/');
   const bar = page.locator('[data-subscribe]');
   await expect(bar).toBeVisible();
-  await expect(bar.locator('a')).toHaveCount(2);
-  await expect(bar.locator('a').first()).toHaveAttribute('href', /calendar\.ics/);
-  await expect(bar.locator('a').last()).toHaveAttribute('href', /\/liguria\/genova\/rss\.xml/);
+  // Three ways to be kept up to date, in the order of how little the reader has
+  // to do afterwards: the calendar needs nothing, the feed needs a reader, the
+  // channel needs Telegram open.
+  await expect(bar.locator('a')).toHaveCount(3);
+  await expect(bar.locator('a').nth(0)).toHaveAttribute('href', /calendar\.ics/);
+  await expect(bar.locator('a').nth(1)).toHaveAttribute('href', /\/liguria\/genova\/rss\.xml/);
+  await expect(bar.locator('a').nth(2)).toHaveAttribute('href', /t\.me\//);
 });

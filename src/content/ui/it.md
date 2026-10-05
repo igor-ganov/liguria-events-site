@@ -86,7 +86,7 @@ eventPage: { starts: "inizio", dates: "date", duration: "durata", price: "da", w
 picks: { title: "In evidenza", day: "Evento del giorno", week: "Evento della settimana", month: "Evento del mese", thisWeek: "Questa settimana" }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
-subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS.", calendar: "Aggiungi al calendario", rss: "RSS" }
+subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS — oppure leggi ogni mattina su Telegram cosa c'è in tutta Italia.", calendar: "Aggiungi al calendario", rss: "RSS", telegram: "Ogni giorno su Telegram" }
 share: { label: "Condividi", copied: "Link copiato" }
 install: { label: "Installa l’app", hint: "Aggiungi Dove Go alla schermata Home" }
 offline:
