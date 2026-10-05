@@ -9,13 +9,35 @@ The bundle is built by the release workflow in the `dovego-android` repository
 
 | Field | Value |
 | --- | --- |
-| App name (≤30) | `Dove Go — cosa fare in Italia` |
+| App name (≤30) | `Dove Go: eventi, sagre, mostre` |
 | Package | `it.dovego.twa` |
 | Category | Events |
 | Tags | events, local, calendar |
 | Contact email | (yours) |
 | Website | `https://dovego.it` |
 | Privacy policy | `https://dovego.it/privacy/` |
+
+## Why those words — and what to change them to
+
+Play ranks on the app name and the short description before it reads anything
+else, and both are editable at any time: this is the cheapest thing in the
+whole growth list to get wrong and fix.
+
+The name was `Dove Go — cosa fare in Italia` (29). It spent eleven of its
+thirty characters on "in Italia" — a word nobody adds to a search inside an
+Italian store — and never said **eventi**, which is the head term. The name is
+now `Dove Go: eventi, sagre, mostre` (30 exactly), and "cosa fare" keeps its
+place in the short description, where it is the first phrase.
+
+"sagre" is in deliberately: it is the one query in this field with real Italian
+volume and almost no app competition, and the corpus is full of them.
+
+**What to measure, once published:** Play Console → Acquisition → *Search
+terms*. It reports the queries that reached the listing and the conversion of
+each. One change at a time, a fortnight apart, or the report cannot tell which
+word did it. Until the app leaves closed testing (Google wants twelve testers
+for fourteen days — the site asks for them on every feed page) there is nothing
+to measure and no reason to touch these strings again.
 
 ## Short description (≤80)
 
