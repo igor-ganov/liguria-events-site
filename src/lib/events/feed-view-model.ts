@@ -3,6 +3,7 @@ import { feedDayGroups } from './feed-day-groups.ts';
 import { feedEvents } from './feed-events.ts';
 import { facetSeo } from './facet-seo.ts';
 import { feedPath } from '../region/feed-path.ts';
+import { feedTitle } from './feed-title.ts';
 import { localizedUrl } from '../i18n/localized-url.ts';
 import { placeLabel } from '../region/place-label.ts';
 import { regionUrl } from '../region/region-url.ts';
@@ -26,7 +27,7 @@ export const feedViewModel = ({ lang, scope, events, today, ui }: Input) => {
   const shown = feedEvents(events, scope);
   const placeName = scope.venue?.name ?? placeLabel(scope.region, scope.city);
   const seo = facetSeo(scope, ui) ?? branch(scope.venue === undefined)(
-    () => ({ title: `${placeName} — ${ui.nav.feed}`, description: ui.seo.feed }),
+    () => ({ title: feedTitle(ui, placeName), description: ui.seo.feed }),
     // A venue's head names its town: the queries that reach this site carry
     // one, and the title used to carry only the venue's name.
     () => venueSeo(ui.seo, placeName, scope.city ?? ''),

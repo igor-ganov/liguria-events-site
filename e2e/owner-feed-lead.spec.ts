@@ -46,6 +46,11 @@ test('the heading names the place, not the word for events', async ({ page }) =>
   await page.goto('/liguria/genova/');
   const heading = page.locator('h1').first();
   await expect(heading).toHaveText(/Genova/);
+  // Not the navigation label. The English page titled itself "Genova — Feed"
+  // and the heading said the same: the one string a search result is made of,
+  // and it was the word off the top of the menu.
+  await expect(heading).not.toHaveText(/Feed/);
+  await expect(page).toHaveTitle(/What.s on in Genova/);
   // It is still hidden: the site header already names the chosen town, and the
   // point of this is what the page says, not how it looks.
   await expect(heading).toHaveClass(/visually-hidden/);

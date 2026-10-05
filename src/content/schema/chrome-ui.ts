@@ -19,5 +19,5 @@ export const chromeUi = {
     stepDates: z.string(), stepWidget: z.string(), widgetHeading: z.string(), widgetLead: z.string(),
     scriptLabel: z.string(), plainLabel: z.string(), preview: z.string(), pick: z.string(), submit: z.string(),
   }),
-  seo: z.object({ venueCount: z.object({ one: z.string().optional(), few: z.string().optional(), many: z.string().optional(), other: z.string() }), venueTitle: z.string(), venuesHere: z.string(), pastHere: z.string(), pastNote: z.string(), venue: z.string(), feed: z.string(), calendar: z.string(), map: z.string() }),
+  seo: z.object({ venueCount: z.object({ one: z.string().optional(), few: z.string().optional(), many: z.string().optional(), other: z.string() }), venueTitle: z.string(), feedTitle: z.string(), venuesHere: z.string(), pastHere: z.string(), pastNote: z.string(), venue: z.string(), feed: z.string(), calendar: z.string(), map: z.string() }),
 };

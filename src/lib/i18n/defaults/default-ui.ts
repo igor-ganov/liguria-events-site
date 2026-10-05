@@ -30,6 +30,7 @@ export const DEFAULT_UI: Ui = {
   seo: {
     venueCount: { other: '' },
     venueTitle: '',
+    feedTitle: "What's on in {place}",
     venuesHere: 'Venues in {place}',
     pastHere: 'Previously here',
     pastNote: 'The most recent dates we have on record at this venue.',
