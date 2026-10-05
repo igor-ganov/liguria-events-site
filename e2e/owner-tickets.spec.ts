@@ -123,6 +123,29 @@ test('a claim that is approved hands the event over, and the page says so', asyn
   await expect(reader.locator('[data-feedback="managed"]')).toBeVisible();
   await expect(reader.locator('[data-feedback="claim"]')).toHaveCount(0);
   await expect(reader.locator('[data-feedback="report"]')).toBeVisible();
+
+  // And the organiser can now edit what the crawler found: the page offers the
+  // editor, the form opens with the crawled event in it, and a new title saves.
+  const before = (await reader.locator('h1').first().textContent()) ?? '';
+  await reader.locator('.event-owner-bar a').click();
+  await expect(reader.locator('#event-form')).toHaveAttribute('data-ready', 'true');
+  await expect(reader.locator('input[name=title]')).not.toHaveValue('');
+  const renamed = `Renamed by its organiser ${Date.now()}`;
+  await reader.locator('input[name=title]').fill(renamed);
+  await reader.locator('#event-form button[type=submit]').click();
+  await expect(reader.locator('h1').first()).toContainText(renamed);
+
+  expect(before).not.toBe(renamed);
+
+  // Everybody else sees the organiser's version at once, by the rule every
+  // event page follows: a page is reachable from the moment it is written and
+  // only a rejection takes it down — and then the crawled version is still
+  // there underneath. What they do not get is the editor.
+  const stranger = await as(browser, STRANGER);
+  await stranger.goto(`/event/${eventId}/`);
+  await expect(stranger.locator('h1').first()).toContainText(renamed);
+  await expect(stranger.locator('.event-owner-bar')).toHaveCount(0);
+  expect((await stranger.goto(`/event/${eventId}/edit`))?.url()).not.toMatch(/\/edit\/?$/);
 });
 
 test('a request with nothing in it, or about nothing, is refused', async ({ browser, baseURL }) => {

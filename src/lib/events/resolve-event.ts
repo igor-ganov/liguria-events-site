@@ -1,6 +1,7 @@
 import { archivedEvent } from './archived-event.ts';
 import { eventIdOfPath } from './event-id-of-path.ts';
 import { branch } from '../branch.ts';
+import { ownedOverCorpus } from './owned-over-corpus.ts';
 import { decodeEventList } from './decode-event-list.ts';
 import { eventForDetail } from './d1-published.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -39,7 +40,9 @@ export type ResolveInput = Readonly<{
 export const resolveEvent = async (raw: ResolveInput): Promise<ResolvedEvent> => {
   const input = { ...raw, id: eventIdOfPath(raw.id) };
   const fromCorpus = input.corpus.find((event) => event.id === input.id);
-  const row = await branch(fromCorpus === undefined && input.id !== '')(
+  // Asked even when the corpus has it: an event handed to its organiser lives
+  // in both, and the organiser's version is the one to show.
+  const row = await branch(input.id !== '')(
     () => eventForDetail(input.db, input.id, input.userId),
     async () => undefined,
   );
@@ -51,7 +54,7 @@ export const resolveEvent = async (raw: ResolveInput): Promise<ResolvedEvent> =>
     async () => undefined,
   );
   return {
-    event: fromCorpus ?? fromDb ?? fromArchive,
+    event: ownedOverCorpus(fromCorpus, fromDb) ?? fromArchive,
     editable: rows.some((found) => found.owned),
     status: rows.at(0)?.status,
     visibility: rows.at(0)?.visibility,
