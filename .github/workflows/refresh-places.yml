@@ -44,16 +44,16 @@ jobs:
           - valle-d-aosta
           - veneto
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - run: pip install duckdb
       - run: bun install --frozen-lockfile
       # build-places.ts spawns overture-places.py to build the region's Overture cache.
       - run: bun run scripts/build-places.ts ${{ matrix.region }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: places-${{ matrix.region }}
           path: public/data/places/${{ matrix.region }}.*.json
@@ -66,8 +66,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: places-*
           merge-multiple: true

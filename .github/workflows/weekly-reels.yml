@@ -26,7 +26,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -41,7 +41,7 @@ jobs:
           ffmpeg -version > /dev/null
       - name: Build
         run: bun run scripts/growth/build-reel.ts "${{ inputs.cities || 'top:5' }}" out/reels
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: reels
           path: out/reels/*.mp4
