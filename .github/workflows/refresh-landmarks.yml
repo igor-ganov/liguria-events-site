@@ -44,11 +44,11 @@ jobs:
           - valle-d-aosta
           - veneto
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run scripts/build-landmarks.ts ${{ matrix.region }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: landmarks-${{ matrix.region }}
           path: public/data/landmarks/${{ matrix.region }}.*.json
@@ -61,10 +61,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: landmarks-*
           merge-multiple: true
