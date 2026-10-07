@@ -11,6 +11,8 @@ import { reorderFeed } from './reorder-feed.ts';
 import { runFeedSearch } from './run-feed-search.ts';
 import { stampFeedOrder } from './stamp-feed-order.ts';
 import { syncFeedUrl } from './sync-feed-url.ts';
+import { unfoldFeed } from './unfold-feed.ts';
+import { watchFeedFold } from './watch-feed-fold.ts';
 import { wireFeedChips } from './wire-feed-chips.ts';
 import { wireFeedDates } from './wire-feed-dates.ts';
 import { wireFeedSearch } from './wire-feed-search.ts';
@@ -34,17 +36,30 @@ export const initFeed = (): void => {
   readFeedParams(feed.today);
   stampFeedOrder();
   buildFeedIndex(feed.lang);
+  // The page opens with the nearest days; the rest are folded away until
+  // something needs every event. An address that already filters does.
+  const unfold = (): boolean => unfoldFeed(feed.lang);
+  [location.search].filter((query) => query.length > 1).forEach(unfold);
   runFeedSearch();
+  // Whatever the reader changed, it is answered over the whole feed: the fold
+  // is opened first, and the search is run again now that it knows every day.
   const refresh = (): void => {
+    unfold();
+    runFeedSearch();
     applyFeedFilter();
     syncFeedUrl(feed.today);
   };
   wireFeedSearch(refresh);
   wireFeedDates(refresh);
   wireFeedChips(refresh);
-  wireFeedSort(feed.today);
+  wireFeedSort(feed.today, unfold);
   applyFeedFilter();
   reorderFeed();
+  watchFeedFold(() => {
+    unfold();
+    applyFeedFilter();
+    reorderFeed();
+  });
   // The list was hidden up front on a filtered URL (see Layout.astro) to avoid
   // flashing the unfiltered static list; it is now filtered, so reveal it.
   document.documentElement.classList.remove('feed-filtering');

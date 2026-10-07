@@ -1661,3 +1661,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
    the line it is drawn with is said here. */
 .icon-sprite { position: absolute; }
 .sprite-icon { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ══ the fold in a feed ═════════════════════════════════════════════
+   Where the rendered days end and the folded ones begin: a marker with no
+   size of its own that the page watches for. While days are still folded the
+   thread has not run out, so its frayed end is not drawn yet. */
+.feed-more { display: block; height: 1px; }
+[data-feed-list]:has(> template[data-feed-tail]) > .capo { display: none; }

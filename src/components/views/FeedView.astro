@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedFoot from './feed/FeedFoot.astro';
-import FeedGroups from './feed/FeedGroups.astro';
+import FoldedGroups from './feed/FoldedGroups.astro';
 import FeedHead from './feed/FeedHead.astro';
 import FeedPicks from '../feed/FeedPicks.astro';
 import Filo from '../percorso/Filo.astro';
@@ -46,7 +46,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
   <Filo city={city ?? ''} today={today} hasDays={groups.length > 0}>
-    <FeedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
+    <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
   </Filo>
   {groups.length === 0 && (
     <EmptyState

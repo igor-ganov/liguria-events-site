@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-07",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
+      "en": "A feed that opens faster",
+      "it": "Un feed che si apre più in fretta",
+      "ru": "Лента открывается быстрее"
+    },
+    "body": {
+      "en": "A feed page now opens with the nearest days and brings the rest as you scroll, search or filter. A browser has a sixth of the page to draw at first, so it appears much sooner on a phone.",
+      "it": "La pagina del feed ora si apre con i giorni più vicini e porta il resto mentre scorri, cerchi o filtri. All’inizio il browser deve disegnare un sesto della pagina, che quindi compare molto prima sul telefono.",
+      "ru": "Страница ленты теперь открывается с ближайших дней, а остальное появляется при прокрутке, поиске или фильтре. Браузеру сначала нужно нарисовать шестую часть страницы, поэтому на телефоне она появляется намного быстрее."
+    }
+  },
+  {
+    "date": "2026-10-07",
     "roadmap": "report-and-claim",
     "example": "/liguria/genova/",
     "title": {
