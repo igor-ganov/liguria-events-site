@@ -64,6 +64,9 @@ export const EventSchema = Schema.Struct({
   x: Schema.optional(Schema.Boolean),
   /** Made on the platform rather than found by the crawler (pl = platform). */
   pl: Schema.optional(Schema.Boolean),
+  /** Kept by its organiser: the version to show wherever the crawler's is
+   *  already on the page (ow = owned). */
+  ow: Schema.optional(Schema.Boolean),
   /** First-seen time (epoch seconds) — powers the "newest added first" sort. */
   cr: Schema.optional(Schema.Number),
 });

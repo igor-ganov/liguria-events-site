@@ -1,6 +1,7 @@
 import { moderateEvent } from './moderate.ts';
 import { sendModerationEmail } from './notify.ts';
 import { statusFor } from './status-for.ts';
+import { verdictWrite } from './verdict-write.ts';
 import type { AiRun } from './verdict-types.ts';
 
 // Post-write moderation (runs via waitUntil, after the response): AI screens the
@@ -16,11 +17,15 @@ export const moderateAndNotify = async (
   ev: { id: string; title: string; description: string; submitterEmail: string },
 ): Promise<void> => {
   const verdict = await moderateEvent(env.AI as unknown as AiRun, ev.title, ev.description);
-  const status = statusFor(verdict.verdict);
   const now = new Date().toISOString();
-  await env.DB.prepare('UPDATE events SET status = ?, gem = ?, updated_at = ? WHERE id = ?')
-    .bind(status, Number(verdict.gem), now, ev.id)
-    .run();
+  const write = verdictWrite(ev.id, verdict, now);
+  const written = await env.DB.prepare(write.sql).bind(...write.values).run();
+  // The verdict is always on record; the submitter hears of it only when it is
+  // what happened to the event, not when a person had already decided.
   await env.DB.prepare(LOG_SQL).bind(ev.id, `ai_${verdict.verdict}`, 'ai', verdict.reason, now).run();
-  await sendModerationEmail(env.RESEND_API_KEY, env.MAIL_FROM, ev.submitterEmail, ev.title, status, verdict.reason);
+  await Promise.all(
+    [statusFor(verdict.verdict)]
+      .filter(() => Number(written.meta?.changes ?? 0) > 0)
+      .map((status) => sendModerationEmail(env.RESEND_API_KEY, env.MAIL_FROM, ev.submitterEmail, ev.title, status, verdict.reason)),
+  );
 };
