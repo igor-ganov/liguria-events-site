@@ -13,8 +13,10 @@ const poiAttr = (poi: FavPoi | undefined): string =>
 
 /** A compact heart toggle for a card corner. `label` is the accessible name.
  *  For a landmark/place, pass `poi` so the toggle can stash what it needs to
- *  render the favourite later (a POI id doesn't encode its region). */
-export const favButtonHtml = (id: string, label: string, poi?: FavPoi): string =>
+ *  render the favourite later (a POI id doesn't encode its region). `glyph` is
+ *  the heart itself: drawn in place by default, or a reference into a sprite
+ *  where a page repeats the button hundreds of times. */
+export const favButtonHtml = (id: string, label: string, poi?: FavPoi, glyph: string = HEART): string =>
   `<button type="button" class="fav-btn" data-fav-toggle data-fav-id="${esc(id)}" aria-pressed="false" ` +
   poiAttr(poi) +
-  `aria-label="${esc(label)}" title="${esc(label)}">${HEART}</button>`;
+  `aria-label="${esc(label)}" title="${esc(label)}">${glyph}</button>`;

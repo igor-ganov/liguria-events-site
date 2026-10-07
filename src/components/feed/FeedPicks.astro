@@ -1,5 +1,5 @@
 ---
-import { categoryIcons } from '../../lib/icons/category-icons.ts';
+import { feedIcons } from '../../lib/icons/feed-icons.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { expandSessions } from '../../lib/events/expand-sessions.ts';
 import { feedCardHtml } from './feed-card-html.ts';
@@ -19,7 +19,7 @@ import type { Ui } from '../../lib/i18n/ui-schema.ts';
 type Props = Readonly<{ events: readonly CompactEvent[]; today: string; ui: Ui; lang: Locale }>;
 const { events, today, ui, lang } = Astro.props;
 const picks = picksOf(expandSessions(events, today), today);
-const context = { lang, ui, icons: categoryIcons(), today };
+const context = { lang, ui, icons: feedIcons(), today };
 const heroes = [
   { label: ui.picks.day, event: picks.day },
   { label: ui.picks.week, event: picks.week },

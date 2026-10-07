@@ -2,13 +2,14 @@
 import Layout from '../../layouts/Layout.astro';
 import FeedFilters from './feed/FeedFilters.astro';
 import FeedFoot from './feed/FeedFoot.astro';
-import FeedGroups from './feed/FeedGroups.astro';
+import FoldedGroups from './feed/FoldedGroups.astro';
 import FeedHead from './feed/FeedHead.astro';
 import FeedPicks from '../feed/FeedPicks.astro';
 import Filo from '../percorso/Filo.astro';
 import EmptyState from './feed/EmptyState.astro';
 import VenueHeader from './feed/VenueHeader.astro';
-import { categoryIconsJson } from '../../lib/icons/category-icons-json.ts';
+import { feedIconsJson } from '../../lib/icons/feed-icons-json.ts';
+import { feedSprite } from '../../lib/icons/feed-sprite.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { feedPageView } from '../../lib/events/feed-page-view.ts';
@@ -35,6 +36,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   {venueLd !== undefined && <script is:inline type="application/ld+json" set:html={venueLd} />}
+  <Fragment set:html={feedSprite()} />
   {venue === undefined && <FeedHead title={title} lead={lead} city={city} ui={ui} />}
   {venue !== undefined && (
     <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
@@ -44,7 +46,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
   <Filo city={city ?? ''} today={today} hasDays={groups.length > 0}>
-    <FeedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
+    <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
   </Filo>
   {groups.length === 0 && (
     <EmptyState
@@ -59,7 +61,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
   <FeedFoot lang={lang} region={region} city={city} venue={venue} today={today} placeName={placeName} title={title} cityVenues={cityVenues} site={Astro.site} ui={ui} />
 </Layout>
 
-<script is:inline type="application/json" id="icons-data" set:html={categoryIconsJson()} />
+<script is:inline type="application/json" id="icons-data" set:html={feedIconsJson()} />
 
 <script>
   import { initFeed } from '../../components/feed/init-feed.ts';

@@ -8,6 +8,7 @@ import { feedCardTags } from './feed-card-tags.ts';
 import { feedCardThumb } from './feed-card-thumb.ts';
 import { feedCardVenue } from './feed-card-venue.ts';
 import { feedCardWhen } from './feed-card-when.ts';
+import { spriteUse } from '../../lib/icons/sprite-use.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
@@ -34,7 +35,7 @@ export const feedCardHtml = (context: FeedContext, event: CompactEvent): string 
   const { lang, ui, icons } = context;
   return (
     `<a class="photo-card" href="${localizedUrl(lang, eventPath(event))}">` +
-    favButtonHtml(event.id, ui.nav.favorites) +
+    favButtonHtml(event.id, ui.nav.favorites, undefined, spriteUse('heart', 18, 'fav-glyph')) +
     feedCardThumb(event) +
     `<header class="photo-card-top">${feedCardTags(event, ui, icons)}` +
     `${badge(event.f === true, 'badge-free', ui.badges.free)}` +
