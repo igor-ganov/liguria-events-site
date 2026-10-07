@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-10-07",
+    "roadmap": "report-and-claim",
+    "example": "/liguria/genova/",
+    "title": {
+      "en": "The feed shows the organiser’s version",
+      "it": "Il feed mostra la versione dell’organizzatore",
+      "ru": "Лента показывает версию организатора"
+    },
+    "body": {
+      "en": "When an organiser edits an event they have taken over, its card in the feed, the calendar and the map follows: new title, new picture, new day.",
+      "it": "Quando un organizzatore modifica un evento che ha preso in gestione, la sua scheda nel feed, nel calendario e sulla mappa lo segue: nuovo titolo, nuova immagine, nuovo giorno.",
+      "ru": "Когда организатор редактирует событие, взятое в управление, его карточка в ленте, календаре и на карте меняется следом: новое название, новая картинка, новый день."
+    }
+  },
+  {
     "date": "2026-10-05",
     "roadmap": "report-and-claim",
     "example": "/liguria/genova/",
