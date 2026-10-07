@@ -7,7 +7,7 @@ import { feedPath } from '../src/lib/region/feed-path.ts';
 import { eventsOfCity } from '../src/lib/events/events-of-city.ts';
 import { feedDayGroups } from '../src/lib/events/feed-day-groups.ts';
 import { feedItemAttrs } from '../src/lib/events/feed-item-attrs.ts';
-import { categoryIconsJson } from '../src/lib/icons/category-icons-json.ts';
+import { feedIconsJson } from '../src/lib/icons/feed-icons-json.ts';
 import { siteJsonLd } from '../src/lib/seo/site-json-ld.ts';
 import { ariaCurrent } from '../src/lib/a11y/aria-current.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
@@ -92,9 +92,9 @@ describe('feedItemAttrs', () => {
 });
 
 describe('the feed page islands', () => {
-  test('the icon island is a category → svg map', () => {
-    const icons: Record<string, string> = JSON.parse(categoryIconsJson());
-    assert.ok((icons['music'] ?? '').startsWith('<svg'));
+  test('the icon island is a category → glyph map, each a reference into the sprite', () => {
+    const icons: Record<string, string> = JSON.parse(feedIconsJson());
+    assert.ok((icons['music'] ?? '').includes('<use href="#ic-music"/>'));
   });
   test('the site JSON-LD carries the search action and escapes `<`', () => {
     assert.ok(siteJsonLd().includes('SearchAction'));

@@ -1,5 +1,5 @@
 ---
-import { categoryIcons } from '../../../lib/icons/category-icons.ts';
+import { feedIcons } from '../../../lib/icons/feed-icons.ts';
 import { feedCardHtml } from '../../feed/feed-card-html.ts';
 import { feedItemAttrs } from '../../../lib/events/feed-item-attrs.ts';
 import { stopClass } from '../../percorso/stop-class.ts';
@@ -16,7 +16,7 @@ type Props = Readonly<{
 const { groups, heading, ui, lang } = Astro.props;
 // The card is built by the same function the browser uses for an event
 // published since the build. Two renderers of one card drift; one cannot.
-const context = { lang, ui, icons: categoryIcons(), today: '' };
+const context = { lang, ui, icons: feedIcons(), today: '' };
 ---
 
 {groups.map(([day, events]) => (
