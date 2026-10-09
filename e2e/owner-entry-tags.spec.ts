@@ -11,11 +11,13 @@
 // Against the real worker: the redirect is middleware, not a built page.
 import { test, expect } from '@playwright/test';
 
-const DOORS = ['/', '/it/', '/calendar', '/ru/map'];
+// Each already carries the separator, so the test adds none: a ternary here
+// would be the one branch this codebase does not write.
+const DOORS = ['/?', '/it/?', '/calendar?', '/ru/map?'];
 
 test('a front door carries the tags it was given', async ({ request }) => {
   for (const door of DOORS) {
-    const sent = `${door}${door.includes('?') ? '&' : '?'}utm_source=google&utm_medium=cpc&utm_campaign=2026-10-test`;
+    const sent = `${door}utm_source=google&utm_medium=cpc&utm_campaign=2026-10-test`;
     const response = await request.get(sent, { maxRedirects: 0 });
     expect(response.status(), sent).toBe(302);
     const to = response.headers()['location'] ?? '';
