@@ -3,8 +3,9 @@
 // Three things can go wrong quietly. The cover can be the thumbnail the source
 // lists rather than the photograph it also serves, which is invisible in a
 // 74-pixel square and a smear at full width. The words can sit on a picture
-// that happens to be white. And the search, which reads the rendered cards,
-// can lose the description the moment the card stops showing it.
+// that happens to be white. And the card can go back to carrying its whole
+// description, hidden, which is a third of the page for a search most readers
+// never run.
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -107,10 +108,9 @@ describe('the card built in the browser', () => {
   test('says nothing about an hour it does not know', () => {
     assert.ok(!feedCardHtml(context, event()).includes('<b></b>'));
   });
-
-  test('keeps the description for the search without showing it', () => {
+  test('does not carry the description: the search fetches those when it is used', () => {
     const html = feedCardHtml(context, event({ d: { en: 'Brass on the pier', it: '', ru: '' } }));
-    assert.match(html, /<p class="mini-desc" hidden>Brass on the pier<\/p>/);
+    assert.equal(html.includes('Brass on the pier') || html.includes('mini-desc'), false);
   });
 
   test('keeps the title where the search looks for it', () => {

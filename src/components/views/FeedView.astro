@@ -45,7 +45,7 @@ const { events, groups, placeName, title, description, path, onward, today, head
   {venue === undefined && facet === undefined && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
-  <Filo city={city ?? ''} today={today} hasDays={groups.length > 0}>
+  <Filo region={region} city={city ?? ''} today={today} hasDays={groups.length > 0}>
     <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
   </Filo>
   {groups.length === 0 && (
