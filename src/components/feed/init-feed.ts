@@ -15,6 +15,7 @@ import { unfoldFeed } from './unfold-feed.ts';
 import { watchFeedFold } from './watch-feed-fold.ts';
 import { wireFeedChips } from './wire-feed-chips.ts';
 import { wireFeedDates } from './wire-feed-dates.ts';
+import { wireFeedDescs } from './wire-feed-descs.ts';
 import { wireFeedSearch } from './wire-feed-search.ts';
 import { wireFeedSort } from './wire-feed-sort.ts';
 import type { FeedContext } from './feed-context.ts';
@@ -50,6 +51,7 @@ export const initFeed = (): void => {
     syncFeedUrl(feed.today);
   };
   wireFeedSearch(refresh);
+  wireFeedDescs(feed.lang);
   wireFeedDates(refresh);
   wireFeedChips(refresh);
   wireFeedSort(feed.today, unfold);

@@ -93,7 +93,8 @@ describe('feedCardHtml', () => {
     assert.ok(html.startsWith('<a class="photo-card" href="/event/concerto-2026-07-04-e1/"'));
     assert.ok(html.includes('<h4 class="mini-title photo-card-title">Concerto</h4>'));
     assert.ok(html.includes('<span class="photo-card-when">'));
-    assert.ok(html.includes('<p class="mini-desc" hidden>A night of jazz.</p>'));
+    // What is written about the event is not on its card: the search fetches it.
+    assert.ok(!html.includes('A night of jazz.'));
     assert.ok(html.includes('<header class="photo-card-top">'));
     assert.ok(html.endsWith('</footer></a>'));
   });

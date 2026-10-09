@@ -1,7 +1,10 @@
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
+import { descriptionOf } from '../../lib/events/description-of.ts';
+import { descriptionPlain } from '../../lib/description/description-plain.ts';
 import { escapeMarkup } from '../../lib/escape-markup.ts';
 import { feedCardAttrs } from './feed-card-attrs.ts';
 import { feedCardHtml } from './feed-card-html.ts';
+import { feedDescs } from './feed-descs.ts';
 import { feedDayOf } from './feed-day-of.ts';
 import { isDefined } from '../../lib/is-defined.ts';
 import { queryAll } from '../../lib/dom/query-all.ts';
@@ -15,6 +18,8 @@ const itemOf = (context: FeedContext, event: CompactEvent): HTMLElement => {
     item.dataset[key] = value;
   });
   item.innerHTML = feedCardHtml(context, event);
+  // A late event came with its description; the search is told at once.
+  feedDescs.set(event.id, descriptionPlain(descriptionOf(context.lang)(event)));
   return item;
 };
 
