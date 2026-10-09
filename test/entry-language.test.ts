@@ -49,3 +49,31 @@ describe('entryPath', () => {
     expect(entryPath('/it/toscana/', undefined, 'lombardia')).toBeUndefined();
   });
 });
+
+// A front door redirects, and the redirect used to drop the query string with
+// it. Measured on the live site 2026-10-10:
+//
+//   GET /?utm_source=google&utm_medium=cpc  ->  Location: /it/lombardia/
+//
+// So every click we would have paid for arrived as "direct", gclid and all,
+// and the same went for any shared link carrying a campaign.
+describe('entryPath keeps what the link carried', () => {
+  test('the tags survive the redirect', () => {
+    expect(entryPath('/', 'it', 'lombardia', '?utm_source=google&utm_medium=cpc')).toBe(
+      '/it/lombardia/?utm_source=google&utm_medium=cpc',
+    );
+  });
+
+  test('on a front door that is not the root, too', () => {
+    expect(entryPath('/calendar', 'it', 'liguria', '?gclid=abc')).toBe('/it/liguria/calendar/?gclid=abc');
+  });
+
+  test('a door with nothing on it redirects as it always did', () => {
+    expect(entryPath('/', 'it', 'lombardia', '')).toBe('/it/lombardia/');
+    expect(entryPath('/map', 'ru', 'lazio', undefined)).toBe('/ru/lazio/map/');
+  });
+
+  test('and an address that is not a front door is still none of its business', () => {
+    expect(entryPath('/it/lombardia/milano/', 'it', 'lombardia', '?utm_source=google')).toBeUndefined();
+  });
+});
