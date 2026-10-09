@@ -51,6 +51,9 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
             region: ctx.locals.runtime?.cf?.region,
             country: ctx.locals.runtime?.cf?.country,
           }),
+          // Whatever brought the reader rides along: a front door that drops
+          // the query string turns a paid click into an anonymous one.
+          ctx.url.search,
         ),
       ),
   );
