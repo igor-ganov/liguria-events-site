@@ -1,0 +1,28 @@
+# The live site as Lighthouse scores it, once a day: a feed, an event, the map
+# and the calendar, audited as a phone on a slow connection. The figures are
+# stored at https://dovego.it/uploads/reports/lighthouse.json, where the morning
+# report (pro-motion) reads them an hour later. Nothing here touches the repo.
+name: Lighthouse
+
+on:
+  schedule:
+    - cron: '10 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: lighthouse
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run scripts/lighthouse-report.ts

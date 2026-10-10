@@ -12,6 +12,10 @@ export default defineConfig({
   site: siteUrl,
   base: '/',
   output: 'static',
+  // The stylesheet rides in the page. As a file of its own it was a second
+  // round trip before anything could be painted — 0.7 s of a phone's first
+  // paint on a slow connection — and every page links the same one anyway.
+  build: { inlineStylesheets: 'always' },
     // wasmModuleImports: the link-preview card is rasterised in the worker, and
   // Workers refuse to compile WebAssembly from a buffer at runtime — the module
   // has to be bound at deploy time, which is what this import mode does.
