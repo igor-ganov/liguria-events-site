@@ -71,3 +71,14 @@ describe('eagerPictures', () => {
     assert.equal(eagerPictures(4)(card), card);
   });
 });
+
+describe('heroCount', () => {
+  test('a feed with nothing in it opens with no highlight', async () => {
+    const { heroCount } = await import('../src/lib/picks/hero-count.ts');
+    assert.equal(heroCount([], '2026-07-04'), 0);
+  });
+  test('an event today is at least the highlight of the day', async () => {
+    const { heroCount } = await import('../src/lib/picks/hero-count.ts');
+    assert.ok(heroCount([event({ img: SOURCE })], '2026-07-04') >= 1);
+  });
+});

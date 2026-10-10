@@ -12,6 +12,7 @@ import { feedIconsJson } from '../../lib/icons/feed-icons-json.ts';
 import { feedSprite } from '../../lib/icons/feed-sprite.ts';
 import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { heroCount } from '../../lib/picks/hero-count.ts';
 import { feedPageView } from '../../lib/events/feed-page-view.ts';
 import type { FeedProps } from './feed/feed-props.ts';
 
@@ -31,6 +32,9 @@ const view = await feedPageView({
   ui,
 });
 const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd, lead } = view;
+// A venue and a facet open with their days; everything else with highlights.
+const withPicks = venue === undefined && facet === undefined;
+const picksAhead = [heroCount(events, today)].filter(() => withPicks).at(0) ?? 0;
 ---
 
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
@@ -42,11 +46,11 @@ const { events, groups, placeName, title, description, path, onward, today, head
     <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
   )}
 
-  {venue === undefined && facet === undefined && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
+  {withPicks && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
   <Filo region={region} city={city ?? ''} today={today} hasDays={groups.length > 0}>
-    <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} />
+    <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} ahead={picksAhead} />
   </Filo>
   {groups.length === 0 && (
     <EmptyState
