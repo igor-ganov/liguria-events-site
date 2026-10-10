@@ -12,5 +12,5 @@ export const feedCardThumb = (event: CompactEvent): string =>
   branch(event.img === undefined)(
     () => `<span class="photo-card-blank">${BRAND_MARK}</span>`,
     () =>
-      `<img class="photo-card-pic" src="${escapeMarkup(largeCover(event.img ?? ''))}" alt="" data-cat="${primaryCategory(event.c)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`,
+      `<img class="photo-card-pic" src="${escapeMarkup(event.th ?? largeCover(event.img ?? ''))}" alt="" data-cat="${primaryCategory(event.c)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`,
   );

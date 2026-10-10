@@ -46,7 +46,7 @@ const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
         {picks.strip.map((event) => (
           <li class="gallery-photo">
             <a class="pick-tile" href={localizedUrl(lang, eventPath(event))}>
-              <img src={largeCover(event.img ?? '')} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+              <img src={event.th ?? largeCover(event.img ?? '')} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
               <b><small>{dayOf(event.s, { weekday: 'short' })}</small>{dayOf(event.s, { day: 'numeric' })}</b>
               <span>{titleOf(lang)(event)}</span>
             </a>

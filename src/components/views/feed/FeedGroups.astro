@@ -1,5 +1,6 @@
 ---
 import { feedIcons } from '../../../lib/icons/feed-icons.ts';
+import { eagerPictures } from '../../feed/eager-pictures.ts';
 import { feedCardHtml } from '../../feed/feed-card-html.ts';
 import { feedItemAttrs } from '../../../lib/events/feed-item-attrs.ts';
 import { stopClass } from '../../percorso/stop-class.ts';
@@ -12,20 +13,24 @@ type Props = Readonly<{
   heading: (day: string) => string;
   ui: Ui;
   lang: Locale;
+  // How many cards stand before these on the page; the leading ones of a page
+  // fetch their photograph at once (eagerPictures). Unset: none of them do.
+  ahead?: number;
 }>;
-const { groups, heading, ui, lang } = Astro.props;
+const { groups, heading, ui, lang, ahead = Number.POSITIVE_INFINITY } = Astro.props;
+const before = groups.map((_, index) => groups.slice(0, index).reduce((count, [, events]) => count + events.length, ahead));
 // The card is built by the same function the browser uses for an event
 // published since the build. Two renderers of one card drift; one cannot.
 const context = { lang, ui, icons: feedIcons(), today: '' };
 ---
 
-{groups.map(([day, events]) => (
+{groups.map(([day, events], group) => (
   <section class="feed-group" data-day={day}>
     <h3>{heading(day)}</h3>
     <ul class="feed-list">
-      {events.map((event) => (
+      {events.map((event, index) => (
         <li class={stopClass(event.pl === true)} {...feedItemAttrs(event)}>
-          <Fragment set:html={feedCardHtml(context, event)} />
+          <Fragment set:html={eagerPictures((before[group] ?? ahead) + index)(feedCardHtml(context, event))} />
         </li>
       ))}
     </ul>
