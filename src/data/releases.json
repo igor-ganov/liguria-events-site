@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-10-10",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
+      "en": "Photographs that arrive sooner",
+      "it": "Fotografie che arrivano prima",
+      "ru": "Фотографии приходят быстрее"
+    },
+    "body": {
+      "en": "The photographs on feed cards now come from our own storage in a size made for the card, instead of from the site each event was found on. A cover weighs tens of kilobytes where it used to weigh hundreds, and the first ones are fetched together with the page.",
+      "it": "Le fotografie sulle schede del feed ora arrivano dal nostro archivio, nella misura fatta per la scheda, invece che dal sito su cui l’evento è stato trovato. Una copertina pesa decine di kilobyte dove prima ne pesava centinaia, e le prime vengono scaricate insieme alla pagina.",
+      "ru": "Фотографии на карточках ленты теперь приходят из нашего хранилища в размере, сделанном под карточку, а не с сайта, где найдено событие. Обложка весит десятки килобайт там, где раньше весила сотни, а первые загружаются вместе со страницей."
+    }
+  },
+  {
     "date": "2026-10-07",
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",

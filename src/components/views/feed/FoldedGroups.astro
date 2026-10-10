@@ -14,7 +14,7 @@ const FIRST_CARDS = 24;
 const { head, tail } = foldFeed(groups, FIRST_CARDS);
 ---
 
-<FeedGroups groups={head} heading={heading} ui={ui} lang={lang} />
+<FeedGroups groups={head} heading={heading} ui={ui} lang={lang} ahead={0} />
 {tail.length > 0 && (
   <template data-feed-tail>
     <FeedGroups groups={tail} heading={heading} ui={ui} lang={lang} />

@@ -79,6 +79,21 @@ const reviewsApiCheck: Check = {
   },
 };
 
+// The feed's covers are small copies kept in R2 (scripts/build-thumbs.ts). A
+// page that names none means the step that makes them did not run, and every
+// card is back to fetching a full-size file from the source; a copy that does
+// not answer means the card shows the mark of the site instead of a picture.
+const thumbsCheck: Check = {
+  name: 'feed cover thumbnails',
+  run: async () => {
+    const html = await (await get(`${BASE}/liguria/`)).text();
+    const path = /\/uploads\/thumbs\/[0-9a-f]{16}\.webp/.exec(html)?.[0];
+    ok(path !== undefined, '/liguria/ names no cover thumbnail');
+    const res = await get(`${BASE}${path}`);
+    ok(res.ok && res.headers.get('content-type') === 'image/webp', `${path} → ${res.status} ${res.headers.get('content-type')}`);
+  },
+};
+
 const CHECKS: readonly Check[] = [
   pageCheck('/liguria/map/'),
   reviewsApiCheck,
@@ -89,6 +104,7 @@ const CHECKS: readonly Check[] = [
   detailCheck('lazio'),
   detailCheck('sicilia'),
   tilesCheck,
+  thumbsCheck,
 ];
 
 const runAll = async (): Promise<string[]> => {

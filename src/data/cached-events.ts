@@ -5,6 +5,8 @@ import type { EventsPayload } from '../lib/events/decode-events.ts';
 import { branch } from '../lib/branch.ts';
 import fallbackPayload from './events-fallback.json';
 import { withoutTestRecords } from '../lib/events/without-test-records.ts';
+import { withThumbs } from '../lib/img/with-thumbs.ts';
+import thumbs from './thumbs.json';
 
 /** Shared corpus (imperative shell): the event-detail pages call the layout
  *  ~160 times per build, and every SSR request needs it — fetch once, share the
@@ -20,9 +22,13 @@ const TTL_MS = 5 * 60 * 1000;
 // Filtered once, here, rather than in each of the fifteen places that read the
 // corpus: a smoke-test record left in the sources would otherwise reach the
 // feed, the venue page, the sitemap and the bot's digest separately.
+// The small copies of covers that existed when the site was built (see
+// scripts/build-thumbs.ts, which writes the list). Empty outside a deploy.
+const MADE: ReadonlySet<string> = new Set<string>(thumbs);
+
 const clean = (payload: EventsPayload): EventsPayload => ({
   ...payload,
-  events: withoutTestRecords(payload.events),
+  events: withoutTestRecords(payload.events).map(withThumbs(MADE)),
 });
 
 const load = (url: string): Promise<EventsPayload> =>

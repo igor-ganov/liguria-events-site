@@ -46,6 +46,9 @@ export const EventSchema = Schema.Struct({
   rg: Schema.optional(Schema.String),
   u: Schema.String,
   img: Schema.optional(Schema.String),
+  // A small copy of the cover on our own storage, set by the site (withThumbs)
+  // when one has been made; the collector never sends it.
+  th: Schema.optional(Schema.String),
   /** Photographs the source page itself carried, beyond the cover (ph = photos). */
   ph: Schema.optional(Schema.Array(Schema.String)),
   /** Attendance length in minutes, when the source stated one (AC-duration). */

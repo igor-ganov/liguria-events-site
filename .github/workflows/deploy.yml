@@ -43,6 +43,12 @@ jobs:
       # e2e/, which throw "test() called here" under bun's runner. E2E runs
       # separately via `bun run test:e2e`.
       - run: bun run test
+      # Small copies of the covers the feed shows, made once and kept in R2.
+      # Only what is missing is made, inside a time budget, and none of it can
+      # fail the deploy: a cover without a copy is shown from its source.
+      - name: Make missing cover thumbnails
+        continue-on-error: true
+        run: bun run scripts/build-thumbs.ts
       - run: bun run build:prod
       - run: bun x wrangler d1 migrations apply dovego --remote
       - run: bun x wrangler deploy
