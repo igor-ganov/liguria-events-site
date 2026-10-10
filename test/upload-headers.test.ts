@@ -22,4 +22,15 @@ describe('uploadHeaders', () => {
       'public, max-age=31536000, immutable',
     );
   });
+
+  test('a report is written over every day, so nothing may keep a copy of it', () => {
+    assert.equal(uploadHeaders(stored('application/json'), 'reports/lighthouse.json').get('cache-control'), 'no-cache');
+  });
+
+  test('a picture stored beside the reports is still kept for a year', () => {
+    assert.equal(
+      uploadHeaders(stored('image/webp'), 'thumbs/abc.webp').get('cache-control'),
+      'public, max-age=31536000, immutable',
+    );
+  });
 });

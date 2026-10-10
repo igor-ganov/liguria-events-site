@@ -2,7 +2,7 @@
 # (and the heavy map bundle) load from cache instead of re-downloading.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
-/font/*
+/fonts/*
   Cache-Control: public, max-age=31536000, immutable
 /sprite/*
   Cache-Control: public, max-age=2592000

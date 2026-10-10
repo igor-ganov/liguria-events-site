@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
   return (
     [object ?? undefined]
       .filter(isDefined)
-      .map((found) => new Response(found.body, { headers: uploadHeaders(found) }))
+      .map((found) => new Response(found.body, { headers: uploadHeaders(found, key) }))
       .at(0) ?? new Response('Not found', { status: 404 })
   );
 };
