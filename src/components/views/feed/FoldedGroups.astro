@@ -8,13 +8,16 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // The nearest days are rendered; the rest ride along inert in a `<template>`,
 // where they cost the browser nothing, and are unfolded when something needs
 // them (see unfoldFeed). The marker after them is what the page watches for.
-type Props = Readonly<{ groups: readonly DayGroup[]; heading: (day: string) => string; ui: Ui; lang: Locale }>;
-const { groups, heading, ui, lang } = Astro.props;
+//
+// `ahead` is how many large cards the page shows before these: the leading
+// cards of a PAGE fetch their photograph at once, wherever they come from.
+type Props = Readonly<{ groups: readonly DayGroup[]; heading: (day: string) => string; ui: Ui; lang: Locale; ahead: number }>;
+const { groups, heading, ui, lang, ahead } = Astro.props;
 const FIRST_CARDS = 24;
 const { head, tail } = foldFeed(groups, FIRST_CARDS);
 ---
 
-<FeedGroups groups={head} heading={heading} ui={ui} lang={lang} ahead={0} />
+<FeedGroups groups={head} heading={heading} ui={ui} lang={lang} ahead={ahead} />
 {tail.length > 0 && (
   <template data-feed-tail>
     <FeedGroups groups={tail} heading={heading} ui={ui} lang={lang} />

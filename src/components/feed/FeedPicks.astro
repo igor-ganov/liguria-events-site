@@ -2,6 +2,7 @@
 import { feedIcons } from '../../lib/icons/feed-icons.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { expandSessions } from '../../lib/events/expand-sessions.ts';
+import { eagerPictures } from './eager-pictures.ts';
 import { feedCardHtml } from './feed-card-html.ts';
 import { largeCover } from '../../lib/img/large-cover.ts';
 import { LOCALE_TAG } from '../../lib/i18n/locale-tag.ts';
@@ -32,10 +33,10 @@ const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
 {heroes.length > 0 && (
   <section class="picks" aria-label={ui.picks.title}>
     <ol class="picks-heroes">
-      {heroes.map(({ label, event }) => (
+      {heroes.map(({ label, event }, place) => (
         <li class="pick-hero" data-pick>
           <span class="pick-label">{label}</span>
-          <Fragment set:html={feedCardHtml(context, event)} />
+          <Fragment set:html={eagerPictures(place)(feedCardHtml(context, event))} />
         </li>
       ))}
     </ol>
