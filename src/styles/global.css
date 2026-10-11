@@ -54,11 +54,6 @@
 /* Theme toggle: circular reveal via document.startViewTransition() (blog mechanics) */
 html:active-view-transition-type(theme) {
   view-transition-name: root;
-  /* Fold main (and any other named element) into the single root snapshot so
-     the WHOLE page reveals with the circle — otherwise main-content is its own
-     group and swaps instantly while only the chrome reveals, and the fixed FAB
-     glitches between the two groups. */
-  main { view-transition-name: none; }
   /* The header is its own group for nav, but the theme reveal must sweep the
      WHOLE page (header included), so fold it back into root here. */
   .site-head { view-transition-name: none; }
@@ -105,9 +100,6 @@ main {
   margin: 0 auto;
   --page-pad: clamp(0.7rem, 3vw, 1.5rem);
   padding: 1rem var(--page-pad) 3rem;
-  /* View-transition target: navigations slide this box (theme.css keeps the
-     theme toggle's circular reveal separate via the 'theme' type). */
-  view-transition-name: main-content;
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -115,11 +107,16 @@ a, button { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; border-radius: 4px; }
 img { max-width: 100%; }
 
-/* ══ view transitions (blog mechanics) ══════════════════════════════ */
-html:not(:active-view-transition-type(theme))::view-transition-old(main-content) {
+/* ══ view transitions ═══════════════════════════════════════════════ */
+/* A navigation slides the SCREEN, not the body of the page. The body is as
+   tall as its content and sits wherever the reader scrolled it: named as a
+   part of its own, it was carried from where the old page stood to where the
+   new one opens, and a feed scrolled far down flew past on the way to an
+   event. The screen is the same box on both sides, so nothing travels. */
+html:not(:active-view-transition-type(theme))::view-transition-old(root) {
   animation: vt-slide-out 0.26s ease-out forwards;
 }
-html:not(:active-view-transition-type(theme))::view-transition-new(main-content) {
+html:not(:active-view-transition-type(theme))::view-transition-new(root) {
   animation: vt-slide-in 0.26s ease-out forwards;
 }
 @keyframes vt-slide-out {
@@ -129,8 +126,8 @@ html:not(:active-view-transition-type(theme))::view-transition-new(main-content)
   from { transform: translateY(14px); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(main-content),
-  ::view-transition-new(main-content) { animation: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
 }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px;

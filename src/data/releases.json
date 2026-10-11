@@ -4,6 +4,21 @@
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",
     "title": {
+      "en": "Pages change in place",
+      "it": "Le pagine cambiano sul posto",
+      "ru": "Страницы сменяются на месте"
+    },
+    "body": {
+      "en": "Opening an event from a feed you had scrolled down, and coming back to it, no longer shows the page rushing past on the way: the screen you were on gives way to the one you arrive at.",
+      "it": "Aprire un evento da un feed già scorso, e tornare indietro, non mostra più la pagina che scorre via di corsa: la schermata dove eri lascia il posto a quella dove arrivi.",
+      "ru": "Когда открываете событие из прокрученной ленты и возвращаетесь назад, страница больше не проносится мимо: один экран сменяется другим на месте."
+    }
+  },
+  {
+    "date": "2026-10-11",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
       "en": "Less to download before a page shows",
       "it": "Meno da scaricare prima che la pagina appaia",
       "ru": "Меньше загрузок до появления страницы"
