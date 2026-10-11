@@ -1251,7 +1251,6 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 
 /* ══ event detail page ══════════════════════════════════════════════ */
-.event-page { max-width: 46rem; margin: 0 auto; }
 .event-hero { position: relative; margin: 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
 .event-hero img { width: 100%; aspect-ratio: 16 / 9; max-height: 22rem; object-fit: cover; display: block; }
 .event-hero figcaption {
@@ -1269,32 +1268,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
    (resolved data-theme, so 'system' follows the OS too). */
 :root[data-theme='dark'] .event-map iframe { filter: invert(0.92) hue-rotate(180deg); }
 /* ── Event description as a designed article ─────────────────────────── */
-.event-article { font-size: 1.02rem; }
-.event-article > :first-child { margin-top: 0; }
-
 /* Lead: the opening paragraph reads a notch larger and calmer than the body. */
 .desc-lead { font-size: 1.1rem; line-height: 1.62; color: var(--ink); }
 .desc-lead p { margin: 0 0 0.7rem; }
 .desc-lead > :last-child { margin-bottom: 0; }
-
-.desc-sec { margin-top: 1.7rem; }
-/* Section header: an accent icon badge, an uppercase label, and a hairline
-   rule that runs to the end of the row — an editorial divider. */
-.desc-h { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.7rem; }
-.desc-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-.desc-h-ic {
-  flex: none; display: inline-grid; place-items: center;
-  width: 28px; height: 28px; border-radius: 9px;
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
-  color: var(--accent);
-}
-.desc-h-ic svg { display: block; }
-.desc-h-tx {
-  font-size: 0.74rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.07em; color: var(--ink-2); white-space: nowrap;
-}
-.desc-body p { margin: 0 0 0.7rem; line-height: 1.6; color: var(--ink); }
-.desc-body > :last-child { margin-bottom: 0; }
 
 /* Bullet lists with accent dot markers instead of default discs. */
 .desc-list { list-style: none; margin: 0.1rem 0 0.7rem; padding: 0; display: flex; flex-direction: column; gap: 0.45rem; }
@@ -1304,27 +1281,7 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
 }
 
-/* Practical sections stand out as highlighted callout cards. */
-.desc-sec[data-sec='tickets'] .desc-body,
-.desc-sec[data-sec='getting-there'] .desc-body,
-.desc-sec[data-sec='when'] .desc-body {
-  background: var(--surface-2); border: 1px solid var(--line);
-  border-left: 3px solid var(--accent); border-radius: var(--radius-md);
-  padding: 0.8rem 1rem;
-}
-.desc-sec[data-sec='tickets'] .desc-list,
-.desc-sec[data-sec='getting-there'] .desc-list,
-.desc-sec[data-sec='when'] .desc-list { margin-bottom: 0; }
 
-.event-sources { margin-top: 1.3rem; }
-.event-sources h2 { font-size: 0.95rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }
-.event-sources ul { list-style: none; padding: 0; margin: 0.4rem 0 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.event-sources a {
-  display: inline-flex; gap: 0.4rem; align-items: center;
-  border: 1px solid var(--line); background: var(--surface);
-  border-radius: 999px; padding: 0.35rem 0.9rem; font-size: 0.88rem;
-}
-.event-sources a:hover { border-color: var(--accent); text-decoration: none; }
 .back-link { display: inline-block; margin-bottom: 0.8rem; font-size: 0.9rem; }
 
 /* ══ search box (feed + landmarks) ══════════════════════════════════ */
@@ -1641,17 +1598,6 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 
 /* ══ what else is on near an event ══════════════════════════════════ */
-/* The way onward from a page that has been read: its town, its venue, and the
-   few things happening around the same date. The page used to end in a link to
-   the whole region, which is where the reader started. */
-.event-also { margin: 1.6rem 0 0.8rem; }
-.event-also h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.6rem; }
-.event-also ul { list-style: none; margin: 0 0 0.8rem; padding: 0; display: grid; gap: 0.4rem; }
-.event-also li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.6rem; }
-.event-also li a { color: var(--ink); }
-.event-also-when { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
-.event-also-onward { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; margin: 0; font-size: 0.9rem; }
-
 /* ══ glyphs by reference ════════════════════════════════════════════
    A feed page draws each glyph once, in a sprite that takes no room, and its
    cards point at them. A glyph that is pointed at has no paint of its own, so

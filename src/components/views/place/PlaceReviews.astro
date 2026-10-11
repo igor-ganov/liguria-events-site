@@ -4,6 +4,7 @@ import { branch } from '../../../lib/branch.ts';
 import { placeReviewSummary, placeReviewList } from '../../../lib/places/reviews.ts';
 import { myReviewOf } from '../../../lib/places/my-review-of.ts';
 import { reviewStars } from '../../../lib/places/review-stars.ts';
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
 // Our own reviews (D1): summary + recent list, and the caller's own review if
@@ -23,6 +24,7 @@ const [summary, reviews, mine] = await Promise.all([
 
 <section class="place-reviews" id="reviews" data-rv data-place={subject} data-region={region}>
   <h2>
+    <span class="widget-ic" set:html={uiIcon('star', 16)} />
     {ui.reviews.title}
     {summary.count > 0 && (
       <span class="rv-summary"><Fragment set:html={reviewStars(summary.avg)} /> {summary.avg} · {summary.count}</span>

@@ -1,0 +1,16 @@
+---
+import Widget from './Widget.astro';
+import { SECTION_ICON } from '../../../lib/description/section-icon.ts';
+import type { DescriptionPart } from '../../../lib/description/description-outline.ts';
+
+// What the event wrote under its own headings — tickets, who is playing, what
+// to know — each on a card of its own, named as the event named it.
+type Props = Readonly<{ cards: readonly DescriptionPart[] }>;
+const { cards } = Astro.props;
+---
+
+{cards.map((card) => (
+  <Widget name={`note-${card.type}`} icon={SECTION_ICON.get(card.type) ?? 'feed'} label={card.label}>
+    <Fragment set:html={card.html} />
+  </Widget>
+))}

@@ -1,21 +1,24 @@
 ---
+import Widget from './Widget.astro';
 import type { NamedLink } from '../../../lib/events/event-links.ts';
 
-type Props = Readonly<{ links: readonly NamedLink[]; heading: string }>;
-const { links, heading } = Astro.props;
+// Where the page comes from, and the two ways to talk to us about it. The
+// sources and the note that the summary was written from them belong together:
+// one says the words are not the organiser's, the other says whose they are.
+type Props = Readonly<{ links: readonly NamedLink[]; heading: string; note: string }>;
+const { links, heading, note } = Astro.props;
 ---
 
-<section class="event-sources">
-  <h2>{heading}</h2>
-  <ul>
-    {
-      links.map((link) => (
-        <li>
-          <a href={link.url} target="_blank" rel="noopener">
-            ↗ {link.name}
-          </a>
-        </li>
-      ))
-    }
+<Widget name="sources" icon="globe" label={heading}>
+  <p class="widget-small">{note}</p>
+  <ul class="widget-chips">
+    {links.map((link) => (
+      <li>
+        <a class="chip" href={link.url} target="_blank" rel="noopener">
+          ↗ {link.name}
+        </a>
+      </li>
+    ))}
   </ul>
-</section>
+  <slot />
+</Widget>

@@ -6,30 +6,19 @@ import { keepOutOfSearch } from '../../lib/events/keep-out-of-search.ts';
 import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
 import EventActions from './event/EventActions.astro';
+import EventBoard from './event/EventBoard.astro';
 import EventCover from './event/EventCover.astro';
-import EventFeedback from './event/EventFeedback.astro';
-import EventGallery from './event/EventGallery.astro';
 import EventPassed from '../events/EventPassed.astro';
-import EventProgramme from './event/EventProgramme.astro';
 import EventTiles from './event/EventTiles.astro';
-import EventWhere from './event/EventWhere.astro';
-import EventMapEmbed from './event/EventMapEmbed.astro';
-import EventAlso from './event/EventAlso.astro';
-import EventEditions from './event/EventEditions.astro';
-import EventSources from './event/EventSources.astro';
-import PlaceReviews from './place/PlaceReviews.astro';
 import { placeReviewSummary } from '../../lib/places/reviews.ts';
 import { reviewSubjectOf } from '../../lib/events/review-subject-of.ts';
 import { cityName } from '../../lib/region/city-name.ts';
-import { alsoOn } from '../../lib/events/also-on.ts';
-import { editionsOf } from '../../lib/events/editions-of.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
 import { eventTiles } from '../../lib/events/event-tiles.ts';
+import { isDefined } from '../../lib/is-defined.ts';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { programmeLeaves } from '../../lib/events/programme-leaves.ts';
-import { upcomingLeaves } from '../../lib/events/upcoming-leaves.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 
@@ -50,17 +39,8 @@ const ui = await uiOf(lang);
 const subject = reviewSubjectOf(event);
 const rating = await placeReviewSummary(Astro.locals.runtime.env.DB, subject);
 const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday(), rating });
-const { region, title, seoTitle, desc, descHtml, descPreview, heroImage, cover, more, links, tickets, passed, jsonLd, mapSearchUrl, mapEmbedUrl } = view;
-const leaves = upcomingLeaves(programmeLeaves(event, lang), isoToday());
+const { region, title, seoTitle, descPreview, heroImage, cover, more, tickets, passed, jsonLd, mapSearchUrl } = view;
 const tiles = eventTiles({ event, lang, labels: { ...ui.eventPage, reviews: ui.reviews.title }, rating });
-// The same feast in other years — the archive for the ones that are over, the
-// corpus for the one that is coming. A reader landing on a feast that has
-// happened wants next year's, and that is the direction the archive alone
-// cannot answer.
-const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
-// What else is on in the same town around the same date. The page offered the
-// whole region and other years of itself, and nothing else.
-const also = await alsoOn(event, isoToday());
 ---
 
 <Layout lang={lang} region={region} title={seoTitle} description={descPreview || seoTitle} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
@@ -74,20 +54,10 @@ const also = await alsoOn(event, isoToday());
     )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && <EventPassed lang={lang} region={region} city={cityName(event.ct ?? '')} label={ui.passedNote} allLabel={ui.headings.allEvents} />}
-    <EventCover event={event} title={title} cover={cover} photos={more.length + 1} ui={ui} />
+    <EventCover event={event} title={title} shots={[cover, ...more].filter(isDefined)} ui={ui} />
     <EventTiles tiles={tiles} />
     <EventActions event={event} title={title} tickets={tickets} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
-    {more.length > 0 && <EventGallery photos={more} photoBy={ui.photoBy} />}
-    {leaves.length > 0 && <EventProgramme leaves={leaves} heading={ui.eventPage.programme} />}
-    <EventWhere event={event} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
-    {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
-    {desc !== '' && <section class="event-desc" set:html={descHtml} />}
-    <p class="site-foot" style="padding:0.4rem 0 0; font-size:0.78rem">{ui.summaryNote}</p>
-    <PlaceReviews subject={subject} region={region} ui={ui} />
-    <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
-    <EventAlso lang={lang} event={event} also={also} ui={ui} />
-    <EventSources links={links} heading={ui.headings.sources} />
-    <EventFeedback event={event} title={title} ui={ui} />
+    <EventBoard lang={lang} event={event} contacts={contacts} view={view} subject={subject} ui={ui} />
     {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
   </article>
 </Layout>

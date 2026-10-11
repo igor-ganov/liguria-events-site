@@ -1,0 +1,68 @@
+---
+import EventAlso from './EventAlso.astro';
+import EventCards from './EventCards.astro';
+import EventEditions from './EventEditions.astro';
+import EventFeedback from './EventFeedback.astro';
+import EventPlace from './EventPlace.astro';
+import EventProgramme from './EventProgramme.astro';
+import EventSources from './EventSources.astro';
+import PlaceReviews from '../place/PlaceReviews.astro';
+import { alsoOn } from '../../../lib/events/also-on.ts';
+import { cityName } from '../../../lib/region/city-name.ts';
+import { descriptionOutline } from '../../../lib/description/description-outline.ts';
+import { editionsOf } from '../../../lib/events/editions-of.ts';
+import { eventWidgets } from '../../../lib/events/event-widgets.ts';
+import { isDefined } from '../../../lib/is-defined.ts';
+import { isoToday } from '../../../lib/calendar/iso-today.ts';
+import { programmeLeaves } from '../../../lib/events/programme-leaves.ts';
+import { upcomingLeaves } from '../../../lib/events/upcoming-leaves.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { NamedLink } from '../../../lib/events/event-links.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// Everything under the facts and the buttons: what the event says of itself,
+// then a board of widgets. The prose is cut into what the board is laid out
+// from — the lead stays prose, and each headed part becomes a widget, joins
+// one, or is left out because a widget already says it.
+type Props = Readonly<{
+  lang: Locale;
+  event: CompactEvent;
+  contacts: EventContacts | undefined;
+  view: Readonly<{ region: string; title: string; desc: string; links: readonly NamedLink[]; mapEmbedUrl: string | undefined }>;
+  subject: string;
+  ui: Ui;
+}>;
+const { lang, event, contacts, view, subject, ui } = Astro.props;
+const leaves = upcomingLeaves(programmeLeaves(event, lang), isoToday());
+const outline = descriptionOutline(view.desc);
+const widgets = eventWidgets({
+  parts: outline.parts,
+  dated: leaves.length > 0,
+  place: [event.v, contacts?.address ?? event.a, cityName(event.ct ?? '')].filter(isDefined),
+});
+// The same feast in other years — the archive for the ones that are over, the
+// corpus for the one that is coming. A reader landing on a feast that has
+// happened wants next year's, and that is the direction the archive alone
+// cannot answer.
+const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
+// What else is on in the same town around the same date. The page offered the
+// whole region and other years of itself, and nothing else.
+const also = await alsoOn(event, isoToday());
+---
+
+{outline.lead !== '' && <section class="event-lead desc-lead" set:html={outline.lead} />}
+<section class="event-widgets">
+  {leaves.length > 0 && (
+    <EventProgramme leaves={leaves} heading={ui.eventPage.programme} written={widgets.programme} whole={ui.eventPage.fullProgramme} />
+  )}
+  <EventPlace event={event} contacts={contacts} mapEmbedUrl={view.mapEmbedUrl} title={view.title} way={widgets.way} ui={ui} />
+  <EventCards cards={widgets.cards} />
+  <PlaceReviews subject={subject} region={view.region} ui={ui} />
+  <EventAlso lang={lang} event={event} also={also} ui={ui} />
+  <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
+  <EventSources links={view.links} heading={ui.headings.sources} note={ui.summaryNote}>
+    <EventFeedback event={event} title={view.title} ui={ui} />
+  </EventSources>
+</section>

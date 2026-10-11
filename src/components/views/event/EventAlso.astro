@@ -1,7 +1,9 @@
 ---
-import { dayWithYear } from '../../../lib/calendar/day-with-year.ts';
+import Widget from './Widget.astro';
+import { LOCALE_TAG } from '../../../lib/i18n/locale-tag.ts';
 import { cityName } from '../../../lib/region/city-name.ts';
 import { eventPath } from '../../../lib/event-path.ts';
+import { largeCover } from '../../../lib/img/large-cover.ts';
 import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
 import { slugify } from '../../../lib/slugify.ts';
 import { titleOf } from '../../../lib/events/title-of.ts';
@@ -16,6 +18,9 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // it is the same gap: the only path to an event page was scrolling a feed, and
 // 17 of 96 sampled pages were in the index.
 //
+// The other events are the feed's own small tiles — a photograph, the day, the
+// name — in one strip to swipe, not a list of blue lines.
+//
 // Every label puts the place first and takes no preposition: one template has
 // to serve "Genova", "Teatro Carlo Felice" and "Liguria", and Italian and
 // Russian each want something different in front of them.
@@ -25,33 +30,38 @@ const region = event.rg ?? '';
 const city = event.ct ?? '';
 const place = [city].filter((named) => named !== '').map(cityName).at(0) ?? region;
 const venue = event.v ?? '';
-const when = dayWithYear(ui);
+const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
+  new Intl.DateTimeFormat(LOCALE_TAG[lang], { ...part, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
 ---
 
 {(also.length > 0 || city !== '') && (
-  <section class="event-also">
-    <h2>{ui.headings.alsoHere.replace('{place}', place)}</h2>
+  <Widget name="also" icon="feed" label={ui.headings.alsoHere.replace('{place}', place)} wide>
     {also.length > 0 && (
-      <ul>
+      <ul class="picks-strip">
         {also.map((one) => (
           <li>
-            <a href={localizedUrl(lang, eventPath(one))}>{titleOf(lang)(one)}</a>
-            <span class="event-also-when">{when(one.s, one.e)}</span>
+            <a class="pick-tile" href={localizedUrl(lang, eventPath(one))}>
+              {one.img !== undefined && (
+                <img src={one.th ?? largeCover(one.img)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+              )}
+              <b><small>{dayOf(one.s, { month: 'short' })}</small>{dayOf(one.s, { day: 'numeric' })}</b>
+              <span>{titleOf(lang)(one)}</span>
+            </a>
           </li>
         ))}
       </ul>
     )}
-    <p class="event-also-onward">
+    <p class="widget-chips">
       {city !== '' && (
-        <a href={localizedUrl(lang, `${region}/${city}/`)}>
+        <a class="chip" href={localizedUrl(lang, `${region}/${city}/`)}>
           {ui.eventPage.allInCity.replace('{place}', cityName(city))}
         </a>
       )}
       {city !== '' && venue !== '' && (
-        <a href={localizedUrl(lang, venuePath(region, city, slugify(venue)))}>
+        <a class="chip" href={localizedUrl(lang, venuePath(region, city, slugify(venue)))}>
           {ui.eventPage.venuePage.replace('{place}', venue)}
         </a>
       )}
     </p>
-  </section>
+  </Widget>
 )}

@@ -1,0 +1,36 @@
+---
+import EventMapEmbed from './EventMapEmbed.astro';
+import Widget from './Widget.astro';
+import { crawlerAddress } from '../../../lib/events/crawler-address.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { DescriptionPart } from '../../../lib/description/description-outline.ts';
+import type { EventContacts } from '../../../lib/events/d1-published.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// Where it is, said once: the venue, the address under it, the map, and — when
+// the event wrote how to get there and it is more than the address again —
+// that. The way out to a full map is the "directions" button above; it is not
+// repeated here.
+type Props = Readonly<{
+  event: CompactEvent;
+  contacts: EventContacts | undefined;
+  mapEmbedUrl: string | undefined;
+  title: string;
+  way: DescriptionPart | undefined;
+  ui: Ui;
+}>;
+const { event, contacts, mapEmbedUrl, title, way, ui } = Astro.props;
+const address = contacts?.address ?? crawlerAddress(event, contacts?.address);
+const shown = event.v !== undefined || address !== undefined || Boolean(mapEmbedUrl);
+---
+
+{shown && (
+  <Widget name="where" icon="pin" label={ui.eventPage.where}>
+    <address class="widget-place">
+      {event.v !== undefined && <b>{event.v}</b>}
+      {address !== undefined && <span>{address}</span>}
+    </address>
+    {mapEmbedUrl && <EventMapEmbed src={mapEmbedUrl} title={`${ui.mapLink}: ${event.v ?? title}`} />}
+    {way !== undefined && <Fragment set:html={way.html} />}
+  </Widget>
+)}

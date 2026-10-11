@@ -3,7 +3,6 @@ import { branch } from '../branch.ts';
 import { clipText } from '../seo/clip-text.ts';
 import { socialImageUrl } from '../img/social-image-url.ts';
 import { canonicalUrl } from '../seo/canonical-url.ts';
-import { descriptionArticleHtml } from '../description/description-article-html.ts';
 import { descriptionOf } from './description-of.ts';
 import { descriptionPlain } from '../description/description-plain.ts';
 import { ARCHIVE_COVER } from './archive-cover-url.ts';
@@ -40,8 +39,9 @@ const mapUrls = (event: CompactEvent) => {
 };
 
 /** Everything the event page renders, derived in one place so the component
- *  stays markup. The description is light Markdown: the body renders it as a
- *  structured article, meta and structured data get the plain-text form. */
+ *  stays markup. The description is light Markdown: the page lays it out as
+ *  widgets (see descriptionOutline), meta and structured data get the
+ *  plain-text form. */
 export const eventDetailView = ({ lang, event, address, site, today, rating }: Input) => {
   const title = titleOf(lang)(event);
   const desc = descriptionOf(lang)(event);
@@ -61,7 +61,6 @@ export const eventDetailView = ({ lang, event, address, site, today, rating }: I
     // a place and a year, and the title said neither.
     seoTitle: eventSeoTitle(event, title, lang),
     desc,
-    descHtml: descriptionArticleHtml(desc),
     descMeta,
     // An event with no photo of its own gets a card drawn from what it says —
     // title, when, where — rather than the same rectangle as everything else.

@@ -1,15 +1,18 @@
 ---
+import Widget from './Widget.astro';
+import type { DescriptionPart } from '../../../lib/description/description-outline.ts';
 import type { ProgrammeLeaf } from '../../../lib/events/programme-leaves.ts';
 
 // The programme as calendar leaves: weekday, the day number large, and under it
 // every hour that day starts. A long run scrolls sideways instead of pushing
-// the rest of the page a screen further down.
-type Props = Readonly<{ leaves: readonly ProgrammeLeaf[]; heading: string }>;
-const { leaves, heading } = Astro.props;
+// the rest of the page a screen further down. What the event wrote about its
+// programme is the same thing in words, so it folds under the leaves: there
+// for whoever wants every line, and not a second list down the page.
+type Props = Readonly<{ leaves: readonly ProgrammeLeaf[]; heading: string; written: DescriptionPart | undefined; whole: string }>;
+const { leaves, heading, written, whole } = Astro.props;
 ---
 
-<section class="event-programme">
-  <h2>{heading}</h2>
+<Widget name="programme" icon="calendar" label={heading} wide>
   <ol class="event-leaves">
     {leaves.map((leaf) => (
       <li>
@@ -23,4 +26,10 @@ const { leaves, heading } = Astro.props;
       </li>
     ))}
   </ol>
-</section>
+  {written !== undefined && (
+    <details class="widget-fold">
+      <summary>{whole}</summary>
+      <Fragment set:html={written.html} />
+    </details>
+  )}
+</Widget>

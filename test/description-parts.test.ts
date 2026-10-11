@@ -9,7 +9,6 @@ import { parseDescriptionBlocks } from '../src/lib/description/parse-description
 import { renderDescriptionBody } from '../src/lib/description/render-description-body.ts';
 import { parseSectionHead } from '../src/lib/description/parse-section-head.ts';
 import { splitDescriptionSections } from '../src/lib/description/split-description-sections.ts';
-import { renderDescriptionSection } from '../src/lib/description/render-description-section.ts';
 import type { DescriptionBlock } from '../src/lib/description/description-block.ts';
 
 describe('escapeDescriptionHtml', () => {
@@ -166,23 +165,5 @@ describe('splitDescriptionSections', () => {
   });
   test('blocks before the first heading belong to no section', () => {
     assert.deepEqual(splitDescriptionSections([{ kind: 'p', text: 'lead' }]), []);
-  });
-});
-
-describe('renderDescriptionSection', () => {
-  test('stamps the type, renders the icon and the body', () => {
-    const html = renderDescriptionSection({
-      label: '[tickets] Biglietti',
-      body: [{ kind: 'p', text: 'Free' }],
-    });
-    assert.ok(html.startsWith('<section class="desc-sec" data-sec="tickets">'));
-    assert.ok(html.includes('<span class="desc-h-tx">Biglietti</span>'));
-    assert.ok(html.includes('<svg'));
-    assert.ok(html.includes('<div class="desc-body"><p>Free</p></div>'));
-  });
-  test('bold inside a label survives', () => {
-    const html = renderDescriptionSection({ label: '**Note**', body: [] });
-    assert.ok(html.includes('<span class="desc-h-tx"><strong>Note</strong></span>'));
-    assert.ok(html.includes('data-sec="info"'));
   });
 });
