@@ -205,23 +205,208 @@
   outline-offset: 2px;
 }
 
-/* ── when exactly: the programme as calendar leaves ──────────────── */
-.event-programme,
-.event-where {
-  margin: 0;
-  padding: 0.9rem 0;
-  border-bottom: 1px solid var(--line);
+/* On a phone the photograph runs edge to edge, as it did in the feed. */
+@media (max-width: 43.99rem) {
+  .event-cover {
+    width: auto;
+    margin-inline: calc(-1 * var(--page-pad));
+    border-radius: 0;
+  }
 }
-.event-programme h2,
-.event-where h2 {
-  margin: 0 0 0.55rem;
+
+/* A figure too long for its tile (a run across months) is set smaller rather
+   than cut: a date missing its last digits is worse than a small one. */
+.event-tiles li[data-long]:not([data-long='false']) b {
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+/* ── the photographs: the cover is the gallery ───────────────────────
+   Every photograph sits at the top, one per screen, and the reader swipes.
+   The browser scrolls and snaps; the name of the event and the chips stay
+   put over whichever picture is showing, and let a finger through to it. */
+.event-shots {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  overflow: auto hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.event-shots::-webkit-scrollbar {
+  display: none;
+}
+.event-shots li {
+  position: relative;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.event-cover h1,
+.event-cover-tags {
+  pointer-events: none;
+}
+.event-cover-count b {
+  font-weight: inherit;
+}
+.event-shot-steps {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.6rem;
+  pointer-events: none;
+}
+.event-shot-steps button {
+  width: 2.6rem;
+  height: 2.6rem;
+  padding: 0 0 0.15rem;
+  border: 0;
+  border-image: none;
+  border-radius: 50%;
+  background: rgb(12 20 24 / 0.6);
+  box-shadow: none;
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.event-shot-steps button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+/* Buttons for a pointer that cannot swipe; a finger does not need them. */
+@media (hover: hover) and (pointer: fine) {
+  .event-shot-steps {
+    display: flex;
+  }
+}
+
+/* ── the page as a board of widgets ──────────────────────────────────
+   Under the facts and the buttons everything is the same piece: a card with
+   a glyph and a small name. On a phone they stack; with room they stand two
+   or three across, and the ones that are strips take the whole row. */
+.event-page {
+  max-width: 62rem;
+  margin: 0 auto;
+}
+.event-lead {
+  max-width: 44rem;
+  margin: 1.1rem 0 0;
+}
+.event-widgets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin: 1.1rem 0 0;
+}
+/* Each row is filled: a card left alone on the last one takes all of it,
+   rather than standing beside a hole. */
+.event-widgets > * {
+  flex: 1 1 19rem;
+}
+.event-widgets > [data-wide]:not([data-wide='false']) {
+  flex-basis: 100%;
+}
+/* The same glyph box a widget has, on the one block that is not built as one;
+   on the pages of places, where it stands alone, it keeps its plain heading. */
+.place-reviews .widget-ic {
+  display: none;
+}
+.event-widgets > .place-reviews .widget-ic {
+  display: grid;
+}
+.widget,
+.event-widgets > .place-reviews {
+  min-width: 0;
+  margin: 0;
+  padding: 0.85rem 0.9rem 0.95rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+.widget-h,
+.event-widgets > .place-reviews > h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.7rem;
   font-family: var(--font-body);
   font-size: 0.7rem;
   font-weight: 500;
   letter-spacing: 0.12em;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--ink-2);
 }
+.widget-ic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  background: var(--filo-velo);
+  color: var(--accent);
+}
+.widget > p {
+  margin: 0 0 0.6rem;
+  line-height: 1.55;
+}
+.widget .desc-list {
+  margin: 0 0 0.6rem;
+}
+.widget > :last-child,
+.widget-fold > :last-child {
+  margin-bottom: 0;
+}
+.widget-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.widget-chips .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+.widget-small {
+  margin: 0 0 0.65rem;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.widget-fold {
+  margin-top: 0.7rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line);
+}
+.widget-fold summary {
+  margin-bottom: 0.6rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+.widget-fold:not([open]) summary {
+  margin-bottom: 0;
+}
+
+/* ── when exactly: the programme as calendar leaves ──────────────── */
 .event-leaves {
   list-style: none;
   margin: 0;
@@ -242,7 +427,7 @@
   padding: 0.4rem 0.55rem 0.5rem;
   border: 1px solid var(--line);
   border-radius: 0.75rem;
-  background: var(--surface);
+  background: var(--bg);
   text-align: center;
 }
 .event-leaves time {
@@ -273,99 +458,38 @@
   color: var(--ink-2);
 }
 
-/* ── where ───────────────────────────────────────────────────────── */
-.event-where address {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  font-style: normal;
-}
-.event-where-pin {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 3.4rem;
-  height: 3.4rem;
-  border-radius: 0.75rem;
-  background: var(--filo-velo);
-  color: var(--accent-2);
-}
-.event-where-text {
+/* ── where: the venue, the address, the map — once ───────────────── */
+.widget-place {
   display: grid;
   gap: 0.1rem;
-  min-width: 0;
+  font-style: normal;
 }
-.event-where-text b {
+.widget-place b {
   font-weight: 500;
 }
-.event-where-text span {
+.widget-place span {
   font-size: 0.86rem;
   color: var(--ink-2);
 }
-.event-where .map-link {
-  justify-self: start;
-  margin-left: 0;
-}
-.event-page .event-desc {
-  margin-top: 1.1rem;
-}
-
-/* On a phone the photograph runs edge to edge, as it did in the feed. */
-@media (max-width: 43.99rem) {
-  .event-cover {
-    width: auto;
-    margin-inline: calc(-1 * var(--page-pad));
-    border-radius: 0;
-  }
-}
-
-/* A figure too long for its tile (a run across months) is set smaller rather
-   than cut: a date missing its last digits is worse than a small one. */
-.event-tiles li[data-long]:not([data-long='false']) b {
-  font-size: 0.92rem;
-  line-height: 1.45;
-}
-
-/* ── the photographs ─────────────────────────────────────────────────
-   One strip to swipe through, each picture nearly as wide as the screen so
-   the next one shows at the edge and says there is more. No script: the
-   browser snaps, and the strip scrolls inside itself, never the page. */
-.event-gallery {
-  list-style: none;
-  margin: 0;
-  padding: 0.9rem 0;
-  display: flex;
-  gap: 0.4rem;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
-  border-bottom: 1px solid var(--line);
-}
-.event-gallery li {
-  flex: none;
-  width: min(78%, 22rem);
-  scroll-snap-align: start;
-}
-.event-gallery figure {
-  position: relative;
-  margin: 0;
-  overflow: hidden;
+.widget .event-map {
+  margin: 0.7rem 0;
   border-radius: 0.75rem;
-  background: var(--surface-2);
+  box-shadow: none;
 }
-.event-gallery img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+.widget .event-map iframe {
+  height: 12rem;
 }
-.event-gallery figcaption {
-  position: absolute;
-  left: 0.4rem;
-  bottom: 0.4rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  background: rgb(12 20 24 / 0.72);
-  color: #fff;
-  font-size: 0.66rem;
+
+/* ── what else is on: the feed's own small tiles ─────────────────── */
+.event-also .picks-strip {
+  margin: 0 0 0.7rem;
+  padding: 0 0 0.3rem;
+}
+
+/* ── where it comes from, and the two ways to write to us ────────── */
+.event-sources .event-feedback {
+  margin: 0.7rem 0 0;
+}
+.event-widgets > .place-reviews .rv-signin {
+  margin: 0 0 0.6rem;
 }

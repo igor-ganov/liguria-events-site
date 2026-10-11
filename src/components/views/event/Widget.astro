@@ -1,0 +1,19 @@
+---
+import { uiIcon } from '../../../lib/icons/ui-icon.ts';
+import type { UiIconName } from '../../../lib/icons/ui-icon-paths.ts';
+
+// One block of the event page. Every block under the facts is one of these —
+// a glyph, a small name, and its content on a card — so the page reads as a
+// board of the same pieces rather than a column of differently made sections.
+type Props = Readonly<{ name: string; icon: UiIconName; label: string; wide?: boolean; id?: string | undefined }>;
+const { name, icon, label, wide = false, id } = Astro.props;
+---
+
+<section class:list={['widget', `event-${name}`]} data-widget={name} data-wide={wide} id={id}>
+  <h2 class="widget-h">
+    <span class="widget-ic" set:html={uiIcon(icon, 16)} />
+    <span class="widget-tx">{label}</span>
+    <slot name="aside" />
+  </h2>
+  <slot />
+</section>

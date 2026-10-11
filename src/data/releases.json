@@ -4,6 +4,21 @@
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",
     "title": {
+      "en": "An event page built of cards",
+      "it": "La pagina di un evento, fatta di schede",
+      "ru": "Страница события из карточек"
+    },
+    "body": {
+      "en": "The photographs of an event are now at the top of its page: swipe the cover to see the rest. Below it, everything is a card — programme, place with its map, tickets, reviews, what else is on nearby — and nothing is said twice: the address is no longer repeated under the map, nor the dates under the calendar. The page is about a quarter shorter.",
+      "it": "Le fotografie di un evento ora sono in cima alla pagina: scorri la copertina per vedere le altre. Sotto, tutto è una scheda — programma, luogo con la mappa, biglietti, recensioni, cos’altro c’è nei dintorni — e niente è detto due volte: l’indirizzo non si ripete sotto la mappa, né le date sotto il calendario. La pagina è più corta di circa un quarto.",
+      "ru": "Фотографии события теперь наверху страницы: листайте обложку, чтобы увидеть остальные. Ниже всё собрано из карточек — программа, место с картой, билеты, отзывы, что ещё рядом — и ничего не повторяется: адрес больше не дублируется под картой, а даты под календарём. Страница стала короче примерно на четверть."
+    }
+  },
+  {
+    "date": "2026-10-11",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
       "en": "Pages change in place",
       "it": "Le pagine cambiano sul posto",
       "ru": "Страницы сменяются на месте"

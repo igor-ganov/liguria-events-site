@@ -28,7 +28,7 @@ test('the name of the event is on the photograph, and white', async ({ page, req
   const event = await pick(request, (candidate) => candidate.img !== undefined);
   await page.goto(`/event/${event.id}/`);
   const cover = page.locator('.event-cover');
-  const [outer, picture] = await Promise.all([cover.boundingBox(), cover.locator('.event-hero img').boundingBox()]);
+  const [outer, picture] = await Promise.all([cover.boundingBox(), cover.locator('.event-hero img').first().boundingBox()]);
   expect(Math.round(picture?.width ?? 0)).toBe(Math.round(outer?.width ?? -1));
   await expect(cover.getByRole('heading', { level: 1 })).toHaveCSS('color', 'rgb(255, 255, 255)');
   await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
@@ -93,25 +93,48 @@ test('on a phone the photograph runs edge to edge and nothing runs off the side'
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
 });
 
-test('the other photographs are one strip that scrolls inside itself', async ({ page, request }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  // The map corpus is trimmed to what a map needs and carries no photographs, so
-  // the event is picked from the full corpus the worker itself reads its pages from.
-  const payload: { events: readonly { id: string; s: string; e?: string; img?: string; ph?: readonly string[]; l?: readonly { image?: string }[] }[] } =
-    await (await request.get(EVENTS_URL)).json();
+// The map corpus is trimmed to what a map needs and carries no photographs, so
+// the event is picked from the full corpus the worker itself reads its pages from.
+type Pictured = Readonly<{ id: string; s: string; e?: string; img?: string; ph?: readonly string[]; l?: readonly { image?: string }[] }>;
+
+const withSeveralPhotographs = async (request: APIRequestContext): Promise<string> => {
+  const payload: { events: readonly Pictured[] } = await (await request.get(EVENTS_URL)).json();
   const today = new Date().toISOString().slice(0, 10);
-  const all = payload.events.filter((candidate) => (candidate.e ?? candidate.s) >= today);
-  const several = all.find(
-    (candidate) => candidate.img !== undefined && ((candidate.ph ?? []).length > 0 || (candidate.l ?? []).some((link) => link.image !== undefined)),
-  );
+  const several = payload.events
+    .filter((candidate) => (candidate.e ?? candidate.s) >= today)
+    .find((candidate) => candidate.img !== undefined && ((candidate.ph ?? []).length > 0 || (candidate.l ?? []).some((link) => link.image !== undefined)));
   expect(several, 'the corpus holds no event with more than one photograph').toBeDefined();
-  await page.goto(`/event/${several?.id ?? ''}/`);
-  const strip = page.locator('.event-gallery');
-  await expect(strip.locator('li').first()).toBeVisible();
-  await expect(strip.locator('figcaption').first()).not.toBeEmpty();
-  // The cover says how many there are in all.
+  return several?.id ?? '';
+};
+
+test('the photographs are the top of the page, swiped one at a time', async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/event/${await withSeveralPhotographs(request)}/`);
+  const strip = page.locator('.event-cover [data-shots]');
   const shown = await strip.locator('li').count();
-  await expect(page.locator('.event-cover-count')).toContainText(String(shown + 1));
+  expect(shown).toBeGreaterThan(1);
+  // There is no second strip further down saying the same thing.
+  await expect(page.locator('.event-gallery')).toHaveCount(0);
+  // The count starts on the first and follows the reader.
+  const count = page.locator('.event-cover-count');
+  await expect(count).toHaveText(`1/${shown}`);
+  await strip.evaluate((list) => list.scrollTo({ left: list.clientWidth, behavior: 'instant' }));
+  await expect(page.locator('[data-shot-at]')).toHaveText('2');
+  // Only the first picture is asked for with the page.
+  expect(await strip.locator('img[loading="eager"]').count()).toBe(1);
   // The strip scrolls; the page does not.
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+});
+
+test('the page says each thing once, on a card of its own', async ({ page, request }) => {
+  const run = await pick(request, (candidate) => days(candidate) > 1);
+  await page.goto(`/event/${run.id}/`);
+  // One place block, one map, one programme: the prose no longer repeats them.
+  await expect(page.locator('[data-widget="where"]')).toHaveCount(1);
+  await expect(page.locator('.event-map iframe')).toHaveCount(1);
+  await expect(page.locator('[data-widget="programme"]')).toHaveCount(1);
+  await expect(page.locator('[data-widget="note-programme"], [data-widget="note-when"], [data-widget="note-getting-there"]')).toHaveCount(0);
+  // Every block under the facts is a card with a name.
+  const unnamed = await page.locator('.event-widgets > *').evaluateAll((cards) => cards.filter((card) => (card.querySelector('h2')?.textContent ?? '').trim() === '').length);
+  expect(unnamed).toBe(0);
 });
