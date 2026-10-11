@@ -1,4 +1,5 @@
 import { branch } from '../branch.ts';
+import { eventSlug } from './event-slug.ts';
 import { isContainer } from './is-container.ts';
 import { sessionSlots } from './session-slots.ts';
 import type { CompactEvent, Session } from './event-schema.ts';
@@ -16,12 +17,14 @@ const hoursOf = (times: readonly string[]): Partial<Pick<CompactEvent, 'h' | 'hs
 
 // One occurrence: a one-day event on the slot's date. The run (`e`) and the
 // programme (`p`) are cleared; the slot's own hours and title (when named)
-// override the umbrella's, dropping its localized title so it can't win.
+// override the umbrella's, dropping its localized title so it can't win. The
+// address stays the umbrella's: that is the page a card for one night opens.
 const occurrenceOf = (event: CompactEvent, { session, times }: SessionSlot): CompactEvent => ({
   ...event,
   e: undefined,
   p: undefined,
   k: undefined,
+  ad: eventSlug(event),
   s: session.date,
   ...hoursOf(times),
   ...branch(session.title === undefined)(

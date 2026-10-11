@@ -7,6 +7,8 @@ export type EventAddress = Readonly<{
   t: string;
   s: string;
   v?: string | undefined;
+  /** An address settled already: an occurrence carries its event's. */
+  ad?: string | undefined;
 }>;
 
 const TITLE = 56;
@@ -30,6 +32,7 @@ const capped = (value: string, max: number): string =>
  * with the language carried by the path prefix.
  */
 export const eventSlug = (event: EventAddress): string =>
+  event.ad ??
   [
     capped(event.t, TITLE),
     ...[event.v ?? ''].filter((venue) => venue !== '').map((venue) => capped(venue, HOST)),

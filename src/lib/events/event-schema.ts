@@ -40,6 +40,10 @@ export const EventSchema = Schema.Struct({
   /** Every hour it starts on its day, when there is more than one. Never on
    *  the wire: it is filled in when a programme is folded into occurrences. */
   hs: Schema.optional(Schema.Array(Schema.String)),
+  /** The address of the event this is one occurrence of. Never on the wire:
+   *  it is filled in when a programme is folded into occurrences, whose own
+   *  day and title are not where the page lives. */
+  ad: Schema.optional(Schema.String),
   /** City slug (province capital) — the crawler's geocoding anchor. */
   ct: Schema.optional(Schema.String),
   /** Region slug — the slice the site is browsed by. */
