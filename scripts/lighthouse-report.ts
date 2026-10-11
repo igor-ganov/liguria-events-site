@@ -85,18 +85,40 @@ const middle = (runs: readonly Figures[]): Figures => {
   };
 };
 
-const audit = async (url: string): Promise<Figures> => {
+// What a page loses points for outside speed: the checks of the three other
+// categories that did not pass. A score says something is wrong; this says what.
+const ChecksSchema = Schema.Struct({
+  categories: Schema.Record({
+    key: Schema.String,
+    value: Schema.Struct({ auditRefs: Schema.Array(Schema.Struct({ id: Schema.String, weight: Schema.Number })) }),
+  }),
+  audits: Schema.Record({ key: Schema.String, value: Schema.Struct({ score: Schema.Unknown }) }),
+});
+const CHECKED = ['accessibility', 'best-practices', 'seo'];
+
+const failingOf = (raw: unknown): readonly string[] => {
+  const { categories, audits } = Schema.decodeUnknownSync(ChecksSchema)(raw);
+  return CHECKED.flatMap((name) => categories[name]?.auditRefs ?? [])
+    .filter((ref) => ref.weight > 0)
+    .map((ref) => ref.id)
+    .filter((id) => typeof audits[id]?.score === 'number' && audits[id].score < 1);
+};
+
+type Audited = Readonly<{ figures: Figures; failing: readonly string[] }>;
+
+const audit = async (url: string): Promise<Audited> => {
   const run = Bun.spawn(
     ['bunx', 'lighthouse', url, '--quiet', '--output=json', '--output-path=stdout', '--chrome-flags=--headless=new --no-sandbox'],
     { stdout: 'pipe', stderr: 'ignore' },
   );
   const text = await new Response(run.stdout).text();
   await run.exited;
-  return figuresOf(Schema.decodeUnknownSync(ResultSchema)(JSON.parse(text)));
+  const raw: unknown = JSON.parse(text);
+  return { figures: figuresOf(Schema.decodeUnknownSync(ResultSchema)(raw)), failing: failingOf(raw) };
 };
 
 // One at a time: two audits at once share the processor each is measuring.
-const several = async (url: string, left: number, done: readonly Figures[] = []): Promise<readonly Figures[]> =>
+const several = async (url: string, left: number, done: readonly Audited[] = []): Promise<readonly Audited[]> =>
   left === 0 ? done : several(url, left - 1, [...done, await audit(url)]);
 
 // An event that is still ahead, so the page is the live one and not an archive.
@@ -119,7 +141,9 @@ const main = async (): Promise<void> => {
   ];
   const pages: Readonly<Record<string, unknown>>[] = [];
   for (const target of targets) {
-    pages.push({ ...target, ...middle(await several(target.url, RUNS)) });
+    const runs = await several(target.url, RUNS);
+    const failing = [...new Set(runs.flatMap((run) => run.failing))].sort();
+    pages.push({ ...target, ...middle(runs.map((run) => run.figures)), failing });
     console.info(JSON.stringify(pages.at(-1)));
   }
   const report = JSON.stringify({ at: new Date().toISOString(), runs: RUNS, pages });

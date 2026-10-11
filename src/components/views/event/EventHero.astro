@@ -1,14 +1,19 @@
 ---
 import { largeCover } from '../../../lib/img/large-cover.ts';
+import { MADE_COVERS } from '../../../data/made-covers.ts';
+import { ownCover } from '../../../lib/img/own-cover.ts';
 import { resized } from '../../../lib/img/resized.ts';
 import type { GalleryPhoto } from '../../../lib/events/event-gallery.ts';
 
 type Props = Readonly<{ photo: GalleryPhoto; title: string; photoBy: string }>;
 const { photo, title, photoBy } = Astro.props;
+// Our own copy when there is one: the largest thing on the page then comes
+// over the connection the page came over, at the size it is shown.
+const src = ownCover(MADE_COVERS)(photo.image) ?? resized(largeCover(photo.image), 1024);
 ---
 
 <figure class="event-hero">
-  <img src={resized(largeCover(photo.image), 1024)} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
+  <img src={src} alt={title} loading="eager" fetchpriority="high" decoding="async" referrerpolicy="no-referrer" />
   {/* No credit for a picture of ours: the archive mark comes with no source,
       and naming a newspaper under it would be a lie. */}
   {photo.name !== '' && (
