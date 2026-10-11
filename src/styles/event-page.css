@@ -304,18 +304,20 @@
   margin: 1.1rem 0 0;
 }
 .event-widgets {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
+  columns: 2 22rem;
+  column-gap: 0.7rem;
   margin: 1.1rem 0 0;
 }
-/* Each row is filled: a card left alone on the last one takes all of it,
-   rather than standing beside a hole. */
+/* Columns, so each card is as tall as what it holds and the next one starts
+   right under it: no card is stretched to its neighbour, and none stands
+   beside a hole. A strip takes the whole width and the columns start again
+   under it. */
 .event-widgets > * {
-  flex: 1 1 19rem;
+  break-inside: avoid;
+  margin-bottom: 0.7rem;
 }
 .event-widgets > [data-wide]:not([data-wide='false']) {
-  flex-basis: 100%;
+  column-span: all;
 }
 /* The same glyph box a widget has, on the one block that is not built as one;
    on the pages of places, where it stands alone, it keeps its plain heading. */
@@ -328,7 +330,7 @@
 .widget,
 .event-widgets > .place-reviews {
   min-width: 0;
-  margin: 0;
+  margin: 0 0 0.7rem;
   padding: 0.85rem 0.9rem 0.95rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);

@@ -19,6 +19,7 @@ const paint = (output: HTMLElement): void => {
   const { payload, view, pick } = editorState;
   const built = routeFromGroups(payload.groups, payload.mode, editorState.byId);
   const days = applyLegCache(built, payload.mode, legCache);
+  output.setAttribute('data-routing', 'pending');
   output.innerHTML =
     viewToggleHtml(view, { list: ui.route.viewList, timeline: ui.route.viewTimeline }, 'route-views') +
     dayHoursControlHtml(payload.dayStart, payload.dayEnd, {

@@ -2,6 +2,8 @@ import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { eventPath } from '../src/lib/event-path.ts';
 import { expandSessions } from '../src/lib/events/expand-sessions.ts';
+import { programmeLeaves } from '../src/lib/events/programme-leaves.ts';
+import { titleOf } from '../src/lib/events/title-of.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
 const ev = (o: Partial<CompactEvent> & Pick<CompactEvent, 'id'>): CompactEvent => ({
@@ -124,5 +126,17 @@ describe('several sessions of one thing on one day', () => {
     const cards = expandSessions([run], '2026-10-01');
     assert.deepEqual(cards.map(eventPath), [eventPath(run), eventPath(run)]);
     assert.equal(cards[0]?.t, 'One night');
+  });
+  // The name of a night comes in the three languages; a reader of the Italian
+  // page is told it in Italian, in the feed and on the page of the event.
+  test('a night is named in the language of the page', () => {
+    const titles = { en: 'Round table', it: 'Tavola rotonda', ru: 'Круглый стол' };
+    const run = ev({ id: 'n', k: true, p: [{ date: '2026-10-11', title: 'Round table', titles }, { date: '2026-10-12', title: 'As read' }] });
+    const [first, second] = expandSessions([run], '2026-10-01');
+    assert.equal(titleOf('it')(first ?? run), 'Tavola rotonda');
+    assert.equal(titleOf('ru')(first ?? run), 'Круглый стол');
+    // One read before names were translated says what it has.
+    assert.equal(titleOf('it')(second ?? run), 'As read');
+    assert.deepEqual(programmeLeaves(run, 'it').map((leaf) => leaf.title), ['Tavola rotonda', 'As read']);
   });
 });

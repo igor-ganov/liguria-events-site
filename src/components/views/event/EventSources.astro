@@ -9,7 +9,7 @@ type Props = Readonly<{ links: readonly NamedLink[]; heading: string; note: stri
 const { links, heading, note } = Astro.props;
 ---
 
-<Widget name="sources" icon="globe" label={heading}>
+<Widget name="sources" icon="globe" label={heading} wide>
   <p class="widget-small">{note}</p>
   <ul class="widget-chips">
     {links.map((link) => (
