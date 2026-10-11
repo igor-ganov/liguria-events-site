@@ -4,6 +4,9 @@
  *
  *   bun run scripts/split-feed-tails.ts
  *
+ * Plain text by name on purpose: a host that serves a site tidies `.html`
+ * out of addresses, and answers the one a page asks for with a redirect.
+ *
  * A file is named after what is in it, so a page always asks for exactly the
  * days it was built with, however long a browser has held either of them, and
  * two pages that fold the same days share one file.
@@ -17,7 +20,7 @@ const DIST = new URL('../dist/', import.meta.url).pathname.replace(/^\/([A-Za-z]
 const TAILS = 'data/tails';
 
 const addressOf = (tail: string): string =>
-  `/${TAILS}/${createHash('sha256').update(tail).digest('hex').slice(0, 16)}.html`;
+  `/${TAILS}/${createHash('sha256').update(tail).digest('hex').slice(0, 16)}.txt`;
 
 await mkdir(`${DIST}${TAILS}`, { recursive: true });
 const pages = await Array.fromAsync(new Glob('**/index.html').scan({ cwd: DIST }));

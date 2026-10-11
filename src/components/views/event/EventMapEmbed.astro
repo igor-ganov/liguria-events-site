@@ -3,12 +3,13 @@ type Props = Readonly<{ src: string; title: string }>;
 const { src, title } = Astro.props;
 ---
 
+<!-- No `src`: the frame gets its address when the reader reaches it (see
+     wireMapFrames), not when the browser decides it is near enough. -->
 <figure class="event-map">
-  <iframe
-    title={title}
-    src={src}
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-    allowfullscreen
-  />
+  <iframe title={title} data-src={src} referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
 </figure>
+
+<script>
+  import { wireMapFrames } from '../../shared/wire-map-frames.ts';
+  document.addEventListener('astro:page-load', wireMapFrames);
+</script>

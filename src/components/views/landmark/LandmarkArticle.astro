@@ -1,4 +1,5 @@
 ---
+import EventMapEmbed from '../event/EventMapEmbed.astro';
 import { landmarkIcon } from '../../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../../lib/landmarks/landmark-color.ts';
 import { landmarkSources } from '../../../lib/landmarks/landmark-sources.ts';
@@ -39,9 +40,7 @@ const favHtml = landmarkFavHtml(lang, ui.nav.favorites)(item);
   </div>
 </dl>
 {item.desc && <p class="event-desc">{item.desc}</p>}
-<figure class="event-map">
-  <iframe title={`${ui.mapLink}: ${item.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
-</figure>
+<EventMapEmbed src={embedSrc} title={`${ui.mapLink}: ${item.name}`} />
 {sources.length > 0 && (
   <section class="event-sources">
     <h2>{ui.headings.sources}</h2>

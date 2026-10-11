@@ -94,6 +94,20 @@ const thumbsCheck: Check = {
   },
 };
 
+// The folded days of a feed are a file the page names. It has to answer under
+// the name the page uses: a host that tidies addresses turns a name it does
+// not like into a redirect, and every reader pays a second round trip for it.
+const tailCheck: Check = {
+  name: 'folded feed days',
+  run: async () => {
+    const html = await (await get(`${BASE}/liguria/`)).text();
+    const path = /data-feed-tail data-src="([^"]+)"/.exec(html)?.[1];
+    ok(path !== undefined, '/liguria/ names no file of folded days');
+    const res = await fetch(`${BASE}${path}`, { redirect: 'manual' });
+    ok(res.status === 200, `${path} → ${res.status}, not the days themselves`);
+  },
+};
+
 const CHECKS: readonly Check[] = [
   pageCheck('/liguria/map/'),
   reviewsApiCheck,
@@ -105,6 +119,7 @@ const CHECKS: readonly Check[] = [
   detailCheck('sicilia'),
   tilesCheck,
   thumbsCheck,
+  tailCheck,
 ];
 
 const runAll = async (): Promise<string[]> => {

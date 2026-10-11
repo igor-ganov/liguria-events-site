@@ -1,4 +1,5 @@
 ---
+import EventMapEmbed from '../event/EventMapEmbed.astro';
 import PlaceFacts from './PlaceFacts.astro';
 import PlaceReviews from './PlaceReviews.astro';
 import { commonsImg } from '../../../lib/img/commons-img.ts';
@@ -42,9 +43,7 @@ const sources = placeSources(place);
 
 <PlaceReviews subject={place.id} region={place.region} ui={ui} />
 
-<figure class="event-map">
-  <iframe title={`${ui.mapLink}: ${place.name}`} src={embedSrc} loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen />
-</figure>
+<EventMapEmbed src={embedSrc} title={`${ui.mapLink}: ${place.name}`} />
 {sources.length > 0 && (
   <section class="event-sources">
     <h2>{ui.headings.sources}</h2>
