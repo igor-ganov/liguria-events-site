@@ -92,16 +92,26 @@ const ChecksSchema = Schema.Struct({
     key: Schema.String,
     value: Schema.Struct({ auditRefs: Schema.Array(Schema.Struct({ id: Schema.String, weight: Schema.Number })) }),
   }),
-  audits: Schema.Record({ key: Schema.String, value: Schema.Struct({ score: Schema.Unknown }) }),
+  audits: Schema.Record({
+    key: Schema.String,
+    value: Schema.Struct({
+      score: Schema.Unknown,
+      details: Schema.optional(Schema.Struct({ items: Schema.optional(Schema.Array(Schema.Unknown)) })),
+    }),
+  }),
 });
 const CHECKED = ['accessibility', 'best-practices', 'seo'];
 
 const failingOf = (raw: unknown): readonly string[] => {
   const { categories, audits } = Schema.decodeUnknownSync(ChecksSchema)(raw);
-  return CHECKED.flatMap((name) => categories[name]?.auditRefs ?? [])
+  const failing = CHECKED.flatMap((name) => categories[name]?.auditRefs ?? [])
     .filter((ref) => ref.weight > 0)
     .map((ref) => ref.id)
     .filter((id) => typeof audits[id]?.score === 'number' && audits[id].score < 1);
+  // The elements at fault go to the log of the run: the stored report names
+  // the check, and whoever wants to fix it needs to know where it is.
+  failing.forEach((id) => console.info(`failed ${id}: ${JSON.stringify((audits[id]?.details?.items ?? []).slice(0, 3)).slice(0, 1500)}`));
+  return failing;
 };
 
 type Audited = Readonly<{ figures: Figures; failing: readonly string[] }>;
