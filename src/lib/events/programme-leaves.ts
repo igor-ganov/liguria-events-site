@@ -34,6 +34,6 @@ export const programmeLeaves = (event: CompactEvent, lang: Locale): readonly Pro
       day: String(Number(session.date.slice(8, 10))),
       month: partOf(lang, { month: 'short' })(session.date),
       times,
-      title: session.title,
+      title: session.titles?.[lang] ?? session.title,
     }))
     .sort((a, b) => order(a).localeCompare(order(b)));

@@ -17,7 +17,8 @@ const hoursOf = (times: readonly string[]): Partial<Pick<CompactEvent, 'h' | 'hs
 
 // One occurrence: a one-day event on the slot's date. The run (`e`) and the
 // programme (`p`) are cleared; the slot's own hours and title (when named)
-// override the umbrella's, dropping its localized title so it can't win. The
+// override the umbrella's, and so does its title in the other languages —
+// the umbrella's localized title is dropped either way, so it can't win. The
 // address stays the umbrella's: that is the page a card for one night opens.
 const occurrenceOf = (event: CompactEvent, { session, times }: SessionSlot): CompactEvent => ({
   ...event,
@@ -29,7 +30,7 @@ const occurrenceOf = (event: CompactEvent, { session, times }: SessionSlot): Com
   ...hoursOf(times),
   ...branch(session.title === undefined)(
     () => ({}),
-    () => ({ t: session.title ?? event.t, tl: undefined }),
+    () => ({ t: session.title ?? event.t, tl: session.titles }),
   ),
 });
 

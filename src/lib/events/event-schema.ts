@@ -21,6 +21,8 @@ const SessionSchema = Schema.Struct({
   date: Schema.String,
   time: Schema.optional(Schema.String),
   title: Schema.optional(Schema.String),
+  /** That title in every language, once the collector has translated it. */
+  titles: Schema.optional(LocalizedTextSchema),
 });
 
 /** Compact event as served by the worker's /events.json (AC-1.2):

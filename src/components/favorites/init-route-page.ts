@@ -27,8 +27,16 @@ const start = (root: Element): void => {
   branch(root.getAttribute('data-owned') === '1')(initRouteEditor, initRouteView);
 };
 
+// Told twice that the page is ready — once when this script runs, once when
+// the router says so — and either may be the only one that arrives. A root is
+// started on the first and left alone on the second: started twice, the route
+// was fetched and drawn twice, and the second drawing replaced the stop a
+// finger was already on.
 const run = (): void => {
-  document.querySelectorAll('[data-route-root]').forEach(start);
+  document.querySelectorAll('[data-route-root]:not([data-started])').forEach((root) => {
+    root.setAttribute('data-started', '');
+    start(root);
+  });
 };
 
 export const initRoutePage = (): void => {
