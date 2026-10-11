@@ -96,7 +96,7 @@ const ChecksSchema = Schema.Struct({
     key: Schema.String,
     value: Schema.Struct({
       score: Schema.Unknown,
-      details: Schema.optional(Schema.Struct({ items: Schema.optional(Schema.Array(Schema.Unknown)) })),
+      details: Schema.optional(Schema.Unknown),
     }),
   }),
 });
@@ -110,7 +110,7 @@ const failingOf = (raw: unknown): readonly string[] => {
     .filter((id) => typeof audits[id]?.score === 'number' && audits[id].score < 1);
   // The elements at fault go to the log of the run: the stored report names
   // the check, and whoever wants to fix it needs to know where it is.
-  failing.forEach((id) => console.info(`failed ${id}: ${JSON.stringify((audits[id]?.details?.items ?? []).slice(0, 3)).slice(0, 1500)}`));
+  failing.forEach((id) => console.info(`failed ${id}: ${JSON.stringify(audits[id]?.details).slice(0, 1500)}`));
   return failing;
 };
 
