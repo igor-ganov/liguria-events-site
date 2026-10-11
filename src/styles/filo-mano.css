@@ -144,6 +144,12 @@
 .subscribe-bar a,
 .new-event a {
   color: var(--on-accent);
+  /* The same colour as the drawing, as a colour, under the text only: what
+     reads colours instead of pixels — a contrast checker, a browser that did
+     not decode the drawing — finds the text on its real ground. Clipped to
+     the content box so no square corner shows outside the hand-drawn edge. */
+  background-color: var(--filo);
+  background-clip: content-box;
   border-image-source: var(--t-giro-pieno);
   border-image-slice: 14 fill;
 }
@@ -167,7 +173,8 @@
 .chip--free[aria-pressed='true'],
 .chip--layer[aria-pressed='true'] {
   color: var(--on-accent);
-  background-color: transparent;
+  background-color: var(--filo);
+  background-clip: content-box;
   border-image-source: var(--t-pillola-piena);
   border-image-slice: 12 fill;
 }
@@ -325,7 +332,8 @@
 }
 .lang-switch a[aria-current='true'] {
   color: var(--on-accent);
-  background-color: transparent;
+  background-color: var(--filo);
+  background-clip: content-box;
   border-image-source: var(--t-pillola-piena);
   border-image-slice: 8 fill;
 }
