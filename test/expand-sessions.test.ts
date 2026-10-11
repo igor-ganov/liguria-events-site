@@ -1,5 +1,6 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
+import { eventPath } from '../src/lib/event-path.ts';
 import { expandSessions } from '../src/lib/events/expand-sessions.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
@@ -114,5 +115,14 @@ describe('several sessions of one thing on one day', () => {
   test('the same hour listed twice is said once', () => {
     const doubled = ev({ id: 'd', k: true, p: [{ date: '2026-10-03', time: '10:00' }, { date: '2026-10-03', time: '10:00' }, { date: '2026-10-03', time: '12:00' }] });
     assert.deepEqual(expandSessions([doubled], '2026-10-01')[0]?.hs, ['10:00', '12:00']);
+  });
+  // The page lives at the address of the whole event. A card that spelt its
+  // own day and title was answered with a redirect: a second round trip before
+  // the page the reader tapped could begin to arrive.
+  test('a card for one night leads to the address of the whole event', () => {
+    const run = ev({ id: '7a02617d7bc0', t: 'The whole run', v: 'Teatro', k: true, p: [{ date: '2026-10-11', title: 'One night' }, { date: '2026-10-12' }] });
+    const cards = expandSessions([run], '2026-10-01');
+    assert.deepEqual(cards.map(eventPath), [eventPath(run), eventPath(run)]);
+    assert.equal(cards[0]?.t, 'One night');
   });
 });
