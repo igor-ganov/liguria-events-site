@@ -5,6 +5,7 @@
 // neither shows on a page that otherwise renders correctly.
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { foldedDays } from './folded-days.ts';
 
 const FEED = '/liguria/';
 const DESCS = '/data/search/liguria.en.json';
@@ -17,9 +18,11 @@ type Probe = Readonly<{ id: string; word: string }>;
 // was searched.
 const probe = async (page: Page): Promise<Probe> => {
   const descs: Readonly<Record<string, string>> = await (await page.request.get(DESCS)).json();
-  return page.evaluate((all) => {
-    const fold = document.querySelector<HTMLTemplateElement>('template[data-feed-tail]');
-    const roots = [document, fold?.content].filter((root) => root !== undefined);
+  const days = await foldedDays(page);
+  return page.evaluate(({ all, html }) => {
+    const held = document.createElement('template');
+    held.innerHTML = html;
+    const roots = [document, held.content];
     const cards = roots.flatMap((root) => [...root.querySelectorAll('.feed-group li[data-id]')]);
     const printed = cards.map((card) => card.textContent ?? '').join(' ').toLowerCase();
     const found = cards
@@ -27,16 +30,15 @@ const probe = async (page: Page): Promise<Probe> => {
       .flatMap((id) => (all[id] ?? '').split(/[^\p{L}]+/u).filter((word) => word.length >= 9).map((word) => ({ id, word })))
       .find(({ word }) => !printed.includes(word.toLowerCase()));
     return found ?? { id: '', word: '' };
-  }, descs);
+  }, { all: descs, html: days });
 };
 
 test('a feed page carries no description, shown or folded', async ({ page }) => {
   await page.goto(FEED);
-  const carried = await page.evaluate(() => {
-    const fold = document.querySelector<HTMLTemplateElement>('template[data-feed-tail]');
-    return document.querySelectorAll('.mini-desc').length + (fold?.content.querySelectorAll('.mini-desc').length ?? 0);
-  });
-  expect(carried).toBe(0);
+  const days = await foldedDays(page);
+  expect(days).not.toBe('');
+  expect(days).not.toContain('mini-desc');
+  expect(await page.locator('.mini-desc').count()).toBe(0);
 });
 
 test('the descriptions are fetched when the search is touched, not before', async ({ page }) => {

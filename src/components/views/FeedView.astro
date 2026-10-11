@@ -49,6 +49,7 @@ const picksAhead = [heroCount(events, today)].filter(() => withPicks).at(0) ?? 0
   {withPicks && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
   {groups.length > 0 && <FeedFilters ui={ui} today={today} />}
 
+  {groups.length > 0 && <h2 class="visually-hidden">{ui.headings.allEvents}</h2>}
   <Filo region={region} city={city ?? ''} today={today} hasDays={groups.length > 0}>
     <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} ahead={picksAhead} />
   </Filo>

@@ -4,7 +4,9 @@ const LIMIT = 20;
 
 const REFERENCE = /<(?:script|link)[^>]*?(?:src|href)="([^"]+)"/gi;
 
-const ASSET = /\.(?:js|css)$/i;
+// Scripts, stylesheets, and the folded days of a feed (splitFeedTail), which
+// a page names in a hint and cannot show the rest of itself without.
+const ASSET = /\.(?:js|css)$|^\/data\/tails\//i;
 
 /**
  * The scripts and stylesheets a stored page cannot work without.

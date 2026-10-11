@@ -9,9 +9,10 @@ const press = (buttons: readonly HTMLElement[], chosen: HTMLElement): void => {
 };
 
 /** The sort buttons. Re-picking the current mode does nothing, so the list is
- *  never reshuffled for no reason. A new order is an order of every day, so the
- *  folded ones are brought in first. */
-export const wireFeedSort = (today: string, unfold: () => unknown): void => {
+ *  never reshuffled for no reason. The days on the page take the new order at
+ *  once — a press that waits on a file feels broken — and the folded ones are
+ *  brought in and ordered after them. */
+export const wireFeedSort = (today: string, rest: (then: () => void) => boolean): void => {
   const buttons = queryAll(document, '[data-feed-sort]');
   buttons.forEach((button) => {
     const mode = feedSortOf(button.dataset['feedSort']);
@@ -22,9 +23,9 @@ export const wireFeedSort = (today: string, unfold: () => unknown): void => {
         .forEach((next) => {
           feedState.sort = next;
           press(buttons, button);
-          unfold();
           reorderFeed();
           syncFeedUrl(today);
+          rest(reorderFeed);
         });
     });
   });

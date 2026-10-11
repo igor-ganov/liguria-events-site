@@ -32,6 +32,9 @@
 /* The label takes the corner the chips had; the chips step down under it. */
 .pick-label {
   position: absolute;
+  margin: 0;
+  font-family: inherit;
+  line-height: normal;
   z-index: 3;
   top: 0.6rem;
   left: 0.7rem;
