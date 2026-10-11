@@ -164,8 +164,8 @@ describe('pageAssets', () => {
   });
 
   test('the folded days of a feed are kept with the page that names them', () => {
-    const feed = '<template data-feed-tail data-src="/data/tails/abc.html"></template><link rel="prefetch" href="/data/tails/abc.html">';
-    assert.deepEqual(pageAssets(feed, ORIGIN), ['/data/tails/abc.html']);
+    const feed = '<template data-feed-tail data-src="/data/tails/abc.txt"></template><link rel="prefetch" href="/data/tails/abc.txt">';
+    assert.deepEqual(pageAssets(feed, ORIGIN), ['/data/tails/abc.txt']);
   });
 
   test('each file once, however it was written', () => {

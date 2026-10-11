@@ -13,7 +13,9 @@ const CSS = 'src/styles/filo-faces.css';
 const WANTED = new Set(['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext']);
 
 const FAMILIES = [
-  'Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,0..100,0..1;1,9..144,300..700,0..100,0..1',
+  // Soft and wonky everywhere it is set, so those two are fixed in the file
+  // rather than carried as axes: half the weight of the face.
+  'Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..700,100,1;1,9..144,300..700,100,1',
   'Rubik:ital,wght@0,300..600;1,300..500',
 ];
 

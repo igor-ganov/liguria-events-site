@@ -103,7 +103,7 @@ test('the folded days are a file of their own, not weight the page carries', asy
   const rest = await folded(page);
   expect(rest.id).not.toBe('');
   expect(served).not.toContain(`data-id="${rest.id}"`);
-  expect(served).toMatch(/<template data-feed-tail data-src="\/data\/tails\/[0-9a-f]+\.html">/);
+  expect(served).toMatch(/<template data-feed-tail data-src="\/data\/tails\/[0-9a-f]+\.txt">/);
 });
 
 test('an event the database also holds is not added a second time for being folded', async ({ page }) => {

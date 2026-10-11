@@ -4,6 +4,21 @@
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",
     "title": {
+      "en": "Less to download before a page shows",
+      "it": "Meno da scaricare prima che la pagina appaia",
+      "ru": "Меньше загрузок до появления страницы"
+    },
+    "body": {
+      "en": "The headline typeface is now half the size it was. The Google map under an event, a place or a landmark is fetched when you scroll to it rather than together with the page, so the title, the date and the photograph no longer wait behind it.",
+      "it": "Il carattere dei titoli ora pesa la metà. La mappa di Google sotto un evento, un luogo o un monumento viene scaricata quando ci arrivi scorrendo, non insieme alla pagina: titolo, data e fotografia non aspettano più dietro di lei.",
+      "ru": "Шрифт заголовков теперь вдвое легче. Карта Google под событием, местом или достопримечательностью загружается, когда вы до неё долистали, а не вместе со страницей: заголовок, дата и фотография больше не ждут её."
+    }
+  },
+  {
+    "date": "2026-10-11",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
       "en": "A feed page a third of the weight",
       "it": "Una pagina del feed che pesa un terzo",
       "ru": "Страница ленты втрое легче"
