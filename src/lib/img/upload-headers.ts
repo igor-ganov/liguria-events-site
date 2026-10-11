@@ -1,3 +1,5 @@
+import { isRewrittenUpload } from './is-rewritten-upload.ts';
+
 /** The bit of an R2 object the response headers are built from. */
 export type CacheableObject = Readonly<{
   writeHttpMetadata: (headers: Headers) => void;
@@ -6,12 +8,7 @@ export type CacheableObject = Readonly<{
 
 const FOREVER = 'public, max-age=31536000, immutable';
 
-// What is stored under a name that is written over again. Everything else is
-// named after what it holds, so a different file is a different address.
-const REWRITTEN = ['reports/'];
-
-const cachingOf = (key: string): string =>
-  REWRITTEN.filter((prefix) => key.startsWith(prefix)).map(() => 'no-cache')[0] ?? FOREVER;
+const cachingOf = (key: string): string => [key].filter(isRewrittenUpload).map(() => 'no-cache')[0] ?? FOREVER;
 
 /** Response headers for a stored upload: the object's own content metadata, its
  *  etag, and a year of immutable caching (the key contains a random id, so a
