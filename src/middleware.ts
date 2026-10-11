@@ -7,6 +7,7 @@ import { authGate } from './lib/auth/auth-gate.ts';
 import { isDefined } from './lib/is-defined.ts';
 import { magicLinkLanding } from './lib/auth/magic-link-landing.ts';
 import { negotiatedRedirect } from './lib/http/negotiated-redirect.ts';
+import { pageAfterPaint } from './lib/html/page-after-paint.ts';
 import { permanentRedirect } from './lib/http/permanent-redirect.ts';
 import { sessionUser } from './lib/auth/session-user.ts';
 import { strayEventPath } from './lib/events/stray-event-path.ts';
@@ -86,5 +87,5 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     ...signin.map(({ target }) => ctx.redirect(target)),
     ...[authGate(ctx.url.pathname, ctx.locals.user)].filter(isDefined).map((to) => ctx.redirect(to)),
   ];
-  return bounce.at(0) ?? next();
+  return bounce.at(0) ?? pageAfterPaint(await next());
 });
