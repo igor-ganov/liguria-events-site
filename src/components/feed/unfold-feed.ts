@@ -16,14 +16,14 @@ const stamp = (fold: HTMLTemplateElement): void => {
 
 /**
  * Bring the folded days onto the page: the page opens with the nearest days
- * rendered and the rest inert in a `<template>`, where they cost the browser
- * nothing. Whatever needs every event — a search, a filter, a sort, the end of
+ * rendered and the rest in a `<template>` that loadFeedTail has filled — one
+ * still waiting for its days is left alone. Whatever needs every event — a search, a filter, a sort, the end of
  * the list coming into view — calls this first. The days take their place, the
  * search index learns them, saved hearts are filled. Says whether there was
  * anything to unfold, so a caller can skip work when there was not.
  */
 export const unfoldFeed = (lang: Locale): boolean => {
-  const folds = [...document.querySelectorAll<HTMLTemplateElement>('template[data-feed-tail]')];
+  const folds = [...document.querySelectorAll<HTMLTemplateElement>('template[data-feed-tail]:not([data-src])')];
   folds.forEach((fold) => {
     stamp(fold);
     fold.replaceWith(fold.content);

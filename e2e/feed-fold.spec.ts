@@ -8,6 +8,7 @@
 // forgets is a feed that silently loses most of its events.
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { foldedDays } from './folded-days.ts';
 
 const FEED = '/liguria/';
 const CARDS = '[data-feed-list] li[data-id]';
@@ -15,12 +16,16 @@ const FOLD = 'template[data-feed-tail]';
 
 type Folded = Readonly<{ count: number; title: string; category: string; id: string }>;
 
-// What is folded away, read from the inert copy: how much, and one event that
-// is nowhere on the rendered page — so finding it proves the fold was opened.
-const folded = (page: Page): Promise<Folded> =>
-  page.locator(FOLD).evaluate((fold: HTMLTemplateElement) => {
+// What is folded away, read from the file the page keeps it in: how much, and
+// one event that is nowhere on the rendered page — so finding it proves the
+// fold was opened.
+const folded = async (page: Page): Promise<Folded> => {
+  const days = await foldedDays(page);
+  return page.evaluate((html) => {
+    const held = document.createElement('template');
+    held.innerHTML = html;
     const shown = new Set([...document.querySelectorAll('[data-feed-list] li[data-id]')].map((card) => card.getAttribute('data-id')));
-    const cards = [...fold.content.querySelectorAll('li[data-id]')];
+    const cards = [...held.content.querySelectorAll('li[data-id]')];
     const only = cards.filter((card) => !shown.has(card.getAttribute('data-id'))).at(-1);
     return {
       count: cards.length,
@@ -28,7 +33,8 @@ const folded = (page: Page): Promise<Folded> =>
       category: (only?.getAttribute('data-cats') ?? '').split(',').at(0) ?? '',
       id: only?.getAttribute('data-id') ?? '',
     };
-  });
+  }, days);
+};
 
 test('the page opens with the nearest days and the rest folded away', async ({ page }) => {
   await page.goto(FEED);
@@ -89,4 +95,26 @@ test('an event saved earlier has its heart filled when its day unfolds', async (
   await page.reload();
   await page.locator('[data-feed-more]').scrollIntoViewIfNeeded();
   await expect(page.locator(`${CARDS}[data-id="${rest.id}"] .fav-btn`).first()).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('the folded days are a file of their own, not weight the page carries', async ({ page }) => {
+  await page.goto(FEED);
+  const served = await page.evaluate(async () => (await fetch(location.href)).text());
+  const rest = await folded(page);
+  expect(rest.id).not.toBe('');
+  expect(served).not.toContain(`data-id="${rest.id}"`);
+  expect(served).toMatch(/<template data-feed-tail data-src="\/data\/tails\/[0-9a-f]+\.html">/);
+});
+
+test('an event the database also holds is not added a second time for being folded', async ({ page }) => {
+  await page.goto(FEED);
+  const rest = await folded(page);
+  const corpus: readonly Readonly<{ id: string }>[] = await (await page.request.get('/data/map-events.json')).json();
+  const twin = corpus.filter((event) => event.id === rest.id);
+  expect(twin).toHaveLength(1);
+  await page.route('**/api/events/published.json', (route) => route.fulfill({ json: twin }));
+  await Promise.all([page.waitForResponse('**/api/events/published.json'), page.reload()]);
+  await page.locator('[data-feed-more]').scrollIntoViewIfNeeded();
+  await expect(page.locator(FOLD)).toHaveCount(0);
+  await expect(page.locator(`${CARDS}[data-id="${rest.id}"]`)).toHaveCount(1);
 });

@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-10-11",
+    "roadmap": "feed-photo-cards",
+    "example": "/liguria/",
+    "title": {
+      "en": "A feed page a third of the weight",
+      "it": "Una pagina del feed che pesa un terzo",
+      "ru": "Страница ленты втрое легче"
+    },
+    "body": {
+      "en": "A feed now arrives with the nearest days only; the later ones are a separate file, fetched in the background and joined in when you scroll, search, filter or sort. The page of a region went from over a megabyte to about a third of that. Screen readers also get a cleaner outline of the feed, and clusters on the map are named by the number they show.",
+      "it": "Il feed ora arriva con i soli giorni più vicini; quelli successivi sono un file a parte, scaricato in sottofondo e aggiunto quando scorri, cerchi, filtri o riordini. La pagina di una regione è passata da oltre un megabyte a circa un terzo. I lettori di schermo trovano inoltre una struttura del feed più pulita, e i gruppi sulla mappa prendono il nome dal numero che mostrano.",
+      "ru": "Лента теперь приходит только с ближайшими днями; дальние лежат отдельным файлом, который загружается в фоне и подключается, когда вы листаете, ищете, фильтруете или сортируете. Страница региона уменьшилась с мегабайта с лишним примерно до трети. Программы чтения с экрана получают более стройную структуру ленты, а группы на карте названы числом, которое на них написано."
+    }
+  },
+  {
     "date": "2026-10-10",
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",
