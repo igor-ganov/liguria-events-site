@@ -138,6 +138,11 @@ test('a page the device never had says so, and offers what it does have', async 
   await app.reload();
   await expect.poll(() => kept(app.page)).toContain('/liguria/');
 
+  // The connection goes first: warming still on its way would otherwise put a
+  // page back between the clearing below and the cut, and the page opened next
+  // would be one the device has after all.
+  await connection.cut();
+
   // Everything but the feed is dropped, so the page opened next is one the
   // device certainly does not have — whatever warming happened to fetch.
   await app.page.evaluate(async (name) => {
@@ -148,8 +153,10 @@ test('a page the device never had says so, and offers what it does have', async 
     );
   }, PAGES_CACHE);
 
-  await connection.cut();
-  await app.open('/liguria/calendar/');
+  // A page the feed does not link to, so it is not one the worker was already
+  // on its way to keep: a page being warmed when the connection went is stored
+  // a moment later, after the clearing above, and is then a page the device has.
+  await app.open('/liguria/calendar/2027-01/');
 
   await expect(app.heading('No connection')).toBeVisible();
   await expect(app.find('[data-offline-list] a').first()).toBeVisible();

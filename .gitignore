@@ -17,3 +17,6 @@ out/
 # Bundled from src/sw by scripts/build-sw.ts
 public/sw.js
 public/offline.js
+
+# The stylesheet of each page, written by scripts/build-page-styles.ts
+src/styles/pages/
