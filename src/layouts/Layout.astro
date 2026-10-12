@@ -13,16 +13,9 @@ import { uiOf } from '../lib/i18n/ui-of.ts';
 import { LEGACY_REGION } from '../lib/region/legacy-region.ts';
 import { LOCALES } from '../lib/i18n/locales.ts';
 import type { LayoutProps } from './layout-props.ts';
-import '../styles/global.css';
-// Filo comes after global.css on purpose: it re-points the old token names at
-// the new palette, so every rule already written against them follows along.
-import '../styles/filo-faces.css';
-import '../styles/filo-tokens.css';
-import '../styles/filo-mano.css';
-import '../styles/filo-percorso.css';
-import '../styles/event-page.css';
-import '../styles/tickets.css';
-import '../styles/picks.css';
+// No stylesheet is imported here. Each page imports its own, cut from the
+// sheets of the site to what that page uses (scripts/build-page-styles.ts);
+// importing one here would put the whole of them back on every page.
 
 type Props = LayoutProps;
 const {
