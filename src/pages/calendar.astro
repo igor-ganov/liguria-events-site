@@ -1,12 +1,14 @@
 ---
 import '../styles/pages/calendar.css';
-import EntryView from '../components/views/EntryView.astro';
-import { uiOf } from '../lib/i18n/ui-of.ts';
+import CalendarView from '../components/views/CalendarView.astro';
+import { isoToday } from '../lib/calendar/iso-today.ts';
+import { monthKeyOf } from '../lib/calendar/month-key-of.ts';
 
-// A calendar with no region named. The same question as the front page, with
-// its links pointing at each region's calendar rather than its feed.
+// The country's calendar for this month. It used to be a 302 into whichever
+// region an IP lookup suggested — the calendar was a region's own page and an
+// address that named no region had to have one invented for it. The region is a
+// filter now (the picker in the header), not a segment of the URL.
 const lang = 'en' as const;
-const ui = await uiOf(lang);
 ---
 
-<EntryView lang={lang} page="calendar/" title={ui.nav.calendar} description={ui.entry.lead} />
+<CalendarView lang={lang} region="" monthKey={monthKeyOf(isoToday())} />

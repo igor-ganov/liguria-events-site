@@ -2,22 +2,25 @@
 import Layout from '../../layouts/Layout.astro';
 import MapCanvas from './map/MapCanvas.astro';
 import MapFilters from './map/MapFilters.astro';
-import { regionName } from '../../lib/region/region-name.ts';
+import { regionPath } from '../../lib/region/region-path.ts';
+import { scopeName } from '../../lib/region/scope-name.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string }>;
 const { lang, region } = Astro.props;
 const ui = await uiOf(lang);
-const placeName = regionName(region);
+const placeName = scopeName(ui.entry.country, region);
 const description = ui.seo.map.replace('{place}', placeName);
 ---
 
 <!-- No `needsEvents`: the corpus is ~2.6 MB of JSON, so it is fetched as a cached
      asset (/data/events.json) after first paint instead of being inlined here. -->
-<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.map}`} description={description} path={`${region}/map/`} needsMap>
+<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.map}`} description={description} path={regionPath(region, 'map/')} needsMap>
   <!-- The map carries every event in the country and merely opens on the region:
-       pan or zoom out and the rest are already there. -->
+       pan or zoom out and the rest are already there. A page with no region
+       opens on all of it — homeRegionEvents finds nothing of its own and falls
+       back to every located event, which is the country. -->
   <script is:inline set:html={`window.__REGION__=${JSON.stringify(region)}`} />
   <h1 class="visually-hidden">{ui.nav.map}</h1>
   <MapFilters ui={ui} />

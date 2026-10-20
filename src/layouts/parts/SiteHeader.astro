@@ -53,5 +53,5 @@ const { lang, region, path, city, ui, picker } = Astro.props;
   </a>
   <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
        region is the one control that must stay reachable everywhere. -->
-  {picker && <RegionPicker lang={lang} region={region} page={pageSegment(path, city)} city={city} />}
+  {picker && <RegionPicker lang={lang} region={region} page={pageSegment(path, city, region)} city={city} />}
 </header>

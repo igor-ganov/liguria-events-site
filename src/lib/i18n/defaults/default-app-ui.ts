@@ -7,7 +7,7 @@ export const DEFAULT_APP_UI = {
   testers: { title: '', lead: '', join: '', install: '' },
   progress: { roadmap: '', roadmapLead: '', releases: '', releasesLead: '', now: '', next: '', later: '', done: '', example: '', here: '' },
   eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "", allInCity: "", venuePage: "", fullProgramme: "" },
-  entry: { heading: "Where are you going?", lead: "", pickHeading: "", regionsHeading: "All regions", hereRegion: "My region", hereCity: "My city" },
+  entry: { heading: "Where are you going?", lead: "", pickHeading: "", regionsHeading: "All regions", hereRegion: "My region", hereCity: "My city", country: "Italy" },
   picks: { title: "", day: "", week: "", month: "", thisWeek: "" },
   subscribe: { note: '', calendar: '', rss: '', telegram: '' },
   share: { label: '', copied: '' },

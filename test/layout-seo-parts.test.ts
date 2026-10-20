@@ -71,17 +71,23 @@ describe('dataStamp', () => {
 
 describe('pageSegment', () => {
   test('a region feed has no sub-page', () => {
-    assert.equal(pageSegment('liguria/', undefined), '');
-    assert.equal(pageSegment('', undefined), '');
+    assert.equal(pageSegment('liguria/', undefined, 'liguria'), '');
+    assert.equal(pageSegment('', undefined, 'liguria'), '');
   });
   test('a sub-page is kept, so switching region stays on it', () => {
-    assert.equal(pageSegment('liguria/map/', undefined), 'map/');
-    assert.equal(pageSegment('liguria/landmarks/', undefined), 'landmarks/');
+    assert.equal(pageSegment('liguria/map/', undefined, 'liguria'), 'map/');
+    assert.equal(pageSegment('liguria/landmarks/', undefined, 'liguria'), 'landmarks/');
   });
   test('a specific month collapses to the calendar index', () => {
-    assert.equal(pageSegment('liguria/calendar/2026-07/', undefined), 'calendar/');
+    assert.equal(pageSegment('liguria/calendar/2026-07/', undefined, 'liguria'), 'calendar/');
   });
   test('on a city page the second segment is the city, not a sub-page', () => {
-    assert.equal(pageSegment('liguria/genova/', 'genova'), '');
+    assert.equal(pageSegment('liguria/genova/', 'genova', 'liguria'), '');
+  });
+  test('and a national page has no region in front of its own name', () => {
+    // "calendar/2026-11/" used to lose its own name to the slice that removes
+    // the region, so the picker offered to switch you to "/<region>/2026-11/".
+    assert.equal(pageSegment('calendar/2026-11/', undefined, ''), 'calendar/');
+    assert.equal(pageSegment('map/', undefined, ''), 'map/');
   });
 });

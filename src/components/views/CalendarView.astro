@@ -11,9 +11,14 @@ import { eventMonths } from '../../lib/calendar/event-months.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { ongoingInMonth } from '../../lib/events/ongoing-in-month.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
-import { regionName } from '../../lib/region/region-name.ts';
+import { regionPath } from '../../lib/region/region-path.ts';
+import { scopeName } from '../../lib/region/scope-name.ts';
 import { eventsOfRegion } from '../../lib/region/events-of-region.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
+
+// What a month shows of itself below the grid. A region's list ran to a
+// hundred; the country's would run to several.
+const ONGOING_MAX = 24;
 
 type Props = Readonly<{ lang: Locale; region: string; monthKey: string }>;
 const { lang, region, monthKey } = Astro.props;
@@ -23,22 +28,25 @@ const ui = await uiOf(lang);
 // plain links to the neighbouring (also prerendered) month pages — the SPA
 // router makes the swap instant.
 const payload = await cachedEvents(EVENTS_URL);
-// One region at a time: the calendar is a local guide, not a national index.
+// One region, or the whole country when the page names none. "/calendar" named
+// none and was guessed into a region before the reader saw anything.
 const events = eventsOfRegion(payload.events, region);
 const title = monthTitle(ui)(monthKey);
-const ongoing = ongoingInMonth(monthKey)(events);
 const monthUrl = (m: string): string => regionUrl(lang, region, `calendar/${m}/`);
+// What is still running, capped: a region's list already ran to a hundred and
+// the country's runs to several.
+const ongoing = ongoingInMonth(monthKey)(events).slice(0, ONGOING_MAX);
 // Only the months that were built: the range stops at last month, and a link to
 // the one before it is a 404 offered in our own markup.
 const built = eventMonths(events, isoToday());
 const neighbour = (delta: number): string | undefined =>
   [addMonths(monthKey, delta)].filter((month) => built.includes(month)).at(0);
 const [previous, following] = [neighbour(-1), neighbour(1)];
-const placeName = regionName(region);
+const placeName = scopeName(ui.entry.country, region);
 const description = ui.seo.calendar.replace('{place}', placeName);
 ---
 
-<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.calendar}`} description={description} path={`${region}/calendar/${monthKey}/`}>
+<Layout lang={lang} region={region} title={`${placeName} — ${ui.nav.calendar}`} description={description} path={regionPath(region, `calendar/${monthKey}/`)}>
   <h1 class="visually-hidden">{ui.nav.calendar}</h1>
 
   <header class="cal-head">

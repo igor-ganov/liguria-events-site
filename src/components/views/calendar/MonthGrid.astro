@@ -3,6 +3,7 @@ import { isoToday } from '../../../lib/calendar/iso-today.ts';
 import { monthGrid } from '../../../lib/calendar/month-grid.ts';
 import { dayKindOf } from '../../../lib/calendar/day-kind.ts';
 import { dayHeading } from '../../../lib/calendar/day-heading.ts';
+import { cellShown } from '../../../lib/calendar/cell-shown.ts';
 import { dayCellEvents } from '../../../lib/events/day-cell-events.ts';
 import { primaryCategory } from '../../../lib/events/primary-category.ts';
 import { titleOf } from '../../../lib/events/title-of.ts';
@@ -26,6 +27,11 @@ const today = isoToday();
 const days = monthGrid(monthKey).flat();
 const kindOf = dayKindOf(monthKey, today);
 const heading = dayHeading(ui);
+// A day of the whole country carries fifty events; a cell that prints all of
+// them is a feed with a grid drawn round it. The busiest regions were already
+// close to that on their own. What is left out is counted, not dropped quietly.
+const CELL_MAX = 4;
+const cell = (day: string) => cellShown(dayCellEvents(day)(events), CELL_MAX);
 ---
 
 <!-- No ARIA table here, deliberately. Below 44rem this grid becomes a list
@@ -40,7 +46,7 @@ const heading = dayHeading(ui);
       <span class="cal-num">{Number(day.slice(8, 10))}</span>
       <span class="cal-day-label">{heading(day)}</span>
       <ul class="cal-events">
-        {dayCellEvents(day)(events).map((event) => (
+        {cell(day).shown.map((event) => (
           <li>
             <a
               class="cal-pill"
@@ -54,6 +60,7 @@ const heading = dayHeading(ui);
           </li>
         ))}
       </ul>
+      {cell(day).more > 0 && <span class="cal-more">+{cell(day).more}</span>}
     </div>
   ))}
 </div>
