@@ -13,6 +13,15 @@ export const chromeUi = {
   theme: z.object({ toggle: z.string(), light: z.string(), dark: z.string(), system: z.string() }),
   range: z.object({ from: z.string(), to: z.string() }),
   sort: z.object({ label: z.string(), date: z.string(), created: z.string() }),
+  // The front door. Declared HERE as well as in ui-dict-schema: the content
+  // collection strips any key its zod schema does not name, so a string that
+  // exists in the dictionary, in the Effect schema and in all three language
+  // files still arrives undefined at render time. It did, and the build said
+  // "Cannot read properties of undefined (reading 'hereCity')".
+  entry: z.object({
+    heading: z.string(), lead: z.string(), pickHeading: z.string(),
+    regionsHeading: z.string(), hereRegion: z.string(), hereCity: z.string(),
+  }),
   menu: z.object({ events: z.string(), explore: z.string(), more: z.string() }),
   venues: z.object({
     title: z.string(), lead: z.string(), stepsHeading: z.string(), stepPage: z.string(),

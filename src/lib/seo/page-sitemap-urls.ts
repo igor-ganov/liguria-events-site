@@ -1,4 +1,5 @@
 import { citySitemapUrls } from './city-sitemap-urls.ts';
+import { doorSitemapUrls } from './door-sitemap-urls.ts';
 import { contentSitemapUrls } from './content-sitemap-urls.ts';
 import { regionSitemapUrls } from './region-sitemap-urls.ts';
 import type { CompactEvent } from '../events/event-schema.ts';
@@ -18,6 +19,7 @@ export const pageSitemapUrls = (
   today: string,
   site: URL | undefined,
 ): readonly SitemapUrl[] => [
+  ...doorSitemapUrls(today, site),
   ...regionSitemapUrls(events, today, site),
   ...citySitemapUrls(events, today, site),
   ...contentSitemapUrls(today, site),

@@ -1,5 +1,6 @@
 ---
 import PwaScripts from './PwaScripts.astro';
+import RegionMemory from './RegionMemory.astro';
 ---
 
 <script>
@@ -9,6 +10,8 @@ import PwaScripts from './PwaScripts.astro';
   import { initThemeToggle } from '../../components/shell/init-theme-toggle.ts';
   initThemeToggle();
 </script>
+
+<RegionMemory />
 
 <script>
   // Swap dead event covers (expired source URLs) for the category tile.

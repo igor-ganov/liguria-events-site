@@ -1,0 +1,11 @@
+---
+// The reader's own region, kept in their browser. Its own part because the
+// shell's script list is meant to be readable in one screen.
+---
+
+<script>
+  // Remember the region of every page the reader opens, so the front door can
+  // honour their last choice instead of guessing it from an IP lookup.
+  import { initRememberRegion } from '../../components/region/init-remember-region.ts';
+  initRememberRegion();
+</script>

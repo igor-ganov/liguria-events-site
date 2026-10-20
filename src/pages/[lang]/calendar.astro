@@ -1,0 +1,14 @@
+---
+import '../../styles/pages/_lang.calendar.css';
+import EntryView from '../../components/views/EntryView.astro';
+import { LOCALES } from '../../lib/i18n/locales.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+
+export const getStaticPaths = () =>
+  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+
+const { lang } = Astro.props;
+const ui = await uiOf(lang);
+---
+
+<EntryView lang={lang} page="calendar/" title={ui.nav.calendar} description={ui.entry.lead} />

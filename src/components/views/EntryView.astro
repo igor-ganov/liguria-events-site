@@ -1,0 +1,82 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EntryRegions from '../entry/EntryRegions.astro';
+import GeoHelp from '../region/GeoHelp.astro';
+import { cachedEvents } from '../../data/cached-events.ts';
+import { cityCentroids } from '../../lib/region/city-centroids.ts';
+import { entryPicks } from '../../lib/region/entry-picks.ts';
+import { EVENTS_URL } from '../../data/events-url.ts';
+import { feedCardHtml } from '../feed/feed-card-html.ts';
+import { feedIcons } from '../../lib/icons/feed-icons.ts';
+import { feedSprite } from '../../lib/icons/feed-sprite.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
+import { regionsAndCitiesOf } from '../../lib/region/regions-cities-of.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import { uiOf } from '../../lib/i18n/ui-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// The front door. It used to be a 302 whose target was guessed: the language
+// from Accept-Language — which is a stated preference and fair — and the region
+// from Cloudflare's IP lookup, falling back to whichever region had the most
+// events. So every reader who had named no region began in Lombardia, and
+// because the decision was taken at the edge, neither a choice they had made
+// here before nor a location permission they had granted could ever win: both
+// live in the browser, and the browser never got a word in.
+//
+// Now it asks, and it is worth reading while it asks: the next event in each of
+// the busiest regions, then the whole country as links. `page` carries the
+// front door the reader came through, so the same question answers "/", where
+// its links lead to a region's feed, and "/calendar" and "/map", where they
+// lead to that region's calendar or map.
+const PICKS = 5;
+
+type Props = Readonly<{ lang: Locale; page: string; title: string; description: string }>;
+const { lang, page, title, description } = Astro.props;
+const ui = await uiOf(lang);
+const payload = await cachedEvents(EVENTS_URL);
+const today = isoToday();
+const picks = entryPicks(payload.events, today, PICKS);
+const groups = regionsAndCitiesOf(payload.events);
+const points = cityCentroids(payload.events);
+const context = { lang, ui, icons: feedIcons(), today };
+---
+
+<Layout lang={lang} region="" title={title} description={description} path={page} picker={false}>
+  <Fragment set:html={feedSprite()} />
+
+  <section class="entry" data-entry>
+    <h1>{ui.entry.heading}</h1>
+    <p class="entry-lead">{ui.entry.lead}</p>
+
+    <div class="entry-here">
+      <button type="button" data-region-here="city">{ui.entry.hereCity}</button>
+      <button type="button" data-region-here="region">{ui.entry.hereRegion}</button>
+    </div>
+
+    {picks.length > 0 && (
+      <Fragment>
+        <h2 class="entry-heading">{ui.entry.pickHeading}</h2>
+        <ul class="entry-picks">
+          {picks.map((pick) => (
+            <li class="entry-pick">
+              <a class="entry-pick-where" href={regionUrl(lang, pick.region, page)}>
+                <span>{pick.name}</span><small>{pick.count}</small>
+              </a>
+              <Fragment set:html={feedCardHtml(context, pick.event)} />
+            </li>
+          ))}
+        </ul>
+      </Fragment>
+    )}
+
+    <h2 class="entry-heading" id="entry-regions-heading">{ui.entry.regionsHeading}</h2>
+    <EntryRegions lang={lang} groups={groups} page={page} points={points} />
+
+    <GeoHelp />
+  </section>
+</Layout>
+
+<script>
+  import { initEntry } from '../entry/init-entry.ts';
+  initEntry();
+</script>

@@ -1,0 +1,12 @@
+---
+import '../styles/pages/calendar.css';
+import EntryView from '../components/views/EntryView.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+// A calendar with no region named. The same question as the front page, with
+// its links pointing at each region's calendar rather than its feed.
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+---
+
+<EntryView lang={lang} page="calendar/" title={ui.nav.calendar} description={ui.entry.lead} />

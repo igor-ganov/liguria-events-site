@@ -123,3 +123,22 @@ describe('the menu leads with making one', () => {
     assert.ok((groups[0]?.links ?? []).some((link) => link.href === '/submit'));
   });
 });
+
+describe('menuGroups on a front door', () => {
+  // A door has no region yet — that is the question it is asking. The shell
+  // used to fall back to the founding region here, which put Liguria in the
+  // menu of a page whose whole purpose is not to guess.
+  const groups = menuGroups('it', '', ui);
+  const hrefs = groups.flatMap((group) => group.links.map((link) => link.href));
+
+  test('the feed, calendar and map are the country doors', () => {
+    assert.ok(hrefs.includes('/it/'));
+    assert.ok(hrefs.includes('/it/calendar/'));
+    assert.ok(hrefs.includes('/it/map/'));
+  });
+
+  test('and landmarks and places, which exist only inside a region, are not offered', () => {
+    assert.equal(hrefs.some((href) => href.includes('landmarks')), false);
+    assert.equal(hrefs.some((href) => href.includes('places')), false);
+  });
+});

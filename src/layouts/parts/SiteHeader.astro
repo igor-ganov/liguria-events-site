@@ -13,8 +13,11 @@ type Props = Readonly<{
   path: string;
   city: string | undefined;
   ui: Ui;
+  /** The front door is itself a region picker; the header does not repeat it,
+   *  and would otherwise have to label it with a region the page has not got. */
+  picker: boolean;
 }>;
-const { lang, region, path, city, ui } = Astro.props;
+const { lang, region, path, city, ui, picker } = Astro.props;
 ---
 
 <header class="site-head">
@@ -50,5 +53,5 @@ const { lang, region, path, city, ui } = Astro.props;
   </a>
   <!-- Outside the nav on purpose: the nav is hidden on a phone, and the
        region is the one control that must stay reachable everywhere. -->
-  <RegionPicker lang={lang} region={region} page={pageSegment(path, city)} city={city} />
+  {picker && <RegionPicker lang={lang} region={region} page={pageSegment(path, city)} city={city} />}
 </header>

@@ -96,11 +96,16 @@ test('the page tier is enumerated, not whatever happened to be prerendered', asy
   expect(locs.every((loc) => !loc.includes('/ru/'))).toBe(true);
   expect(xml).toContain('<lastmod>');
   expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
-  // The map is an application view; the rest were in the generated file because
-  // nobody had excluded them, and three of them answer 302 to a sign-in.
-  ['/map/', '/admin/', '/settings/', '/tickets/', '/auth/', '/favorites/', '/notifications/', '/offline/', '/event/'].forEach(
+  // These were in the generated file because nobody had excluded them, and
+  // three of them answer 302 to a sign-in.
+  ['/admin/', '/settings/', '/tickets/', '/auth/', '/favorites/', '/notifications/', '/offline/', '/event/'].forEach(
     (path) => expect(locs.some((loc) => loc.includes(path))).toBe(false),
   );
+  // A region's map view is an application view and twenty of them were the bulk
+  // of the generated file. The one country-wide map is a different thing: it is
+  // the page that asks which region, and until today it answered 302.
+  expect(locs.some((loc) => /\/[a-z-]+\/map\/$/.test(loc.replace('https://dovego.it/it', '')))).toBe(false);
+  expect(locs).toContain('https://dovego.it/it/map/');
 });
 
 test('a region feed links the venues with a programme, the ones its sitemap advertises', async ({ page }) => {
