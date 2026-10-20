@@ -36,3 +36,8 @@
 # from where the reader is or where the events are. A rule here can read nothing
 # and so sent every visitor to one region, the one the site was founded in, long
 # after the site had stopped being about it. See src/lib/i18n/bare-entry.ts.
+
+# @astrojs/sitemap wrote this file until the page tier was enumerated by hand.
+# Nothing indexes it any more, and Google has read it for two months, so it
+# moves rather than disappears.
+/sitemap-0.xml   /sitemap-pages.xml         301

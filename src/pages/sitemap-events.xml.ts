@@ -1,4 +1,5 @@
 import { isoToday } from '../lib/calendar/iso-today.ts';
+import { SITEMAP_PARTS } from '../lib/seo/sitemap-parts.ts';
 import { sitemapIndexXml } from '../lib/seo/sitemap-index-xml.ts';
 import type { APIRoute } from 'astro';
 
@@ -12,13 +13,11 @@ import type { APIRoute } from 'astro';
 // for whoever asks, and nothing offers it any more.
 export const prerender = true;
 
-const PARTS = ['sitemap-upcoming.xml', 'sitemap-places.xml'];
-
 export const GET: APIRoute = ({ site }) => {
   const today = isoToday();
   const origin = site?.origin ?? 'https://dovego.it';
   return new Response(
-    sitemapIndexXml(PARTS.map((part) => ({ loc: `${origin}/${part}`, lastmod: today }))),
+    sitemapIndexXml(SITEMAP_PARTS.map((part) => ({ loc: `${origin}/${part}`, lastmod: today }))),
     { headers: { 'content-type': 'application/xml; charset=utf-8' } },
   );
 };

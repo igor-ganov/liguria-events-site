@@ -10,6 +10,10 @@ test('robots.txt announces every sitemap the site keeps by hand', async ({ reque
   ['sitemap-index.xml', 'sitemap-events.xml', 'sitemap-upcoming.xml', 'sitemap-places.xml'].forEach((name) =>
     expect(robots).toContain(`Sitemap: https://dovego.it/${name}`),
   );
+  // Both indexes name the page tier now. It used to be @astrojs/sitemap's
+  // sitemap-0.xml, which Google last downloaded on 30 September: 864 rows with
+  // no lastmod said nothing about what had changed.
+  expect(robots).toContain('sitemap-pages.xml');
   // The archive is not among them, on purpose: 3 345 finished pages were a
   // third of everything we offered a crawler that fetches a dozen a day. The
   // file is still served for whoever asks — nothing advertises it.
@@ -38,7 +42,7 @@ test('the old sitemap address is now an index of the three it was split into', a
   expect(res.headers()['content-type']).toContain('xml');
   const xml = await res.text();
   expect(xml).toContain('<sitemapindex');
-  ['sitemap-upcoming.xml', 'sitemap-places.xml'].forEach((part) =>
+  ['sitemap-pages.xml', 'sitemap-upcoming.xml', 'sitemap-places.xml'].forEach((part) =>
     expect(xml).toContain(`<loc>https://dovego.it/${part}</loc>`),
   );
   // Not the archive: the index is what a crawler is asked to spend its day on.
@@ -82,9 +86,34 @@ test('venues have a sitemap of their own, and the archive another', async ({ req
   expect((await archive.text()).includes('<urlset')).toBe(true);
 });
 
-test('the generated sitemap no longer spends itself on map views', async ({ request }) => {
-  const xml = await (await request.get('/sitemap-0.xml')).text();
-  expect(xml).not.toContain('/map/');
+test('the page tier is enumerated, not whatever happened to be prerendered', async ({ request }) => {
+  const res = await request.get('/sitemap-pages.xml');
+  expect(res.status()).toBe(200);
+  const xml = await res.text();
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1] ?? '');
+  expect(locs.length).toBeGreaterThan(0);
+  // One row per page, the Italian one, each with a lastmod and its languages.
+  expect(locs.every((loc) => !loc.includes('/ru/'))).toBe(true);
+  expect(xml).toContain('<lastmod>');
+  expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
+  // The map is an application view; the rest were in the generated file because
+  // nobody had excluded them, and three of them answer 302 to a sign-in.
+  ['/map/', '/admin/', '/settings/', '/tickets/', '/auth/', '/favorites/', '/notifications/', '/offline/', '/event/'].forEach(
+    (path) => expect(locs.some((loc) => loc.includes(path))).toBe(false),
+  );
+});
+
+test('a region feed links the venues with a programme, the ones its sitemap advertises', async ({ page }) => {
+  // The city page has linked its venues since 4 October and not one venue page
+  // was fetched in the fortnight after: the city pages are barely read
+  // themselves. The region feeds are the tier Google keeps and recrawls.
+  await page.goto('/it/liguria/');
+  const links = page.locator('.city-venues a');
+  expect(await links.count()).toBeGreaterThan(0);
+  const first = await links.first().getAttribute('href');
+  expect(first).toMatch(/^\/it\/liguria\/[^/]+\/[^/]+\/$/);
+  // And the town, because a region spans several and the name does not say.
+  await expect(page.locator('.city-venues-town').first()).toBeVisible();
 });
 
 test('a feed page carries a link-preview image on our own origin', async ({ page }) => {

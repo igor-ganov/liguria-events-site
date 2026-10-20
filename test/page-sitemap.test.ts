@@ -1,0 +1,89 @@
+// The page tier — regions, cities, calendars, the content pages — was the one
+// part of the site still advertised by @astrojs/sitemap: 864 rows, three
+// locales of every page, no lastmod, no hreflang, and whatever route happened
+// to be prerendered. Google last downloaded that file on 30 September and the
+// tier it holds is the tier it indexes. Enumerated here instead, as an
+// allowlist: a denylist advertises every page somebody forgets to exclude —
+// which is how /admin/, /settings/ and /auth/verify/ came to be in it.
+import { describe, expect, test } from 'bun:test';
+import { pageSitemapUrls } from '../src/lib/seo/page-sitemap-urls.ts';
+import type { CompactEvent } from '../src/lib/events/event-schema.ts';
+
+const SITE = new URL('https://dovego.it');
+const TODAY = '2026-10-20';
+
+const at = (region: string, city: string, start: string): CompactEvent => ({
+  id: `${region}${city}${start}`,
+  t: 'Concerto',
+  s: start,
+  c: ['music'],
+  u: 'https://source/1',
+  v: 'Teatro di Prova',
+  ct: city,
+  rg: region,
+});
+
+const events = [
+  at('liguria', 'genova', '2026-10-21'),
+  at('liguria', 'savona', '2026-11-04'),
+  at('lombardia', 'milano', '2026-12-01'),
+];
+
+const locs = pageSitemapUrls(events, TODAY, SITE).map((url) => url.loc);
+
+describe('pageSitemapUrls', () => {
+  test('one row per page, in the language the site speaks, with the rest as alternates', () => {
+    const urls = pageSitemapUrls(events, TODAY, SITE);
+    expect(urls.length).toBeGreaterThan(0);
+    expect(locs.filter((loc) => loc.includes('/ru/'))).toEqual([]);
+    const region = urls.find((url) => url.loc === 'https://dovego.it/it/liguria/');
+    expect(region?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'it', 'ru', 'x-default']);
+    expect(region?.lastmod).toBe(TODAY);
+  });
+
+  test('every region and city that has something on, and none that has not', () => {
+    expect(locs).toContain('https://dovego.it/it/liguria/');
+    expect(locs).toContain('https://dovego.it/it/liguria/genova/');
+    expect(locs).toContain('https://dovego.it/it/lombardia/milano/');
+    // An empty region still has a page — the map of Italy has no holes — but an
+    // empty page is not worth a crawler's day.
+    expect(locs).not.toContain('https://dovego.it/it/molise/');
+  });
+
+  test('a month that has passed is never advertised, and the ones to come are', () => {
+    // 60 rows for September were still being offered on 20 October. The page is
+    // built for it, because the calendar has a back arrow; nothing offers it.
+    expect(locs.some((loc) => loc.includes('/calendar/2026-09/'))).toBe(false);
+    expect(locs).toContain('https://dovego.it/it/liguria/calendar/2026-10/');
+    expect(locs).toContain('https://dovego.it/it/liguria/calendar/2026-11/');
+    expect(locs).toContain('https://dovego.it/it/liguria/calendar/');
+  });
+
+  test('a page behind the session gate is not a search result', () => {
+    // All of these were in the generated sitemap, and /admin/ and /settings/
+    // answer 302 to a sign-in: pages with redirect, offered as content.
+    ['/admin/', '/settings/', '/tickets/', '/favorites/', '/notifications/', '/offline/', '/delete-account/', '/submit/', '/auth/'].forEach(
+      (path) => expect(locs.some((loc) => loc.includes(path))).toBe(false),
+    );
+  });
+
+  test('the map is an application view, not a landing page', () => {
+    expect(locs.some((loc) => loc.includes('/map/'))).toBe(false);
+  });
+
+  test('a page built at the root only declares the one language it has', () => {
+    const terms = pageSitemapUrls(events, TODAY, SITE).find((url) => url.loc.endsWith('/terms/'));
+    expect(terms?.loc).toBe('https://dovego.it/terms/');
+    expect(terms?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'x-default']);
+  });
+
+  test('the pages that are written in three languages say so', () => {
+    const roadmap = pageSitemapUrls(events, TODAY, SITE).find((url) => url.loc.includes('/roadmap/'));
+    expect(roadmap?.loc).toBe('https://dovego.it/it/roadmap/');
+    expect(roadmap?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'it', 'ru', 'x-default']);
+  });
+
+  test('no event pages: they move on another clock and have a file of their own', () => {
+    expect(locs.some((loc) => loc.includes('/event/'))).toBe(false);
+  });
+});
