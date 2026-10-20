@@ -11,7 +11,7 @@ import { LOCALES } from '../../../lib/i18n/locales.ts';
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   const months = eventMonths(payload.events, isoToday());
-  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+  return LOCALES.flatMap((lang) =>
     months.map((month) => ({ params: { lang, month }, props: { lang, month } })),
   );
 };

@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 // the print rules are global — under print media the site header (and other
 // screen-only chrome) must be hidden so the PDF is the itinerary alone.
 test('print media hides the site chrome', async ({ page }) => {
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await expect(page.locator('.site-head')).toBeVisible(); // shown on screen
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('.site-head')).toBeHidden(); // stripped for the PDF

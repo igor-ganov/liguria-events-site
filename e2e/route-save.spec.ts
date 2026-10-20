@@ -23,9 +23,9 @@ test('saving a route shows a shareable link and remembers it', async ({ page }) 
     }),
   );
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2'])));
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   await page.locator('[data-route-from]').fill('2099-07-10');
   await page.locator('[data-route-generate]').click();
@@ -56,7 +56,7 @@ test('a signed-in owner sees their route with a working privacy toggle', async (
     return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: 'owned1', public: false }) });
   });
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   const row = page.locator('.route-mine-row', { hasText: 'Trip' });
   await expect(row).toBeVisible();

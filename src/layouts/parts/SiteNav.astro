@@ -6,8 +6,15 @@ import { regionUrl } from '../../lib/region/region-url.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 import type { Ui } from '../../lib/i18n/ui-schema.ts';
 
-type Props = Readonly<{ lang: Locale; region: string; path: string; ui: Ui }>;
-const { lang, region, path, ui } = Astro.props;
+type Props = Readonly<{
+  lang: Locale;
+  region: string;
+  path: string;
+  ui: Ui;
+  /** The languages this page is written in; none means it offers no switch. */
+  locales: readonly Locale[];
+}>;
+const { lang, region, path, ui, locales } = Astro.props;
 ---
 
 <nav aria-label="Site">
@@ -27,7 +34,7 @@ const { lang, region, path, ui } = Astro.props;
     href="https://liguria-events-bot.igor-ganov.workers.dev/calendar.ics"
     rel="noopener">{ui.nav.ical}</a
   >
-  <LanguageSwitcher lang={lang} path={path} />
+  <LanguageSwitcher lang={lang} path={path} locales={locales} />
   <ThemeToggle ui={ui} />
   <span class="account" data-account><span class="acct-skeleton" aria-hidden="true"></span></span>
 </nav>

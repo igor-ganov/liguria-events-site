@@ -8,9 +8,9 @@ test('a `from` date drops earlier events from the route', async ({ page }) => {
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }),
   );
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2', 'e3'])));
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   await expect(page.locator('[data-route-generate]')).toBeVisible();
   await page.locator('[data-route-from]').fill('2099-07-10');

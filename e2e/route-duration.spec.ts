@@ -8,9 +8,9 @@ test('route shows a duration per stop and honours a manual override', async ({ p
   await page.route('**/events.json*', (route) =>
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }),
   );
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2'])));
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   // The two saved events have to be on the page before the button is worth
   // pressing: the click handler is wired by the same script that renders them,

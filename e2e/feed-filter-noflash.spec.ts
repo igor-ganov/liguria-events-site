@@ -24,7 +24,7 @@ test('a filtered feed URL hides the list before any script runs', async ({ page 
   // CSS, so they hold with the module chunks never arriving at all — which is
   // exactly the window a reader on a slow connection sees.
   await withoutScripts(page);
-  await page.goto('/liguria/?cats=music', { waitUntil: 'commit' });
+  await page.goto('/en/liguria/?cats=music', { waitUntil: 'commit' });
 
   await expect(page.locator('html')).toHaveClass(/feed-filtering/);
   await expect(page.locator('[data-feed-list]')).toHaveCSS('visibility', 'hidden');
@@ -33,7 +33,7 @@ test('a filtered feed URL hides the list before any script runs', async ({ page 
 test('and shows it, filtered, once the feed script has run', async ({ page }) => {
   // No artificial delay: the reveal is asserted at the speed the product runs,
   // so this cannot fail for being slow.
-  await page.goto('/liguria/?cats=music');
+  await page.goto('/en/liguria/?cats=music');
 
   await expect(page.locator('html')).not.toHaveClass(/feed-filtering/);
   await expect(page.locator('[data-feed-list]')).toHaveCSS('visibility', 'visible');
@@ -49,7 +49,7 @@ test('the default (unfiltered) feed is never hidden — it stays instant', async
   // Again with no script at all: the point is that an unfiltered feed is
   // readable before anything runs, not that it becomes readable afterwards.
   await withoutScripts(page);
-  await page.goto('/liguria/', { waitUntil: 'commit' });
+  await page.goto('/en/liguria/', { waitUntil: 'commit' });
 
   await expect(page.locator('html')).not.toHaveClass(/feed-filtering/);
   await expect(page.locator('[data-feed-list]')).toBeVisible();

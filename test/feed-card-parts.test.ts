@@ -90,7 +90,7 @@ describe('feedCardTags', () => {
 describe('feedCardHtml', () => {
   test('builds the photo card the feed already renders', () => {
     const html = feedCardHtml(context, event({ d: { en: 'A night of jazz.', it: '', ru: '' } }));
-    assert.ok(html.startsWith('<a class="photo-card" href="/event/concerto-2026-07-04-e1/"'));
+    assert.ok(html.startsWith('<a class="photo-card" href="/en/event/concerto-2026-07-04-e1/"'));
     assert.ok(html.includes('<h4 class="mini-title photo-card-title">Concerto</h4>'));
     assert.ok(html.includes('<span class="photo-card-when">'));
     // What is written about the event is not on its card: the search fetches it.

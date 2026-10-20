@@ -4,7 +4,7 @@
 import { expect, test } from '@playwright/test';
 
 test('a cluster answers to the number written on it', async ({ page }) => {
-  await page.goto('/liguria/map/');
+  await page.goto('/en/liguria/map/');
   const cluster = page.locator('.ev-cluster').first();
   await expect(cluster).toBeVisible({ timeout: 30_000 });
   const shown = (await cluster.innerText()).trim();

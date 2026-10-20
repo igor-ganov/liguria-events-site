@@ -8,7 +8,7 @@ import { monthKeyOf } from '../../lib/calendar/month-key-of.ts';
 // The country's calendar for this month. It used to be a 302 into whichever
 // region an IP lookup suggested; the region is a filter now, not a segment.
 export const getStaticPaths = () =>
-  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+  LOCALES.map((lang) => ({ params: { lang }, props: { lang } }));
 
 const { lang } = Astro.props;
 ---

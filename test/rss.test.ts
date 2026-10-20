@@ -23,7 +23,7 @@ describe('eventRssItems', () => {
       SITE,
     );
     assert.deepEqual(items.map((item) => item.guid), ['sooner', 'later']);
-    assert.equal(items[0]?.link, 'https://dovego.it/event/concerto-2026-08-24-sooner/');
+    assert.equal(items[0]?.link, 'https://dovego.it/en/event/concerto-2026-08-24-sooner/');
   });
 
   test('what has already happened is not news', () => {
@@ -45,8 +45,8 @@ describe('eventRssItems', () => {
 describe('rssXml', () => {
   const channel = {
     title: 'Liguria — Dove Go',
-    link: 'https://dovego.it/liguria/',
-    self: 'https://dovego.it/liguria/rss.xml',
+    link: 'https://dovego.it/en/liguria/',
+    self: 'https://dovego.it/en/liguria/rss.xml',
     description: 'Upcoming events in Liguria.',
   };
 
@@ -54,7 +54,7 @@ describe('rssXml', () => {
     const xml = rssXml(channel, eventRssItems([ev({ id: 'a' })], TODAY, SITE));
     assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"'));
     // Validators reject a self link that points at the page it describes.
-    assert.ok(xml.includes('href="https://dovego.it/liguria/rss.xml" rel="self"'));
+    assert.ok(xml.includes('href="https://dovego.it/en/liguria/rss.xml" rel="self"'));
     assert.ok(xml.includes('<item>'));
     assert.ok(xml.endsWith('</channel></rss>'));
   });

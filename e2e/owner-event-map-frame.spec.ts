@@ -22,7 +22,7 @@ test('the map of an event is fetched when the reader reaches it, not before', as
   const asked: string[] = [];
   page.on('request', (sent) => asked.push(new URL(sent.url()).hostname));
   await page.setViewportSize({ width: 390, height: 500 });
-  await page.goto(`/event/${event.id}/`);
+  await page.goto(`/en/event/${event.id}/`);
   const frame = page.locator('.event-map iframe');
   await expect(frame).toHaveCount(1);
   expect(asked.filter((host) => host.includes('google'))).toEqual([]);

@@ -17,7 +17,7 @@ const shardRequests = (page: Page): Promise<readonly string[]> =>
   );
 
 test('switching Places on from an overview camera downloads nothing', async ({ page }) => {
-  await page.goto('/liguria/map/?z=8.9&c=44.40,9.30');
+  await page.goto('/en/liguria/map/?z=8.9&c=44.40,9.30');
   await expect(page.locator('.ev-marker').first()).toBeVisible({ timeout: 30_000 });
 
   await page.locator('[data-map-places]').click();
@@ -30,7 +30,7 @@ test('switching Places on from an overview camera downloads nothing', async ({ p
 });
 
 test('a close camera past the threshold loads the places and draws them', async ({ page }) => {
-  await page.goto('/liguria/map/?pl=1&z=13&c=44.4072,8.9340');
+  await page.goto('/en/liguria/map/?pl=1&z=13&c=44.4072,8.9340');
   await expect(page.locator('.pl-marker').first()).toBeVisible({ timeout: 30_000 });
 
   const shards = await shardRequests(page);

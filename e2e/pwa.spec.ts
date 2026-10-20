@@ -46,13 +46,13 @@ test('every icon the manifest points at exists and is the size it claims', async
 });
 
 test('a page announces the manifest and the home-screen icon', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/manifest.webmanifest');
   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute('href', '/icons/apple-touch-icon.png');
 });
 
 test('the service worker installs and takes control of the page', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   // skipWaiting + clients.claim, so control arrives without a second load.
   await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
 

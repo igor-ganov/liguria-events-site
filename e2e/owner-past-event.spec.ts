@@ -22,7 +22,7 @@ test('an event that has happened keeps its page, and says it is over', async ({ 
   expect(created.ok()).toBe(true);
   const id = (await created.json()).id;
 
-  const response = await page.goto(`/event/${id}/`);
+  const response = await page.goto(`/en/event/${id}/`);
   expect(response?.status()).toBe(200);
   await expect(page.locator('h1')).toContainText('Concerto d’Estate 2020');
 
@@ -52,7 +52,7 @@ test('an event that is over wears the archive mark instead of a photograph', asy
   expect(created.ok()).toBe(true);
   const id = (await created.json()).id;
 
-  await page.goto(`/event/${id}/`);
+  await page.goto(`/en/event/${id}/`);
   await expect(page.locator('.event-hero img')).toHaveAttribute('src', /\/og\/archive\.png/);
   await expect(page.locator('.event-hero figcaption')).toHaveCount(0);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /\/og\/archive\.png/);
@@ -76,7 +76,7 @@ test('an upcoming event carries no such banner', async ({ page, context }) => {
     },
   });
   const id = (await created.json()).id;
-  await page.goto(`/event/${id}/`);
+  await page.goto(`/en/event/${id}/`);
   await expect(page.locator('h1')).toContainText('Concerto Futuro 2099');
   await expect(page.locator('.event-passed')).toHaveCount(0);
 });
@@ -94,7 +94,7 @@ test('every locale of a past event resolves, since the sitemap lists all three',
   const id = (await created.json()).id;
   // The archive step was once added to /event and forgotten in /{lang}/event,
   // which left two thirds of every sitemap entry answering 404.
-  for (const path of [`/event/${id}/`, `/it/event/${id}/`, `/ru/event/${id}/`]) {
+  for (const path of [`/en/event/${id}/`, `/it/event/${id}/`, `/ru/event/${id}/`]) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(200);
     await expect(page.locator('.event-passed p')).not.toBeEmpty();
@@ -102,6 +102,6 @@ test('every locale of a past event resolves, since the sitemap lists all three',
 });
 
 test('an id that never existed is still a 404 — nothing is a catch-all', async ({ page }) => {
-  const response = await page.goto('/event/nosucheventatall/');
+  const response = await page.goto('/en/event/nosucheventatall/');
   expect(response?.status()).toBe(404);
 });

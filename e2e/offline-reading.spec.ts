@@ -24,7 +24,7 @@ const kept = (page: Page): Promise<string[]> =>
   }, PAGES_CACHE);
 
 test('the first visit comes from the site, and says nothing about age', async ({ app, connection }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
 
   await expect(app.find('html')).not.toHaveAttribute('data-from-cache', /\d+/);
@@ -32,15 +32,15 @@ test('the first visit comes from the site, and says nothing about age', async ({
 });
 
 test('the next one comes off the device, and says how old it is', async ({ app, connection }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   // The worker takes control DURING this first load, so the load itself was
   // not its to answer and nothing was kept. The reload is the first navigation
   // it actually handles.
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page)).toContain('/liguria/');
+  await expect.poll(() => kept(app.page)).toContain('/en/liguria/');
 
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
 
   // Served from storage WITH a connection: that is what makes it instant, and
   // it is exactly why the age has to be said out loud.
@@ -56,12 +56,12 @@ test('one visit is enough for the app to work without a signal', async ({ app, c
   // load itself is not its to answer — what the device ends up holding comes
   // from the warming that follows, and that must not depend on the page being
   // controlled by the time it fires.
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
-  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/');
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/en/liguria/');
 
   await connection.cut();
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await expect(app.find('.feed-list').first()).toBeVisible();
 });
 
@@ -69,13 +69,13 @@ test('the map says it cannot draw, instead of spinning', async ({ app, connectio
   // The page comes off the device like any other, but its tiles are not on it:
   // that is a real limit, and a reader is owed it in seconds rather than after
   // half a minute of a spinner that looks like the app is stuck.
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/map/');
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/en/liguria/map/');
 
   await connection.cut();
-  await app.open('/liguria/map/');
+  await app.open('/en/liguria/map/');
   await expect(app.find('[data-map-retry]')).toBeVisible();
 });
 
@@ -84,13 +84,13 @@ test('a list that is fetched when opened says why it is empty', async ({ app, co
   // something to keep on a device for a tunnel. With no signal the grid is
   // empty either way -- the difference is whether the reader is told, or left
   // to read it as a region with nothing worth seeing in it.
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/landmarks/');
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/en/liguria/landmarks/');
 
   await connection.cut();
-  await app.open('/liguria/landmarks/');
+  await app.open('/en/liguria/landmarks/');
   await expect(app.find('[data-lm-grid] [role="status"]')).toContainText(/no connection|when you open it/i);
 });
 
@@ -105,25 +105,25 @@ test('a page nobody opened is fetched before anybody taps it', async ({ app, con
   // The link is on the feed, so the worker is asked to have it ready. Without
   // this a reader who had opened the app once still had nothing but the single
   // page they landed on.
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
 
-  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/calendar/');
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/en/liguria/calendar/');
 
   await connection.cut();
-  await app.open('/liguria/calendar/');
+  await app.open('/en/liguria/calendar/');
   await expect(app.find('.cal-grid')).toBeVisible();
 });
 
 test('with no signal it says so, and still shows the page', async ({ app, connection }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page)).toContain('/liguria/');
+  await expect.poll(() => kept(app.page)).toContain('/en/liguria/');
 
   await connection.cut();
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
 
   await expect(app.find('.feed-list').first()).toBeVisible();
   await expect(app.find('[data-offline-notice]')).toContainText(/No connection/i);
@@ -133,10 +133,10 @@ test('a page the device never had says so, and offers what it does have', async 
   app,
   connection,
 }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page)).toContain('/liguria/');
+  await expect.poll(() => kept(app.page)).toContain('/en/liguria/');
 
   // The connection goes first: warming still on its way would otherwise put a
   // page back between the clearing below and the cut, and the page opened next
@@ -149,14 +149,14 @@ test('a page the device never had says so, and offers what it does have', async 
     const cache = await caches.open(name);
     const keys = await cache.keys();
     await Promise.all(
-      keys.filter((request) => !new URL(request.url).pathname.endsWith('/liguria/')).map((r) => cache.delete(r)),
+      keys.filter((request) => !new URL(request.url).pathname.endsWith('/en/liguria/')).map((r) => cache.delete(r)),
     );
   }, PAGES_CACHE);
 
   // A page the feed does not link to, so it is not one the worker was already
   // on its way to keep: a page being warmed when the connection went is stored
   // a moment later, after the clearing above, and is then a page the device has.
-  await app.open('/liguria/calendar/2027-01/');
+  await app.open('/en/liguria/calendar/2027-01/');
 
   await expect(app.heading('No connection')).toBeVisible();
   await expect(app.find('[data-offline-list] a').first()).toBeVisible();
@@ -167,10 +167,10 @@ test('when the site has something newer, the reader is offered it rather than sw
   app,
   connection,
 }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page)).toContain('/liguria/');
+  await expect.poll(() => kept(app.page)).toContain('/en/liguria/');
 
   // The stored copy is made to differ from what the site serves: the shape of
   // an event published since this reader last looked.
@@ -179,7 +179,7 @@ test('when the site has something newer, the reader is offered it rather than sw
     const keys = await cache.keys();
     await Promise.all(
       keys
-        .filter((request) => new URL(request.url).pathname.endsWith('/liguria/'))
+        .filter((request) => new URL(request.url).pathname.endsWith('/en/liguria/'))
         .map(async (request) => {
           const stored = await cache.match(request);
           await Promise.all(
@@ -194,7 +194,7 @@ test('when the site has something newer, the reader is offered it rather than sw
     );
   }, PAGES_CACHE);
 
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
 
   // What was on the device is still what is on screen — nothing is swapped
   // under a reader mid-sentence — and the newer version is offered.
@@ -209,25 +209,25 @@ test('when the site has something newer, the reader is offered it rather than sw
 const OFF_DEVICE = { lcpMs: 2500, cls: 0.1 };
 
 test('a page off the device paints without waiting for anything', async ({ app, connection, perf }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
-  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/liguria/calendar/');
+  await expect.poll(() => kept(app.page), { timeout: 20_000 }).toContain('/en/liguria/calendar/');
 
   await connection.cut();
-  await app.open('/liguria/calendar/');
+  await app.open('/en/liguria/calendar/');
   await app.find('.cal-grid').waitFor({ state: 'visible' });
   await app.quiet();
   await perf.within(OFF_DEVICE);
 });
 
 test('a page rendered for one person is never kept', async ({ app, connection }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await connection.ready();
   await app.reload();
 
-  await expect.poll(() => kept(app.page)).toContain('/liguria/');
-  // By substring, not by exact path: the site links to `/submit` without the
+  await expect.poll(() => kept(app.page)).toContain('/en/liguria/');
+  // By substring, not by exact path: the site links to `/en/submit` without the
   // trailing slash the page redirects to, and a check that only knew the
   // slashed form watched a leak happen.
   const personal = (await kept(app.page)).filter((path) => /submit|settings|admin|edit/.test(path));

@@ -28,7 +28,7 @@ const as = async (browser: Browser, userId: string): Promise<Page> => {
 };
 
 const openRequest = async (page: Page, eventId: string, button: string): Promise<string> => {
-  await page.goto(`/event/${eventId}/`);
+  await page.goto(`/en/event/${eventId}/`);
   await page.locator(`[data-feedback="${button}"]`).click();
   await page.locator('textarea[name="body"]').fill('This is ours.');
   await page.getByRole('button', { name: 'Send' }).click();
@@ -81,7 +81,7 @@ test('a code sent to the organiser and typed back hands the event over', async (
   await enterCode(reader, thread, otherThan(code));
   await expect(reader.locator('.claim-code-note[role="alert"]')).toBeVisible();
   await expect(reader.locator('.ticket-status')).toHaveText('answered');
-  await reader.goto(`/event/${eventId}/`);
+  await reader.goto(`/en/event/${eventId}/`);
   await expect(reader.locator('[data-feedback="managed"]')).toHaveCount(0);
 
   // The right one closes the thread and hands the event over.
@@ -89,7 +89,7 @@ test('a code sent to the organiser and typed back hands the event over', async (
   await expect(reader.locator('.ticket-status')).toHaveText('resolved');
   await expect(reader.locator('.ticket-thread li[data-staff="true"] .ticket-body').last()).toContainText('now yours');
   await expect(reader.locator('.claim-code-enter')).toHaveCount(0);
-  await reader.goto(`/event/${eventId}/`);
+  await reader.goto(`/en/event/${eventId}/`);
   await expect(reader.locator('[data-feedback="managed"]')).toBeVisible();
   await expect(reader.locator('.event-owner-bar a')).toBeVisible();
 
@@ -155,6 +155,6 @@ test('a claim turned down by hand cannot be approved by a code already sent', as
   await reader.goto(thread);
   await expect(reader.locator('.ticket-status')).toHaveText('rejected');
   await expect(reader.locator('.claim-code-enter')).toHaveCount(0);
-  await reader.goto(`/event/${eventId}/`);
+  await reader.goto(`/en/event/${eventId}/`);
   await expect(reader.locator('[data-feedback="managed"]')).toHaveCount(0);
 });

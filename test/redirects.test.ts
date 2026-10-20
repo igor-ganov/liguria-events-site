@@ -44,10 +44,13 @@ describe('public/_redirects', () => {
   // The city URLs were live long enough for browsers to cache the 301s pointing
   // at them; they have to keep resolving.
   test('the legacy city paths redirect permanently, page and all', () => {
-    assert.equal(sourceOf('/genova/*')?.destination, '/liguria/:splat');
+    // They were English addresses, so they land where English lives now rather
+    // than at a prefix-less one that would only redirect them a second time.
+    assert.equal(sourceOf('/genova/*')?.destination, '/en/liguria/:splat');
     assert.equal(sourceOf('/genova/*')?.status, 301);
-    assert.equal(sourceOf('/milano/*')?.destination, '/lombardia/:splat');
-    assert.equal(sourceOf('/torino/*')?.destination, '/piemonte/:splat');
+    assert.equal(sourceOf('/milano/*')?.destination, '/en/lombardia/:splat');
+    assert.equal(sourceOf('/torino/*')?.destination, '/en/piemonte/:splat');
+    // The twins that already named their language are untouched.
     assert.equal(sourceOf('/it/genova/*')?.destination, '/it/liguria/:splat');
   });
 

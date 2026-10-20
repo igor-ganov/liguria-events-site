@@ -25,7 +25,7 @@ const touches = (before: Box, after: Box, rowStart: number): boolean =>
   (near(after.x, rowStart) && near(after.y, before.y + before.height));
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('.photo-card').first()).toBeVisible();
 });
 

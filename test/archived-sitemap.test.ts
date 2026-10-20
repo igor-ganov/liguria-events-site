@@ -32,7 +32,7 @@ describe('archivedSitemapUrls', () => {
   test('every language of every archived page', () => {
     expect(urls).toHaveLength(3);
     expect(urls[0]?.loc).toBe(
-      'https://dovego.it/event/sagra-del-fuoco-di-recco-2026-piazza-nicoloso-2026-09-04-abc123abc123/',
+      'https://dovego.it/en/event/sagra-del-fuoco-di-recco-2026-piazza-nicoloso-2026-09-04-abc123abc123/',
     );
     expect(urls.map((url) => url.loc).some((loc) => loc.includes('/it/'))).toBe(true);
     expect(urls.map((url) => url.loc).some((loc) => loc.includes('/ru/'))).toBe(true);

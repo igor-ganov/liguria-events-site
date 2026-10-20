@@ -19,7 +19,7 @@ const PLAN = {
   direct: [],
 };
 
-const poi = (id: string, lat: number, lng: number) => ({ id, kind: 'landmark', region: 'liguria', name: id, lat, lng, cat: 'castle', url: `/landmark/liguria/${id}/` });
+const poi = (id: string, lat: number, lng: number) => ({ id, kind: 'landmark', region: 'liguria', name: id, lat, lng, cat: 'castle', url: `/en/landmark/liguria/${id}/` });
 
 test('a transit leg shows the compact walk → bus → walk breakdown', async ({ page }) => {
   await page.addInitScript((data) => {
@@ -29,7 +29,7 @@ test('a transit leg shows the compact walk → bus → walk breakdown', async ({
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ events: [] }) }));
   await page.route('https://api.transitous.org/**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(PLAN) }));
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.locator('[data-route-mode="transit"]').click();
   await page.locator('[data-route-generate]').click();
 

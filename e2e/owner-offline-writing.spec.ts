@@ -36,7 +36,7 @@ const fillEvent = async (app: { find: (selector: string) => Locator }, title: st
 
 test('an event written with no signal is kept, and says so', async ({ app, context, connection }) => {
   await signInAsOwner(app.page, context);
-  await app.open('/submit');
+  await app.open('/en/submit');
   await fillEvent(app, 'Concerto senza rete');
 
   await connection.cut();
@@ -48,12 +48,12 @@ test('an event written with no signal is kept, and says so', async ({ app, conte
 
   // And it is NOT claimed to have published: the page did not navigate to an
   // event that does not exist.
-  expect(new URL(app.page.url()).pathname).toBe('/submit');
+  expect(new URL(app.page.url()).pathname).toBe('/en/submit');
 });
 
 test('it goes out by itself when the signal comes back', async ({ app, context, connection }) => {
   await signInAsOwner(app.page, context);
-  await app.open('/submit');
+  await app.open('/en/submit');
   await fillEvent(app, 'Concerto che parte da solo');
   await connection.cut();
   await app.find('#event-form button[type=submit]').click();
@@ -62,14 +62,14 @@ test('it goes out by itself when the signal comes back', async ({ app, context, 
   await connection.restore();
   // Any page, not the form: an author who closed the tab has to be told
   // wherever they next open the site.
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await expect.poll(() => queued(app.page)).toBe(0);
   await expect(app.find('[data-outbox-notice]')).toBeHidden();
 });
 
 test('the queue says what is still waiting, wherever you are', async ({ app, context, connection }) => {
   await signInAsOwner(app.page, context);
-  await app.open('/submit');
+  await app.open('/en/submit');
   await fillEvent(app, 'Concerto in attesa');
   await connection.cut();
   await app.find('#event-form button[type=submit]').click();
@@ -103,7 +103,7 @@ test('an edit that waited does not overwrite a change made meanwhile', async ({
   const id = String((await created.json()).id);
 
   // The author opens the editor, so their form carries the version they saw.
-  await app.open(`/event/${id}/edit`);
+  await app.open(`/en/event/${id}/edit`);
   await app.find('input[name=title]').fill('Mostra di prova — nuovo titolo');
 
   // Their signal goes. The edit is kept rather than lost.
@@ -122,12 +122,12 @@ test('an edit that waited does not overwrite a change made meanwhile', async ({
 
   // The signal comes back and the queue tries. It must NOT win.
   await connection.restore();
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await expect(app.find('[data-outbox-notice]')).toContainText(/changed elsewhere/i);
 
   // And the change made meanwhile is still there, untouched. Read off the
   // event's own page: there is no GET on the edit endpoint, and the page is
   // what a person would look at anyway.
-  const now = await request.get(`/event/${id}/`, { headers: cookie });
+  const now = await request.get(`/en/event/${id}/`, { headers: cookie });
   expect(await now.text()).toContain('Riscritta altrove');
 });

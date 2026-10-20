@@ -7,7 +7,7 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('.photo-card').first()).toBeVisible();
 });
 
@@ -19,7 +19,7 @@ test('a region feed opens with its highlights, each saying why it is there', asy
 });
 
 test('no event is offered twice among them', async ({ page }) => {
-  const links = await page.locator('.picks a[href*="/event/"]').evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('href') ?? ''));
+  const links = await page.locator('.picks a[href*="/en/event/"]').evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute('href') ?? ''));
   expect(new Set(links).size).toBe(links.length);
 });
 
@@ -38,6 +38,6 @@ test('the highlights speak the language of the page', async ({ page }) => {
 });
 
 test('a venue page is about one venue and carries no highlights', async ({ page }) => {
-  await page.goto('/liguria/genova/teatro-ivo-chiesa/');
+  await page.goto('/en/liguria/genova/teatro-ivo-chiesa/');
   await expect(page.locator('.picks')).toHaveCount(0);
 });

@@ -19,12 +19,13 @@ test('a region serves a valid RSS feed of what is coming up', async ({ request }
   const items = (xml.match(/<item>/g) ?? []).length;
   expect(items).toBeGreaterThan(0);
   expect(items).toBeLessThanOrEqual(50);
-  // Entries point at the event pages, not back at the feed.
-  expect(xml).toMatch(/<link>https:\/\/dovego\.it\/event\/[a-z0-9-]+-[0-9a-f]{12}\/<\/link>/);
+  // Entries point at the event pages, not back at the feed. The feed's own
+  // address names no language and its items carry the one the root used to be.
+  expect(xml).toMatch(/<link>https:\/\/dovego\.it\/en\/event\/[a-z0-9-]+-[0-9a-f]{12}\/<\/link>/);
 });
 
 test('both feeds are advertised from the region page itself', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
     'href',
     'https://dovego.it/liguria/rss.xml',
@@ -41,7 +42,7 @@ test('a city has a feed of its own, not just its region', async ({ request }) =>
 });
 
 test('a city page points at its own feeds, not the region’s', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   await expect(page.locator('link[type="application/rss+xml"]')).toHaveAttribute(
     'href',
     'https://dovego.it/liguria/genova/rss.xml',
@@ -51,7 +52,7 @@ test('a city page points at its own feeds, not the region’s', async ({ page })
 test('subscribing is offered on the page, not only in the head', async ({ page }) => {
   // A calendar subscription keeps working without the reader ever returning;
   // it was declared where no reader looks.
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const bar = page.locator('[data-subscribe]');
   await expect(bar).toBeVisible();
   // Three ways to be kept up to date, in the order of how little the reader has

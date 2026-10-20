@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 
 // Palazzo Ducale in Genova: a real venue, eleven finished dates in the archive
 // on the day this was written, and the archive only ever grows.
-const VENUE = '/liguria/genova/palazzo-ducale/';
+const VENUE = '/en/liguria/genova/palazzo-ducale/';
 
 test('a venue says what has already happened there', async ({ page }) => {
   const response = await page.goto(VENUE);
@@ -36,6 +36,6 @@ test('and says it without advertising the pages', async ({ page }) => {
 });
 
 test('a city feed is not a venue and has no past section', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   await expect(page.locator('.venue-past')).toHaveCount(0);
 });

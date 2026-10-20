@@ -83,7 +83,7 @@ test('a venue page declares itself canonical, in all three languages', async ({ 
 
 test('a venue nobody plays at still has a page, it just says nothing is on', async ({ page }) => {
   // It used to 404, which is the site claiming the place is not real.
-  const response = await page.goto('/liguria/genova/bar-sotto-casa-che-non-esiste/');
+  const response = await page.goto('/en/liguria/genova/bar-sotto-casa-che-non-esiste/');
   expect(response?.status()).toBe(200);
   await expect(page.locator('[data-empty-state]')).toBeVisible();
 });
@@ -91,14 +91,14 @@ test('a venue nobody plays at still has a page, it just says nothing is on', asy
 test('a venue page asks the venue itself for its dates', async ({ page }) => {
   // The organiser is exactly who lands on a venue page, and until now the site
   // had nothing to say to them.
-  await page.goto('/liguria/genova/teatro-carlo-felice/');
+  await page.goto('/en/liguria/genova/teatro-carlo-felice/');
   const invite = page.locator('.venue-invite a');
   await expect(invite).toContainText('Teatro Carlo Felice');
   // It leads to the page that tells a venue what it gets — its dates kept
   // current, and its programme on its own site in one line of HTML — and it
   // carries the venue, so the code shown there is this venue's. It used to go
   // straight to the submit form, which asked for work before offering any.
-  await expect(invite).toHaveAttribute('href', '/venues/?venue=liguria/genova/teatro-carlo-felice');
+  await expect(invite).toHaveAttribute('href', '/en/venues/?venue=liguria/genova/teatro-carlo-felice');
 });
 
 test('one event is one event, in every language', async ({ page, request }) => {

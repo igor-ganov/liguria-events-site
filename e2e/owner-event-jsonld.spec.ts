@@ -10,14 +10,14 @@ test('an event page carries an Event document with everything Google asks for', 
   const id = corpus.at(0)?.id ?? '';
   expect(id).not.toBe('');
 
-  await page.goto(`/event/${id}/`);
+  await page.goto(`/en/event/${id}/`);
   const raw = await page.locator('script[type="application/ld+json"]').first().textContent();
   const json = JSON.parse(raw ?? '{}');
 
   expect(json['@type']).toBe('Event');
   expect(json['name']).toBeTruthy();
   expect(json['startDate']).toMatch(/^\d{4}-\d{2}-\d{2}/);
-  expect(json['url']).toContain('/event/');
+  expect(json['url']).toContain('/en/event/');
   expect(json['eventStatus']).toBe('https://schema.org/EventScheduled');
   expect(json['eventAttendanceMode']).toBe('https://schema.org/OfflineEventAttendanceMode');
   // Location with an address is the requirement events were failing.

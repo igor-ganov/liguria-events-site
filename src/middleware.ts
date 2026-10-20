@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { SESSION_COOKIE, sessionCookie } from './lib/auth/session.ts';
 import { authGate } from './lib/auth/auth-gate.ts';
+import { legacyLocalePath } from './lib/i18n/legacy-locale-path.ts';
 import { isDefined } from './lib/is-defined.ts';
 import { magicLinkLanding } from './lib/auth/magic-link-landing.ts';
 import { permanentRedirect } from './lib/http/permanent-redirect.ts';
@@ -28,6 +29,24 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
       break;
     default:
       return permanentRedirect(stray);
+  }
+
+  // English was the site with no prefix — a whole duplicate tree of route files
+  // at the root, mirroring [lang]/ — which is why "/" was the English home page
+  // rather than the door to the site, and why the one language nobody here
+  // reads held every address Google had indexed. English has a prefix now, so
+  // the addresses it used to own move to it, permanently and with whatever
+  // brought the reader still attached.
+  //
+  // This reaches the worker at all because 404.astro is server-rendered: an
+  // address that matches no route would otherwise be answered by the assets
+  // layer, which never runs any of this.
+  const moved = legacyLocalePath(ctx.url.pathname);
+  switch (moved) {
+    case undefined:
+      break;
+    default:
+      return permanentRedirect(`${moved}${ctx.url.search}`);
   }
 
   // A front door — "/", "/calendar", "/map" and their language-prefixed twins —

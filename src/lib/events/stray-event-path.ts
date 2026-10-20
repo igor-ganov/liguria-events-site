@@ -1,5 +1,6 @@
 import { branch } from '../branch.ts';
 import { eventIdOfPath } from './event-id-of-path.ts';
+import { DEFAULT_LOCALE } from '../i18n/default-locale.ts';
 import { LOCALES } from '../i18n/locales.ts';
 import { REGION_NAMES } from '../region/regions.ts';
 
@@ -16,11 +17,14 @@ import { REGION_NAMES } from '../region/regions.ts';
  */
 export const strayEventPath = (pathname: string): string | undefined => {
   const parts = pathname.split('/').filter((part) => part !== '');
-  const lang = LOCALES.filter((locale) => locale !== 'en').find((locale) => locale === parts[0]);
+  const lang = LOCALES.find((locale) => locale === parts[0]);
   const rest = parts.slice(...[lang].filter((found) => found !== undefined).map(() => 1));
   const region = Object.keys(REGION_NAMES).find((slug) => slug === rest[0]);
   const id = eventIdOfPath(rest[1] ?? '');
-  const prefix = [lang].filter((found) => found !== undefined).map((found) => `/${found}`).at(0) ?? '';
+  // A stray with no language was an English address, like every other address
+  // that had no prefix; sending it to a prefix-less one would only redirect it a
+  // second time, tens of thousands of times a day.
+  const prefix = `/${lang ?? DEFAULT_LOCALE}`;
   return branch(rest.length === 2 && region !== undefined && id !== '')(
     () => `${prefix}/event/${id}/`,
     () => undefined,

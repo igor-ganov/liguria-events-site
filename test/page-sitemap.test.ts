@@ -75,10 +75,13 @@ describe('pageSitemapUrls', () => {
     expect(locs).toContain('https://dovego.it/it/map/');
   });
 
-  test('a page built at the root only declares the one language it has', () => {
+  test('a page that is in no language is advertised at its one address', () => {
+    // It used to declare itself English, which held while English was the site
+    // with no prefix. The day English took one, that claim would have pointed
+    // at /en/terms/ — a page nobody builds.
     const terms = pageSitemapUrls(events, TODAY, SITE).find((url) => url.loc.endsWith('/terms/'));
     expect(terms?.loc).toBe('https://dovego.it/terms/');
-    expect(terms?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'x-default']);
+    expect(terms?.alternates).toEqual([]);
   });
 
   test('the pages that are written in three languages say so', () => {

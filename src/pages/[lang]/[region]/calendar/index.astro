@@ -11,7 +11,7 @@ import { monthKeyOf } from '../../../../lib/calendar/month-key-of.ts';
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   const cities = regionsOf(payload.events);
-  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+  return LOCALES.flatMap((lang) =>
     cities.map(({ slug }) => ({ params: { lang, region: slug }, props: { lang, region: slug } })),
   );
 };

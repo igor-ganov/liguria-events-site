@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE } from '../i18n/default-locale.ts';
+import { ROOT_ONLY } from '../i18n/root-only-locales.ts';
 import { sitemapRow } from './sitemap-row.ts';
 import type { SitemapUrl } from './sitemap-url.ts';
 
@@ -7,7 +7,7 @@ import type { SitemapUrl } from './sitemap-url.ts';
 // /it/ twin for them handed Google four URLs that answered 404 — the mistake
 // alternateLinks already carries a comment about.
 const TRANSLATED = ['releases/', 'roadmap/', 'venues/'];
-const ROOT_ONLY = ['privacy/', 'terms/', 'content-policy/'];
+const ROOT_PAGES = ['privacy/', 'terms/', 'content-policy/'];
 
 /**
  * The written pages, and only the written pages.
@@ -20,5 +20,5 @@ const ROOT_ONLY = ['privacy/', 'terms/', 'content-policy/'];
  */
 export const contentSitemapUrls = (today: string, site: URL | undefined): readonly SitemapUrl[] => [
   ...TRANSLATED.map((path) => sitemapRow(path, today, site)),
-  ...ROOT_ONLY.map((path) => sitemapRow(path, today, site, [DEFAULT_LOCALE])),
+  ...ROOT_PAGES.map((path) => sitemapRow(path, today, site, ROOT_ONLY)),
 ];

@@ -8,25 +8,28 @@
 #
 # Rules are matched in order, most specific first.
 
+# These were English addresses, so they move to where English lives now. The
+# /it/ and /ru/ twins below already named their language and are unchanged.
+#
 # The city URLs the site shipped with for a few hours, before the slice became
 # the region. A browser that saw "/" 301 to "/genova/" cached that answer
 # forever, so these keep resolving. Now that a region feed can be filtered to a
 # city, the legacy city FEED lands on that filter (?city=…); the exact feed rules
 # come first so they win over the splat below. The city sub-pages (calendar/map,
 # which don't filter by city) still land on the region's sub-page via the splat.
-/genova/         /liguria/genova/           301
-/milano/         /lombardia/milano/         301
-/torino/         /piemonte/torino/          301
+/genova/         /en/liguria/genova/           301
+/milano/         /en/lombardia/milano/         301
+/torino/         /en/piemonte/torino/          301
 /it/genova/      /it/liguria/genova/        301
 /ru/genova/      /ru/liguria/genova/        301
-/genova          /liguria/genova/           301
-/milano          /lombardia/milano/         301
-/torino          /piemonte/torino/          301
+/genova          /en/liguria/genova/           301
+/milano          /en/lombardia/milano/         301
+/torino          /en/piemonte/torino/          301
 /it/genova       /it/liguria/genova/        301
 /ru/genova       /ru/liguria/genova/        301
-/genova/*        /liguria/:splat            301
-/milano/*        /lombardia/:splat          301
-/torino/*        /piemonte/:splat           301
+/genova/*        /en/liguria/:splat            301
+/milano/*        /en/lombardia/:splat          301
+/torino/*        /en/piemonte/:splat           301
 /it/genova/*     /it/liguria/:splat         301
 /ru/genova/*     /ru/liguria/:splat         301
 

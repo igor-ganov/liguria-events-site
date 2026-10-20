@@ -11,7 +11,7 @@ const token = (page: Page, name: string) =>
   page.evaluate((n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), name);
 
 test('the palette reaches the page', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   // Read from the stylesheet rather than written out here: a literal in a spec
   // is a second source of truth, and it goes stale the first time a colour is
   // corrected — which is exactly what happened when --sosta was darkened to
@@ -23,7 +23,7 @@ test('the palette reaches the page', async ({ page }) => {
 });
 
 test('both typefaces actually load', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await page.waitForFunction(() => document.fonts.status === 'loaded');
   // A family name in the stack proves nothing — the face has to be there, or
   // the page silently falls back and the design is gone.
@@ -36,7 +36,7 @@ test('both typefaces actually load', async ({ page }) => {
 });
 
 test('the primary action is drawn, not bordered', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const azione = page.locator('.head-create').first();
   await expect(azione).toBeVisible();
   const disegno = await azione.evaluate((n) => ({
@@ -48,14 +48,14 @@ test('the primary action is drawn, not bordered', async ({ page }) => {
 });
 
 test('chips carry the same hand as the buttons', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const chip = page.locator('.chip').first();
   await expect(chip).toBeVisible();
   await expect(chip).toHaveCSS('border-image-source', /svg/);
 });
 
 test('the thread runs down the feed and ends frayed', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const percorso = page.locator('.percorso');
   await expect(percorso).toBeVisible();
   // One thread per page: two would stop being a route and become decoration.
@@ -81,7 +81,7 @@ test('the thread runs down the feed and ends frayed', async ({ page }) => {
 });
 
 test('the thread is drawn as far as it has been read, and no further', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const velo = page.locator('.velo-filo');
   await expect(velo).toHaveCount(1);
 
@@ -107,7 +107,7 @@ test('the thread is drawn as far as it has been read, and no further', async ({ 
 });
 
 test('the create button is the loud one, and says what it does', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const crea = page.locator('.head-create');
   await expect(crea).toBeVisible();
   // Not a bare plus sign: the label is the whole point of the control.
@@ -127,7 +127,7 @@ test('the create button is the loud one, and says what it does', async ({ page }
 
 test('the create button stands out on a phone too', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const crea = page.locator('.head-create');
   await expect(crea.locator('span')).toBeVisible();
   const box = await crea.boundingBox();

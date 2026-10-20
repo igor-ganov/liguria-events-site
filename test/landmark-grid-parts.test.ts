@@ -99,7 +99,7 @@ describe('landmarkThumbHtml', () => {
 describe('landmarkCardHtml', () => {
   test('links to the detail page and carries the kind colour and label', () => {
     const html = landmarkCardHtml('en', ui)(landmark({ desc: 'On a rock.' }));
-    assert.ok(html.includes('href="/landmark/liguria/castello-della-pietra--'));
+    assert.ok(html.includes('href="/en/landmark/liguria/castello-della-pietra--'));
     assert.ok(html.includes('style="--lm:#8d6e63"'));
     assert.ok(html.includes('<span class="lm-name">Castello della Pietra</span>'));
     assert.ok(html.includes(ui.landmarks.kinds.castle));

@@ -11,8 +11,8 @@ import { menuGroups } from '../lib/menu/menu-groups.ts';
 import { LEGACY_REGION } from '../lib/region/legacy-region.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; path: string; region?: string }>;
-const { lang, path, region = LEGACY_REGION } = Astro.props;
+type Props = Readonly<{ lang: Locale; path: string; region?: string; locales: readonly Locale[] }>;
+const { lang, path, region = LEGACY_REGION, locales } = Astro.props;
 const ui = await uiOf(lang);
 const groups = menuGroups(lang, region, ui);
 ---
@@ -38,7 +38,7 @@ const groups = menuGroups(lang, region, ui);
   <nav id="fab-popup" class="fab-popup" data-fab-panel role="dialog" aria-modal="true" aria-label="Menu">
     <FabGroups groups={groups} lang={lang} favLabel={ui.nav.favorites} />
     <div class="fab-tools">
-      <LanguageSwitcher lang={lang} path={path} />
+      <LanguageSwitcher lang={lang} path={path} locales={locales} />
       <ThemeToggle ui={ui} labelled />
     </div>
     <div class="fab-account" data-account></div>

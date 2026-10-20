@@ -15,7 +15,7 @@ const slowCorpus = (page: Page, ms: number): Promise<unknown> =>
 
 test('the map still draws and clears its skeleton when the corpus arrives late', async ({ page }) => {
   await slowCorpus(page, 2500);
-  await page.goto('/liguria/map/');
+  await page.goto('/en/liguria/map/');
 
   // The map itself comes up while the corpus is still in flight.
   await expect(page.locator('canvas.maplibregl-canvas')).toBeVisible({ timeout: 30_000 });

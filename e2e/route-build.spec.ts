@@ -13,7 +13,7 @@ test('route builds after opening Favourites via the SPA router', async ({ page }
     route.fulfill({ contentType: 'application/json', body: JSON.stringify(corpus) }),
   );
 
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1', 'e2'])));
 
   // Open Favourites the way a user does — the header link, intercepted by
@@ -42,9 +42,9 @@ test('route builds after opening Favourites via the SPA router', async ({ page }
 test('route tools stay visible when favourites exist but the corpus is unavailable', async ({ page }) => {
   await page.route('**/events.json*', (route) => route.abort());
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1'])));
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   await expect(page.locator('[data-route-generate]')).toBeVisible();
 });
@@ -55,9 +55,9 @@ test('route tools stay visible when favourites exist but the corpus is unavailab
 // dark theme. It is now painted by the Filo hand-drawn stroke instead of a
 // background colour, so the assertion is that SOMETHING fills it — either way.
 test('the Generate route button is actually painted (not invisible)', async ({ page }) => {
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => localStorage.setItem('dovego:favorites', JSON.stringify(['e1'])));
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   const btn = page.locator('[data-route-generate]');
   await expect(btn).toBeVisible();

@@ -19,7 +19,7 @@ import { uiOf } from '../../../lib/i18n/ui-of.ts';
 import { LOCALES } from '../../../lib/i18n/locales.ts';
 
 const { lang: langParam, id = '' } = Astro.params;
-const lang = LOCALES.find((l) => l === langParam && l !== 'en');
+const lang = LOCALES.find((l) => l === langParam);
 switch (lang) {
   case undefined:
     return new Response(null, { status: 404 });

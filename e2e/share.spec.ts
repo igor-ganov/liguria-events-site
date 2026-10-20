@@ -7,7 +7,7 @@ import { SHARE } from '../src/components/share/share-selectors.ts';
 test.use({ permissions: ['clipboard-read', 'clipboard-write'] });
 
 test('a feed page can be shared, and says so when the link is copied', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const button = page.locator(SHARE.buttonSelector);
   await expect(button).toBeVisible();
   await expect(button).toHaveAccessibleName('Share');
@@ -15,11 +15,11 @@ test('a feed page can be shared, and says so when the link is copied', async ({ 
   await button.click();
   // The desktop browser has no share sheet, so the clipboard is the path taken.
   await expect(button.locator(SHARE.labelSelector)).toHaveText('Link copied');
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('/liguria/genova/');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('/en/liguria/genova/');
 });
 
 test('the control is reachable and operable from the keyboard', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const button = page.locator(SHARE.buttonSelector);
   await button.focus();
   await expect(button).toBeFocused();

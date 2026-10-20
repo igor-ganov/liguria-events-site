@@ -36,7 +36,7 @@ const poi = (id: string, lat: number, lng: number) => ({
   lat,
   lng,
   cat: 'castle',
-  url: `/landmark/liguria/${id}/`,
+  url: `/en/landmark/liguria/${id}/`,
 });
 
 test('generator timeline: dragging a block body pins its start time and persists', async ({ page }) => {
@@ -49,7 +49,7 @@ test('generator timeline: dragging a block body pins its start time and persists
   await page.route('**/events.json*', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify({ events: [] }) }));
   await page.route('https://api.transitous.org/**', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(PLAN) }));
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.locator('[data-route-generate]').click();
 
   // Wait until real routing has settled before switching views, so the timeline

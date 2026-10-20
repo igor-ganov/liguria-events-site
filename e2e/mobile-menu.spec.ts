@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 test.use({ viewport: { width: 360, height: 520 } });
 
 test('mobile menu stays within the viewport', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await page.locator('.mobile-fab').click();
 
   const popup = page.locator('.fab-popup');
@@ -25,7 +25,7 @@ test('mobile menu stays within the viewport', async ({ page }) => {
 for (const larghezza of [360, 390, 430]) {
   test(`nothing spills out of the menu at ${larghezza}px`, async ({ page }) => {
     await page.setViewportSize({ width: larghezza, height: 840 });
-    await page.goto('/liguria/');
+    await page.goto('/en/liguria/');
     await page.locator('.mobile-fab').click();
     const popup = page.locator('.fab-popup');
     await expect(popup).toHaveCSS('opacity', '1');

@@ -25,7 +25,7 @@ const transitionActive = (page: Page) =>
   );
 
 test('header stays out of the root snapshot during a ClientRouter transition', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('header.site-head')).toBeVisible();
 
   await page.addStyleTag({ content: SLOW_TX });

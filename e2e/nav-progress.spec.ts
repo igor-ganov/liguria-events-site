@@ -12,7 +12,7 @@ const slow = async (page: Page, urlGlob: string, ms: number): Promise<void> => {
 };
 
 test('the nav progress bar shows during a slow forward navigation and completes', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const bar = page.locator('#nav-progress');
   await expect(bar).toHaveCSS('opacity', '0'); // idle: hidden
 
@@ -25,7 +25,7 @@ test('the nav progress bar shows during a slow forward navigation and completes'
 });
 
 test('the nav progress bar also drives back navigation', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await page.locator('.site-head nav a[href$="/calendar/"]').first().click();
   await expect(page).toHaveURL(/\/calendar\/?$/);
 

@@ -1,8 +1,0 @@
----
-import '../../../styles/pages/place._region._slug.css';
-export const prerender = false;
-import PlaceDetail from '../../../components/views/PlaceDetail.astro';
-const { region, slug } = Astro.params;
----
-
-<PlaceDetail lang="en" region={region ?? ''} slug={slug ?? ''} />

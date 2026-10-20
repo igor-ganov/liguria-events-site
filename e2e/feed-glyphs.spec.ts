@@ -10,7 +10,7 @@ const painted = (svg: SVGGraphicsElement): number => {
 };
 
 test('the heart, the category and the pin on a card are all drawn', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const card = page.locator('[data-feed-list] li:has(.photo-card-venue)').first();
   await card.scrollIntoViewIfNeeded();
   expect(await card.locator('.fav-btn svg').evaluate(painted)).toBeGreaterThan(0);
@@ -19,7 +19,7 @@ test('the heart, the category and the pin on a card are all drawn', async ({ pag
 });
 
 test('the page draws each glyph once, however many cards point at it', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const drawings = await page.locator('[data-feed-list] li').evaluateAll((cards) => cards.reduce((count, card) => count + card.querySelectorAll('svg path, svg circle, svg rect, svg line, svg polyline').length, 0));
   const blanks = await page.locator('[data-feed-list] .photo-card-blank').count();
   // A card with no photograph still draws the site's mark in place: two paths.
@@ -27,7 +27,7 @@ test('the page draws each glyph once, however many cards point at it', async ({ 
 });
 
 test('a heart pointed at still fills when the event is saved', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const heart = page.locator('[data-feed-list] li .fav-btn').first();
   await heart.scrollIntoViewIfNeeded();
   await heart.click();

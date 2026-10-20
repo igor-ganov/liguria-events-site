@@ -14,20 +14,20 @@ import { TESTER_CALL } from '../src/lib/testing/tester-call.ts';
 const SHOWN = Number(TESTER_CALL.open);
 
 test('a region page carries the call exactly when it is switched on', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.getByRole('complementary', { name: /Help launch the app/i })).toHaveCount(SHOWN);
 });
 
 test('both steps are linked, at the addresses the constant names', async ({ page }) => {
   // Two links because joining and opting in are two separate things; somebody
   // who only does the first gets no app and no explanation why.
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator(`a[href="${TESTER_CALL.group}"]`)).toHaveCount(SHOWN);
   await expect(page.locator(`a[href="${TESTER_CALL.optIn}"]`)).toHaveCount(SHOWN);
 });
 
 test('it does not follow the reader into a city', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   await expect(page.getByRole('complementary', { name: /Help launch the app/i })).toHaveCount(0);
   await expect(page.locator(`a[href="${TESTER_CALL.group}"]`)).toHaveCount(0);
 });

@@ -24,7 +24,7 @@ describe('upcomingSitemapUrls', () => {
       'https://dovego.it/it/event/concerto-2026-08-20-abc/',
     ]);
     assert.deepEqual(urls[0]?.alternates, [
-      { hreflang: 'en', href: 'https://dovego.it/event/concerto-2026-08-20-abc/' },
+      { hreflang: 'en', href: 'https://dovego.it/en/event/concerto-2026-08-20-abc/' },
       { hreflang: 'it', href: 'https://dovego.it/it/event/concerto-2026-08-20-abc/' },
       { hreflang: 'ru', href: 'https://dovego.it/ru/event/concerto-2026-08-20-abc/' },
       { hreflang: 'x-default', href: 'https://dovego.it/it/event/concerto-2026-08-20-abc/' },
@@ -82,14 +82,14 @@ describe('alternateLinks', () => {
     ]);
   });
 
-  test('a page built at the root only declares only that', async () => {
+  test('a page that is in no language declares no alternates', async () => {
     // /terms/ advertised /it/terms/ and /ru/terms/, neither of which was ever
-    // built: four 404s handed to Google in our own markup.
+    // built: four 404s handed to Google in our own markup. It then declared
+    // itself English, which held while English was the site with no prefix —
+    // and would have pointed at /en/terms/, another page that is not built, the
+    // day English took one. It is answered at one address and has no language.
     const { alternateLinks } = await import('../src/lib/seo/alternate-links.ts');
     const { ROOT_ONLY } = await import('../src/lib/i18n/root-only-locales.ts');
-    assert.deepEqual(alternateLinks('terms/', SITE, ROOT_ONLY), [
-      { hreflang: 'en', href: 'https://dovego.it/terms/' },
-      { hreflang: 'x-default', href: 'https://dovego.it/terms/' },
-    ]);
+    assert.deepEqual(alternateLinks('terms/', SITE, ROOT_ONLY), []);
   });
 });

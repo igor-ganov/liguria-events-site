@@ -30,7 +30,7 @@ const corpusOf = (event: unknown) => (page: Page): Promise<unknown> =>
   );
 
 const openMap = async (page: Page, day: string): Promise<void> => {
-  await page.goto(`/liguria/map/?from=${day}&to=${day}`);
+  await page.goto(`/en/liguria/map/?from=${day}&to=${day}`);
   // The map has finished its first draw — markers, if any, are on the canvas.
   await expect(page.locator('[data-map-canvas]')).toHaveAttribute('data-loading', 'false', {
     timeout: 30_000,

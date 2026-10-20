@@ -3,7 +3,7 @@
 // feed with a card title three levels under the page title and nothing between.
 import { expect, test } from '@playwright/test';
 
-const PAGES = ['/liguria/', '/liguria/genova/', '/liguria/calendar/'];
+const PAGES = ['/en/liguria/', '/en/liguria/genova/', '/en/liguria/calendar/'];
 
 const levels = (): number[] =>
   [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')].map((heading) => Number(heading.tagName.slice(1)));
