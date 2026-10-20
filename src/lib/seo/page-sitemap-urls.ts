@@ -19,7 +19,7 @@ export const pageSitemapUrls = (
   today: string,
   site: URL | undefined,
 ): readonly SitemapUrl[] => [
-  ...doorSitemapUrls(today, site),
+  ...doorSitemapUrls(events, today, site),
   ...regionSitemapUrls(events, today, site),
   ...citySitemapUrls(events, today, site),
   ...contentSitemapUrls(today, site),

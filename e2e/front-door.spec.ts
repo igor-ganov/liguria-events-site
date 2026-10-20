@@ -63,15 +63,34 @@ test('a reader with nothing remembered is asked, not guessed at', async ({ page 
   expect(new URL(page.url()).pathname).toBe('/');
 });
 
-test('the country calendar and map ask the same question, for their own page', async ({ page }) => {
-  await page.goto('/calendar');
-  await page.evaluate(() => localStorage.clear());
-  await page.goto('/calendar');
-  await expect(page.locator('[data-entry] h1')).toBeVisible();
-  // Picking a region from here lands on that region's calendar, not its feed.
-  await expect(page.locator('.entry-regions .rp-region a').first()).toHaveAttribute('href', /\/calendar\/$/);
-  await page.goto('/map');
-  await expect(page.locator('.entry-regions .rp-region a').first()).toHaveAttribute('href', /\/map\/$/);
+test('the country calendar is a calendar, not a redirect into a region', async ({ page }) => {
+  // "/calendar" named no region, so one was guessed for it — the menu item sent
+  // every reader into Lombardia. It is the country's month now, and the region
+  // is a filter in the header rather than a segment of the address.
+  await page.goto('/calendar/');
+  await expect(page.locator('.cal-grid')).toBeVisible();
+  await expect(page.locator('[data-entry]')).toHaveCount(0);
+  expect(new URL(page.url()).pathname).toBe('/calendar/');
+});
+
+test('and a day it cannot print whole says how much it is holding', async ({ page }) => {
+  await page.goto('/calendar/');
+  // A day of the whole country carries dozens; the cap is only honest if the
+  // rest is counted rather than dropped.
+  expect(await page.locator('.cal-more').count()).toBeGreaterThan(0);
+});
+
+test('the country map opens on the country', async ({ page }) => {
+  await page.goto('/map/');
+  await expect(page.locator('[data-entry]')).toHaveCount(0);
+  expect(new URL(page.url()).pathname).toBe('/map/');
+  expect(await page.evaluate(() => Object(globalThis)['__REGION__'])).toBe('');
+});
+
+test('switching region from a national page keeps you on that page', async ({ page }) => {
+  await page.goto('/calendar/');
+  const first = page.locator('.region-picker .rp-region a').first();
+  await expect(first).toHaveAttribute('href', /\/[a-z-]+\/calendar\/$/);
 });
 
 test('a reader whose browser speaks Italian is sent on in Italian', async ({ browser }) => {

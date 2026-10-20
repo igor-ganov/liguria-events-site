@@ -21,6 +21,8 @@ export const chromeUi = {
   entry: z.object({
     heading: z.string(), lead: z.string(), pickHeading: z.string(),
     regionsHeading: z.string(), hereRegion: z.string(), hereCity: z.string(),
+    /** What the calendar and the map are OF when they are not of a region. */
+    country: z.string(),
   }),
   menu: z.object({ events: z.string(), explore: z.string(), more: z.string() }),
   venues: z.object({

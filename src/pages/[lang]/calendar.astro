@@ -1,14 +1,16 @@
 ---
 import '../../styles/pages/_lang.calendar.css';
-import EntryView from '../../components/views/EntryView.astro';
+import CalendarView from '../../components/views/CalendarView.astro';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { LOCALES } from '../../lib/i18n/locales.ts';
-import { uiOf } from '../../lib/i18n/ui-of.ts';
+import { monthKeyOf } from '../../lib/calendar/month-key-of.ts';
 
+// The country's calendar for this month. It used to be a 302 into whichever
+// region an IP lookup suggested; the region is a filter now, not a segment.
 export const getStaticPaths = () =>
   LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
 
 const { lang } = Astro.props;
-const ui = await uiOf(lang);
 ---
 
-<EntryView lang={lang} page="calendar/" title={ui.nav.calendar} description={ui.entry.lead} />
+<CalendarView lang={lang} region="" monthKey={monthKeyOf(isoToday())} />

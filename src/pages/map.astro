@@ -1,12 +1,11 @@
 ---
 import '../styles/pages/map.css';
-import EntryView from '../components/views/EntryView.astro';
-import { uiOf } from '../lib/i18n/ui-of.ts';
+import MapView from '../components/views/MapView.astro';
 
-// A map with no region named. The same question as the front page, with its
-// links pointing at each region's map.
+// The country's map. The map has always carried every event in Italy and merely
+// opened on a region; this is the same map with no region to open on, so it
+// opens on all of it.
 const lang = 'en' as const;
-const ui = await uiOf(lang);
 ---
 
-<EntryView lang={lang} page="map/" title={ui.nav.map} description={ui.entry.lead} />
+<MapView lang={lang} region="" />

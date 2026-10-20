@@ -1616,6 +1616,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 .feed-more { display: block; height: 1px; }
 [data-feed-list]:has(> template[data-feed-tail]) > .capo { display: none; }
 
+/* A day that is holding more than it shows. The number is the honest part of
+   a cap: the cell is not pretending that is all there is. */
+.cal-more { display: block; margin-top: 0.15rem; color: var(--muted); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+
 /* ══ the front door ═════════════════════════════════════════════════
    The page that asks instead of guessing. It used to be a 302 to whichever
    region an IP lookup suggested, so it had no styles at all. Its job is to be

@@ -110,3 +110,16 @@ describe('the front doors', () => {
     expect(door?.alternates.find((alt) => alt.hreflang === 'x-default')?.href).toBe('https://dovego.it/it/');
   });
 });
+
+describe('the national calendar', () => {
+  test('its months are offered too, and only the ones still to come', () => {
+    expect(locs).toContain('https://dovego.it/it/calendar/2026-10/');
+    expect(locs).toContain('https://dovego.it/it/calendar/2026-11/');
+    expect(locs.some((loc) => loc.includes('/it/calendar/2026-09/'))).toBe(false);
+  });
+
+  test('and they are the country\u2019s, with no region in the address', () => {
+    expect(locs.some((loc) => /\/it\/[a-z-]+\/calendar\/2026-11\/$/.test(loc))).toBe(true);
+    expect(locs).toContain('https://dovego.it/it/calendar/2026-11/');
+  });
+});

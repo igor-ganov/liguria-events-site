@@ -1,0 +1,23 @@
+---
+import '../../styles/pages/calendar._month.css';
+import CalendarView from '../../components/views/CalendarView.astro';
+import { cachedEvents } from '../../data/cached-events.ts';
+import { EVENTS_URL } from '../../data/events-url.ts';
+import { eventMonths } from '../../lib/calendar/event-months.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
+
+// One month of the country. The same range the regions get — from last month,
+// whose back arrow has to land somewhere, to the horizon.
+export const getStaticPaths = async () => {
+  const payload = await cachedEvents(EVENTS_URL);
+  return eventMonths(payload.events, isoToday()).map((month) => ({
+    params: { month },
+    props: { month },
+  }));
+};
+
+const lang = 'en' as const;
+const { month } = Astro.props;
+---
+
+<CalendarView lang={lang} region="" monthKey={month} />
