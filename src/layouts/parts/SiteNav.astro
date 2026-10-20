@@ -14,8 +14,11 @@ const { lang, region, path, ui } = Astro.props;
   <a href={regionUrl(lang, region)}>{ui.nav.feed}</a>
   <a href={regionUrl(lang, region, 'calendar/')}>{ui.nav.calendar}</a>
   <a href={regionUrl(lang, region, 'map/')}>{ui.nav.map}</a>
-  <a href={regionUrl(lang, region, 'landmarks/')}>{ui.nav.landmarks}</a>
-  <a href={regionUrl(lang, region, 'places/')}>{ui.nav.places}</a>
+  {/* Landmarks and places exist inside a region only. On a front door there is
+      no region yet — that is the question the page is asking — so the nav does
+      not invent one. */}
+  {region !== '' && <a href={regionUrl(lang, region, 'landmarks/')}>{ui.nav.landmarks}</a>}
+  {region !== '' && <a href={regionUrl(lang, region, 'places/')}>{ui.nav.places}</a>}
   <a class="nav-fav" href={localizedUrl(lang, 'favorites/')}>
     {ui.nav.favorites}<span class="fav-badge" data-fav-count hidden></span>
   </a>

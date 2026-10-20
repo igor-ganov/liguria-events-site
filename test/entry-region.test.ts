@@ -1,13 +1,14 @@
-// The site stopped being a Liguria guide a long time ago: 1 583 events across
-// twelve regions, Lombardia first with 536 and Liguria third with 299. The front
-// door still sent everybody to Liguria, and so did the bare /calendar, /map, /it
-// and /ru. A reader's own region is a fact Cloudflare hands us on every request;
-// where the events actually are is a fact in the corpus. Neither needs a
-// constant naming the region the site was founded in.
+// What is left of the front door once it stopped guessing. bareEntry still says
+// which addresses are doors — it is how the one remaining redirect, to the
+// language the reader's browser asked for, finds them. geoRegion and
+// busiestRegion decide no door at all now: they survive as the fallback for a
+// push subscription on /notifications/, a page that asks the reader for their
+// location first and needs something to answer a refusal with.
+//
+// Nothing in this file decides where a reader lands. See entry-landing.test.ts.
 import { describe, expect, test } from 'bun:test';
 import { bareEntry } from '../src/lib/i18n/bare-entry.ts';
 import { busiestRegion } from '../src/lib/region/busiest-region.ts';
-import { entryPath } from '../src/lib/i18n/entry-path.ts';
 import { geoRegion } from '../src/lib/region/geo-region.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
@@ -90,20 +91,3 @@ describe('bareEntry', () => {
   });
 });
 
-describe('entryPath', () => {
-  test('opens the reader region, in the language they asked for', () => {
-    expect(entryPath('/', 'ru,en;q=0.8', 'lombardia')).toBe('/ru/lombardia/');
-    expect(entryPath('/', undefined, 'lazio')).toBe('/it/lazio/');
-    expect(entryPath('/', 'en-GB', 'toscana')).toBe('/toscana/');
-  });
-
-  test('keeps the page the address asked for, and the language it already names', () => {
-    expect(entryPath('/calendar', 'en-GB', 'toscana')).toBe('/toscana/calendar/');
-    expect(entryPath('/it/map', 'en-GB', 'veneto')).toBe('/it/veneto/map/');
-    expect(entryPath('/ru', undefined, 'sicilia')).toBe('/ru/sicilia/');
-  });
-
-  test('and leaves every other address alone', () => {
-    expect(entryPath('/liguria/', undefined, 'liguria')).toBeUndefined();
-  });
-});

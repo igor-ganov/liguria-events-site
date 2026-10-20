@@ -67,8 +67,12 @@ describe('pageSitemapUrls', () => {
     );
   });
 
-  test('the map is an application view, not a landing page', () => {
-    expect(locs.some((loc) => loc.includes('/map/'))).toBe(false);
+  test('a region map is an application view, not a landing page', () => {
+    // Twenty near-identical map views were the bulk of the generated file. The
+    // one country-wide door is a different thing: it is a page that asks which
+    // region, and before this it answered 302 and could not be offered at all.
+    expect(locs.some((loc) => /\/[a-z-]+\/map\/$/.test(loc.replace('https://dovego.it/it', '')))).toBe(false);
+    expect(locs).toContain('https://dovego.it/it/map/');
   });
 
   test('a page built at the root only declares the one language it has', () => {
@@ -85,5 +89,24 @@ describe('pageSitemapUrls', () => {
 
   test('no event pages: they move on another clock and have a file of their own', () => {
     expect(locs.some((loc) => loc.includes('/event/'))).toBe(false);
+  });
+});
+
+describe('the front doors', () => {
+  // They could not be advertised before: each one answered 302, and `/` has sat
+  // in Google's index as a redirect since the site began — crawled 13 July,
+  // never since. A redirect is not a page anybody can be shown in a result.
+  test('the page, the country calendar and the country map are pages now, and offered as pages', () => {
+    expect(locs).toContain('https://dovego.it/it/');
+    expect(locs).toContain('https://dovego.it/it/calendar/');
+    expect(locs).toContain('https://dovego.it/it/map/');
+  });
+
+  test('each declaring the languages it is written in', () => {
+    const door = pageSitemapUrls(events, TODAY, SITE).find((url) => url.loc === 'https://dovego.it/it/');
+    expect(door?.alternates.map((alt) => alt.hreflang)).toEqual(['en', 'it', 'ru', 'x-default']);
+    // x-default is the Italian door, and it is a page — it used to be the 404
+    // every page's hreflang cluster pointed at.
+    expect(door?.alternates.find((alt) => alt.hreflang === 'x-default')?.href).toBe('https://dovego.it/it/');
   });
 });

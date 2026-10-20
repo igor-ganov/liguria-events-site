@@ -46,10 +46,15 @@ export const menuGroups = (lang: Locale, region: string, ui: MenuUi): readonly M
   {
     label: ui.menu.explore,
     favourites: false,
-    links: [
-      { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin', label: ui.nav.landmarks },
-      { href: regionUrl(lang, region, 'places/'), icon: 'places', label: ui.nav.places },
-    ],
+    // Landmarks and places exist inside a region only. On a front door there is
+    // no region yet — that is what the page is asking — so the group is empty
+    // rather than pointing at two addresses that were never built.
+    links: [region]
+      .filter((slug) => slug !== '')
+      .flatMap(() => [
+        { href: regionUrl(lang, region, 'landmarks/'), icon: 'pin' as const, label: ui.nav.landmarks },
+        { href: regionUrl(lang, region, 'places/'), icon: 'places' as const, label: ui.nav.places },
+      ]),
   },
   {
     label: ui.menu.more,

@@ -39,7 +39,7 @@ const onSheetClick = (parts: RegionPickerParts, popup: RegionPopup, event: Mouse
 /** Wire one picker's elements: open/close, filter-as-you-type and Enter. */
 export const wireRegionPicker = (parts: RegionPickerParts): void => {
   const popup = regionPopup(parts);
-  wireRegionHere(parts);
+  wireRegionHere(parts.root, parts.list);
   parts.toggle.addEventListener('click', () => popup.flip());
   // Escape and backdrop taps close a dialog on their own — keep the button's
   // state truthful when they do.

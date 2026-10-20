@@ -1615,3 +1615,55 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
    thread has not run out, so its frayed end is not drawn yet. */
 .feed-more { display: block; height: 1px; }
 [data-feed-list]:has(> template[data-feed-tail]) > .capo { display: none; }
+
+/* ══ the front door ═════════════════════════════════════════════════
+   The page that asks instead of guessing. It used to be a 302 to whichever
+   region an IP lookup suggested, so it had no styles at all. Its job is to be
+   answerable in one glance on a phone: the question, the two ways to answer it
+   from where you stand, what is on in a few regions, and then the country. */
+.entry { max-width: 54rem; margin: 0 auto; padding: 1.2rem 0 2.4rem; }
+.entry h1 { font-size: 1.55rem; line-height: 1.15; margin: 0 0 0.4rem; }
+.entry-lead { color: var(--muted); margin: 0 0 1.2rem; max-width: 42rem; }
+.entry-heading { font-size: 1rem; font-weight: 700; margin: 2rem 0 0.7rem; }
+
+/* The reader saying where they are — the answer that now wins. Side by side,
+   thumb-sized, above everything they would otherwise have to read. */
+.entry-here { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.entry-here button {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.55rem 1.05rem; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink); font: inherit; font-weight: 600; cursor: pointer;
+}
+.entry-here button:hover { border-color: var(--accent); color: var(--accent); }
+.entry-here button[aria-busy='true'] { opacity: 0.6; cursor: progress; }
+
+/* One card per region, as wide as the screen allows. The card is the feed's
+   own — a reader should recognise what they are about to click. */
+.entry-picks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.entry-pick { display: flex; flex-direction: column; gap: 0.4rem; }
+.entry-pick-where {
+  display: inline-flex; align-items: baseline; gap: 0.4rem; align-self: start;
+  color: var(--ink); text-decoration: none; font-weight: 700;
+}
+.entry-pick-where:hover { color: var(--accent); }
+.entry-pick-where small { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* Twenty regions, so a list that wraps rather than a column that scrolls. The
+   city rows are in the markup for the geolocation buttons to measure against
+   and stay hidden: four hundred links are not a landing page. */
+.entry-regions { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 0.6rem; }
+.entry-regions .rp-region {
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface);
+}
+.entry-regions .rp-region > a {
+  display: inline-flex; align-items: baseline; gap: 0.4rem;
+  padding: 0.3rem 0.8rem; color: var(--ink); text-decoration: none;
+}
+.entry-regions .rp-region > a:hover { color: var(--accent); }
+.entry-regions .rp-region small { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+
+@media (min-width: 44rem) {
+  .entry h1 { font-size: 2rem; }
+  .entry-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

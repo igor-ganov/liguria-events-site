@@ -1,0 +1,12 @@
+---
+import '../styles/pages/index.css';
+import EntryView from '../components/views/EntryView.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+// The front door, which used to be a 302 and is now a page. See EntryView for
+// what it decides and what it refuses to decide.
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+---
+
+<EntryView lang={lang} page="" title={ui.entry.heading} description={ui.entry.lead} />

@@ -1,0 +1,53 @@
+---
+import { placeKey } from '../../lib/region/place-key.ts';
+import { regionUrl } from '../../lib/region/region-url.ts';
+import { localizedUrl } from '../../lib/i18n/localized-url.ts';
+import type { Centroid } from '../../lib/region/city-centroids.ts';
+import type { RegionGroup } from '../../lib/region/regions-cities-of.ts';
+import type { Locale } from '../../lib/i18n/locales.ts';
+
+// The whole country as links, on the page rather than inside a dialog. The row
+// markup is the picker's own — .rp-region / .rp-city carrying the slug and the
+// point — so "my region" and "my city" resolve a position against these rows
+// with the same helpers the header picker uses, and a row's own href is what
+// navigation reuses: whatever it carries (the locale, the page segment) is
+// exactly where the reader should land.
+//
+// The city rows are hidden until something searches them. They are here for the
+// geolocation buttons and for a reader who types a town name, not to put four
+// hundred links on a landing page.
+type Props = Readonly<{
+  lang: Locale;
+  groups: readonly RegionGroup[];
+  page: string;
+  points: ReadonlyMap<string, Centroid>;
+}>;
+const { lang, groups, page, points } = Astro.props;
+---
+
+<ul class="entry-regions" data-region-list>
+  {groups.map((group) => (
+    <Fragment>
+      <li class="rp-region" data-name={group.name.toLowerCase()} data-region={group.slug}>
+        <a href={regionUrl(lang, group.slug, page)}>
+          <span>{group.name}</span><small>{group.count}</small>
+        </a>
+      </li>
+      {group.cities.map((city) => (
+        <li
+          class="rp-city"
+          hidden
+          data-name={`${group.name.toLowerCase()} ${city.name.toLowerCase()}`}
+          data-region={group.slug}
+          data-city={city.slug}
+          data-lat={points.get(placeKey(group.slug, city.slug))?.lat}
+          data-lng={points.get(placeKey(group.slug, city.slug))?.lng}
+        >
+          <a href={localizedUrl(lang, `${group.slug}/${city.slug}/`)}>
+            <span>{city.name}</span><small>{city.count}</small>
+          </a>
+        </li>
+      ))}
+    </Fragment>
+  ))}
+</ul>

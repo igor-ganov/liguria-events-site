@@ -1,0 +1,12 @@
+---
+import '../styles/pages/map.css';
+import EntryView from '../components/views/EntryView.astro';
+import { uiOf } from '../lib/i18n/ui-of.ts';
+
+// A map with no region named. The same question as the front page, with its
+// links pointing at each region's map.
+const lang = 'en' as const;
+const ui = await uiOf(lang);
+---
+
+<EntryView lang={lang} page="map/" title={ui.nav.map} description={ui.entry.lead} />

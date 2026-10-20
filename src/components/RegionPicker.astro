@@ -7,11 +7,13 @@ import { EVENTS_URL } from '../data/events-url.ts';
 import { cityCentroids } from '../lib/region/city-centroids.ts';
 import { regionsAndCitiesOf } from '../lib/region/regions-cities-of.ts';
 import { placeLabel } from '../lib/region/place-label.ts';
+import { uiOf } from '../lib/i18n/ui-of.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
 type Props = Readonly<{ lang: Locale; region: string; page?: string; city?: string | undefined }>;
 const { lang, region, page = '', city } = Astro.props;
 const label = placeLabel(region, city);
+const ui = await uiOf(lang);
 
 // A combined region+city picker: every region is a bold group header, its
 // cities listed under it, each row carrying its event count. Region headers keep
@@ -37,7 +39,7 @@ const points = cityCentroids(payload.events);
       <span class="visually-hidden">Search region</span>
       <input type="search" data-region-search placeholder="Type a region…" autocomplete="off" />
     </label>
-    <HereButtons />
+    <HereButtons ui={ui} />
     <ul data-region-list>
       {groups.map((group) => (
         <RegionRows lang={lang} group={group} region={region} city={city} page={page} points={points} />

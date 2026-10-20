@@ -1,6 +1,5 @@
 import { locateHere } from './locate-here.ts';
 import { queryAll } from '../../lib/dom/query-all.ts';
-import type { RegionPickerParts } from './region-picker-parts.ts';
 
 const isDialog = (node: unknown): node is HTMLDialogElement => node instanceof HTMLDialogElement;
 
@@ -13,20 +12,27 @@ const modeOf = (button: HTMLElement): 'city' | 'region' =>
 
 // A refusal is not an error to swallow: the selection stays as it was, and the
 // visitor is told the two ways out — the browser's own permission, or the list.
-const explain = (parts: RegionPickerParts): void =>
-  queryAll(parts.root, '[data-geo-help]')
+const explain = (root: HTMLElement): void =>
+  queryAll(root, '[data-geo-help]')
     .filter(isDialog)
     .forEach((help) => help.showModal());
 
-const run = async (parts: RegionPickerParts, button: HTMLElement): Promise<void> => {
+const run = async (root: HTMLElement, list: HTMLElement, button: HTMLElement): Promise<void> => {
   button.setAttribute('aria-busy', 'true');
-  await locateHere(parts, modeOf(button)).catch(() => explain(parts));
+  await locateHere(list, modeOf(button)).catch(() => explain(root));
   button.removeAttribute('aria-busy');
 };
 
-/** Wire the two "here" buttons: each asks the browser where the visitor is and
- *  jumps to the matching row, or explains itself when it cannot. */
-export const wireRegionHere = (parts: RegionPickerParts): void =>
-  queryAll(parts.root, '[data-region-here]').forEach((button) =>
-    button.addEventListener('click', () => void run(parts, button)),
+/**
+ * Wire the two "here" buttons under a list of regions and cities: each asks the
+ * browser where the visitor is and jumps to the matching row, or explains
+ * itself when it cannot.
+ *
+ * This is the reader telling us where they are, with a permission they granted.
+ * The front door used to overrule it with an IP lookup before the page had
+ * loaded — these buttons are the answer that wins now.
+ */
+export const wireRegionHere = (root: HTMLElement, list: HTMLElement): void =>
+  queryAll(root, '[data-region-here]').forEach((button) =>
+    button.addEventListener('click', () => void run(root, list, button)),
   );

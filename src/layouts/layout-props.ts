@@ -22,4 +22,9 @@ export type LayoutProps = Readonly<{
    *  page that exists only at the root must say so, or its hreflang points at
    *  pages that were never built. */
   locales?: readonly Locale[];
+  /** Whether the header carries the region picker. The front door is itself a
+   *  region picker, and the header's would otherwise label it with the founding
+   *  region — the page that exists to stop guessing, guessing in its own
+   *  header. */
+  picker?: boolean;
 }>;
