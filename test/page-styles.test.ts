@@ -126,7 +126,11 @@ describe('the pages of the site', () => {
   const sheetImports = (text: string): readonly string[] => importsOf(text).filter((spec) => spec.endsWith('.css') && spec.includes('styles/'));
 
   test('there are pages to speak of', () => {
-    assert.ok(pages.length > 40);
+    // Fewer than there were, and that is the point: English used to be a second
+    // copy of the route tree at the root — twenty files saying what [lang]/
+    // already said. It has a prefix like the other two languages now, so one
+    // set of routes serves all three.
+    assert.ok(pages.length > 30);
   });
   test('each one imports its own stylesheet, and no other', () => {
     const wrong = pages.filter((page) => {

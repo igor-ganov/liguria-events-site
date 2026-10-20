@@ -9,12 +9,16 @@ import { strayEventPath } from '../src/lib/events/stray-event-path.ts';
 describe('strayEventPath', () => {
   test('an event id standing where a city should be points at the event', () => {
     assert.equal(strayEventPath('/it/puglia/51a5e3abbc8f/'), '/it/event/51a5e3abbc8f/');
-    assert.equal(strayEventPath('/campania/bab135a46427/'), '/event/bab135a46427/');
+    assert.equal(strayEventPath('/campania/bab135a46427/'), '/en/event/bab135a46427/');
     assert.equal(strayEventPath('/ru/emilia-romagna/e18b9b1bc3c7/'), '/ru/event/e18b9b1bc3c7/');
+    // A stray with no language was an English address, like every other address
+    // that had none; answering with a prefix-less one would only redirect it a
+    // second time, tens of thousands of times a day.
+    assert.equal(strayEventPath('/en/puglia/51a5e3abbc8f/'), '/en/event/51a5e3abbc8f/');
   });
 
   test('a missing trailing slash is still the same address', () => {
-    assert.equal(strayEventPath('/campania/bab135a46427'), '/event/bab135a46427/');
+    assert.equal(strayEventPath('/campania/bab135a46427'), '/en/event/bab135a46427/');
   });
 
   test('every real page is left alone', () => {

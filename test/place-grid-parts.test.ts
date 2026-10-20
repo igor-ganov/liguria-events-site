@@ -75,7 +75,7 @@ describe('placeThumbHtml', () => {
 describe('placeCardHtml', () => {
   test('links to the detail page and carries the category colour and label', () => {
     const html = placeCardHtml('en', ui)(place({ desc: 'Fish and focaccia.' }));
-    assert.ok(html.includes('href="/place/liguria/trattoria-da-maria--'));
+    assert.ok(html.includes('href="/en/place/liguria/trattoria-da-maria--'));
     assert.ok(html.includes('style="--lm:#e0563b"'));
     assert.ok(html.includes('<span class="lm-name">Trattoria da Maria</span>'));
     assert.ok(html.includes(ui.places.categories.restaurant));

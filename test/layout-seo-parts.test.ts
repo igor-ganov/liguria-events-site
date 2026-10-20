@@ -13,10 +13,10 @@ import { pageSegment } from '../src/lib/region/page-segment.ts';
 const site = new URL('https://dovego.it');
 
 describe('canonicalUrl', () => {
-  test('the default locale lives at the root', () => {
-    assert.equal(canonicalUrl('en', 'liguria/', site), 'https://dovego.it/liguria/');
+  test('every locale is prefixed, English included', () => {
+    assert.equal(canonicalUrl('en', 'liguria/', site), 'https://dovego.it/en/liguria/');
   });
-  test('every other locale is prefixed', () => {
+  test('and the other two the same way', () => {
     assert.equal(canonicalUrl('it', 'liguria/map/', site), 'https://dovego.it/it/liguria/map/');
     assert.equal(canonicalUrl('ru', '', site), 'https://dovego.it/ru/');
   });
@@ -32,7 +32,7 @@ describe('alternateLinks', () => {
   });
   // x-default is the answer to "none of the above", and the site speaks Italian.
   test('each row points at that locale, and x-default at the language we speak', () => {
-    assert.equal(links[0]?.href, 'https://dovego.it/liguria/');
+    assert.equal(links[0]?.href, 'https://dovego.it/en/liguria/');
     assert.equal(links[1]?.href, 'https://dovego.it/it/liguria/');
     assert.equal(links[3]?.href, links[1]?.href);
   });

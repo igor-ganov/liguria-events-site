@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
 // emits that order, so there is no reflow on first load. "Newest first" orders
 // cards WITHIN a day by first-seen time (the data-created stamp).
 test('feed defaults to By date (unique-first, no reflow) and Newest first orders by creation time', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
 
   await expect(page.locator('[data-feed-sort="date"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('[data-feed-sort="unique"]')).toHaveCount(0); // no separate uniqueness button — it IS the default

@@ -34,7 +34,7 @@ const travel = (): number[] => {
 };
 
 test('a feed scrolled far down gives way to the next page without flying past', async ({ page }) => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   await expect(page.locator('header.site-head')).toBeVisible();
   await page.addStyleTag({ content: SLOW_TX });
   await page.evaluate(() => scrollTo(0, 2600));

@@ -10,7 +10,7 @@ const GENOA = { latitude: 44.4074, longitude: 8.934 };
 const PALERMO = { latitude: 38.1157, longitude: 13.3615 };
 
 const openPicker = async (page: Page): Promise<void> => {
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   // The picker marks itself bound once its script has wired the button. Clicking
   // before that lands on a control with no listener yet: the dialog stays shut
   // and the failure reads as though the picker were broken.

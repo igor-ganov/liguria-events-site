@@ -44,7 +44,7 @@ const poi = (id: string, lat: number, lng: number) => ({
   lat,
   lng,
   cat: 'castle',
-  url: `/landmark/liguria/${id}/`,
+  url: `/en/landmark/liguria/${id}/`,
 });
 
 test('generated route upgrades from the estimate to real transit routing', async ({ page }) => {
@@ -66,7 +66,7 @@ test('generated route upgrades from the estimate to real transit routing', async
   await cdp.send('Network.enable');
   await cdp.send('Network.emulateNetworkConditions', FAST_3G);
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.locator('[data-route-generate]').click();
 
   // Instant paint: the straight-line estimate (no data-real yet).

@@ -6,7 +6,7 @@ import { LOCALES } from '../../lib/i18n/locales.ts';
 // The country's map: the same map that has always carried every event in Italy,
 // with no region to open on, so it opens on all of it.
 export const getStaticPaths = () =>
-  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+  LOCALES.map((lang) => ({ params: { lang }, props: { lang } }));
 
 const { lang } = Astro.props;
 ---

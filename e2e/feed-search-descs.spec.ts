@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { foldedDays } from './folded-days.ts';
 
-const FEED = '/liguria/';
+const FEED = '/en/liguria/';
 const DESCS = '/data/search/liguria.en.json';
 const CARDS = '[data-feed-list] li[data-id]';
 

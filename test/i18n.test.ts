@@ -20,9 +20,13 @@ describe('isLocale', () => {
 });
 
 describe('localizedUrl', () => {
-  test('en at root (no prefix), others prefixed', () => {
-    assert.ok(localizedUrl('en').endsWith('/'));
-    assert.equal(localizedUrl('en').includes('/en/'), false);
+  // English was the site with no prefix, which is why "/" was the English home
+  // page rather than the door to the site, why a whole duplicate tree of route
+  // files sat at the root mirroring [lang]/, and why the one language nobody
+  // here reads held the addresses Google had indexed.
+  test('every language names itself, English included', () => {
+    assert.match(localizedUrl('en'), /\/en\/$/);
+    assert.match(localizedUrl('en', 'liguria/'), /\/en\/liguria\/$/);
     assert.match(localizedUrl('it', 'feed/'), /\/it\/feed\/$/);
     assert.match(localizedUrl('ru', 'event/abc/'), /\/ru\/event\/abc\/$/);
   });

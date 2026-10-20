@@ -4,7 +4,7 @@ import { signInAsOwner } from './owner-fixture.ts';
 
 // The AUTHENTICATED owner-route editor, against the real worker (wrangler dev
 // --local) with a seeded test user, signed in with a minted cookie.
-const POI = { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Castle', lat: 44.41, lng: 8.94, cat: 'castle', url: '/landmark/liguria/test--x/' };
+const POI = { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Castle', lat: 44.41, lng: 8.94, cat: 'castle', url: '/en/landmark/liguria/test--x/' };
 
 test('owner adds a favourite POI, reorders, and the save persists to D1', async ({ page, context }) => {
   await signInAsOwner(page, context);

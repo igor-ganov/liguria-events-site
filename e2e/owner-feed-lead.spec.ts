@@ -43,7 +43,7 @@ test('and says what is on today, which is the question being asked', async ({ pa
 });
 
 test('the heading names the place, not the word for events', async ({ page }) => {
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const heading = page.locator('h1').first();
   await expect(heading).toHaveText(/Genova/);
   // Not the navigation label. The English page titled itself "Genova — Feed"

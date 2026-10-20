@@ -47,13 +47,13 @@ const uiData = JSON.stringify({ lang, ui });
     <NavProgress />
     <OfflineNotice />
     <OutboxNotice />
-    <SiteHeader picker={picker} lang={lang} region={region} path={path} city={city} ui={ui} />
+    <SiteHeader picker={picker} lang={lang} region={region} path={path} city={city} ui={ui} locales={locales} />
     {payload && <script is:inline type="application/json" id="events-data" set:html={JSON.stringify(payload.events)} />}
     <script is:inline type="application/json" id="ui-data" set:html={uiData} />
     <main>
       <slot />
     </main>
-    <MobileMenu lang={lang} path={path} region={region} />
+    <MobileMenu lang={lang} path={path} region={region} locales={locales} />
     <SiteFooter ui={ui} lang={lang} generatedAt={payload?.generatedAt} />
     <SigninDialog ui={ui} />
     <ShellScripts />

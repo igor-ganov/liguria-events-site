@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 const ITALY = { west: 6.6, east: 19.2, south: 35, north: 47.2 };
 
 test('the map opens over Italy, not over the ocean', async ({ page }) => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('.form-loc-map')).toHaveAttribute('data-ready', 'true');
   const centre = await page.evaluate(() => {
     const el = document.querySelector('.form-loc-map');
@@ -24,7 +24,7 @@ test('the map opens over Italy, not over the ocean', async ({ page }) => {
 });
 
 test('clicking the map writes the coordinates into the form, not into a city list', async ({ page }) => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('.form-loc-map')).toHaveAttribute('data-ready', 'true');
   const map = page.locator('.form-loc-map');
   await map.scrollIntoViewIfNeeded();

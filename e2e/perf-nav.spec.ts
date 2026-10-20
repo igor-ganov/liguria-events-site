@@ -38,7 +38,7 @@ test('main pages navigate forward and back under Fast-3G without hanging', async
   // `commit` (not the default `load`): waiting for the full load event would
   // block on every feed image under Fast-3G — a timeout in disguise. Readiness
   // is `settled` (main visible + progress bar hidden = astro:page-load fired).
-  await page.goto('/liguria/', { waitUntil: 'commit' });
+  await page.goto('/en/liguria/', { waitUntil: 'commit' });
   await settled(page);
   log(`load /liguria/: ${Date.now() - t0}ms`);
 

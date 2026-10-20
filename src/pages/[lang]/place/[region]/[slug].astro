@@ -6,7 +6,7 @@ import { LOCALES } from '../../../../lib/i18n/locales.ts';
 
 const { lang, region, slug } = Astro.params;
 // Only the non-default locales own a /[lang]/ route; anything else 404s.
-const locale = LOCALES.find((l) => l === lang && l !== 'en');
+const locale = LOCALES.find((l) => l === lang);
 switch (locale) {
   case undefined:
     return new Response('Not found', { status: 404 });

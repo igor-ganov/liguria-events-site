@@ -1,3 +1,5 @@
+import { ENTRY_LOCALE } from '../i18n/entry-locale.ts';
+import { localizedUrl } from '../i18n/localized-url.ts';
 import type { ManifestShortcut } from './web-manifest.ts';
 
 const icons = [{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }] as const;
@@ -15,9 +17,9 @@ export const MANIFEST_SHORTCUTS: readonly ManifestShortcut[] = [
     name: 'Add an event',
     short_name: 'Add',
     description: 'Publish something you are putting on',
-    url: '/submit/',
+    url: localizedUrl(ENTRY_LOCALE, 'submit/'),
     icons,
   },
-  { name: 'Map', short_name: 'Map', description: "What's on around you", url: '/map', icons },
-  { name: 'Saved', short_name: 'Saved', description: 'Events you starred', url: '/favorites/', icons },
+  { name: 'Map', short_name: 'Map', description: "What's on around you", url: localizedUrl(ENTRY_LOCALE, 'map/'), icons },
+  { name: 'Saved', short_name: 'Saved', description: 'Events you starred', url: localizedUrl(ENTRY_LOCALE, 'favorites/'), icons },
 ];

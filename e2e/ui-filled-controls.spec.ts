@@ -7,8 +7,8 @@ import { expect, test } from '@playwright/test';
 const CLEAR = ['rgba(0, 0, 0, 0)', 'transparent'];
 
 const CASES = [
-  { path: '/liguria/', control: '[data-feed-sort][aria-pressed="true"]' },
-  { path: '/liguria/', control: '.subscribe-bar a' },
+  { path: '/en/liguria/', control: '[data-feed-sort][aria-pressed="true"]' },
+  { path: '/en/liguria/', control: '.subscribe-bar a' },
 ];
 
 CASES.forEach(({ path, control }) => {

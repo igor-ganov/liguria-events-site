@@ -18,7 +18,7 @@ test('a feed page offers the daily channel beside the calendar and the feed', as
 });
 
 test('the three ways to follow are all there, in every language', async ({ page }) => {
-  for (const path of ['/liguria/genova/', '/it/liguria/genova/', '/ru/liguria/genova/']) {
+  for (const path of ['/en/liguria/genova/', '/it/liguria/genova/', '/ru/liguria/genova/']) {
     await page.goto(path);
     const bar = page.locator('.subscribe-bar');
     await expect(bar.locator('a[href*=".ics"]')).toHaveCount(1);

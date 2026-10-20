@@ -26,7 +26,7 @@ const days = (event: Wire): number => new Set((event.p ?? []).map((session) => s
 
 test('the name of the event is on the photograph, and white', async ({ page, request }) => {
   const event = await pick(request, (candidate) => candidate.img !== undefined);
-  await page.goto(`/event/${event.id}/`);
+  await page.goto(`/en/event/${event.id}/`);
   const cover = page.locator('.event-cover');
   const [outer, picture] = await Promise.all([cover.boundingBox(), cover.locator('.event-hero img').first().boundingBox()]);
   expect(Math.round(picture?.width ?? 0)).toBe(Math.round(outer?.width ?? -1));
@@ -36,19 +36,19 @@ test('the name of the event is on the photograph, and white', async ({ page, req
 
 test('an event that came with no photograph wears the mark of the site', async ({ page, request }) => {
   const event = await pick(request, (candidate) => candidate.img === undefined);
-  await page.goto(`/event/${event.id}/`);
+  await page.goto(`/en/event/${event.id}/`);
   await expect(page.locator('.event-cover-blank .brand-mark')).toBeVisible();
   await expect(page.locator('.event-cover img')).toHaveCount(0);
 });
 
 test('there is a tile for each fact held and none for the rest', async ({ page, request }) => {
   const timed = await pick(request, (candidate) => candidate.h !== undefined);
-  await page.goto(`/event/${timed.id}/`);
+  await page.goto(`/en/event/${timed.id}/`);
   await expect(page.locator('[data-tile="when"] b')).not.toBeEmpty();
   await expect(page.locator('[data-tile="starts"] b')).toHaveText(timed.h ?? '');
 
   const untimed = await pick(request, (candidate) => candidate.h === undefined);
-  await page.goto(`/event/${untimed.id}/`);
+  await page.goto(`/en/event/${untimed.id}/`);
   await expect(page.locator('[data-tile="when"]')).toHaveCount(1);
   await expect(page.locator('[data-tile="starts"]')).toHaveCount(0);
   const empty = await page.locator('.event-tiles b').evaluateAll((values) => values.filter((value) => (value.textContent ?? '').trim() === '').length);
@@ -57,7 +57,7 @@ test('there is a tile for each fact held and none for the rest', async ({ page, 
 
 test('a programme is leaves, one per day, counted on a tile', async ({ page, request }) => {
   const run = await pick(request, (candidate) => days(candidate) > 1);
-  await page.goto(`/event/${run.id}/`);
+  await page.goto(`/en/event/${run.id}/`);
   await expect(page.locator('[data-tile="dates"] b')).toHaveText(String(days(run)));
   // The tile counts the whole run; the leaves show what is still ahead, so a
   // reader is never offered a date that has gone. Every leaf carries its day,
@@ -73,7 +73,7 @@ test('a programme is leaves, one per day, counted on a tile', async ({ page, req
 test('the actions are one row of buttons a thumb can hit', async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const event = await pick(request, (candidate) => candidate.img !== undefined);
-  await page.goto(`/event/${event.id}/`);
+  await page.goto(`/en/event/${event.id}/`);
   const actions = page.getByRole('navigation', { name: 'Actions' });
   await expect(actions.getByRole('button', { name: 'Favourites' })).toBeVisible();
   await expect(actions.getByRole('button', { name: 'Share' })).toBeVisible();
@@ -86,7 +86,7 @@ test('the actions are one row of buttons a thumb can hit', async ({ page, reques
 test('on a phone the photograph runs edge to edge and nothing runs off the side', async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const event = await pick(request, (candidate) => candidate.img !== undefined);
-  await page.goto(`/event/${event.id}/`);
+  await page.goto(`/en/event/${event.id}/`);
   const cover = await page.locator('.event-cover').boundingBox();
   expect(Math.round(cover?.x ?? -1)).toBe(0);
   expect(Math.round(cover?.width ?? 0)).toBe(390);
@@ -109,7 +109,7 @@ const withSeveralPhotographs = async (request: APIRequestContext): Promise<strin
 
 test('the photographs are the top of the page, swiped one at a time', async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(`/event/${await withSeveralPhotographs(request)}/`);
+  await page.goto(`/en/event/${await withSeveralPhotographs(request)}/`);
   const strip = page.locator('.event-cover [data-shots]');
   const shown = await strip.locator('li').count();
   expect(shown).toBeGreaterThan(1);
@@ -128,7 +128,7 @@ test('the photographs are the top of the page, swiped one at a time', async ({ p
 
 test('the page says each thing once, on a card of its own', async ({ page, request }) => {
   const run = await pick(request, (candidate) => days(candidate) > 1);
-  await page.goto(`/event/${run.id}/`);
+  await page.goto(`/en/event/${run.id}/`);
   // One place block, one map, one programme: the prose no longer repeats them.
   await expect(page.locator('[data-widget="where"]')).toHaveCount(1);
   await expect(page.locator('.event-map iframe')).toHaveCount(1);

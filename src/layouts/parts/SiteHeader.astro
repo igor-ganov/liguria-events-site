@@ -16,8 +16,10 @@ type Props = Readonly<{
   /** The front door is itself a region picker; the header does not repeat it,
    *  and would otherwise have to label it with a region the page has not got. */
   picker: boolean;
+  /** The languages this page is written in; none means it offers no switch. */
+  locales: readonly Locale[];
 }>;
-const { lang, region, path, city, ui, picker } = Astro.props;
+const { lang, region, path, city, ui, picker, locales } = Astro.props;
 ---
 
 <header class="site-head">
@@ -39,7 +41,7 @@ const { lang, region, path, city, ui, picker } = Astro.props;
       <span class="brand-word">Dove <span class="brand-go">Go</span></span>
     </a>
   </p>
-  <SiteNav lang={lang} region={region} path={path} ui={ui} />
+  <SiteNav lang={lang} region={region} path={path} ui={ui} locales={locales} />
   <!-- Outside the nav on purpose, like the region picker below: the nav is
        hidden on a phone, and making an event is the thing this site is for.
        Reachable without an account — the sign-in comes at the moment of

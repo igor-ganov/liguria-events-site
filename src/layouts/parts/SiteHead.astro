@@ -7,7 +7,7 @@ import { alternateLinks } from '../../lib/seo/alternate-links.ts';
 import SiteFeeds from './SiteFeeds.astro';
 import SocialMeta from './SocialMeta.astro';
 import WebAnalytics from './WebAnalytics.astro';
-import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
+import { pageCanonical } from '../../lib/seo/page-canonical.ts';
 import { tilesOrigin } from '../../lib/seo/tiles-origin.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
@@ -28,7 +28,7 @@ type Props = Readonly<{
 }>;
 const { lang, title, description, path, needsMap, image, ogType, noindex, locales, region, city, site } = Astro.props;
 const tiles = tilesOrigin(import.meta.env.PUBLIC_PMTILES_URL);
-const canonical = canonicalUrl(lang, path, site);
+const canonical = pageCanonical(lang, path, site, locales);
 const icon = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`;
 ---
 

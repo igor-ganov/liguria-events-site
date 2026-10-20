@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 // a popup opening from one, the opt-in layers toggling (and persisting), the
 // category filter, and the camera round-tripping through the URL.
 
-const MAP = '/liguria/map/';
+const MAP = '/en/liguria/map/';
 
 /** The map is ready once its own markers are mounted — maplibre adds them to the
  *  canvas container, so their presence proves style load + clustering ran. */

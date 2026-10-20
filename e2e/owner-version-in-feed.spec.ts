@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
 import { signInAs } from './sign-in-as.ts';
 import type { Browser, Page } from '@playwright/test';
 
-const FEED = '/liguria/';
+const FEED = '/en/liguria/';
 
 const as = async (browser: Browser, userId: string): Promise<Page> => {
   const context = await browser.newContext();
@@ -44,7 +44,7 @@ const publish = async (browser: Browser, eventId: string): Promise<void> => {
 
 const handOver = async (browser: Browser, eventId: string): Promise<Page> => {
   const organiser = await as(browser, 'e2e-owner');
-  await organiser.goto(`/event/${eventId}/`);
+  await organiser.goto(`/en/event/${eventId}/`);
   await organiser.locator('[data-feedback="claim"]').click();
   await organiser.locator('textarea[name="body"]').fill('This is ours.');
   await organiser.getByRole('button', { name: 'Send' }).click();
@@ -56,7 +56,7 @@ const handOver = async (browser: Browser, eventId: string): Promise<Page> => {
 };
 
 const edit = async (organiser: Page, eventId: string, fields: Readonly<Record<string, string>>): Promise<void> => {
-  await organiser.goto(`/event/${eventId}/`);
+  await organiser.goto(`/en/event/${eventId}/`);
   await organiser.locator('.event-owner-bar a').click();
   await expect(organiser.locator('#event-form')).toHaveAttribute('data-ready', 'true');
   await Object.entries(fields).reduce(async (before, [field, value]) => {

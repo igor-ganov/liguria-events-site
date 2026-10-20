@@ -4,14 +4,20 @@ import { localizedUrl } from '../lib/i18n/localized-url.ts';
 import { branch } from '../lib/branch.ts';
 import type { Locale } from '../lib/i18n/locales.ts';
 
-type Props = Readonly<{ lang: Locale; path: string }>;
-const { lang, path } = Astro.props;
+// The languages THIS page is written in. A page that is in none — the legal
+// pages, which have one address and no translated twin — offers no switch.
+// Offering one put /en/terms/, /it/terms/ and /ru/terms/ in the header: three
+// addresses nobody builds. That mistake has been made once already in the
+// hreflang rows; this is the same mistake somewhere a reader can click.
+type Props = Readonly<{ lang: Locale; path: string; locales: readonly Locale[] }>;
+const { lang, path, locales } = Astro.props;
 const LABEL: Readonly<Record<Locale, string>> = { en: 'EN', it: 'IT', ru: 'RU' };
 ---
 
+{locales.length > 0 && (
 <div class="lang-switch" role="group" aria-label="Language">
   {
-    LOCALES.map((loc) => (
+    LOCALES.filter((loc) => locales.includes(loc)).map((loc) => (
       <a
         href={localizedUrl(loc, path)}
         hreflang={loc}
@@ -22,6 +28,7 @@ const LABEL: Readonly<Record<Locale, string>> = { en: 'EN', it: 'IT', ru: 'RU' }
     ))
   }
 </div>
+)}
 
 <script>
   // Detail pages carry their id in the query (client-rendered, no per-record

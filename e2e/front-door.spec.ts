@@ -18,9 +18,11 @@ test('the front door is a page, not a redirect', async ({ request }) => {
 
 test('and it names no region of its own', async ({ page }) => {
   await page.goto('/');
-  // Nothing on it claims to be a place the reader is in; the canonical is the
-  // door itself, which is what Google can finally index.
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://dovego.it/');
+  // Nothing on it claims to be a place the reader is in. The canonical is the
+  // door in the language the site is written for — "/" is the address people
+  // type and it answers rather than redirecting, which is what Google can
+  // finally index after ninety-nine days of a redirect.
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://dovego.it/it/');
   await expect(page.locator('[data-entry] h1')).toBeVisible();
 });
 
@@ -42,17 +44,19 @@ test('the whole country is links, each with what it has', async ({ page }) => {
   await page.goto('/');
   const rows = page.locator('.entry-regions .rp-region');
   expect(await rows.count()).toBeGreaterThan(10);
-  await expect(rows.first().locator('a')).toHaveAttribute('href', /^\/[a-z-]+\/$/);
+  // In a language, like every page of the site: the root is the only address
+  // left that names none.
+  await expect(rows.first().locator('a')).toHaveAttribute('href', /^\/(en|it|ru)\/[a-z-]+\/$/);
 });
 
 test('a reader who has read a region is sent back to it, by their own browser', async ({ page }) => {
   // The region is remembered from the address of the page they were on, and the
   // jump is made where that record lives. No 302, and nothing an IP suggests.
-  await page.goto('/lombardia/');
+  await page.goto('/en/lombardia/');
   expect(await page.evaluate(() => localStorage.getItem('region'))).toBe('lombardia');
   await page.goto('/');
   await page.waitForURL('**/lombardia/');
-  expect(new URL(page.url()).pathname).toBe('/lombardia/');
+  expect(new URL(page.url()).pathname).toBe('/en/lombardia/');
 });
 
 test('a reader with nothing remembered is asked, not guessed at', async ({ page }) => {
@@ -64,31 +68,31 @@ test('a reader with nothing remembered is asked, not guessed at', async ({ page 
 });
 
 test('the country calendar is a calendar, not a redirect into a region', async ({ page }) => {
-  // "/calendar" named no region, so one was guessed for it — the menu item sent
+  // "/en/calendar" named no region, so one was guessed for it — the menu item sent
   // every reader into Lombardia. It is the country's month now, and the region
   // is a filter in the header rather than a segment of the address.
-  await page.goto('/calendar/');
+  await page.goto('/en/calendar/');
   await expect(page.locator('.cal-grid')).toBeVisible();
   await expect(page.locator('[data-entry]')).toHaveCount(0);
-  expect(new URL(page.url()).pathname).toBe('/calendar/');
+  expect(new URL(page.url()).pathname).toBe('/en/calendar/');
 });
 
 test('and a day it cannot print whole says how much it is holding', async ({ page }) => {
-  await page.goto('/calendar/');
+  await page.goto('/en/calendar/');
   // A day of the whole country carries dozens; the cap is only honest if the
   // rest is counted rather than dropped.
   expect(await page.locator('.cal-more').count()).toBeGreaterThan(0);
 });
 
 test('the country map opens on the country', async ({ page }) => {
-  await page.goto('/map/');
+  await page.goto('/en/map/');
   await expect(page.locator('[data-entry]')).toHaveCount(0);
-  expect(new URL(page.url()).pathname).toBe('/map/');
+  expect(new URL(page.url()).pathname).toBe('/en/map/');
   expect(await page.evaluate(() => Object(globalThis)['__REGION__'])).toBe('');
 });
 
 test('switching region from a national page keeps you on that page', async ({ page }) => {
-  await page.goto('/calendar/');
+  await page.goto('/en/calendar/');
   const first = page.locator('.region-picker .rp-region a').first();
   await expect(first).toHaveAttribute('href', /\/[a-z-]+\/calendar\/$/);
 });
@@ -114,4 +118,25 @@ test('the doors are offered to search, which a redirect never could be', async (
   ['https://dovego.it/it/', 'https://dovego.it/it/calendar/', 'https://dovego.it/it/map/'].forEach((loc) =>
     expect(xml).toContain(`<loc>${loc}</loc>`),
   );
+});
+
+test('a page that is in no language offers no language switch', async ({ page }) => {
+  // The legal pages have one address and no translated twin. Offering a switch
+  // put /en/terms/, /it/terms/ and /ru/terms/ in the header — three addresses
+  // nobody builds, and the same mistake the hreflang rows made once already.
+  await page.goto('/terms/');
+  await expect(page.locator('.lang-switch')).toHaveCount(0);
+  await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://dovego.it/terms/');
+});
+
+test('every language names itself, and the root is the door', async ({ page, request }) => {
+  // English used to be the site with no prefix, so "/" was its home page rather
+  // than the door, and the duplicate route tree that served it sat at the root.
+  for (const path of ['/en/liguria/', '/it/liguria/', '/ru/liguria/']) {
+    expect([path, (await request.get(path)).status()]).toEqual([path, 200]);
+  }
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'it');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://dovego.it/it/');
 });

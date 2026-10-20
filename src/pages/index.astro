@@ -1,11 +1,19 @@
 ---
 import '../styles/pages/index.css';
 import EntryView from '../components/views/EntryView.astro';
+import { ENTRY_LOCALE } from '../lib/i18n/entry-locale.ts';
 import { uiOf } from '../lib/i18n/ui-of.ts';
 
-// The front door, which used to be a 302 and is now a page. See EntryView for
-// what it decides and what it refuses to decide.
-const lang = 'en' as const;
+// dovego.it itself. Every language has a prefix now, so this address belongs to
+// none of them — and it is the one people type, so it answers rather than
+// redirecting: `/` has sat in Google's index as a redirect since the site
+// began, crawled on 13 July and not since.
+//
+// It is the Italian door, and it says so: the canonical points at /it/, which
+// is where the hreflang cluster has named its x-default all along. The site is
+// about events in Italy and its readers read Italian; a reader whose browser
+// says otherwise has their links rewritten before they click one (init-entry).
+const lang = ENTRY_LOCALE;
 const ui = await uiOf(lang);
 ---
 

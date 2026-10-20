@@ -15,7 +15,7 @@ const fillRow = async (page: Page, index: number, date: string): Promise<void> =
 
 test('a container event is created from its programme and skips the empty days', async ({ page, context }) => {
   await signInAsOwner(page, context);
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('#event-form')).toHaveAttribute('data-ready', 'true');
 
   await page.locator('input[name=title]').fill('Sere d’Estate E2E');
@@ -47,19 +47,19 @@ test('a container event is created from its programme and skips the empty days',
   expect(id).not.toBe('');
 
   // The run was DERIVED from the programme, not from anything typed in.
-  const editable = await page.request.get(`/event/${id}/edit`);
+  const editable = await page.request.get(`/en/event/${id}/edit`);
   expect(editable.ok()).toBe(true);
   const form = await editable.text();
   expect(form).toContain(`value="${PROGRAMME[0]}"`);
   expect(form).toContain(`value="${PROGRAMME[2]}"`);
   // …and the edit form comes back with the box ticked and every date in place.
-  await page.goto(`/event/${id}/edit`);
+  await page.goto(`/en/event/${id}/edit`);
   await expect(page.locator('[data-container-toggle]')).toBeChecked();
   await expect(page.locator('[data-programme-row]')).toHaveCount(3);
 
   // The published wire shape carries the programme and the container mark, so
   // the feed and the map can honour it. It is pending until moderated, which is
   // why this reads the author's own copy rather than the public feed.
-  await page.goto(`/event/${id}`);
+  await page.goto(`/en/event/${id}`);
   await expect(page.locator('h1')).toContainText('Sere d’Estate E2E');
 });

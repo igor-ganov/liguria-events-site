@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
 import { PageDataSchema } from '../src/lib/i18n/ui-schema.ts';
 
 const PAGES = [
-  ['English', '/liguria/'],
+  ['English', '/en/liguria/'],
   ['Italian', '/it/liguria/'],
   ['Russian', '/ru/liguria/'],
 ] as const;

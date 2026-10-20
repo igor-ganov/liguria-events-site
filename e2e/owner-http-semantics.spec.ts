@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test('a city with nothing on answers 200 and says so', async ({ page }) => {
   // Savona is a provincial capital of Liguria. It had no page at all, because
   // the city list was derived from events rather than from the place table.
-  const response = await page.goto('/liguria/savona/');
+  const response = await page.goto('/en/liguria/savona/');
   expect(response?.status()).toBe(200);
   await expect(page.locator('[data-empty-state] h2')).not.toBeEmpty();
   // …and it leads somewhere rather than dead-ending.
@@ -16,7 +16,7 @@ test('a city with nothing on answers 200 and says so', async ({ page }) => {
 });
 
 test('a venue with nothing on answers 200, named after itself', async ({ page }) => {
-  const response = await page.goto('/liguria/genova/teatro-che-non-ha-nulla-in-programma/');
+  const response = await page.goto('/en/liguria/genova/teatro-che-non-ha-nulla-in-programma/');
   expect(response?.status()).toBe(200);
   await expect(page.locator('.venue-head h1')).toHaveText('Teatro Che Non Ha Nulla In Programma');
   await expect(page.locator('[data-empty-state]')).toBeVisible();
@@ -24,21 +24,21 @@ test('a venue with nothing on answers 200, named after itself', async ({ page })
 });
 
 test('a venue under a city that is not a city is still a 404', async ({ page }) => {
-  const response = await page.goto('/liguria/non-una-citta/qualche-teatro/');
+  const response = await page.goto('/en/liguria/non-una-citta/qualche-teatro/');
   expect(response?.status()).toBe(404);
 });
 
 test('an event that existed and is gone answers 410, not 404', async ({ page }) => {
   // A well-formed id of ours that resolves nowhere: 410 is what a search engine
   // acts on, and Search Console is holding 15 806 URLs excluded as 404s.
-  const response = await page.goto('/event/1e6b4b74d225/');
+  const response = await page.goto('/en/event/1e6b4b74d225/');
   expect(response?.status()).toBe(410);
   await expect(page.locator('[data-empty-state] h2')).not.toBeEmpty();
   await expect(page.locator('[data-empty-state] a.empty-onward')).toHaveAttribute('href', /\//);
 });
 
 test('an id that was never ours keeps its 404', async ({ page }) => {
-  for (const path of ['/event/zzz/', '/event/NOTLOWERCASE/', '/event/4d15a917f0f4x/']) {
+  for (const path of ['/en/event/zzz/', '/en/event/NOTLOWERCASE/', '/en/event/4d15a917f0f4x/']) {
     const response = await page.goto(path);
     expect(response?.status(), path).toBe(404);
   }

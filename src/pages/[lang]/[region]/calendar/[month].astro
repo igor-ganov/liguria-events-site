@@ -12,7 +12,7 @@ import { eventMonths } from '../../../../lib/calendar/event-months.ts';
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   const today = isoToday();
-  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+  return LOCALES.flatMap((lang) =>
     regionsOf(payload.events).flatMap(({ slug }) =>
       eventMonths(eventsOfRegion(payload.events, slug), today).map((month) => ({
         params: { lang, region: slug, month },

@@ -24,7 +24,7 @@ test('the feed stays inside its budget, and the map bundle is not shipped here',
   app,
   perf,
 }) => {
-  await app.open('/liguria/');
+  await app.open('/en/liguria/');
   await app.find('.feed-list').first().waitFor({ state: 'visible' });
   await app.quiet();
   await perf.within(FEED);
@@ -39,7 +39,7 @@ test('the map stays inside its budget once it has drawn, on a slow link', async 
   // shift this budget exists to catch only appeared when the pipe was narrow
   // enough for the fonts to land a second after the first paint.
   await connection.slow();
-  await app.open('/liguria/map/');
+  await app.open('/en/liguria/map/');
   await app.find('canvas.maplibregl-canvas').waitFor({ state: 'visible' });
   // Not settled: a map streams tiles for as long as it is on screen, so there
   // is no moment when nothing is in flight. The canvas is the state that says
@@ -48,7 +48,7 @@ test('the map stays inside its budget once it has drawn, on a slow link', async 
 });
 
 test('the corpus is not inlined and the engine is not on the critical path', async ({ app }) => {
-  await app.open('/liguria/map/');
+  await app.open('/en/liguria/map/');
   const html = await app.page.content();
 
   // The corpus used to be inlined here: 2.6 MB of JSON ahead of first paint.

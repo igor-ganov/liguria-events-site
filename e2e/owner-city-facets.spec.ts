@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 // Server-rendered, because the site rebuilds every six hours and a page built
 // at 23:23 would otherwise call yesterday's events "today" until morning.
 
-const CITY = '/liguria/genova';
+const CITY = '/en/liguria/genova';
 
 test('each facet exists, titles itself, and is canonical', async ({ page }) => {
   const cases = [
@@ -33,7 +33,7 @@ test('a facet wins over a venue of the same name', async ({ page }) => {
 
 test('an empty facet is a page that says so, not a 404', async ({ page }) => {
   // Imperia is small; whichever of these is empty must still answer 200.
-  const response = await page.goto('/liguria/imperia/tomorrow/');
+  const response = await page.goto('/en/liguria/imperia/tomorrow/');
   expect(response?.status()).toBe(200);
   const empty = await page.locator('[data-empty-state]').count();
   const cards = await page.locator('.feed-list > li').count();
@@ -47,5 +47,5 @@ test('facets exist in every language', async ({ page }) => {
 });
 
 test('a facet under a city that is not a city is still a 404', async ({ page }) => {
-  expect((await page.goto('/liguria/non-una-citta/today/'))?.status()).toBe(404);
+  expect((await page.goto('/en/liguria/non-una-citta/today/'))?.status()).toBe(404);
 });

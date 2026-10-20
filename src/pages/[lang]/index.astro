@@ -5,7 +5,7 @@ import { LOCALES } from '../../lib/i18n/locales.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 
 export const getStaticPaths = () =>
-  LOCALES.filter((lang) => lang !== 'en').map((lang) => ({ params: { lang }, props: { lang } }));
+  LOCALES.map((lang) => ({ params: { lang }, props: { lang } }));
 
 const { lang } = Astro.props;
 const ui = await uiOf(lang);

@@ -9,7 +9,7 @@ import { LOCALES } from '../../../../lib/i18n/locales.ts';
 export const getStaticPaths = async () => {
   const payload = await cachedEvents(EVENTS_URL);
   const regions = regionsOf(payload.events);
-  return LOCALES.filter((lang) => lang !== 'en').flatMap((lang) =>
+  return LOCALES.flatMap((lang) =>
     regions.map(({ slug }) => ({ params: { lang, region: slug }, props: { lang, region: slug } })),
   );
 };

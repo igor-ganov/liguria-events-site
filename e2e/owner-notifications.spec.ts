@@ -9,7 +9,7 @@
 // came from, and only a worker knows that.
 import { test, expect } from '@playwright/test';
 
-const PAGES = ['/notifications/', '/it/notifications/'];
+const PAGES = ['/en/notifications/', '/it/notifications/'];
 
 test('the notification page is reachable in every language and says what it does', async ({ page }) => {
   for (const path of PAGES) {
@@ -27,7 +27,7 @@ test('the notification page is reachable in every language and says what it does
 test('it carries the key a browser needs to subscribe', async ({ page }) => {
   // Without the public half of the VAPID key the subscribe call throws, and a
   // build that forgot to pass it would ship a switch that does nothing.
-  await page.goto('/notifications/');
+  await page.goto('/en/notifications/');
   const key = await page.locator('[data-notify]').getAttribute('data-vapid');
   expect(key?.length ?? 0).toBeGreaterThan(80);
 });

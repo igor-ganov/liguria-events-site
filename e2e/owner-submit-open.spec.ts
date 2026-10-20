@@ -7,20 +7,20 @@ import { signInAsOwner } from './owner-fixture.ts';
 // real worker.
 
 test('an anonymous visitor gets the form, not a redirect', async ({ page }) => {
-  const response = await page.goto('/submit');
+  const response = await page.goto('/en/submit');
   expect(response?.status()).toBe(200);
-  expect(new URL(page.url()).pathname).toBe('/submit');
+  expect(new URL(page.url()).pathname).toBe('/en/submit');
   await expect(page.locator('#event-form')).toBeVisible();
   await expect(page.locator('input[name=title]')).toBeVisible();
 });
 
 test('it says when the account will be asked for', async ({ page }) => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('.submit-card')).toContainText('sign in once');
 });
 
 test('sending it anonymously opens the sign-in and keeps what was typed', async ({ page }) => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await page.locator('input[name=title]').fill('Concerto di prova');
   await page.locator('textarea[name=description]').fill('Una descrizione di prova.');
   await page.locator('input[name=venue]').fill('Teatro di prova');
@@ -34,7 +34,7 @@ test('sending it anonymously opens the sign-in and keeps what was typed', async 
 });
 
 test('the draft is put back on the next visit, once', async ({ page }) => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await page.evaluate(() =>
     sessionStorage.setItem(
       'dovego:event-draft',
@@ -55,14 +55,14 @@ test('the page has exactly one main landmark', async ({ page }) => {
   // It had two: the shell renders one and this page nested another inside it,
   // which is invalid HTML and gives a screen reader two "main" landmarks to
   // choose between.
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('main')).toHaveCount(1);
 });
 
 test('the form asks who may see it, and defaults to nobody but the link', async ({ page }) => {
   // The default is what happens when nobody chooses, so it has to be the
   // private one: a friends' party must not land in a city feed or in Google.
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   const listed = page.locator('input[name=listed]');
   await expect(listed).toBeVisible();
   await expect(listed).not.toBeChecked();
@@ -75,7 +75,7 @@ test('the link handed back is the one friends should get, and can be sent in a t
   context,
 }) => {
   await signInAsOwner(page, context);
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('#event-form')).toHaveAttribute('data-ready', 'true');
   await page.locator('#event-form [name=title]').fill('Concerto in cortile');
   await page.locator('#event-form [name=startDate]').fill('2026-12-01');
@@ -132,7 +132,7 @@ test('the header sends an Italian reader to the Italian form', async ({ page }) 
 });
 
 test('a segment that is not a language is not a second create page', async ({ page }) => {
-  const response = await page.goto('/liguria/submit');
-  expect(new URL(page.url()).pathname).toBe('/submit');
+  const response = await page.goto('/en/liguria/submit');
+  expect(new URL(page.url()).pathname).toBe('/en/submit');
   expect(response?.status()).toBe(200);
 });

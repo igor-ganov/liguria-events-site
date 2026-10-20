@@ -47,7 +47,7 @@ test('the event page points its preview at that card', async ({ page, context })
     data: { title: 'Senza foto', startDate: '2026-12-06', categories: ['music'], venue: 'Cortile' },
   });
   const id = (await created.json()).id;
-  await page.goto(`/event/${id}/`);
+  await page.goto(`/en/event/${id}/`);
   const image = await page.locator('meta[property="og:image"]').getAttribute('content');
   expect(image).toContain(`/og/${id}.png`);
 });
@@ -73,11 +73,11 @@ test('the link the author was handed works for the people it was sent to', async
   const id = (await created.json()).id;
 
   // `request` carries no session: this is the friend who was sent the link.
-  const strangers = await request.get(`/event/${id}/`);
+  const strangers = await request.get(`/en/event/${id}/`);
   expect(strangers.status(), 'a friend with the link cannot open the event').toBe(200);
   await expect(page.locator('body')).toBeVisible();
 
   // Reachable is not listed: it must still stay out of any index.
-  const shown = await request.get(`/event/${id}/`).then((r) => r.text());
+  const shown = await request.get(`/en/event/${id}/`).then((r) => r.text());
   expect(shown).toContain('noindex');
 });

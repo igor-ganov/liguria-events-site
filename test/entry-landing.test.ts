@@ -154,11 +154,11 @@ describe('regionUrl without a region', () => {
   test('is the front door for that page', () => {
     expect(regionUrl('it', '', '')).toBe('/it/');
     expect(regionUrl('it', '', 'calendar/')).toBe('/it/calendar/');
-    expect(regionUrl('en', '', 'map/')).toBe('/map/');
+    expect(regionUrl('en', '', 'map/')).toBe('/en/map/');
   });
 
   test('and a region still puts itself in the path', () => {
     expect(regionUrl('it', 'liguria', '')).toBe('/it/liguria/');
-    expect(regionUrl('en', 'liguria', 'calendar/')).toBe('/liguria/calendar/');
+    expect(regionUrl('en', 'liguria', 'calendar/')).toBe('/en/liguria/calendar/');
   });
 });

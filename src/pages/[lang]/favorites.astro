@@ -8,7 +8,7 @@ import { LEGACY_REGION } from '../../lib/region/legacy-region.ts';
 import { LOCALES } from '../../lib/i18n/locales.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
 
-export const getStaticPaths = () => LOCALES.filter((loc) => loc !== 'en').map((lang) => ({ params: { lang } }));
+export const getStaticPaths = () => LOCALES.map((lang) => ({ params: { lang } }));
 
 const lang = LOCALES.find((loc) => loc === Astro.params.lang) ?? 'en';
 const ui = await uiOf(lang);

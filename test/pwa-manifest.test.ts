@@ -54,7 +54,10 @@ describe('appManifest', () => {
 
   test('the shortcuts lead where the app is for: making an event, the map, saved', () => {
     const urls = manifest.shortcuts.map((shortcut) => shortcut.url);
-    assert.deepEqual(urls, ['/submit/', '/map', '/favorites/']);
+    // Behind a language, because every page is now: a manifest is one file for
+    // everybody, so it pins the one the site is written for — the same answer
+    // the hreflang x-default has always given.
+    assert.deepEqual(urls, ['/it/submit/', '/it/map/', '/it/favorites/']);
     manifest.shortcuts.forEach((shortcut) => {
       assert.ok(shortcut.url.startsWith('/'), shortcut.url);
       assert.ok(shortcut.name.length > 0);

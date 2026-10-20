@@ -8,7 +8,7 @@ import type { Page } from '@playwright/test';
 test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
 
 const ready = async (page: Page): Promise<void> => {
-  await page.goto('/submit');
+  await page.goto('/en/submit');
   await expect(page.locator('#event-form')).toHaveAttribute('data-ready', 'true');
 };
 

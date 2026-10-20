@@ -7,9 +7,9 @@
 import { test } from './kit/index.ts';
 
 const PAGES = [
-  { name: 'the region feed', path: '/liguria/' },
-  { name: 'the calendar', path: '/liguria/calendar/' },
-  { name: 'saved events', path: '/favorites/' },
+  { name: 'the region feed', path: '/en/liguria/' },
+  { name: 'the calendar', path: '/en/liguria/calendar/' },
+  { name: 'saved events', path: '/en/favorites/' },
   // The form for making an event is server-rendered and so is not in the
   // static build these projects serve; it is audited against the real worker,
   // in ui-owner-shell.spec.ts.
@@ -30,7 +30,7 @@ for (const page of PAGES) {
 }
 
 test('the map holds together, canvas and all', async ({ app, audit }) => {
-  await app.open('/liguria/map/');
+  await app.open('/en/liguria/map/');
   // The map is the one page whose content arrives after the document does, so
   // the audit waits for the thing itself rather than for the page around it.
   await app.find('canvas.maplibregl-canvas').waitFor({ state: 'visible' });

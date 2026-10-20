@@ -8,17 +8,17 @@ test('a favourited landmark shows on the favourites page', async ({ page }) => {
     route.fulfill({ contentType: 'application/json', body: JSON.stringify({ events: [] }) }),
   );
 
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
   await page.evaluate(() => {
     localStorage.setItem('dovego:favorites', JSON.stringify(['wd:Q1']));
     localStorage.setItem(
       'dovego:fav-pois',
       JSON.stringify({
-        'wd:Q1': { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Castle', lat: 44.4, lng: 8.9, cat: 'castle', url: '/landmark/liguria/test--x/' },
+        'wd:Q1': { id: 'wd:Q1', kind: 'landmark', region: 'liguria', name: 'Test Castle', lat: 44.4, lng: 8.9, cat: 'castle', url: '/en/landmark/liguria/test--x/' },
       }),
     );
   });
-  await page.goto('/favorites/');
+  await page.goto('/en/favorites/');
 
   await expect(page.getByText('Test Castle')).toBeVisible();
   await expect(page.locator('[data-route-generate]')).toBeVisible(); // it's a favourite → tools show

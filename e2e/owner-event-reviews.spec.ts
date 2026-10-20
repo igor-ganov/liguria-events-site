@@ -18,7 +18,7 @@ const anEvent = async (request: APIRequestContext): Promise<string> => {
 const reviews = (page: Page) => page.locator('[data-rv]');
 
 test('a reader who is not signed in sees the reviews and a way in, not a form', async ({ page, request }) => {
-  await page.goto(`/event/${await anEvent(request)}/`);
+  await page.goto(`/en/event/${await anEvent(request)}/`);
   await expect(reviews(page).getByRole('heading', { name: /Reviews/ })).toBeVisible();
   await expect(reviews(page).locator('.rv-signin')).toBeVisible();
   await expect(reviews(page).locator('[data-rv-form]')).toHaveCount(0);
@@ -32,7 +32,7 @@ test('a signed-in reader rates an event, sees it counted, and can take it back',
   // is this run's and nobody else's. Removing a review that is not there is a
   // plain success, so this needs no condition.
   await page.request.delete(`/api/places/reviews?place=evt:${id}`);
-  await page.goto(`/event/${id}/`);
+  await page.goto(`/en/event/${id}/`);
   await expect(reviews(page)).toHaveAttribute('data-ready', 'true');
 
   await reviews(page).locator('[data-rv-star="4"]').click();

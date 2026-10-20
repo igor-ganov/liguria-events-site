@@ -35,7 +35,7 @@ const as = async (browser: Browser, userId: string): Promise<Page> => {
 };
 
 const openRequest = async (page: Page, eventId: string, button: string, words: string): Promise<string> => {
-  await page.goto(`/event/${eventId}/`);
+  await page.goto(`/en/event/${eventId}/`);
   await page.locator(`[data-feedback="${button}"]`).click();
   await page.locator('textarea[name="body"]').fill(words);
   await page.getByRole('button', { name: 'Send' }).click();
@@ -44,7 +44,7 @@ const openRequest = async (page: Page, eventId: string, button: string, words: s
 };
 
 test('a reader who is not signed in is sent to sign in, not shown the form', async ({ page, request }) => {
-  await page.goto(`/event/${await eventAt(request, 9)}/`);
+  await page.goto(`/en/event/${await eventAt(request, 9)}/`);
   await expect(page.locator('[data-feedback="report"]')).toBeVisible();
   await expect(page.locator('[data-feedback="claim"]')).toBeVisible();
   await page.locator('[data-feedback="report"]').click();
@@ -119,7 +119,7 @@ test('a claim that is approved hands the event over, and the page says so', asyn
   await expect(staff.locator('.ticket-thread li[data-staff="true"] .ticket-body')).toContainText('now yours');
 
   // The event page now says who looks after it and stops offering it again.
-  await reader.goto(`/event/${eventId}/`);
+  await reader.goto(`/en/event/${eventId}/`);
   await expect(reader.locator('[data-feedback="managed"]')).toBeVisible();
   await expect(reader.locator('[data-feedback="claim"]')).toHaveCount(0);
   await expect(reader.locator('[data-feedback="report"]')).toBeVisible();
@@ -142,10 +142,10 @@ test('a claim that is approved hands the event over, and the page says so', asyn
   // only a rejection takes it down — and then the crawled version is still
   // there underneath. What they do not get is the editor.
   const stranger = await as(browser, STRANGER);
-  await stranger.goto(`/event/${eventId}/`);
+  await stranger.goto(`/en/event/${eventId}/`);
   await expect(stranger.locator('h1').first()).toContainText(renamed);
   await expect(stranger.locator('.event-owner-bar')).toHaveCount(0);
-  expect((await stranger.goto(`/event/${eventId}/edit`))?.url()).not.toMatch(/\/edit\/?$/);
+  expect((await stranger.goto(`/en/event/${eventId}/edit`))?.url()).not.toMatch(/\/edit\/?$/);
 });
 
 test('a request with nothing in it, or about nothing, is refused', async ({ browser, baseURL }) => {

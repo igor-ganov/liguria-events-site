@@ -65,7 +65,7 @@ test('the upcoming sitemap lists each event once, in Italian, with the other two
   }));
   // The other two languages are alternates of that entry, which is what
   // hreflang is for — the pages still exist and still say so.
-  expect(alternates.some((link) => link.lang === 'en' && /dovego\.it\/event\//.test(link.href))).toBe(true);
+  expect(alternates.some((link) => link.lang === 'en' && /\/en\/event\//.test(link.href))).toBe(true);
   expect(alternates.some((link) => link.lang === 'ru' && /\/ru\/event\//.test(link.href))).toBe(true);
   // x-default is the Italian page too: a reader whose language we do not serve
   // gets the one the site is written for, not English by alphabet.
@@ -79,7 +79,7 @@ test('venues have a sitemap of their own, and the archive another', async ({ req
   // a day should spend them on what is new, not on two thousand finished pages.
   const places = await (await request.get('/sitemap-places.xml')).text();
   expect(places).toContain('<urlset');
-  expect(places.includes('/event/')).toBe(false);
+  expect(places.includes('/en/event/')).toBe(false);
 
   const archive = await request.get('/sitemap-archive.xml');
   expect(archive.status()).toBe(200);
@@ -98,7 +98,7 @@ test('the page tier is enumerated, not whatever happened to be prerendered', asy
   expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
   // These were in the generated file because nobody had excluded them, and
   // three of them answer 302 to a sign-in.
-  ['/admin/', '/settings/', '/tickets/', '/auth/', '/favorites/', '/notifications/', '/offline/', '/event/'].forEach(
+  ['/admin/', '/settings/', '/tickets/', '/auth/', '/en/favorites/', '/en/notifications/', '/offline/', '/en/event/'].forEach(
     (path) => expect(locs.some((loc) => loc.includes(path))).toBe(false),
   );
   // A region's map view is an application view and twenty of them were the bulk
@@ -125,7 +125,7 @@ test('a feed page carries a link-preview image on our own origin', async ({ page
   // A shared listing link used to arrive as a grey rectangle: og:image was
   // emitted only on event pages, and there only as a hot-link in whatever
   // shape the source CDN happened to use (R1.1, R1.3).
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const image = await page.locator('meta[property="og:image"]').getAttribute('content');
   expect(image).toBeTruthy();
   expect(image).toContain('/cdn-cgi/image/');
@@ -137,7 +137,7 @@ test('the analytics beacon is on the page, not just configured in the dashboard'
   // month — its zone-level injection never reached a Worker-rendered response —
   // and it was dropped for a first-party collector that counts the same visits
   // with no third party and nothing to consent to.
-  await page.goto('/liguria/genova/');
+  await page.goto('/en/liguria/genova/');
   const beacon = page.locator('script[data-project]');
   await expect(beacon).toHaveCount(1);
   await expect(beacon).toHaveAttribute('data-project', 'dovego-it');

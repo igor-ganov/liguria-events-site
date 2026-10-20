@@ -57,7 +57,7 @@ describe('eventCard', () => {
   test('carries the localized link, image, title and date span', () => {
     const card = eventCard('en')(event({ img: 'https://img/a.jpg', h: '21:00' }));
     assert.deepEqual(card, {
-      href: '/event/festa-2026-08-20-abc/',
+      href: '/en/event/festa-2026-08-20-abc/',
       image: 'https://img/a.jpg',
       title: 'Festa',
       when: '20.08 · 21:00',
@@ -81,7 +81,7 @@ describe('landmarkCard', () => {
 
   test('resolves the link, kind badge, title and blurb', () => {
     const built = card(landmark({ desc: 'A tower.' }));
-    assert.equal(built.href, `/${landmarkPath('liguria', 'Lanterna', 'l1')}`);
+    assert.equal(built.href, `/en/${landmarkPath('liguria', 'Lanterna', 'l1')}`);
     assert.equal(built.kindLabel, DEFAULT_UI.landmarks.kinds['lighthouse']);
     assert.equal(built.title, 'Lanterna');
     assert.equal(built.desc, 'A tower.');
@@ -113,7 +113,7 @@ describe('placeCard', () => {
 
   test('resolves the link, category badge and title', () => {
     const built = card(place({}));
-    assert.equal(built.href, `/${placePath('liguria', 'Trattoria', 'p1')}`);
+    assert.equal(built.href, `/en/${placePath('liguria', 'Trattoria', 'p1')}`);
     assert.equal(built.kindLabel, DEFAULT_UI.places.categories['restaurant']);
     assert.equal(built.title, 'Trattoria');
   });

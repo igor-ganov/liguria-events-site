@@ -17,7 +17,7 @@ import { venueView } from '../../../../../lib/events/venue-view.ts';
 import { LOCALES } from '../../../../../lib/i18n/locales.ts';
 
 const { lang: langParam, region = '', city = '', venue: slug = '' } = Astro.params;
-const lang = LOCALES.find((l) => l === langParam && l !== 'en');
+const lang = LOCALES.find((l) => l === langParam);
 switch (lang) {
   case undefined:
     return new Response(null, { status: 404 });

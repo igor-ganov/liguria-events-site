@@ -1,3 +1,4 @@
+import { branch } from '../branch.ts';
 import { canonicalUrl } from './canonical-url.ts';
 import { DEFAULT_LOCALE } from '../i18n/default-locale.ts';
 import { ENTRY_LOCALE } from '../i18n/entry-locale.ts';
@@ -26,7 +27,14 @@ export const alternateLinks = (
   path: string,
   site: URL | undefined,
   locales: readonly Locale[] = LOCALES,
-): readonly AlternateLink[] => [
-  ...locales.map((loc) => ({ hreflang: loc, href: canonicalUrl(loc, path, site) })),
-  { hreflang: 'x-default', href: canonicalUrl(fallbackOf(locales), path, site) },
-];
+): readonly AlternateLink[] =>
+  // A page in no language declares nothing. hreflang is a map between language
+  // versions, and a page answered at one address has no map to draw — the legal
+  // pages are the whole of that category.
+  branch(locales.length === 0)<readonly AlternateLink[]>(
+    () => [],
+    () => [
+      ...locales.map((loc) => ({ hreflang: loc, href: canonicalUrl(loc, path, site) })),
+      { hreflang: 'x-default', href: canonicalUrl(fallbackOf(locales), path, site) },
+    ],
+  );

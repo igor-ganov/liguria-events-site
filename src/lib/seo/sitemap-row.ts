@@ -1,5 +1,5 @@
 import { alternateLinks } from './alternate-links.ts';
-import { canonicalUrl } from './canonical-url.ts';
+import { pageCanonical } from './page-canonical.ts';
 import { ENTRY_LOCALE } from '../i18n/entry-locale.ts';
 import { LOCALES } from '../i18n/locales.ts';
 import type { Locale } from '../i18n/locales.ts';
@@ -19,10 +19,15 @@ export const sitemapRow = (
   site: URL | undefined,
   locales: readonly Locale[] = LOCALES,
 ): SitemapUrl => ({
-  // The language the site speaks, when the page has it — a page built at the
-  // root only is advertised at the root, the same rule alternateLinks applies
-  // to the x-default row.
-  loc: canonicalUrl(locales.find((locale) => locale === ENTRY_LOCALE) ?? locales[0] ?? ENTRY_LOCALE, path, site),
+  // The language the site speaks, when the page is in a language at all: a page
+  // with none is advertised at the one address it answers from, the same rule
+  // alternateLinks applies to the rows it does not draw.
+  loc: pageCanonical(
+    locales.find((locale) => locale === ENTRY_LOCALE) ?? locales[0] ?? ENTRY_LOCALE,
+    path,
+    site,
+    locales,
+  ),
   lastmod,
   alternates: alternateLinks(path, site, locales),
 });

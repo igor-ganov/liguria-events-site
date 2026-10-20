@@ -13,12 +13,12 @@ const firstWithPhoto = (html: string): string =>
   /<li[^>]*data-id="([0-9a-f]+)"[^>]*><a class="photo-card"[^>]*>(?:(?!<\/li>)[\s\S])*?<img class="photo-card-pic"/.exec(html)?.[1] ?? '';
 
 test('a feed card whose photograph is dead wears the mark of the site instead', async ({ page }) => {
-  const id = firstWithPhoto(await (await page.request.get('/liguria/')).text());
+  const id = firstWithPhoto(await (await page.request.get('/en/liguria/')).text());
   expect(id, 'the page has no card with a photograph').not.toBe('');
 
   // Every picture from another origin fails; the site's own files still load.
   await page.route(/^https?:\/\/(?!localhost)[^/]+\/.*\.(?:jpe?g|png|webp)(?:\?.*)?$/i, (route) => route.abort());
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const card = page.locator(`.feed-list > li[data-id="${id}"]`).first();
   // Scrolled to, so the lazy picture is actually asked for — and refused.
   await card.scrollIntoViewIfNeeded();

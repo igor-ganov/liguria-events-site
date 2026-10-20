@@ -27,8 +27,8 @@ const pictures = async (selector: string): Promise<readonly Picture[]> => {
 };
 
 const PAGES: readonly Readonly<{ name: string; path: string }>[] = [
-  { name: 'a region', path: '/liguria/' },
-  { name: 'a city', path: '/liguria/genova/' },
+  { name: 'a region', path: '/en/liguria/' },
+  { name: 'a city', path: '/en/liguria/genova/' },
 ];
 
 PAGES.forEach(({ name, path }) => {

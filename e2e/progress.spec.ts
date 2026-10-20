@@ -13,7 +13,7 @@ const NEWEST = RELEASES[0];
 const OLDEST = [...ROADMAP].filter((item) => item.stage === 'done').sort((a, b) => (a.shipped ?? '').localeCompare(b.shipped ?? ''))[0];
 
 test('the roadmap answers and is cut into stages', async ({ page }) => {
-  const response = await page.goto('/roadmap/');
+  const response = await page.goto('/en/roadmap/');
   expect(response?.status()).toBe(200);
   await expect(page.getByRole('heading', { level: 1, name: 'Roadmap' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: 'In progress' })).toBeVisible();
@@ -25,7 +25,7 @@ test('the roadmap answers and is cut into stages', async ({ page }) => {
 test('the roadmap is a path: what is behind, where we are, what is ahead', async ({ page }) => {
   // The order IS the content. A list that put the present first read as a
   // backlog; the line has to run forward in time and mark the point reached.
-  await page.goto('/roadmap/');
+  await page.goto('/en/roadmap/');
   const order = await page.locator('[data-journey]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-journey') ?? ''));
   const run = order.filter((stage, index) => stage !== order[index - 1]);
   const ahead = ['now', 'next', 'later'].filter((stage) => order.includes(stage));
@@ -35,14 +35,14 @@ test('the roadmap is a path: what is behind, where we are, what is ahead', async
 });
 
 test('the path travelled is also drawn as one bar, with its numbers', async ({ page }) => {
-  await page.goto('/roadmap/');
+  await page.goto('/en/roadmap/');
   const done = ROADMAP.filter((item) => item.stage === 'done').length;
   await expect(page.getByRole('img', { name: new RegExp(`^${done} Shipped`) })).toBeVisible();
 });
 
 test('a stage with nothing in it is not announced', async ({ page }) => {
   const later = ROADMAP.filter((item) => item.stage === 'later').length;
-  await page.goto('/roadmap/');
+  await page.goto('/en/roadmap/');
   await expect(page.getByRole('heading', { level: 2, name: 'Later' })).toHaveCount(Math.min(later, 1));
 });
 
@@ -55,12 +55,17 @@ test('the roadmap speaks the other two languages', async ({ page }) => {
 });
 
 test('the release notes run newest first, each with somewhere to see it', async ({ page }) => {
-  const response = await page.goto('/releases/');
+  const response = await page.goto('/en/releases/');
   expect(response?.status()).toBe(200);
   const entries = page.getByRole('article');
   await expect(entries).toHaveCount(RELEASES.length);
   await expect(entries.first().getByRole('heading')).toHaveText(NEWEST?.title.en ?? '');
-  await expect(entries.first().getByRole('link', { name: 'See it' })).toHaveAttribute('href', NEWEST?.example ?? '');
+  // Prefixed like every other link now: English stopped being the language
+  // with no prefix, so its example is /en/… the way Italian's is /it/….
+  await expect(entries.first().getByRole('link', { name: 'See it' })).toHaveAttribute(
+    'href',
+    `/en${NEWEST?.example ?? ''}`,
+  );
 });
 
 test('a release in Italian sends the reader to the Italian example', async ({ page }) => {
@@ -70,14 +75,14 @@ test('a release in Italian sends the reader to the Italian example', async ({ pa
 });
 
 test('each page leads to the other, and the footer leads to both', async ({ page }) => {
-  await page.goto('/roadmap/');
+  await page.goto('/en/roadmap/');
   await page.getByRole('main').getByRole('link', { name: 'Release notes' }).click();
   await expect(page).toHaveURL(/\/releases\/$/);
   await page.getByRole('main').getByRole('link', { name: 'Roadmap' }).click();
   await expect(page).toHaveURL(/\/roadmap\/$/);
 
-  await page.goto('/liguria/');
+  await page.goto('/en/liguria/');
   const footer = page.getByRole('contentinfo');
-  await expect(footer.getByRole('link', { name: 'Roadmap' })).toHaveAttribute('href', '/roadmap/');
-  await expect(footer.getByRole('link', { name: 'Release notes' })).toHaveAttribute('href', '/releases/');
+  await expect(footer.getByRole('link', { name: 'Roadmap' })).toHaveAttribute('href', '/en/roadmap/');
+  await expect(footer.getByRole('link', { name: 'Release notes' })).toHaveAttribute('href', '/en/releases/');
 });
