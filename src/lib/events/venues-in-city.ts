@@ -2,8 +2,15 @@ import { venuePath } from './venue-path.ts';
 import { venuesOf } from './venues-of.ts';
 import type { CompactEvent } from './event-schema.ts';
 
-/** A venue of one city, with the page it has. */
-export type CityVenue = Readonly<{ name: string; slug: string; count: number; path: string }>;
+/** A venue with the page it has — and, on a list that spans a whole region, the
+ *  town it stands in, which its name does not always say. */
+export type CityVenue = Readonly<{
+  name: string;
+  slug: string;
+  count: number;
+  path: string;
+  town?: string | undefined;
+}>;
 
 /**
  * The venues of one city, busiest first.

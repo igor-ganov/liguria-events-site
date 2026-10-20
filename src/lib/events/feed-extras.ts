@@ -2,6 +2,7 @@ import { branch } from '../branch.ts';
 import { canonicalUrl } from '../seo/canonical-url.ts';
 import { venueJsonLd } from './venue-jsonld.ts';
 import { venuesInCity } from './venues-in-city.ts';
+import { venuesInRegion } from './venues-in-region.ts';
 import type { CityVenue } from './venues-in-city.ts';
 import type { CompactEvent } from './event-schema.ts';
 import type { FeedScope } from './feed-events.ts';
@@ -25,10 +26,14 @@ type Input = Readonly<{
  * of the component because a page template is a layout, not a derivation.
  */
 export const feedExtras = ({ lang, scope, corpus, shown, path, site }: Input) => ({
-  cityVenues: branch(
-    scope.city !== undefined && scope.venue === undefined && scope.facet === undefined,
-  )<readonly CityVenue[]>(
-    () => venuesInCity(corpus, scope.region, scope.city ?? ''),
+  cityVenues: branch(scope.venue === undefined && scope.facet === undefined)<readonly CityVenue[]>(
+    () =>
+      branch(scope.city !== undefined)<readonly CityVenue[]>(
+        () => venuesInCity(corpus, scope.region, scope.city ?? ''),
+        // A region feed lists the venues with a programme: the set the sitemap
+        // advertises, from the tier Google actually recrawls.
+        () => venuesInRegion(corpus, scope.region),
+      ),
     () => [],
   ),
   venueLd: [scope.venue]

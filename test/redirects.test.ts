@@ -64,6 +64,14 @@ describe('public/_redirects', () => {
     }
   });
 
+  // @astrojs/sitemap owned this address for two months and Google has read it
+  // for two months. It moves rather than disappearing: the page tier it used to
+  // hold is now enumerated by hand in sitemap-pages.xml.
+  test("the address the generated sitemap had still answers", () => {
+    assert.equal(sourceOf("/sitemap-0.xml")?.destination, "/sitemap-pages.xml");
+    assert.equal(sourceOf("/sitemap-0.xml")?.status, 301);
+  });
+
   // A rule whose source also matches a destination is a loop. `/:lang/calendar`
   // would have been one: the first segment of `/liguria/calendar/` is not a
   // language, but the pattern cannot tell.

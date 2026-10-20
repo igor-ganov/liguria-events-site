@@ -1544,6 +1544,10 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
 }
 .city-venues a { color: var(--ink); text-decoration: none; }
 .city-venues a:hover { color: var(--accent); }
+/* On a region's list the town comes after the name, in the quieter voice: the
+   venue is what is being linked, the town is how to place it. */
+.city-venues-town { color: var(--muted); font-size: 0.8rem; }
+.city-venues-town::before { content: '·'; margin-inline-end: 0.3rem; }
 .city-venues-count { color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
 
 /* ══ what a feed says about itself ══════════════════════════════════ */

@@ -13,6 +13,8 @@ export const SeoUiSchema = Schema.Struct({
   venueTitle: Schema.String,
   feedTitle: Schema.String,
   venuesHere: Schema.String,
+  /** The same list on a region feed, where Italian takes "in" and not "a". */
+  venuesAround: Schema.String,
   pastHere: Schema.String,
   pastNote: Schema.String,
   venue: Schema.String,

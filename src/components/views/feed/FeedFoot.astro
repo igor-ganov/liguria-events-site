@@ -1,5 +1,6 @@
 ---
 import CityVenues from './CityVenues.astro';
+import { venuesHeading } from '../../../lib/events/venues-heading.ts';
 import SubscribeBar from './SubscribeBar.astro';
 import VenuePast from './VenuePast.astro';
 import type { CityVenue } from '../../../lib/events/venues-in-city.ts';
@@ -28,7 +29,11 @@ const { lang, region, city, venue, today, placeName, title, cityVenues, site, ui
 
 {venue !== undefined && <VenuePast city={city ?? ''} slug={venue.slug} today={today} ui={ui} />}
 {cityVenues.length > 0 && (
-  <CityVenues lang={lang} heading={ui.seo.venuesHere.replace('{place}', placeName)} venues={cityVenues} />
+  <CityVenues
+    lang={lang}
+    heading={venuesHeading(ui.seo, city, placeName)}
+    venues={cityVenues}
+  />
 )}
 <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
 <SubscribeBar region={region} city={city} site={site} ui={ui} title={title} />

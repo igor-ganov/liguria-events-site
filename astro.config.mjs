@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
-import sitemap from '@astrojs/sitemap';
 
 // One Worker per environment (Cloudflare adapter): public pages stay
 // prerendered (static assets), while auth / submit / API routes opt into
@@ -24,11 +23,16 @@ export default defineConfig({
     imageService: 'compile',
     wasmModuleImports: true,
   }),
-  // Emits sitemap-index.xml + sitemap-0.xml over the prerendered routes. SSR
-  // event detail pages (prerender = false) are intentionally excluded.
-  // The map is an application view, not a page anybody should land on from a
-  // search result — 60 near-identical entries would be the bulk of the file.
-  integrations: [sitemap({ filter: (page) => !page.endsWith('/map/') })],
+  // No sitemap integration. It wrote sitemap-0.xml over everything prerendered,
+  // which is a denylist — one `filter` excluding the map view — and a denylist
+  // advertises every page nobody remembered to exclude: /admin/, /admin/users/,
+  // /settings/, /tickets/ and /auth/verify/ were all offered to Google as
+  // content, three of them answering 302 to a sign-in. It also wrote all three
+  // locales of every page, no lastmod and no hreflang, long after the
+  // hand-written files had stopped doing any of that. src/pages/sitemap-*.xml.ts
+  // enumerate the pages instead: an allowlist cannot leak a page it was never
+  // told about.
+  integrations: [],
   i18n: {
     locales: ['en', 'it', 'ru'],
     defaultLocale: 'en',

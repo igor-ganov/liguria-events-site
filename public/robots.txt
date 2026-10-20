@@ -65,14 +65,16 @@ Disallow: /
 User-agent: meta-externalagent
 Disallow: /
 
-Sitemap: https://dovego.it/sitemap-index.xml
-# Event and facet pages are server-rendered, so the generated index above cannot
-# see them. sitemap-events.xml is an index of the two files they were split
-# into: what is coming changes daily, a city's facets rarely.
+# Two indexes of the same three files, because Google has had both addresses
+# submitted since August and neither should start answering 404. Each names
+# sitemap-pages.xml (regions, cities, calendars, the written pages),
+# sitemap-upcoming.xml (what is on, changing daily) and sitemap-places.xml (the
+# city facets and the venues with a programme).
 #
-# The archive is deliberately not advertised, and neither are the venue pages:
-# together they were 5 898 of the 9 741 URLs this site offered a crawler that
-# manages a dozen fetches a day, and not one of them was ever indexed.
+# The archive is deliberately not advertised: 3 345 finished pages were a third
+# of everything this site offered a crawler that manages a few hundred fetches a
+# day. It is still served for whoever asks.
+Sitemap: https://dovego.it/sitemap-index.xml
 Sitemap: https://dovego.it/sitemap-events.xml
 Sitemap: https://dovego.it/sitemap-upcoming.xml
 Sitemap: https://dovego.it/sitemap-places.xml

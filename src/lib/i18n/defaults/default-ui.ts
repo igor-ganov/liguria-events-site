@@ -4,6 +4,7 @@ import { DEFAULT_CATALOG_UI } from './default-catalog-ui.ts';
 import { DEFAULT_LANDMARKS_UI } from './default-landmarks-ui.ts';
 import { DEFAULT_PLACES_UI } from './default-places-ui.ts';
 import { DEFAULT_REVIEWS_UI } from './default-reviews-ui.ts';
+import { DEFAULT_SEO_UI } from './default-seo-ui.ts';
 import { DEFAULT_ROUTE_UI } from './default-route-ui.ts';
 import { DEFAULT_VENUES_UI } from './default-venues-ui.ts';
 import type { Ui } from '../ui-schema.ts';
@@ -27,18 +28,7 @@ export const DEFAULT_UI: Ui = {
   route: DEFAULT_ROUTE_UI,
   menu: { events: "What's on", explore: 'Explore', more: 'More' },
   venues: DEFAULT_VENUES_UI,
-  seo: {
-    venueCount: { other: '' },
-    venueTitle: '',
-    feedTitle: "What's on in {place}",
-    venuesHere: 'Venues in {place}',
-    pastHere: 'Previously here',
-    pastNote: 'The most recent dates we have on record at this venue.',
-    venue: '',
-    feed: "Events and what's on in {place} — concerts, exhibitions, markets and more.",
-    calendar: "Event calendar for {place} — what's on, day by day.",
-    map: "Map of events in {place} — find what's on near you.",
-  },
+  seo: DEFAULT_SEO_UI,
   ...DEFAULT_CATALOG_UI,
   ...DEFAULT_APP_UI,
   headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years', alsoHere: '{place}: what else is on' },
