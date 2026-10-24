@@ -8,7 +8,12 @@ import type { SitemapUrl } from './sitemap-url.ts';
 // The pages a region has beside its feed. Both are thin for most regions and
 // both are the only path to the place and landmark detail pages, which nothing
 // else advertises.
-const SUB_PAGES = ['calendar/', 'landmarks/', 'places/'];
+//
+// The region's calendar door is not among them: like the country's, it renders
+// this month and canonicalises to that month's address, which is advertised in
+// its own row below. Sixteen regions offering a door that points elsewhere is
+// sixteen fetches from a budget of 629 a day.
+const SUB_PAGES = ['landmarks/', 'places/'];
 
 /**
  * A region's own pages: the feed, its calendar and the months still to come.

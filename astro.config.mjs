@@ -36,6 +36,16 @@ export default defineConfig({
   i18n: {
     locales: ['en', 'it', 'ru'],
     defaultLocale: 'en',
-    routing: { prefixDefaultLocale: false },
+    // Every language carries its prefix, English included. Left at
+    // `prefixDefaultLocale: false` after English moved under /en/, Astro went
+    // on treating the prefix-less address as English's real one and 301'd
+    // /en/event/<id>/ back to /event/<id>/ — which the middleware then sent
+    // back to /en/, a redirect loop that answered nothing at all.
+    //
+    // `redirectToDefaultLocale: false` because the root is not an English page:
+    // it is the door that asks the reader where they are, and
+    // `legacyLocalePath` in the middleware owns moving the addresses that
+    // genuinely were English, with its own rules for files and machinery.
+    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: false },
   },
 });
