@@ -36,7 +36,7 @@ const detailCheck = (region: string): Check => ({
       ReadonlyArray<{ id: string; name: string; img?: string }>;
     const item = rows.find((l) => l.img);
     ok(item !== undefined, `${region}: no landmark with an image`);
-    const url = `${BASE}/landmark/${region}/${slug.of(item.name, item.id)}/`;
+    const url = `${BASE}/en/landmark/${region}/${slug.of(item.name, item.id)}/`;
     const res = await get(url);
     ok(res.ok, `${url} → ${res.status}`);
     const html = await res.text();
@@ -86,9 +86,9 @@ const reviewsApiCheck: Check = {
 const thumbsCheck: Check = {
   name: 'feed cover thumbnails',
   run: async () => {
-    const html = await (await get(`${BASE}/liguria/`)).text();
+    const html = await (await get(`${BASE}/en/liguria/`)).text();
     const path = /\/uploads\/thumbs\/[0-9a-f]{16}\.webp/.exec(html)?.[0];
-    ok(path !== undefined, '/liguria/ names no cover thumbnail');
+    ok(path !== undefined, '/en/liguria/ names no cover thumbnail');
     const res = await get(`${BASE}${path}`);
     ok(res.ok && res.headers.get('content-type') === 'image/webp', `${path} → ${res.status} ${res.headers.get('content-type')}`);
   },
@@ -100,16 +100,41 @@ const thumbsCheck: Check = {
 const tailCheck: Check = {
   name: 'folded feed days',
   run: async () => {
-    const html = await (await get(`${BASE}/liguria/`)).text();
+    const html = await (await get(`${BASE}/en/liguria/`)).text();
     const path = /data-feed-tail data-src="([^"]+)"/.exec(html)?.[1];
-    ok(path !== undefined, '/liguria/ names no file of folded days');
+    ok(path !== undefined, '/en/liguria/ names no file of folded days');
     const res = await fetch(`${BASE}${path}`, { redirect: 'manual' });
     ok(res.status === 200, `${path} → ${res.status}, not the days themselves`);
   },
 };
 
+// A bare event id is an address thousands of links still use — minted before
+// the slugs, assembled by crawlers, pasted into chats — and it has to end
+// somewhere. English was left on `prefixDefaultLocale: false` after the site
+// moved it under /en/, so Astro 301'd /en/event/<id>/ back to /event/<id>/ and
+// the middleware sent that to /en/ again: fifty hops and no answer at all. A
+// redirect chain is fine; a cycle is not, and nothing but a live request sees
+// one.
+const bareIdCheck: Check = {
+  name: 'a bare event id resolves, in every language',
+  run: async () => {
+    const html = await (await get(`${BASE}/en/liguria/`)).text();
+    const id = /\/event\/[a-z0-9-]*?([0-9a-f]{12})\//.exec(html)?.[1];
+    ok(id !== undefined, '/en/liguria/ names no event to follow');
+    await Promise.all(
+      ['en', 'it', 'ru'].map(async (lang) => {
+        const url = `${BASE}/${lang}/event/${id}/`;
+        const res = await get(url);
+        ok(res.ok, `${url} → ${res.status}`);
+        ok(res.url.startsWith(`${BASE}/${lang}/event/`), `${url} ended at ${res.url}`);
+      }),
+    );
+  },
+};
+
 const CHECKS: readonly Check[] = [
-  pageCheck('/liguria/map/'),
+  pageCheck('/en/liguria/map/'),
+  bareIdCheck,
   reviewsApiCheck,
   shardCheck('places', 'lombardia'),
   shardCheck('places', 'sicilia'),

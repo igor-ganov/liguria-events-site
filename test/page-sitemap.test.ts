@@ -56,7 +56,11 @@ describe('pageSitemapUrls', () => {
     expect(locs.some((loc) => loc.includes('/calendar/2026-09/'))).toBe(false);
     expect(locs).toContain('https://dovego.it/it/liguria/calendar/2026-10/');
     expect(locs).toContain('https://dovego.it/it/liguria/calendar/2026-11/');
-    expect(locs).toContain('https://dovego.it/it/liguria/calendar/');
+    // The calendar door itself is NOT advertised: it renders this month and
+    // says so, declaring /it/liguria/calendar/2026-10/ as its canonical. A
+    // sitemap row whose page points somewhere else spends a fetch to be told
+    // to fetch again, and Googlebot has 629 of them a day for the whole site.
+    expect(locs).not.toContain('https://dovego.it/it/liguria/calendar/');
   });
 
   test('a page behind the session gate is not a search result', () => {
@@ -99,10 +103,17 @@ describe('the front doors', () => {
   // They could not be advertised before: each one answered 302, and `/` has sat
   // in Google's index as a redirect since the site began — crawled 13 July,
   // never since. A redirect is not a page anybody can be shown in a result.
-  test('the page, the country calendar and the country map are pages now, and offered as pages', () => {
+  test('the page and the country map are pages now, and offered as pages', () => {
     expect(locs).toContain('https://dovego.it/it/');
-    expect(locs).toContain('https://dovego.it/it/calendar/');
     expect(locs).toContain('https://dovego.it/it/map/');
+  });
+
+  test('the country calendar door is not offered: it canonicalises to this month', () => {
+    // Measured 2026-10-24: /it/calendar/ declares /it/calendar/2026-10/ as its
+    // canonical, and that month is advertised in its own row. Both the door and
+    // the month were being offered, so one of the two was always a wasted fetch.
+    expect(locs).not.toContain('https://dovego.it/it/calendar/');
+    expect(locs).toContain('https://dovego.it/it/calendar/2026-10/');
   });
 
   test('each declaring the languages it is written in', () => {

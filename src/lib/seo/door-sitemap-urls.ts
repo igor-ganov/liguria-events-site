@@ -4,8 +4,13 @@ import type { CompactEvent } from '../events/event-schema.ts';
 import type { SitemapUrl } from './sitemap-url.ts';
 
 // The pages that name no region: the front door that asks, and the country's
-// own calendar and map, which used to be redirects into a guessed region.
-const DOORS = ['', 'calendar/', 'map/'];
+// own map, which used to be a redirect into a guessed region.
+//
+// The calendar door is deliberately absent. It renders this month and declares
+// that month's address as its canonical, and the month has a row of its own
+// below — so advertising the door spends a fetch to be told to fetch again.
+// Googlebot manages 629 fetches a day for the whole site.
+const DOORS = ['', 'map/'];
 
 /**
  * The national pages, advertised for the first time.
