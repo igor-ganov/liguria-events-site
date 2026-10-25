@@ -3,6 +3,7 @@ import { editionKey } from './edition-key.ts';
 import { eventsOfVenue } from './events-of-venue.ts';
 import { hasRealVenue } from './has-real-venue.ts';
 import { isUpcoming } from './is-upcoming.ts';
+import { nextDayOn } from './next-day-on.ts';
 import { regionOf } from '../region/region-of.ts';
 import { slugify } from '../slugify.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -15,9 +16,8 @@ const SHOWN = 8;
 export type AtVenue = Readonly<{ shown: readonly CompactEvent[] }>;
 
 // A season that opened in February is on tonight: it is dated by the day a
-// reader can go, never before today.
-const from = (today: string) => (event: CompactEvent): string =>
-  [event.s, today].toSorted().at(-1) ?? today;
+// reader can go, never before today, and a container by its next session.
+const from = nextDayOn;
 
 const others = (all: readonly CompactEvent[], here: CompactEvent, today: string): readonly CompactEvent[] =>
   eventsOfVenue(all, regionOf(here), here.ct ?? '', slugify(here.v ?? ''))
