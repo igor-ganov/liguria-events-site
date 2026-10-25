@@ -41,6 +41,26 @@ describe('eventLinks', () => {
     ]);
   });
 
+  test('one link per source: the pages of a show sold date by date are one source', () => {
+    // The crawler folds a show Ticketmaster sells date by date into one event
+    // and keeps every other date's page as a link — 83 of them for one
+    // exhibition. A reader wants to know who says so, once each.
+    const links = eventLinks(
+      ev({
+        u: 'https://www.ticketmaster.it/event/banksy-25-10',
+        l: [
+          { source: 'ticketmaster', url: 'https://www.ticketmaster.it/event/banksy-26-10' },
+          { source: 'mentelocale', url: 'https://www.mentelocale.it/torino/1' },
+          { source: 'ticketmaster', url: 'https://www.ticketmaster.it/event/banksy-27-10' },
+        ],
+      }),
+    );
+    assert.deepEqual(links.map((link) => link.url), [
+      'https://www.ticketmaster.it/event/banksy-25-10',
+      'https://www.mentelocale.it/torino/1',
+    ]);
+  });
+
   test('an event with no source link renders no link at all', () => {
     assert.deepEqual(eventLinks(ev({ u: '' })), []);
   });
