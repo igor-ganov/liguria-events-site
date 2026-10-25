@@ -78,3 +78,13 @@ test('"various places" is not a venue: no strip, and its name links nowhere', as
   await expect(page.locator('.event-at-venue')).toHaveCount(0);
   await expect(page.locator('.event-where .widget-place a')).toHaveCount(0);
 });
+
+test('every tile is dated by the next day a reader can go, never a day gone', async ({ page, request }) => {
+  // A season that opened in February showed "6 Feb" in October.
+  const [here] = await aBusyVenue(request);
+  await page.goto(`/it/event/${here?.id ?? ''}/`);
+  const days = await page.locator('.pick-tile').evaluateAll((els) => els.map((el) => el.getAttribute('data-day') ?? ''));
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
+  expect(days.length).toBeGreaterThan(0);
+  expect(days.filter((day) => day < today)).toEqual([]);
+});
