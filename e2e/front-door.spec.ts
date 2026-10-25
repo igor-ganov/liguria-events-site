@@ -115,9 +115,10 @@ test('a reader whose browser speaks Italian is sent on in Italian', async ({ bro
 
 test('the doors are offered to search, which a redirect never could be', async ({ request }) => {
   const xml = await (await request.get('/sitemap-pages.xml')).text();
-  ['https://dovego.it/it/', 'https://dovego.it/it/calendar/', 'https://dovego.it/it/map/'].forEach((loc) =>
-    expect(xml).toContain(`<loc>${loc}</loc>`),
-  );
+  ['https://dovego.it/it/', 'https://dovego.it/it/map/'].forEach((loc) => expect(xml).toContain(`<loc>${loc}</loc>`));
+  // The country's calendar is advertised by its months: the bare address is a
+  // page whose canonical is the current month, and a sitemap lists canonicals.
+  expect(xml).toMatch(/<loc>https:\/\/dovego\.it\/it\/calendar\/\d{4}-\d{2}\/<\/loc>/);
 });
 
 test('a page that is in no language offers no language switch', async ({ page }) => {
