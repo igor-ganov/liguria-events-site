@@ -1,0 +1,29 @@
+---
+import PickStrip from './PickStrip.astro';
+import Widget from './Widget.astro';
+import { venueLink } from '../../../lib/events/venue-link.ts';
+import type { AtVenue } from '../../../lib/events/also-at-venue.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// A reader at one show of a theatre wants its other shows. The town strip
+// mixed them into everything nearby, six at a time; this strip is the venue's
+// own, soonest first, and it ends at the venue's page, where the rest are.
+// Nothing is drawn when the venue is not a place or has nothing else on.
+type Props = Readonly<{ lang: Locale; event: CompactEvent; venue: AtVenue; ui: Ui }>;
+const { lang, event, venue, ui } = Astro.props;
+const name = event.v ?? '';
+const page = venueLink(lang)(event);
+---
+
+{venue.shown.length > 0 && (
+  <Widget name="at-venue" icon="pin" label={ui.headings.alsoAtVenue.replace('{place}', name)} wide>
+    <PickStrip lang={lang} events={venue.shown} />
+    {page !== undefined && (
+      <p class="widget-chips">
+        <a class="chip" href={page}>{ui.eventPage.venuePage.replace('{place}', name)}</a>
+      </p>
+    )}
+  </Widget>
+)}

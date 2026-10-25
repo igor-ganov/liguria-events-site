@@ -45,14 +45,14 @@ test('an event page says what else is on in its town', async ({ page, request })
   const town = onward.filter((href) => /^\/it\/[a-z-]+\/[a-z-]+\/$/.test(href));
   expect(town, `no town link among ${onward.join(' ')}`).toHaveLength(1);
   // Links to other event pages: the crawl path that did not exist.
-  expect(onward.filter((href) => href.includes('/en/event/')).length).toBeGreaterThan(0);
+  expect(onward.filter((href) => href.includes('/it/event/')).length).toBeGreaterThan(0);
 });
 
 test('and it does not offer the reader the page they are already on', async ({ page, request }) => {
   const path = await anEvent(request);
   await page.goto(path);
   const links = await page
-    .locator('.event-also a[href*="/en/event/"]')
+    .locator('.event-also a[href*="/it/event/"]')
     .evaluateAll((els) => els.map((el) => el.getAttribute('href') ?? ''));
   expect(links.length).toBeGreaterThan(0);
   expect(links.includes(path)).toBe(false);

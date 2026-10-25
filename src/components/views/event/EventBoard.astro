@@ -1,5 +1,6 @@
 ---
 import EventAlso from './EventAlso.astro';
+import EventAtVenue from './EventAtVenue.astro';
 import EventCards from './EventCards.astro';
 import EventEditions from './EventEditions.astro';
 import EventFeedback from './EventFeedback.astro';
@@ -47,8 +48,9 @@ const widgets = eventWidgets({
 // happened wants next year's, and that is the direction the archive alone
 // cannot answer.
 const editions = await editionsOf(event, Astro.locals.runtime.env.DB);
-// What else is on in the same town around the same date. The page offered the
-// whole region and other years of itself, and nothing else.
+// What else is on at the same venue, then in the same town around the same
+// date. The page offered the whole region and other years of itself, and
+// nothing else.
 const also = await alsoOn(event, isoToday());
 ---
 
@@ -57,10 +59,11 @@ const also = await alsoOn(event, isoToday());
   {leaves.length > 0 && (
     <EventProgramme leaves={leaves} heading={ui.eventPage.programme} written={widgets.programme} whole={ui.eventPage.fullProgramme} />
   )}
-  <EventPlace event={event} contacts={contacts} mapEmbedUrl={view.mapEmbedUrl} title={view.title} way={widgets.way} ui={ui} />
+  <EventPlace lang={lang} event={event} contacts={contacts} mapEmbedUrl={view.mapEmbedUrl} title={view.title} way={widgets.way} ui={ui} />
   <EventCards cards={widgets.cards} />
   <PlaceReviews subject={subject} region={view.region} ui={ui} />
-  <EventAlso lang={lang} event={event} also={also} ui={ui} />
+  <EventAtVenue lang={lang} event={event} venue={also.venue} ui={ui} />
+  <EventAlso lang={lang} event={event} also={also.town} venueAbove={also.venue.shown.length > 0} ui={ui} />
   <EventEditions lang={lang} heading={ui.headings.editions} editions={editions} />
   <EventSources links={view.links} heading={ui.headings.sources} note={ui.summaryNote}>
     <EventFeedback event={event} title={view.title} ui={ui} />

@@ -469,6 +469,13 @@
 .widget-place b {
   font-weight: 500;
 }
+/* The venue's name leads to its page; underlined, so it does not read as a
+   link by its colour alone. */
+.widget-place a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
 .widget-place span {
   font-size: 0.86rem;
   color: var(--ink-2);
@@ -482,7 +489,8 @@
   height: 12rem;
 }
 
-/* ── what else is on: the feed's own small tiles ─────────────────── */
+/* ── what else is on, at the venue and in town: the feed's own tiles ─ */
+.event-at-venue .picks-strip,
 .event-also .picks-strip {
   margin: 0 0 0.7rem;
   padding: 0 0 0.3rem;

@@ -1,0 +1,32 @@
+---
+import { LOCALE_TAG } from '../../../lib/i18n/locale-tag.ts';
+import { eventPath } from '../../../lib/event-path.ts';
+import { largeCover } from '../../../lib/img/large-cover.ts';
+import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
+import { titleOf } from '../../../lib/events/title-of.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+
+// Other events as the feed's own small tiles — a photograph, the day, the
+// name — in one strip to swipe, not a list of blue lines.
+type Props = Readonly<{ lang: Locale; events: readonly CompactEvent[] }>;
+const { lang, events } = Astro.props;
+const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
+  new Intl.DateTimeFormat(LOCALE_TAG[lang], { ...part, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
+---
+
+{events.length > 0 && (
+  <ul class="picks-strip">
+    {events.map((one) => (
+      <li>
+        <a class="pick-tile" href={localizedUrl(lang, eventPath(one))}>
+          {one.img !== undefined && (
+            <img src={one.th ?? largeCover(one.img)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+          )}
+          <b><small>{dayOf(one.s, { month: 'short' })}</small>{dayOf(one.s, { day: 'numeric' })}</b>
+          <span>{titleOf(lang)(one)}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+)}
