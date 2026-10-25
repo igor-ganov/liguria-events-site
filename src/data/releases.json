@@ -1,5 +1,19 @@
 [
   {
+    "date": "2026-10-25",
+    "example": "/it/liguria/",
+    "title": {
+      "en": "Changing the language keeps your place",
+      "it": "Cambiare lingua non ti fa perdere il punto",
+      "ru": "Смена языка не сбивает с места"
+    },
+    "body": {
+      "en": "Switching the language now changes the page you are on instead of opening a new one: Back takes you to where you were before, in the language you chose, and the page stays scrolled where you left it.",
+      "it": "Cambiare lingua ora traduce la pagina in cui sei invece di aprirne una nuova: Indietro ti riporta dove eri prima, nella lingua scelta, e la pagina resta al punto in cui l’avevi lasciata.",
+      "ru": "Переключение языка теперь меняет текущую страницу, а не открывает новую: «Назад» ведёт туда, где вы были до этого, уже на выбранном языке, а страница остаётся прокрученной там же, где была."
+    }
+  },
+  {
     "date": "2026-10-11",
     "roadmap": "feed-photo-cards",
     "example": "/liguria/",
