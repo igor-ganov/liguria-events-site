@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-10-25",
+    "roadmap": "venue-pages",
+    "example": "/liguria/genova/teatro-della-tosse/",
+    "title": {
+      "en": "The other shows of the same theatre",
+      "it": "Gli altri spettacoli dello stesso teatro",
+      "ru": "Другие спектакли того же театра"
+    },
+    "body": {
+      "en": "The page of a show now ends with what else is on at the same venue, soonest first, and a link to the venue's own page with all its events. The venue's name under \"Where\" leads there too. The strip of what else is on in town no longer repeats those shows.",
+      "it": "La pagina di uno spettacolo ora si chiude con cos’altro c’è nello stesso luogo, dal più vicino, e un link alla pagina del luogo con tutti i suoi eventi. Anche il nome del luogo sotto «Dove» porta lì. La striscia di cos’altro c’è in città non ripete più quegli spettacoli.",
+      "ru": "Страница спектакля теперь заканчивается тем, что ещё идёт на той же площадке, начиная с ближайшего, и ссылкой на страницу площадки со всеми её событиями. Название площадки в блоке «Где» тоже ведёт туда. Лента «что ещё в городе» больше не повторяет эти спектакли."
+    }
+  },
+  {
+    "date": "2026-10-25",
     "example": "/it/liguria/",
     "title": {
       "en": "Changing the language keeps your place",

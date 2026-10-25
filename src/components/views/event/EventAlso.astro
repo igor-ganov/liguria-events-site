@@ -1,12 +1,9 @@
 ---
+import PickStrip from './PickStrip.astro';
 import Widget from './Widget.astro';
-import { LOCALE_TAG } from '../../../lib/i18n/locale-tag.ts';
 import { cityName } from '../../../lib/region/city-name.ts';
-import { eventPath } from '../../../lib/event-path.ts';
-import { largeCover } from '../../../lib/img/large-cover.ts';
 import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
 import { slugify } from '../../../lib/slugify.ts';
-import { titleOf } from '../../../lib/events/title-of.ts';
 import { venuePath } from '../../../lib/events/venue-path.ts';
 import type { CompactEvent } from '../../../lib/events/event-schema.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
@@ -18,46 +15,30 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // it is the same gap: the only path to an event page was scrolling a feed, and
 // 17 of 96 sampled pages were in the index.
 //
-// The other events are the feed's own small tiles — a photograph, the day, the
-// name — in one strip to swipe, not a list of blue lines.
-//
 // Every label puts the place first and takes no preposition: one template has
 // to serve "Genova", "Teatro Carlo Felice" and "Liguria", and Italian and
 // Russian each want something different in front of them.
-type Props = Readonly<{ lang: Locale; event: CompactEvent; also: readonly CompactEvent[]; ui: Ui }>;
-const { lang, event, also, ui } = Astro.props;
+//
+// The venue chip is here only while the venue has no strip of its own above;
+// when it has one, the chip closes that strip instead.
+type Props = Readonly<{ lang: Locale; event: CompactEvent; also: readonly CompactEvent[]; venueAbove: boolean; ui: Ui }>;
+const { lang, event, also, venueAbove, ui } = Astro.props;
 const region = event.rg ?? '';
 const city = event.ct ?? '';
 const place = [city].filter((named) => named !== '').map(cityName).at(0) ?? region;
 const venue = event.v ?? '';
-const dayOf = (iso: string, part: Intl.DateTimeFormatOptions): string =>
-  new Intl.DateTimeFormat(LOCALE_TAG[lang], { ...part, timeZone: 'UTC' }).format(new Date(`${iso}T00:00:00Z`));
 ---
 
 {(also.length > 0 || city !== '') && (
   <Widget name="also" icon="feed" label={ui.headings.alsoHere.replace('{place}', place)} wide>
-    {also.length > 0 && (
-      <ul class="picks-strip">
-        {also.map((one) => (
-          <li>
-            <a class="pick-tile" href={localizedUrl(lang, eventPath(one))}>
-              {one.img !== undefined && (
-                <img src={one.th ?? largeCover(one.img)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-              )}
-              <b><small>{dayOf(one.s, { month: 'short' })}</small>{dayOf(one.s, { day: 'numeric' })}</b>
-              <span>{titleOf(lang)(one)}</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-    )}
+    <PickStrip lang={lang} events={also} />
     <p class="widget-chips">
       {city !== '' && (
         <a class="chip" href={localizedUrl(lang, `${region}/${city}/`)}>
           {ui.eventPage.allInCity.replace('{place}', cityName(city))}
         </a>
       )}
-      {city !== '' && venue !== '' && (
+      {city !== '' && venue !== '' && !venueAbove && (
         <a class="chip" href={localizedUrl(lang, venuePath(region, city, slugify(venue)))}>
           {ui.eventPage.venuePage.replace('{place}', venue)}
         </a>
