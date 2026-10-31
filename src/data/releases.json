@@ -1,5 +1,20 @@
 [
   {
+    "date": "2026-10-31",
+    "roadmap": "feed-photo-cards",
+    "example": "/it/liguria/",
+    "title": {
+      "en": "A day of the feed reads by the clock, and folds away",
+      "it": "Un giorno del feed si legge per orario, e si chiude",
+      "ru": "День в ленте читается по часам и сворачивается"
+    },
+    "body": {
+      "en": "Under each day, what happens at a time is listed by the hour, and what is on all day — exhibitions, long runs, events with no set time — follows under its own heading, with no misleading hour. The day you are reading stays at the top of the screen as you scroll. Tap a day to fold it into a strip of its pictures with how many events it holds; the feed remembers it on this device.",
+      "it": "Sotto ogni giorno, ciò che accade a un’ora precisa è in ordine di orario, e ciò che è aperto tutto il giorno — mostre, eventi lunghi, eventi senza orario — segue sotto un titolo suo, senza un orario fuorviante. Il giorno che stai leggendo resta in cima allo schermo mentre scorri. Tocca un giorno per chiuderlo in una striscia delle sue immagini con il numero di eventi; il feed lo ricorda su questo dispositivo.",
+      "ru": "Внутри каждого дня то, что начинается в определённое время, идёт по часам, а то, что открыто весь день, — выставки, долгие события, события без времени — следует под отдельным заголовком, без вводящего в заблуждение часа. День, который вы читаете, остаётся вверху экрана при прокрутке. Нажмите на день, чтобы свернуть его в полоску картинок с числом событий; лента запомнит это на этом устройстве."
+    }
+  },
+  {
     "date": "2026-10-25",
     "roadmap": "venue-pages",
     "example": "/liguria/genova/teatro-della-tosse/",

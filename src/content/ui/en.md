@@ -86,6 +86,7 @@ eventPage: { starts: "starts", dates: "dates", duration: "lasts", price: "from",
 entry: { heading: "Where are you going?", lead: "Pick a region and we will remember it. What is coming up around Italy:", pickHeading: "Next up around Italy", regionsHeading: "All regions", country: "Italy", hereRegion: "My region", hereCity: "My city" }
 picks: { title: "Highlights", day: "Event of the day", week: "Event of the week", month: "Event of the month", thisWeek: "This week" }
 calNav: { prev: 'Previous month', next: 'Next month' }
+feedDay: { allDay: 'All day' }
 badges: { free: 'free', gem: 'gem', made: 'made here' }
 subscribe: { note: "Follow this place: add it to your calendar or subscribe by RSS — or read what is on across Italy every morning on Telegram.", calendar: "Add to calendar", rss: "RSS", telegram: "Daily on Telegram" }
 share: { label: "Share", copied: "Link copied" }

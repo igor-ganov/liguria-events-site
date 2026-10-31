@@ -1,4 +1,4 @@
-import { byUniqueness } from './by-uniqueness.ts';
+import { byDayOrder } from './by-day-order.ts';
 import { expandSessions } from './expand-sessions.ts';
 import { groupByDay } from './group-by-day.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -7,13 +7,13 @@ import type { CompactEvent } from './event-schema.ts';
 export type DayGroup = readonly [string, readonly CompactEvent[]];
 
 /**
- * Within each day, lead with the unique, time-pinned events (short span) and
- * sink the long runs. The server emits this order so the default "By date" sort
- * is a no-op on first load — no reflow — while keeping the curation.
+ * Each day reads by the clock: the events that happen at a time lead, in the
+ * order of their hours, and what is on all day follows (byDayOrder). The server
+ * emits this order so the default "By date" sort is a no-op on first load.
  */
 export const feedDayGroups =
   (today: string) =>
   (events: readonly CompactEvent[]): readonly DayGroup[] =>
     [...groupByDay(today)(expandSessions(events, today)).entries()].map(
-      ([day, dayEvents]): DayGroup => [day, [...dayEvents].sort(byUniqueness)],
+      ([day, dayEvents]): DayGroup => [day, [...dayEvents].sort(byDayOrder(day))],
     );

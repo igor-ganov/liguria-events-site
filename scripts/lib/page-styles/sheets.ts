@@ -13,6 +13,8 @@ export const SHEETS = [
   'filo-tokens.css',
   'filo-mano.css',
   'filo-percorso.css',
+  'feed-days.css',
+  'feed-days-shut.css',
   'event-page.css',
   'tickets.css',
   'picks.css',

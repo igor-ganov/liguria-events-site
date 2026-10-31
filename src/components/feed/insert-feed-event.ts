@@ -1,20 +1,26 @@
+import { branch } from '../../lib/branch.ts';
 import { dayHeading } from '../../lib/calendar/day-heading.ts';
 import { descriptionOf } from '../../lib/events/description-of.ts';
 import { descriptionPlain } from '../../lib/description/description-plain.ts';
-import { escapeMarkup } from '../../lib/escape-markup.ts';
 import { feedCardAttrs } from './feed-card-attrs.ts';
 import { feedCardHtml } from './feed-card-html.ts';
+import { feedDayHtml } from './feed-day-html.ts';
 import { feedDescs } from './feed-descs.ts';
 import { feedDayOf } from './feed-day-of.ts';
 import { isDefined } from '../../lib/is-defined.ts';
+import { isTimedOn } from '../../lib/events/is-timed-on.ts';
 import { queryAll } from '../../lib/dom/query-all.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { FeedContext } from './feed-context.ts';
-import type { Ui } from '../../lib/i18n/ui-schema.ts';
 
-const itemOf = (context: FeedContext, event: CompactEvent): HTMLElement => {
+// A timed card carries its hour: the default sort places it by the clock.
+const itemOf = (context: FeedContext, event: CompactEvent, timed: boolean): HTMLElement => {
   const item = document.createElement('li');
-  Object.entries(feedCardAttrs(event)).forEach(([key, value]) => {
+  const hour: Readonly<Record<string, string>> = branch(timed)(
+    () => ({ at: event.h ?? '' }),
+    () => ({}),
+  );
+  Object.entries({ ...feedCardAttrs(event), ...hour }).forEach(([key, value]) => {
     item.dataset[key] = value;
   });
   item.innerHTML = feedCardHtml(context, event);
@@ -23,38 +29,33 @@ const itemOf = (context: FeedContext, event: CompactEvent): HTMLElement => {
   return item;
 };
 
-const newDay = (list: HTMLElement, item: HTMLElement, day: string, ui: Ui): void => {
-  item.dataset['ord'] = '0';
-  const section = document.createElement('section');
-  section.className = 'feed-group';
-  section.dataset['day'] = day;
-  section.innerHTML = `<h3>${escapeMarkup(dayHeading(ui)(day))}</h3><ul class="feed-list"></ul>`;
-  section.querySelector('ul')?.appendChild(item);
-  // Keep day groups in ascending date order.
-  const after = queryAll(list, '.feed-group')
-    .filter((group) => (group.dataset['day'] ?? '') > day)
-    .slice(0, 1);
-  after.forEach((sibling) => list.insertBefore(section, sibling));
-  [after.length].filter((count) => count === 0).forEach(() => list.appendChild(section));
+// A day not on the page yet is opened from the same markup the server builds,
+// in ascending date order among the others.
+const openDay = (list: HTMLElement, day: string, { ui }: FeedContext): void => {
+  const holder = document.createElement('template');
+  holder.innerHTML = feedDayHtml({ day, heading: dayHeading(ui)(day), allDay: ui.feedDay.allDay }, '', '');
+  const after = queryAll(list, '.feed-group').filter((group) => (group.dataset['day'] ?? '') > day).slice(0, 1);
+  after.forEach((sibling) => list.insertBefore(holder.content, sibling));
+  [after.length].filter((count) => count === 0).forEach(() => list.appendChild(holder.content));
 };
 
-// Late events land after the server-rendered ones in "by date"; reorderFeed
-// re-places them by span in "by uniqueness".
-const intoDay = (list: HTMLElement, item: HTMLElement, day: string, ui: Ui): void => {
-  const groups = queryAll(list, `.feed-group[data-day="${day}"] .feed-list`).slice(0, 1);
-  groups.forEach((group) => {
-    item.dataset['ord'] = String(group.children.length);
-    group.appendChild(item);
+// Late events land at the end of their part; reorderFeed then places a timed
+// one by its hour.
+const intoDay = (context: FeedContext, list: HTMLElement, event: CompactEvent, day: string): void => {
+  const timed = isTimedOn(day)(event);
+  [queryAll(list, `.feed-group[data-day="${day}"]`).length].filter((count) => count === 0).forEach(() => openDay(list, day, context));
+  const part = branch(timed)(() => `#fd-${day}`, () => `#fd-${day}-all > ul`);
+  queryAll(list, part).slice(0, 1).forEach((target) => {
+    const item = itemOf(context, event, timed);
+    item.dataset['ord'] = String(target.children.length);
+    target.appendChild(item);
   });
-  [groups.length].filter((count) => count === 0).forEach(() => newDay(list, item, day, ui));
 };
 
-/** Put an event published since the build into its day group, opening a new one
- *  when that day is not on the page yet. */
+/** Put an event published since the build into its day, in the part it belongs
+ *  to, opening the day when it is not on the page yet. */
 export const insertFeedEvent = (context: FeedContext, event: CompactEvent): void => {
   [document.querySelector<HTMLElement>('[data-feed-list]') ?? undefined]
     .filter(isDefined)
-    .forEach((list) =>
-      intoDay(list, itemOf(context, event), feedDayOf(event.s, context.today), context.ui),
-    );
+    .forEach((list) => intoDay(context, list, event, feedDayOf(event.s, context.today)));
 };

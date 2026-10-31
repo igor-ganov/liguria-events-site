@@ -9,6 +9,7 @@ export const DEFAULT_APP_UI = {
   eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "", allInCity: "", venuePage: "", fullProgramme: "" },
   entry: { heading: "Where are you going?", lead: "", pickHeading: "", regionsHeading: "All regions", hereRegion: "My region", hereCity: "My city", country: "Italy" },
   picks: { title: "", day: "", week: "", month: "", thisWeek: "" },
+  feedDay: { allDay: 'All day' },
   subscribe: { note: '', calendar: '', rss: '', telegram: '' },
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },
