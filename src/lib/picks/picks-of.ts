@@ -30,12 +30,15 @@ const onBetween = (from: string, to: string) => (event: CompactEvent): boolean =
  * The event of the day, of the week and of the month, and a strip of what else
  * starts this week. Each is a different event, each has a photograph, and the
  * strip is empty rather than thin: fewer than four is not a selection.
+ * On a holiday the event of the day is the best of the holiday's own events
+ * (`festive`), when one of them is on.
  */
-export const picksOf = (events: readonly CompactEvent[], today: string): Picks => {
+export const picksOf = (events: readonly CompactEvent[], today: string, festive: ReadonlySet<string> = new Set()): Picks => {
   const pool = oncePerEvent(events.filter((event) => event.img !== undefined && (event.e ?? event.s) >= today));
   const best = (to: string, taken: readonly (CompactEvent | undefined)[]): readonly CompactEvent[] =>
     ranked(pool.filter(onBetween(today, to)).filter((event) => !taken.some((other) => other?.id === event.id)));
-  const day = best(today, []).at(0);
+  const ofToday = best(today, []);
+  const day = ofToday.find((event) => festive.has(event.id)) ?? ofToday.at(0);
   const week = best(addDays(today, 6), [day]).at(0);
   const month = best(addDays(today, 29), [day, week]).at(0);
   const starting = best(addDays(today, 6), [day, week, month]).filter((event) => event.s >= today);
