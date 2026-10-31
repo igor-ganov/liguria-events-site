@@ -1,5 +1,6 @@
 ---
 import FeedGroups from './FeedGroups.astro';
+import { feedDaysBoot } from '../../feed/feed-days-boot.ts';
 import { foldFeed } from '../../../lib/events/fold-feed.ts';
 import type { DayGroup } from '../../../lib/events/feed-day-groups.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
@@ -11,12 +12,16 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 //
 // `ahead` is how many large cards the page shows before these: the leading
 // cards of a PAGE fetch their photograph at once, wherever they come from.
+//
+// The inline script before the days folds those the reader folded before they
+// are painted (feedDaysBoot); the module wires the buttons and the later days.
 type Props = Readonly<{ groups: readonly DayGroup[]; heading: (day: string) => string; ui: Ui; lang: Locale; ahead: number }>;
 const { groups, heading, ui, lang, ahead } = Astro.props;
 const FIRST_CARDS = 24;
 const { head, tail } = foldFeed(groups, FIRST_CARDS);
 ---
 
+<script is:inline set:html={feedDaysBoot()} />
 <FeedGroups groups={head} heading={heading} ui={ui} lang={lang} ahead={ahead} />
 {tail.length > 0 && (
   <template data-feed-tail>
@@ -24,3 +29,8 @@ const { head, tail } = foldFeed(groups, FIRST_CARDS);
   </template>
 )}
 {tail.length > 0 && <span class="feed-more" data-feed-more aria-hidden="true"></span>}
+
+<script>
+  import { wireFeedDays } from '../../feed/wire-feed-days.ts';
+  document.addEventListener('astro:page-load', wireFeedDays);
+</script>

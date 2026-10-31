@@ -1,0 +1,99 @@
+/* ══ Feed days ═══════════════════════════════════════════════════════
+   A day's heading stays in sight while its day is read, it is the button
+   that folds the day, and a folded day is a strip of its pictures dealt
+   like a hand of cards, with how many there are. No script measures any
+   of it: the strip is the day's own cards, shrunk, so a filter that hides
+   a card hides its picture and the count follows by itself (a CSS
+   counter only counts what is shown).
+   After filo-percorso.css: it undoes the padding the thread gives h3. */
+
+.feed-group {
+  scroll-margin-top: var(--site-head-h, 6.5rem);
+}
+
+/* ── the heading: sticky, and a button ──────────────────────────────── */
+.feed-group > .feed-day-head,
+.percorso .feed-group > .feed-day-head {
+  position: sticky;
+  top: var(--site-head-h, 6.5rem);
+  z-index: 3;
+  padding: 0;
+  background: color-mix(in hsl, var(--bg) 90%, transparent);
+  backdrop-filter: blur(8px);
+}
+.feed-day-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  padding: 0.9rem 0.2rem 0.5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.feed-day-toggle:hover {
+  color: var(--ink);
+}
+.feed-day-toggle:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+  border-radius: 0.4rem;
+}
+/* The chevron: down while the day is open, pointing on when folded. */
+.feed-day-toggle::before {
+  content: '';
+  flex: none;
+  inline-size: 0.45em;
+  block-size: 0.45em;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  rotate: 45deg;
+  translate: 0 -0.12em;
+  transition: rotate var(--speed) ease;
+}
+
+/* ── the part of the day that is on all day ─────────────────────────── */
+.feed-allday-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 1rem 0.2rem 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.feed-allday-head::after {
+  content: '';
+  flex: 1;
+  border-block-start: 1px dashed var(--line);
+}
+/* No clock on what is on all day: an opening hour is not a time to go. */
+.feed-allday .photo-card-when b,
+.feed-allday .photo-card-more {
+  display: none;
+}
+/* A part with nothing shown in it — none, or all filtered away — is gone. */
+.feed-day-part:not(:has(li:not([hidden]))) {
+  display: none;
+}
+
+@media (max-width: 43.99rem) {
+  .percorso .feed-day-toggle,
+  .percorso .feed-allday-head {
+    padding-inline: 0.9rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed-day-toggle::before {
+    transition: none;
+  }
+}

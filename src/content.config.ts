@@ -32,6 +32,7 @@ const ui = defineCollection({
     picks: z.object({ title: z.string(), day: z.string(), week: z.string(), month: z.string(), thisWeek: z.string() }),
     headings: z.object({ ongoing: z.string(), sources: z.string(), allEvents: z.string(), editions: z.string(), alsoHere: z.string(), alsoAtVenue: z.string() }),
     calNav: z.object({ prev: z.string(), next: z.string() }),
+    feedDay: z.object({ allDay: z.string() }),
     badges: z.object({ free: z.string(), gem: z.string(), made: z.string() }),
     subscribe: z.object({ note: z.string(), calendar: z.string(), rss: z.string(), telegram: z.string() }),
     share: z.object({ label: z.string(), copied: z.string() }),

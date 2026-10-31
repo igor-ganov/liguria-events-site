@@ -211,16 +211,16 @@ describe('sortFeedCards', () => {
   const key = (card: FeedCardKey): FeedCardKey => card;
   const card = (over: Partial<FeedCardKey> = {}): FeedCardKey => ({
     ord: 0,
+    at: '',
     created: 0,
-    span: 0,
     ...over,
   });
 
-  test('by date lifts the short, time-pinned events above the long runs', () => {
-    const cards = [card({ ord: 0, span: 30 }), card({ ord: 1, span: 0 })];
+  test('by date reads the clock before the order the server rendered', () => {
+    const cards = [card({ ord: 0, at: '21:00' }), card({ ord: 1, at: '09:00' })];
     assert.deepEqual(sortFeedCards('date', cards, key), [cards[1], cards[0]]);
   });
-  test('equal spans keep the order the server rendered', () => {
+  test('equal hours keep the order the server rendered', () => {
     const cards = [card({ ord: 1 }), card({ ord: 0 })];
     assert.deepEqual(sortFeedCards('date', cards, key), [cards[1], cards[0]]);
   });
@@ -233,7 +233,7 @@ describe('sortFeedCards', () => {
     assert.deepEqual(sortFeedCards('created', cards, key), [cards[1], cards[0]]);
   });
   test('the input is left alone', () => {
-    const cards = [card({ ord: 1, span: 9 }), card({ ord: 0, span: 1 })];
+    const cards = [card({ ord: 1, at: '21:00' }), card({ ord: 0, at: '09:00' })];
     const before = [...cards];
     sortFeedCards('date', cards, key);
     assert.deepEqual(cards, before);

@@ -86,6 +86,7 @@ eventPage: { starts: "inizio", dates: "date", duration: "durata", price: "da", w
 entry: { heading: "Dove vai?", lead: "Scegli una regione: la ricorderemo. Cosa succede in Italia nei prossimi giorni:", pickHeading: "Prossimi eventi in Italia", regionsHeading: "Tutte le regioni", country: "Italia", hereRegion: "La mia regione", hereCity: "La mia città" }
 picks: { title: "In evidenza", day: "Evento del giorno", week: "Evento della settimana", month: "Evento del mese", thisWeek: "Questa settimana" }
 calNav: { prev: 'Mese precedente', next: 'Mese successivo' }
+feedDay: { allDay: 'Tutto il giorno' }
 badges: { free: 'gratis', gem: 'chicca', made: 'creato qui' }
 subscribe: { note: "Segui questo posto: aggiungilo al calendario o iscriviti via RSS — oppure leggi ogni mattina su Telegram cosa c'è in tutta Italia.", calendar: "Aggiungi al calendario", rss: "RSS", telegram: "Ogni giorno su Telegram" }
 share: { label: "Condividi", copied: "Link copiato" }

@@ -1,24 +1,25 @@
 import type { FeedSort } from './feed-state.ts';
 
-/** What a card is ordered by: its server-rendered position, when it was first
- *  seen, and how many days it runs for. */
+/** What a card is ordered by: its server-rendered position, the hour it
+ *  happens at ('' when it is on all day) and when it was first seen. */
 export type FeedCardKey = {
   readonly ord: number;
+  readonly at: string;
   readonly created: number;
-  readonly span: number;
 };
 
 type Compare = (a: FeedCardKey, b: FeedCardKey) => number;
 
-// "By date" lifts the short, time-pinned events above the long multi-week runs —
-// the exact order the server already emits, so the first load never reflows.
-// "Newest first" orders by first-seen time, falling back to that same order.
+// "By date" is the clock: the exact order the server already emits (by the
+// hour, ties as the server broke them), so the first load never reflows; a card
+// published since the build finds its hour. "Newest first" orders by first-seen
+// time, falling back to that same order.
 const COMPARE: Readonly<Record<FeedSort, Compare>> = {
   created: (a, b) => b.created - a.created || a.ord - b.ord,
-  date: (a, b) => a.span - b.span || a.ord - b.ord,
+  date: (a, b) => a.at.localeCompare(b.at) || a.ord - b.ord,
 };
 
-/** Order one day's cards. Grouping (the day headings) is untouched. */
+/** Order one list of a day's cards. Grouping (the day headings) is untouched. */
 export const sortFeedCards = <T>(
   sort: FeedSort,
   cards: readonly T[],

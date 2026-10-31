@@ -1,0 +1,104 @@
+/* ══ A folded feed day: one row, the day's pictures dealt as a hand ═══
+   The row is the day's own cards with everything but the picture put
+   away, overlapping and slightly turned. It is clipped at a hand's width,
+   so a folded day costs the handful of pictures that show — the rest are
+   cut away and, being lazy, never fetched. The count is a counter of the
+   cards still shown, so a filter changes it without a script. The whole
+   row opens the day: the button's own box is stretched over it. */
+
+.feed-group[data-shut] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-inline-size: 34rem;
+  padding-block: 0.35rem;
+  padding-inline-end: 3.4rem;
+  overflow: clip;
+  counter-reset: feed-shown;
+}
+.feed-group[data-shut] > .feed-day-head,
+.percorso .feed-group[data-shut] > .feed-day-head {
+  position: static;
+  flex: none;
+  margin-inline-end: 1.2rem;
+  background: none;
+  backdrop-filter: none;
+}
+.feed-group[data-shut] .feed-day-toggle {
+  inline-size: auto;
+  padding-block: 0.6rem;
+}
+.feed-group[data-shut] .feed-day-toggle::before {
+  rotate: -45deg;
+  translate: -0.1em 0;
+}
+.feed-group[data-shut] .feed-day-toggle::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+.feed-group[data-shut] .feed-day-part,
+.feed-group[data-shut] .feed-list {
+  display: contents;
+}
+.feed-group[data-shut] .feed-allday-head {
+  display: none;
+}
+
+/* ── a picture of the hand ─────────────────────────────────────────── */
+.feed-group[data-shut] .feed-list > li {
+  position: relative;
+  flex: none;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  margin-inline-start: -0.95rem;
+  border-radius: 0.55rem;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px var(--bg), 0 2px 6px rgb(0 0 0 / 0.2);
+  rotate: -4deg;
+  counter-increment: feed-shown;
+}
+.feed-group[data-shut] .feed-list > li:nth-child(even) {
+  rotate: 3deg;
+}
+.feed-group[data-shut] .feed-list > li > .photo-card {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  aspect-ratio: auto;
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+  pointer-events: none;
+}
+.feed-group[data-shut] .photo-card > :not(.photo-card-pic, .photo-card-blank) {
+  display: none;
+}
+.feed-group[data-shut] .photo-card-blank .brand-mark {
+  height: 55%;
+  translate: none;
+}
+
+/* ── how many: the cards still shown, counted ──────────────────────── */
+.feed-group[data-shut]::after {
+  content: counter(feed-shown);
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 50%;
+  translate: 0 -50%;
+  z-index: 1;
+  min-inline-size: 2.4rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: -0.6rem 0 0.6rem var(--bg);
+}
+.feed-group[data-shut]:hover::after {
+  border-color: var(--ink-2);
+}
