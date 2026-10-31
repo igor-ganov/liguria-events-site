@@ -26,6 +26,7 @@ const data = JSON.stringify({ pin: import.meta.env.PUBLIC_FIXED_TODAY ?? '', hol
           var style = doc.createElement('style');
           style.textContent = '[data-holiday-of]:not([data-holiday-of="' + CSS.escape(h.id) + '"]){display:none}';
           doc.head.appendChild(style);
+          doc.querySelectorAll('link[rel="icon"]').forEach(function (link) { link.setAttribute('href', h.icon); });
         });
       };
       dress(document);

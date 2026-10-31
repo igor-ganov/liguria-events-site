@@ -8,6 +8,7 @@ import { Effect } from 'effect';
 import { decodeHolidaysPayload } from '../src/lib/holidays/decode-holidays.ts';
 import { upcomingHolidays } from '../src/lib/holidays/upcoming-holidays.ts';
 import { holidayDress } from '../src/lib/holidays/holiday-dress.ts';
+import { holidayIcon } from '../src/lib/holidays/holiday-icon.ts';
 import { holidayAccent } from '../src/lib/holidays/holiday-accent.ts';
 import { holidayRootAttrs } from '../src/lib/holidays/holiday-root-attrs.ts';
 import { pillImages } from '../src/lib/holidays/pill-images.ts';
@@ -88,6 +89,7 @@ describe('holidayDress', () => {
       from: '2026-10-30',
       to: '2026-10-31',
       attrs: holidayRootAttrs(holiday()),
+      icon: holidayIcon(holiday()),
     });
   });
 });

@@ -99,3 +99,22 @@ test('outside the window there is nothing: no colour, no motif, no chip', async 
   await expect(page.locator('.site-head .holiday-motif')).toBeHidden();
   await expect(page.locator('[data-feed-holiday]')).toBeHidden();
 });
+
+const iconHref = (page: Page): Promise<string> =>
+  page.locator('link[rel="icon"]').evaluate((link) => link.getAttribute('href') ?? '');
+
+test('the tab icon wears the holiday, and takes it off after', async ({ page }) => {
+  await open(page, '/en/liguria/');
+  await expect(page.locator('html')).toHaveAttribute('data-holiday', 'halloween');
+  const dressed = await iconHref(page);
+  expect(dressed.startsWith('data:image/svg+xml,')).toBe(true);
+  expect(decodeURIComponent(dressed)).toContain(`fill="${ACCENT}"`);
+
+  await page.locator('nav[aria-label="Site"] a[href$="/liguria/landmarks/"]').click();
+  await expect(page).toHaveURL(/\/liguria\/landmarks\/$/);
+  expect(await iconHref(page)).toBe(dressed);
+
+  await open(page, '/en/liguria/', new Date('2099-11-02T00:30:00+01:00'));
+  await expect(page.locator('[data-feed-quick="tonight"]')).toBeVisible();
+  expect(await iconHref(page)).toMatch(/\/favicon\.svg$/);
+});
