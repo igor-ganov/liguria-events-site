@@ -2,6 +2,7 @@ import { cachedEvents } from '../../data/cached-events.ts';
 import { dayHeading } from '../calendar/day-heading.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { feedExtras } from './feed-extras.ts';
+import { facetWindow } from './facet-window.ts';
 import { feedLead } from './feed-lead.ts';
 import { feedViewModel } from './feed-view-model.ts';
 import { isoToday } from '../calendar/iso-today.ts';
@@ -38,7 +39,7 @@ export const feedPageView = async ({ lang, scope: given, today: when, site, ui }
     today,
     heading: dayHeading(ui),
     // The one sentence the page says about itself, before the cards start.
-    lead: feedLead({ lang, ui, placeName: view.placeName, events: view.events, today }),
+    lead: feedLead({ lang, ui, placeName: view.placeName, events: view.events, today, window: facetWindow(given.facet?.slug, today) }),
     // A shared link with no picture arrives as a grey rectangle, so every feed
     // page takes the cover of its soonest event, cropped to preview size.
     image: socialImageUrl(socialImage(view.events), site),

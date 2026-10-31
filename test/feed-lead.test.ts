@@ -70,3 +70,36 @@ describe('feedLead', () => {
     expect(quiet).toContain('2 eventi in programma');
   });
 });
+
+// A facet page is a question about a date, and the lead has to answer that
+// date. Measured on /it/liguria/genova/today/ on 2026-10-31, which announced
+// "31 ottobre 2026 – 18 giugno 2028: 114 eventi ... Oggi: 114. Questo fine
+// settimana: 114." - the span of the longest exhibition open today, and the
+// same number said three times.
+describe('feedLead on a facet page', () => {
+  // A long exhibition, open across the weekend and running into 2028.
+  const withRun: readonly CompactEvent[] = [
+    event('a', '2026-10-10', ['art'], '2028-06-18'),
+    event('b', '2026-10-11', ['music']),
+  ];
+  const weekend = { from: '2026-10-10', to: '2026-10-11' };
+  const line = feedLead({ lang: 'it', ui, placeName: 'Genova', events: withRun, today: TODAY, window: weekend });
+
+  test('says the days the facet is about, not the run of its longest event', () => {
+    expect(line).toContain('Genova, 10 – 11 ottobre 2026: 2 eventi in programma');
+    expect(line).not.toContain('2028');
+  });
+
+  test('and does not restate the same count as today and the weekend', () => {
+    expect(line).not.toContain('Oggi:');
+    expect(line).not.toContain('Questo fine settimana:');
+  });
+
+  test('a city page, which has no facet window, is unchanged', () => {
+    expect(feedLead({ lang: 'it', ui, placeName: 'Genova', events, today: TODAY })).toContain('Oggi: 2.');
+  });
+
+  test('nothing in the window means no sentence, as everywhere else', () => {
+    expect(feedLead({ lang: 'it', ui, placeName: 'Savona', events: [], today: TODAY, window: weekend })).toBe('');
+  });
+});
