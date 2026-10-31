@@ -45,7 +45,7 @@ const ui = defineCollection({
     submitAuth: z.object({ note: z.string(), signin: z.string() }),
     created: z.object({ heading: z.string(), linkNote: z.string(), publicNote: z.string(), copy: z.string(), copied: z.string(), sendTo: z.string(), whatsapp: z.string(), telegram: z.string() }),
     visibility: z.object({ legend: z.string(), listedTitle: z.string(), listedNote: z.string(), linkNote: z.string() }),
-    facets: z.object({ category: z.object({ title: z.string(), description: z.string() }), today: z.object({ title: z.string(), description: z.string() }), tomorrow: z.object({ title: z.string(), description: z.string() }), weekend: z.object({ title: z.string(), description: z.string() }), free: z.object({ title: z.string(), description: z.string() }) }),
+    facets: z.object({ category: z.object({ title: z.string(), description: z.string() }), today: z.object({ title: z.string(), description: z.string() }), tomorrow: z.object({ title: z.string(), description: z.string() }), weekend: z.object({ title: z.string(), description: z.string() }), free: z.object({ title: z.string(), description: z.string() }), tonight: z.object({ title: z.string(), description: z.string() }), sunday: z.object({ title: z.string(), description: z.string() }) }),
     gone: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),
     nothingHere: z.object({ heading: z.string(), note: z.string(), onward: z.string() }),
     empty: z.string(),

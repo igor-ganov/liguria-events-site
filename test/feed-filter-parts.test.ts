@@ -35,6 +35,9 @@ const state = (over: Partial<FeedState> = {}): FeedState => ({
   window: undefined,
   holiday: '',
   holidayIds: new Set<string>(),
+  base: '',
+  page: '',
+  toggle: false,
   ...over,
 });
 
@@ -320,5 +323,27 @@ describe('the made-here filter', () => {
 
   test('off, it hides nothing', () => {
     assert.equal(matchesFeedRow(state(), row({ made: false })), true);
+  });
+});
+
+describe('a quick filter on a feed with quick pages', () => {
+  const tonight = (over: Partial<FeedState>) =>
+    state({ quick: 'tonight', window: quickWindow('tonight', { day: TODAY, minute: 0 }), from: TODAY, to: TODAY, ...over });
+
+  test('the region feed moves to the page of the quick filter pressed, keeping the rest in the query', () => {
+    const pressed = tonight({ base: '/en/liguria/', toggle: true, cats: new Set(['music']) });
+    assert.equal(feedUrl('/en/liguria/', pressed, TODAY), '/en/liguria/tonight/?cats=music');
+  });
+
+  test('and back to itself when it is released', () => {
+    assert.equal(feedUrl('/en/liguria/tonight/', state({ base: '/en/liguria/', toggle: true }), TODAY), '/en/liguria/');
+  });
+
+  test('a quick page keeps its own address and says nothing of the filter it is', () => {
+    assert.equal(feedUrl('/en/liguria/tonight/', tonight({ base: '/en/liguria/', page: 'tonight' }), TODAY), '/en/liguria/tonight/');
+  });
+
+  test('a venue page, which has no quick pages, keeps the filter in the query', () => {
+    assert.equal(feedUrl('/en/liguria/genova/teatro/', tonight({}), TODAY), '/en/liguria/genova/teatro/?when=tonight');
   });
 });

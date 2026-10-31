@@ -25,5 +25,6 @@ const hooks = {
     <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
     <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path>
   </svg>
-  <span {...{ [SHARE.label]: '' }}>{ui.share.label}</span>
+  {/* Announced when it turns into "Link copied": the button's name stays "Share". */}
+  <span aria-live="polite" {...{ [SHARE.label]: '' }}>{ui.share.label}</span>
 </button>

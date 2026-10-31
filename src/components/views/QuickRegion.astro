@@ -1,0 +1,29 @@
+---
+import FeedView from './FeedView.astro';
+import Layout from '../../layouts/Layout.astro';
+import { branch } from '../../lib/branch.ts';
+import { facetOf } from '../../lib/events/facet-of.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
+import { LOCALES } from '../../lib/i18n/locales.ts';
+import { REGION_NAMES } from '../../lib/region/regions.ts';
+
+// A region's quick page — /en/liguria/tonight/ — answered per request like a
+// city's facets: the site rebuilds every six hours, and a page built at noon
+// would otherwise list yesterday's evening tonight. Its route sits beside the
+// region's cities as a fixed segment, which a route wins over a city of the
+// same name (there is no town called "tonight").
+type Props = Readonly<{ slug: string }>;
+const { slug } = Astro.props;
+const lang = LOCALES.find((locale) => locale === Astro.params['lang']);
+const region = Astro.params['region'] ?? '';
+const facet = facetOf(slug);
+const known = lang !== undefined && region in REGION_NAMES && facet !== undefined;
+Astro.response.status = branch(known)(() => 200, () => 404);
+---
+
+{known && lang !== undefined && <FeedView lang={lang} region={region} facet={facet} today={isoToday()} />}
+{!known && (
+  <Layout lang={lang ?? 'en'} title="Not found">
+    <p class="feed-empty">This page could not be found.</p>
+  </Layout>
+)}

@@ -1,6 +1,20 @@
 [
   {
     "date": "2026-10-31",
+    "example": "/liguria/tonight/",
+    "title": {
+      "en": "Tonight, this weekend and Sunday evening have their own pages",
+      "it": "Stasera, questo weekend e domenica sera hanno le loro pagine",
+      "ru": "У «Сегодня вечером», «В эти выходные» и «В воскресенье вечером» свои страницы"
+    },
+    "body": {
+      "en": "Each quick filter is now a page of its own, for every region and every city — /liguria/tonight/, /liguria/genova/this-weekend/ — so it can be found in a search and opened straight from a link. Pressing a chip in the feed still filters at once, and the address becomes that page. Beside the filters there is now a Share button: it passes on the view exactly as you filtered it, through the phone’s share sheet or as a copied link.",
+      "it": "Ogni filtro rapido è ora una pagina a sé, per ogni regione e ogni città — /liguria/tonight/, /liguria/genova/this-weekend/ — così si trova con una ricerca e si apre direttamente da un link. Premere un filtro nel feed filtra subito, come prima, e l’indirizzo diventa quello della pagina. Accanto ai filtri c’è ora il pulsante Condividi: passa la vista esattamente come l’hai filtrata, con la condivisione del telefono o copiando il link.",
+      "ru": "Каждый быстрый фильтр теперь — отдельная страница, для каждого региона и каждого города: /liguria/tonight/, /liguria/genova/this-weekend/. Её можно найти поиском и открыть прямо по ссылке. Нажатие на фильтр в ленте по-прежнему фильтрует сразу, а адрес становится адресом этой страницы. Рядом с фильтрами появилась кнопка «Поделиться»: она передаёт подборку ровно такой, какой вы её отфильтровали, — через меню «Поделиться» телефона или скопированной ссылкой."
+    }
+  },
+  {
+    "date": "2026-10-31",
     "example": "/liguria/?when=weekend",
     "title": {
       "en": "Tonight, this weekend, Sunday evening",

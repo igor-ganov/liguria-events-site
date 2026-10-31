@@ -2,12 +2,11 @@ import { branch } from '../branch.ts';
 import { feedDayGroups } from './feed-day-groups.ts';
 import { feedEvents } from './feed-events.ts';
 import { facetSeo } from './facet-seo.ts';
-import { feedPath } from '../region/feed-path.ts';
 import { feedTitle } from './feed-title.ts';
 import { localizedUrl } from '../i18n/localized-url.ts';
 import { placeLabel } from '../region/place-label.ts';
 import { regionUrl } from '../region/region-url.ts';
-import { venuePath } from './venue-path.ts';
+import { feedScopePath } from './feed-scope-path.ts';
 import { venueSeo } from './venue-seo.ts';
 import type { CompactEvent } from './event-schema.ts';
 import type { FeedScope } from './feed-events.ts';
@@ -40,13 +39,10 @@ export const feedViewModel = ({ lang, scope, events, today, ui }: Input) => {
     // facet page titled itself "What's on today in {place}".
     title: seo.title.replace('{place}', placeName),
     description: seo.description.replace('{place}', placeName),
-    path: branch(scope.facet === undefined && scope.venue === undefined)(
-      () => feedPath(scope.region, scope.city),
-      () =>
-        venuePath(scope.region, scope.city ?? '', scope.facet?.slug ?? scope.venue?.slug ?? ''),
-    ),
-    // A venue or a facet leads up to its city, a city up to its region.
-    onward: branch(scope.facet === undefined && scope.venue === undefined)(
+    path: feedScopePath(scope),
+    // A venue or a facet leads up to its city, a city up to its region, and so
+    // does a region's own facet (tonight in Liguria).
+    onward: branch(scope.city === undefined || (scope.facet === undefined && scope.venue === undefined))(
       () => regionUrl(lang, scope.region),
       () => localizedUrl(lang, `${scope.region}/${scope.city ?? ''}/`),
     ),

@@ -24,14 +24,15 @@ const STAMPS: readonly Stamp[] = [
 ];
 
 const KINDS = [
-  { kind: 'tonight', from: '2026-11-04', to: '2026-11-04', shown: ['q-tonight-late', 'q-today-long'] },
+  { kind: 'tonight', slug: 'tonight', from: '2026-11-04', to: '2026-11-04', shown: ['q-tonight-late', 'q-today-long'] },
   {
     kind: 'weekend',
+    slug: 'this-weekend',
     from: '2026-11-06',
     to: '2026-11-08',
     shown: ['q-fri-evening', 'q-sat-untimed', 'q-sun-evening', 'q-sun-morning', 'q-month-run'],
   },
-  { kind: 'sunday', from: '2026-11-08', to: '2026-11-08', shown: ['q-sun-evening'] },
+  { kind: 'sunday', slug: 'sunday-evening', from: '2026-11-08', to: '2026-11-08', shown: ['q-sun-evening'] },
 ] as const;
 
 const stamp = (page: Page): Promise<void> =>
@@ -66,17 +67,34 @@ const expectShown = async (page: Page, shown: readonly string[]): Promise<void> 
   for (const { id } of STAMPS.filter((s) => !shown.includes(s.id))) await expect(card(id)).toBeHidden();
 };
 
+// On a region feed each chip is a link to its own page — /en/liguria/tonight/ —
+// and pressing it filters the cards already here and puts that page's address
+// in the bar, rather than loading anything.
 test('tonight, this weekend and Sunday evening each keep their own days and hours', async ({ page }) => {
   await open(page);
-  for (const { kind, from, to, shown } of KINDS) {
-    await page.locator(`[data-feed-quick="${kind}"]`).click();
-    await expect(page.locator(`[data-feed-quick="${kind}"]`)).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-feed-quick][aria-pressed="true"]')).toHaveCount(1);
+  for (const { kind, slug, from, to, shown } of KINDS) {
+    const chip = page.locator(`[data-feed-quick="${kind}"]`);
+    await expect(chip).toHaveAttribute('href', `/en/liguria/${slug}/`);
+    await chip.click();
+    await expect(chip).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('[data-feed-quick][aria-current="page"]')).toHaveCount(1);
+    await expect(chip).toHaveAttribute('href', '/en/liguria/');
     await expect(page.locator('[data-feed-from]')).toHaveValue(from);
     await expect(page.locator('[data-feed-to]')).toHaveValue(to);
-    await expect(page).toHaveURL(new RegExp(`[?&]when=${kind}`));
+    await expect(page).toHaveURL(new RegExp(`/en/liguria/${slug}/$`));
     await expectShown(page, shown);
   }
+});
+
+test('pressing the pressed chip goes back to the whole feed, and a chip carries the other filters', async ({ page }) => {
+  await open(page);
+  await page.locator('[data-feed-cat="music"]').click();
+  await expect(page.locator('[data-feed-quick="tonight"]')).toHaveAttribute('href', '/en/liguria/tonight/?cats=music');
+  await page.locator('[data-feed-quick="tonight"]').click();
+  await expect(page).toHaveURL(/\/en\/liguria\/tonight\/\?cats=music$/);
+  await page.locator('[data-feed-quick="tonight"]').click();
+  await expect(page).toHaveURL(/\/en\/liguria\/\?cats=music$/);
+  await expect(page.locator('[data-feed-quick][aria-current]')).toHaveCount(0);
 });
 
 test('the quick row is labelled in the reader language', async ({ page }) => {
@@ -94,7 +112,7 @@ test('a quick filter combines with a category, and clear undoes both', async ({ 
   await expectShown(page, ['q-tonight-late']);
 
   await page.locator('[data-feed-clear]').click();
-  await expect(page.locator('[data-feed-quick][aria-pressed="true"]')).toHaveCount(0);
+  await expect(page.locator('[data-feed-quick][aria-current]')).toHaveCount(0);
   await expect(page.locator('[data-feed-from]')).toHaveValue(today ?? '');
   await expect(page.locator('[data-feed-to]')).toHaveValue('');
   await expect(page.locator('[data-feed-clear]')).toBeHidden();
@@ -105,13 +123,31 @@ test('picking a date by hand lets go of the quick filter', async ({ page }) => {
   await page.locator('[data-feed-quick="weekend"]').click();
   await page.locator('[data-feed-to]').fill('2026-11-30');
   await page.locator('[data-feed-to]').dispatchEvent('change');
-  await expect(page.locator('[data-feed-quick="weekend"]')).toHaveAttribute('aria-pressed', 'false');
-  await expect(page).not.toHaveURL(/when=/);
-  await expect(page).toHaveURL(/to=2026-11-30/);
+  await expect(page.locator('[data-feed-quick="weekend"]')).not.toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveURL(/\/en\/liguria\/\?(.*&)?to=2026-11-30/);
 });
 
 test('a shared quick-filter address is answered for the day it is opened', async ({ page }) => {
   await open(page, '/en/liguria/?when=sunday');
-  await expect(page.locator('[data-feed-quick="sunday"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('[data-feed-quick="sunday"]')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('[data-feed-from]')).toHaveValue('2026-11-08');
+});
+
+test('a city feed leads to the city feed quick pages', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  await page.goto('/en/liguria/genova/');
+  await expect(page.locator('[data-feed-quick="tonight"]')).toHaveAttribute('href', '/en/liguria/genova/tonight/');
+  await expect(page.locator('[data-feed-quick="sunday"]')).toHaveAttribute('href', '/en/liguria/genova/sunday-evening/');
+});
+
+test('any filtered view can be passed on from beside the filters', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await open(page);
+  await page.locator('[data-feed-quick="weekend"]').click();
+  await page.locator('[data-feed-cat="music"]').click();
+  const share = page.locator('.feed-share [data-share-button]');
+  await expect(share).toHaveAccessibleName('Share');
+  await share.click();
+  await expect(share.locator('[data-share-label]')).toHaveText('Link copied');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(/\/en\/liguria\/this-weekend\/\?cats=music$/);
 });

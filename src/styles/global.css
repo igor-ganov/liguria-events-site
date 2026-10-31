@@ -606,7 +606,10 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 /* Not yet wired to the map engine — shown as pending rather than silently inert. */
 .map-filters[data-armed='false'] .chip, .map-filters[data-armed='false'] input { opacity: 0.55; cursor: progress; }
 .chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.chip[aria-pressed='true'] {
+/* A quick chip is a link to its page; the page it is reads as pressed. */
+a.chip { text-decoration: none; }
+.chip[aria-pressed='true'],
+.chip[aria-current='page'] {
   color: var(--on-accent);
   background: hsl(var(--hue, 30) 70% 42%);
   border-color: hsl(var(--hue, 30) 70% 42%);
@@ -616,7 +619,8 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 1rem 0 1.3rem; }
 /* The quick row (holiday, tonight, weekend, Sunday evening) sits above the
    dates it sets. */
-.chips--quick { margin: 0.2rem 0 0.9rem; }
+.chips--quick { margin: 0.2rem 0 0.4rem; }
+.feed-share { margin: 0 0 0.9rem; }
 
 /* ══ mini event cards (feed + ongoing) ══════════════════════════════ */
 .mini-card {

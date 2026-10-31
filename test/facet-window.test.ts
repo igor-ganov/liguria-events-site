@@ -19,8 +19,9 @@ describe('facetWindow', () => {
     expect(facetWindow('tomorrow', MONDAY)).toEqual({ from: '2026-10-06', to: '2026-10-06' });
   });
 
-  test('this weekend is the coming Saturday and Sunday', () => {
-    expect(facetWindow('this-weekend', MONDAY)).toEqual({ from: '2026-10-10', to: '2026-10-11' });
+  // The quick filter's weekend, which its page shares: from Friday evening.
+  test('this weekend is the coming Friday to Sunday', () => {
+    expect(facetWindow('this-weekend', MONDAY)).toEqual({ from: '2026-10-09', to: '2026-10-11' });
   });
 
   test('a facet that is not about dates has no window of its own', () => {

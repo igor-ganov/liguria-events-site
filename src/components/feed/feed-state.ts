@@ -27,6 +27,13 @@ export type FeedState = {
   /** The holiday chip, by holiday id, and the events the job gave it. */
   holiday: string;
   holidayIds: ReadonlySet<string>;
+  /** Where this feed's quick pages start ('/en/liguria/'), or '' where it has
+   *  none (a venue); the quick filter this page is (on /tonight/), or ''; and
+   *  whether a chip filters this page in place rather than leading away —
+   *  only on a whole region or city feed, whose cards include every page's. */
+  base: string;
+  page: QuickKind | '';
+  toggle: boolean;
 };
 
 /** Module-level, so it survives an SPA swap — readFeedParams resets it, so a
@@ -47,4 +54,7 @@ export const feedState: FeedState = {
   window: undefined,
   holiday: '',
   holidayIds: new Set<string>(),
+  base: '',
+  page: '',
+  toggle: false,
 };

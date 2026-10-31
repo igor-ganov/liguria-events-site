@@ -55,7 +55,7 @@ describe('facets', () => {
     assert.deepEqual([...narrow('tomorrow', events, today)].sort(), ['run', 'tomorrow']);
   });
 
-  test('this weekend is Saturday and Sunday', () => {
+  test('this weekend is Friday evening to Sunday, and Saturday is in it', () => {
     assert.deepEqual([...narrow('this-weekend', events, today)].sort(), ['run', 'saturday']);
   });
 
