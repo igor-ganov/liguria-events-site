@@ -64,8 +64,8 @@ describe('the quick pages list what the quick filters show', () => {
   });
 
   test('each has a title and a description of its own', () => {
-    assert.equal(facetSeo({ region: 'liguria', facet: facetOf('tonight') }, DEFAULT_UI), DEFAULT_UI.facets.tonight);
-    assert.equal(facetSeo({ region: 'liguria', facet: facetOf('sunday-evening') }, DEFAULT_UI), DEFAULT_UI.facets.sunday);
+    assert.deepEqual(facetSeo({ region: 'liguria', facet: facetOf('tonight') }, DEFAULT_UI), DEFAULT_UI.facets.tonight);
+    assert.deepEqual(facetSeo({ region: 'liguria', facet: facetOf('sunday-evening') }, DEFAULT_UI), DEFAULT_UI.facets.sunday);
   });
 });
 

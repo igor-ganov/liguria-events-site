@@ -1,4 +1,5 @@
 import { isCategory } from './is-category.ts';
+import { regionPhrase } from './region-phrase.ts';
 import type { FeedScope } from './feed-events.ts';
 import type { Ui } from '../i18n/ui-schema.ts';
 
@@ -33,5 +34,7 @@ export const facetSeo = (
   return [
     ...[KEYS[slug]].filter((key): key is keyof Ui['facets'] => key !== undefined).map((key) => ui.facets[key]),
     ...categorySeo(slug, ui),
-  ].at(0);
+  ]
+    .map(regionPhrase(scope.city))
+    .at(0);
 };
