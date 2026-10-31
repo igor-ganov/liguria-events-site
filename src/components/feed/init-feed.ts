@@ -18,6 +18,8 @@ import { wholeFeed } from './whole-feed.ts';
 import { wireFeedChips } from './wire-feed-chips.ts';
 import { wireFeedDates } from './wire-feed-dates.ts';
 import { wireFeedDescs } from './wire-feed-descs.ts';
+import { wireFeedHoliday } from './wire-feed-holiday.ts';
+import { wireFeedQuick } from './wire-feed-quick.ts';
 import { wireFeedSearch } from './wire-feed-search.ts';
 import { wireFeedSort } from './wire-feed-sort.ts';
 import type { FeedContext } from './feed-context.ts';
@@ -54,7 +56,9 @@ export const initFeed = (): void => {
   wireFeedSearch(refresh);
   wireFeedDescs(feed.lang);
   wireFeedDates(refresh);
-  wireFeedChips(refresh);
+  wireFeedChips(refresh, feed.today);
+  wireFeedQuick(refresh, feed.today);
+  wireFeedHoliday(refresh);
   wireFeedSort(feed.today, feedRest(feed.lang));
   // The list was hidden up front on a filtered URL (see Layout.astro) to avoid
   // flashing the unfiltered static list; once filtered it is revealed. An

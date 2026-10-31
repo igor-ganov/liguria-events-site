@@ -7,7 +7,7 @@
   // filter; init-feed reveals it the instant it has applied the filter. The
   // default view (no filter params) is never hidden, so it stays instant.
   (function () {
-    var KEYS = ['from', 'to', 'cats', 'free', 'gems', 'q'];
+    var KEYS = ['from', 'to', 'cats', 'free', 'gems', 'q', 'when', 'holiday'];
     var isFiltered = function (search) {
       var p = new URLSearchParams(search);
       return KEYS.some(function (k) { return p.has(k); });

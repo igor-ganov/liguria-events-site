@@ -11,6 +11,8 @@ import { matchesFeedRow } from '../src/components/feed/matches-feed-row.ts';
 import { feedHits } from '../src/components/feed/feed-hits.ts';
 import { sortFeedCards } from '../src/components/feed/sort-feed-cards.ts';
 import { feedDayOf } from '../src/components/feed/feed-day-of.ts';
+import { feedFiltered } from '../src/components/feed/feed-filtered.ts';
+import { quickWindow } from '../src/lib/quick/quick-window.ts';
 import type { FeedCardKey } from '../src/components/feed/sort-feed-cards.ts';
 import type { FeedRow } from '../src/components/feed/matches-feed-row.ts';
 import type { FeedState } from '../src/components/feed/feed-state.ts';
@@ -29,6 +31,10 @@ const state = (over: Partial<FeedState> = {}): FeedState => ({
   hits: undefined,
   sort: 'date',
   index: undefined,
+  quick: '',
+  window: undefined,
+  holiday: '',
+  holidayIds: new Set<string>(),
   ...over,
 });
 
@@ -41,6 +47,8 @@ const row = (over: Partial<FeedRow> = {}): FeedRow => ({
   made: false,
   city: '',
   cats: ['music'],
+  times: [],
+  du: 0,
   ...over,
 });
 
@@ -67,6 +75,8 @@ describe('parseFeedParams', () => {
       gems: false,
       made: false,
       sort: 'date',
+      quick: '',
+      holiday: '',
     });
   });
   test('reads every filter back', () => {
@@ -84,6 +94,8 @@ describe('parseFeedParams', () => {
         gems: true,
         made: true,
         sort: 'created',
+        quick: '',
+        holiday: '',
       },
     );
   });
@@ -130,6 +142,33 @@ describe('feedQueryString', () => {
   });
 });
 
+describe('quick filters and the holiday in the URL', () => {
+  test('read back, an unknown one ignored', () => {
+    assert.equal(parseFeedParams('?when=tonight&holiday=halloween', TODAY).quick, 'tonight');
+    assert.equal(parseFeedParams('?when=tonight&holiday=halloween', TODAY).holiday, 'halloween');
+    assert.equal(parseFeedParams('?when=someday', TODAY).quick, '');
+  });
+  test('a quick filter stands for its range, so the range is not written', () => {
+    const weekend = state({ quick: 'weekend', from: '2026-07-10', to: '2026-07-12' });
+    assert.equal(feedQueryString(weekend, TODAY), 'when=weekend');
+  });
+  test('the holiday is written by its id', () => {
+    assert.equal(feedQueryString(state({ from: TODAY, holiday: 'halloween' }), TODAY), 'holiday=halloween');
+  });
+});
+
+describe('feedFiltered', () => {
+  test('a pristine feed is not filtered', () => {
+    assert.equal(feedFiltered(state({ from: TODAY })), false);
+  });
+  test('every chip counts, the quick ones and the holiday included', () => {
+    assert.equal(feedFiltered(state({ cats: new Set(['music']) })), true);
+    assert.equal(feedFiltered(state({ free: true })), true);
+    assert.equal(feedFiltered(state({ quick: 'tonight' })), true);
+    assert.equal(feedFiltered(state({ holiday: 'halloween' })), true);
+  });
+});
+
 describe('feedUrl', () => {
   test('nothing filtered leaves the path bare', () => {
     assert.equal(feedUrl('/feed/', state({ from: TODAY }), TODAY), '/feed/');
@@ -171,6 +210,18 @@ describe('matchesFeedRow', () => {
     assert.equal(matchesFeedRow(state({ city: 'genova' }), row({ city: 'genova' })), true);
     assert.equal(matchesFeedRow(state({ city: 'genova' }), row({ city: 'savona' })), false);
     assert.equal(matchesFeedRow(state({ city: 'genova' }), row()), false);
+  });
+  test('a quick filter keeps only what happens in its hours', () => {
+    const window = quickWindow('tonight', { day: '2026-07-10', minute: 600 });
+    assert.equal(matchesFeedRow(state({ window }), row({ times: ['21:00'] })), true);
+    assert.equal(matchesFeedRow(state({ window }), row({ times: ['10:00'] })), false);
+    assert.equal(matchesFeedRow(state({ window }), row()), false);
+  });
+  test('the holiday keeps only the events the job assigned to it', () => {
+    const holiday = state({ holiday: 'halloween', holidayIds: new Set(['e1']) });
+    assert.equal(matchesFeedRow(holiday, row()), true);
+    assert.equal(matchesFeedRow(holiday, row({ id: 'e2' })), false);
+    assert.equal(matchesFeedRow(state({ holidayIds: new Set(['e1']) }), row({ id: 'e2' })), true);
   });
   test('any chosen category matching is enough', () => {
     const chips = state({ cats: new Set(['art', 'music']) });

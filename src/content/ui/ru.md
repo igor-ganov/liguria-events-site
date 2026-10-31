@@ -54,7 +54,7 @@ landmarks:
   empty: Ничего не найдено.
   search: Поиск мест…
   kinds: { castle: Замки, church: Храмы, museum: Музеи, palace: Дворцы, monument: Памятники, tower: Башни, lighthouse: Маяки, square: Площади, park: Парки, heritage: Историческое наследие, beach: Пляжи, attraction: Достопримечательности }
-chips: { free: 'Только бесплатные', gems: 'Необычное', made: 'Созданные здесь', clear: 'Сбросить' }
+chips: { free: 'Только бесплатные', gems: 'Необычное', made: 'Созданные здесь', clear: 'Сбросить', quick: 'Когда', tonight: 'Сегодня вечером', weekend: 'В эти выходные', sunday: 'В воскресенье вечером' }
 theme: { toggle: 'Переключить тему', light: 'Светлая', dark: 'Тёмная', system: 'Системная' }
 range: { from: 'С', to: 'По' }
 sort: { label: 'Сортировка', date: 'По дате', created: 'Сначала новые' }

@@ -1,5 +1,7 @@
 import { feedSortOf } from './feed-sort-of.ts';
+import { quickKindOf } from '../../lib/quick/quick-kind-of.ts';
 import type { FeedSort } from './feed-state.ts';
+import type { QuickKind } from '../../lib/quick/quick-kind.ts';
 
 /** The filters a feed URL carries. */
 export type FeedParams = {
@@ -11,6 +13,8 @@ export type FeedParams = {
   readonly gems: boolean;
   readonly made: boolean;
   readonly sort: FeedSort;
+  readonly quick: QuickKind | '';
+  readonly holiday: string;
 };
 
 /** Restore the filters from a query string. An absent `from` means the feed
@@ -26,5 +30,7 @@ export const parseFeedParams = (search: string, today: string): FeedParams => {
     gems: params.get('gems') === '1',
     made: params.get('made') === '1',
     sort: feedSortOf(params.get('sort') ?? undefined),
+    quick: quickKindOf(params.get('when') ?? undefined),
+    holiday: params.get('holiday') ?? '',
   };
 };

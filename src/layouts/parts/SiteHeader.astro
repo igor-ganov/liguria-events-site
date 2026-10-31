@@ -2,6 +2,8 @@
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import RegionPicker from '../../components/RegionPicker.astro';
 import SiteNav from './SiteNav.astro';
+import HolidayMotif from '../../components/holiday/HolidayMotif.astro';
+import { pageHolidays } from '../page-holidays.ts';
 import { pageSegment } from '../../lib/region/page-segment.ts';
 import { regionUrl } from '../../lib/region/region-url.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
@@ -20,6 +22,7 @@ type Props = Readonly<{
   locales: readonly Locale[];
 }>;
 const { lang, region, path, city, ui, picker, locales } = Astro.props;
+const holidays = await pageHolidays();
 ---
 
 <header class="site-head">
@@ -39,6 +42,7 @@ const { lang, region, path, city, ui, picker, locales } = Astro.props;
         ></path>
       </svg>
       <span class="brand-word">Dove <span class="brand-go">Go</span></span>
+      {holidays.map((holiday) => <HolidayMotif motif={holiday.theme.motif} of={holiday.id} />)}
     </a>
   </p>
   <SiteNav lang={lang} region={region} path={path} ui={ui} locales={locales} />

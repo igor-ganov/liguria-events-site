@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-31T00:00:00.000Z",
+  "holidays": [
+    {
+      "id": "halloween",
+      "name": { "en": "Halloween", "it": "Halloween", "ru": "\u0425\u044d\u043b\u043b\u043e\u0443\u0438\u043d" },
+      "themeFrom": "2099-10-30",
+      "themeTo": "2099-11-01",
+      "theme": { "accent": "#a34a00", "accentDark": "#ff9f45", "motif": "pumpkin" },
+      "events": ["e2e-holiday-1", "e2e-holiday-2"]
+    }
+  ]
+}

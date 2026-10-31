@@ -153,6 +153,15 @@ html:not(:active-view-transition-type(theme))::view-transition-new(root) {
 .brand-mark { flex: none; display: block; }
 .brand-word { font-weight: 800; letter-spacing: -0.02em; }
 .brand-go { color: var(--brand); }
+/* The holiday's motif beside the name: decoration, in the brand colour, with a
+   slow sway for readers who have not asked for less motion. */
+.holiday-motif { flex: none; display: block; color: var(--brand); }
+/* What a holiday shows stays hidden until HolidayInit puts the holiday on. */
+:root:not([data-holiday]) [data-holiday-of] { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .site-head .holiday-motif { transform-origin: 50% 85%; animation: holiday-sway 3.2s ease-in-out infinite alternate; }
+}
+@keyframes holiday-sway { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
 
 /* Auth pages (login / verify / submit) */
 .auth-card {
@@ -605,6 +614,9 @@ events-feed, events-calendar { display: block; min-height: 85vh; }
 .chip--free[aria-pressed='true'] { background: var(--free); border-color: var(--free); }
 .cat-tag { padding: 0.12rem 0.55rem; font-size: 0.72rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 1rem 0 1.3rem; }
+/* The quick row (holiday, tonight, weekend, Sunday evening) sits above the
+   dates it sets. */
+.chips--quick { margin: 0.2rem 0 0.9rem; }
 
 /* ══ mini event cards (feed + ongoing) ══════════════════════════════ */
 .mini-card {

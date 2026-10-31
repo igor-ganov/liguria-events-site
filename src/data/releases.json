@@ -1,6 +1,34 @@
 [
   {
     "date": "2026-10-31",
+    "example": "/liguria/?when=weekend",
+    "title": {
+      "en": "Tonight, this weekend, Sunday evening",
+      "it": "Stasera, questo weekend, domenica sera",
+      "ru": "Сегодня вечером, в эти выходные, в воскресенье вечером"
+    },
+    "body": {
+      "en": "Above the dates in the feed there are now three quick filters. Tonight shows what is on today from six in the evening; this weekend, from Friday evening to Sunday (from now on, once the weekend has begun); Sunday evening, the coming Sunday from five. Each sets the dates by itself and combines with the categories, free and hidden gems.",
+      "it": "Sopra le date del feed ci sono ora tre filtri rapidi. Stasera mostra cosa c’è oggi dalle sei di sera; questo weekend, da venerdì sera a domenica (da adesso in poi, se il weekend è già cominciato); domenica sera, la prossima domenica dalle cinque. Ognuno imposta da solo le date e si combina con le categorie, i gratuiti e le chicche.",
+      "ru": "Над датами в ленте появились три быстрых фильтра. «Сегодня вечером» показывает, что идёт сегодня с шести вечера; «В эти выходные» — с вечера пятницы до воскресенья (а если выходные уже начались — с этой минуты); «В воскресенье вечером» — ближайшее воскресенье с пяти. Каждый сам выставляет даты и сочетается с категориями, бесплатными и необычными событиями."
+    }
+  },
+  {
+    "date": "2026-10-31",
+    "example": "/liguria/",
+    "title": {
+      "en": "The site dresses for the holiday",
+      "it": "Il sito si veste per la festa",
+      "ru": "Сайт наряжается к празднику"
+    },
+    "body": {
+      "en": "On the days of a holiday the site takes on its colour and a small drawing beside the name, and the feed gets a chip with the holiday’s name that shows only its events. Which holidays, which colours and which events are chosen by an AI job; religious and military occasions are left out.",
+      "it": "Nei giorni di una festa il sito ne prende il colore e un piccolo disegno accanto al nome, e il feed ha un filtro con il nome della festa che mostra solo i suoi eventi. Quali feste, quali colori e quali eventi li sceglie un processo di intelligenza artificiale; le ricorrenze religiose e militari restano fuori.",
+      "ru": "В дни праздника сайт принимает его цвет и маленький рисунок рядом с названием, а в ленте появляется кнопка с названием праздника, которая показывает только его события. Какие праздники, цвета и события — решает ИИ; религиозные и военные даты не отмечаются."
+    }
+  },
+  {
+    "date": "2026-10-31",
     "roadmap": "feed-photo-cards",
     "example": "/it/liguria/",
     "title": {

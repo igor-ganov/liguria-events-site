@@ -35,7 +35,13 @@ describe('feedCardAttrs', () => {
       gem: '0',
       made: '0',
       created: '1750000000',
+      times: '',
+      du: '0',
     });
+  });
+  test('carries the hours and the length, like a server-rendered card', () => {
+    assert.equal(feedCardAttrs(event({ h: '10:00', hs: ['10:00', '21:00'], du: 60 })).times, '10:00,21:00');
+    assert.equal(feedCardAttrs(event({ du: 60 })).du, '60');
   });
   test('a one-day event ends the day it starts', () => {
     assert.equal(feedCardAttrs(event()).end, '2026-07-04');

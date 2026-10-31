@@ -1,0 +1,32 @@
+---
+import { MOTIF_PATHS } from '../../lib/holidays/motif-paths.ts';
+import type { Motif } from '../../lib/holidays/motifs.ts';
+
+// Decoration only: hidden from assistive technology, drawn in the accent, and
+// it sways only for readers who have not asked for less motion (global.css).
+// `of` names the holiday it belongs to, when it stands alone (the header),
+// so that it shows only while that holiday is on (HolidayInit.astro).
+type Props = Readonly<{ motif: Motif; size?: number; of?: string }>;
+const { motif, size = 22, of } = Astro.props;
+const paths = MOTIF_PATHS[motif];
+---
+
+{paths.length > 0 && (
+  <svg
+    class="holiday-motif"
+    data-motif={motif}
+    data-holiday-of={of}
+    viewBox="0 0 24 24"
+    width={size}
+    height={size}
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+    focusable="false"
+  >
+    {paths.map((d) => <path d={d} />)}
+  </svg>
+)}

@@ -1,4 +1,5 @@
 import { feedRowOf } from './feed-row-of.ts';
+import { feedFiltered } from './feed-filtered.ts';
 import { feedState } from './feed-state.ts';
 import { matchesFeedRow } from './matches-feed-row.ts';
 import { queryAll } from '../../lib/dom/query-all.ts';
@@ -26,8 +27,5 @@ export const applyFeedFilter = (): void => {
     .map(applyGroup)
     .reduce((total, shown) => total + shown, 0);
   setHidden(el('[data-feed-empty]'), visible > 0);
-  setHidden(
-    el('[data-feed-clear]'),
-    feedState.cats.size === 0 && !feedState.free && !feedState.gems && !feedState.made,
-  );
+  setHidden(el('[data-feed-clear]'), !feedFiltered(feedState));
 };

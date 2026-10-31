@@ -1,4 +1,5 @@
 import { branch } from '../../lib/branch.ts';
+import { startTimes } from '../../lib/events/start-times.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 
 const flag = (on: boolean): string =>
@@ -21,4 +22,6 @@ export const feedCardAttrs = (event: CompactEvent): Readonly<Record<string, stri
     () => '',
     () => String(event.cr),
   ),
+  times: startTimes(event).join(','),
+  du: String(event.du ?? 0),
 });

@@ -9,13 +9,16 @@ const params = (state: FeedState, today: string): readonly Param[] => [
   ...[[...state.cats].join(',')]
     .filter(() => state.cats.size > 0)
     .map((cats): Param => ['cats', cats]),
+  // A quick filter stands for its range, recomputed by whoever opens the link.
   ...[state.from]
-    .filter((from) => from !== '' && from !== today)
+    .filter((from) => from !== '' && from !== today && state.quick === '')
     .map((from): Param => ['from', from]),
-  ...[state.to].filter((to) => to !== '').map((to): Param => ['to', to]),
+  ...[state.to].filter((to) => to !== '' && state.quick === '').map((to): Param => ['to', to]),
+  ...[state.quick].filter((quick) => quick !== '').map((quick): Param => ['when', quick]),
   ...[state.free].filter((free) => free).map((): Param => ['free', '1']),
   ...[state.gems].filter((gems) => gems).map((): Param => ['gems', '1']),
   ...[state.made].filter((made) => made).map((): Param => ['made', '1']),
+  ...[state.holiday].filter((holiday) => holiday !== '').map((holiday): Param => ['holiday', holiday]),
   ...[state.sort].filter((sort) => sort === 'created').map((): Param => ['sort', 'created']),
 ];
 

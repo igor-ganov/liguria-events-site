@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 // Two surfaces:
@@ -40,6 +41,11 @@ const FORM_FACTORS = [
 // the network on purpose run alongside everything else, so the default has to
 // clear a loaded machine — CI raises it through the environment.
 const MAX_WAIT_MS = Number(process.env.E2E_MAX_WAIT_MS ?? 10_000);
+
+// The holidays the AI job publishes are read at build time, like the corpus.
+// The build under test reads a fixture instead: one holiday active on any day,
+// handed over as a data: URL so no server has to be up before the build is.
+const HOLIDAYS_URL = `data:application/json;base64,${readFileSync('e2e/fixtures/holidays.json').toString('base64')}`;
 
 export default defineConfig({
   testDir: './e2e',
@@ -99,6 +105,7 @@ export default defineConfig({
     {
       command: `bun run build && bunx serve dist -l ${STATIC_PORT}`,
       url: `${STATIC_URL}/liguria/`,
+      env: { HOLIDAYS_URL },
       reuseExistingServer: !process.env.CI,
       timeout: 300_000,
     },
