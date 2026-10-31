@@ -1,0 +1,33 @@
+---
+import HolidayMotif from '../../holiday/HolidayMotif.astro';
+import { QUICK_KINDS } from '../../../lib/quick/quick-kind.ts';
+import { pageHolidays } from '../../../layouts/page-holidays.ts';
+import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// The quick row: the holiday of the day first, when there is one (the page
+// carries the coming ones; HolidayInit shows the one that is on), then the
+// three time filters. Each is a toggle button; the time filters are worked
+// out in the browser when pressed (wire-feed-quick.ts), as the page is static.
+type Props = Readonly<{ ui: Ui; lang: Locale }>;
+const { ui, lang } = Astro.props;
+const holidays = await pageHolidays();
+---
+
+<p class="chips chips--quick" role="group" aria-label={ui.chips.quick} data-feed-quick-row>
+  {holidays.map((holiday) => (
+    <button
+      class="chip chip--holiday"
+      data-feed-holiday={holiday.id}
+      data-holiday-of={holiday.id}
+      data-ids={holiday.events.join(' ')}
+      aria-pressed="false"
+    >
+      <HolidayMotif motif={holiday.theme.motif} size={16} />
+      {holiday.name[lang]}
+    </button>
+  ))}
+  {QUICK_KINDS.map((kind) => (
+    <button class="chip chip--quick" data-feed-quick={kind} aria-pressed="false">{ui.chips[kind]}</button>
+  ))}
+</p>

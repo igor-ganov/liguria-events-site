@@ -54,7 +54,7 @@ landmarks:
   empty: No landmarks match.
   search: Search landmarks…
   kinds: { castle: Castles, church: Churches, museum: Museums, palace: Palaces, monument: Monuments, tower: Towers, lighthouse: Lighthouses, square: Squares, park: Parks, heritage: Heritage sites, beach: Beaches, attraction: Attractions }
-chips: { free: 'Free only', gems: 'Hidden gems', made: 'Made here', clear: 'Clear' }
+chips: { free: 'Free only', gems: 'Hidden gems', made: 'Made here', clear: 'Clear', quick: 'When', tonight: 'Tonight', weekend: 'This weekend', sunday: 'Sunday evening' }
 theme: { toggle: 'Toggle colour theme', light: 'Light', dark: 'Dark', system: 'System' }
 range: { from: 'From', to: 'To' }
 sort: { label: 'Sort', date: 'By date', created: 'Newest first' }

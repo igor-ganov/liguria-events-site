@@ -11,4 +11,6 @@ export const feedRowOf = (item: HTMLElement): FeedRow => ({
   made: item.dataset['made'] === '1',
   city: item.dataset['ct'] ?? '',
   cats: (item.dataset['cats'] ?? '').split(','),
+  times: (item.dataset['times'] ?? '').split(',').filter((time) => time !== ''),
+  du: Number(item.dataset['du'] ?? 0) || 0,
 });

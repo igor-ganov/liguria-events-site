@@ -1,5 +1,6 @@
 import { feedState } from './feed-state.ts';
 import { parseFeedParams } from './parse-feed-params.ts';
+import { setFeedQuick } from './set-feed-quick.ts';
 
 /** Restore the filters from the URL into the module-level state, which persists
  *  across SPA swaps — so every field is written, not only the ones present. */
@@ -14,6 +15,11 @@ export const readFeedParams = (today: string): void => {
   feedState.gems = params.gems;
   feedState.made = params.made;
   feedState.sort = params.sort;
+  feedState.holiday = params.holiday;
+  feedState.quick = '';
+  feedState.window = undefined;
+  // A quick filter in the URL is worked out again for the moment it is opened.
+  [params.quick].filter((quick) => quick !== '').forEach((quick) => setFeedQuick(quick, today));
   // The city is a path segment (/<region>/<city>/), server-rendered onto the
   // list — not a query filter. It stays fixed for the page; reading it keeps the
   // ct filter (which also drops late D1 events that carry no city) working.

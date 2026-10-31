@@ -107,6 +107,23 @@
   --today-ring: var(--filo);
 }
 
+/* Holiday dress (src/lib/holidays). The colour the AI job picked for the day,
+   checked for 4.5:1 on every surface before it gets here, takes the line's
+   place — and with it the accent's, the brand's and the pressed chip's, whose
+   hand-drawn pill is redrawn in it. A theme whose colour failed the check
+   carries no flag and keeps the line. The ink on the line stays: a colour
+   that reads on these surfaces reads under white (light) or --carta (dark). */
+:root[data-holiday-light]:not([data-theme='dark']) {
+  --filo: var(--holiday-light);
+  --t-pillola-piena: var(--holiday-pill-light);
+  --t-pillola-filo: var(--holiday-ring-light);
+}
+:root[data-holiday-dark][data-theme='dark'] {
+  --filo: var(--holiday-dark);
+  --t-pillola-piena: var(--holiday-pill-dark);
+  --t-pillola-filo: var(--holiday-ring-dark);
+}
+
 body {
   font-family: var(--font-body);
   font-weight: 300;

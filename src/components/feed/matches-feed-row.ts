@@ -1,3 +1,4 @@
+import { matchesQuick } from '../../lib/quick/matches-quick.ts';
 import type { FeedState } from './feed-state.ts';
 
 /** One rendered card, as the filter reads it off the DOM. */
@@ -10,6 +11,9 @@ export type FeedRow = {
   readonly made: boolean;
   readonly city: string;
   readonly cats: readonly string[];
+  /** Every hour it starts at on its day, and how long it lasts (minutes). */
+  readonly times: readonly string[];
+  readonly du: number;
 };
 
 type Rule = (state: FeedState, row: FeedRow) => boolean;
@@ -25,6 +29,8 @@ const RULES: readonly Rule[] = [
   (state, row) => !state.made || row.made,
   (state, row) => state.city === '' || row.city === state.city,
   (state, row) => state.cats.size === 0 || row.cats.some((cat) => state.cats.has(cat)),
+  (state, row) => state.window === undefined || matchesQuick(state.window, row),
+  (state, row) => state.holiday === '' || state.holidayIds.has(row.id),
 ];
 
 /** Whether a card survives the current filters — an event that runs across the

@@ -79,6 +79,8 @@ describe('feedItemAttrs', () => {
       'data-gem': '1',
       'data-ct': 'genova',
       'data-created': '1700000000',
+      'data-times': '',
+      'data-du': '0',
     });
   });
   test('absent flags read as 0 and absent fields as empty', () => {
@@ -88,6 +90,11 @@ describe('feedItemAttrs', () => {
     assert.equal(attrs['data-ct'], '');
     assert.equal(attrs['data-created'], '');
     assert.equal(attrs['data-end'], '2026-07-06');
+  });
+  test('carries every hour it starts at and how long it lasts', () => {
+    assert.equal(feedItemAttrs(event({ h: '18:00' }))['data-times'], '18:00');
+    assert.equal(feedItemAttrs(event({ h: '10:00', hs: ['10:00', '21:00'] }))['data-times'], '10:00,21:00');
+    assert.equal(feedItemAttrs(event({ du: 90 }))['data-du'], '90');
   });
 });
 

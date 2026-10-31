@@ -1,0 +1,35 @@
+---
+import { holidayDress } from '../../lib/holidays/holiday-dress.ts';
+import { pageHolidays } from '../page-holidays.ts';
+
+// The page carries the holidays not yet over; this picks the one whose window
+// holds today in Rome and dresses the root before the first paint, like the
+// theme script. Everything a holiday shows (motif, chip) is marked
+// data-holiday-of and stays hidden unless it is the one that is on.
+const holidays = await pageHolidays();
+const data = JSON.stringify({ pin: import.meta.env.PUBLIC_FIXED_TODAY ?? '', holidays: holidays.map(holidayDress) });
+---
+
+{holidays.length > 0 && <script is:inline type="application/json" id="holidays-data" set:html={data} />}
+{holidays.length > 0 && (
+  <script is:inline>
+    (function () {
+      var ROME = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit' });
+      var read = function (doc) {
+        try { return JSON.parse((doc.getElementById('holidays-data') || {}).textContent || '{}'); } catch (_) { return {}; }
+      };
+      var dress = function (doc) {
+        var data = read(doc);
+        var today = data.pin || ROME.format(new Date());
+        (data.holidays || []).filter(function (h) { return h.from <= today && today <= h.to; }).slice(0, 1).forEach(function (h) {
+          Object.keys(h.attrs).forEach(function (name) { doc.documentElement.setAttribute(name, h.attrs[name]); });
+          var style = doc.createElement('style');
+          style.textContent = '[data-holiday-of]:not([data-holiday-of="' + CSS.escape(h.id) + '"]){display:none}';
+          doc.head.appendChild(style);
+        });
+      };
+      dress(document);
+      document.addEventListener('astro:before-swap', function (e) { dress(e.newDocument); });
+    })();
+  </script>
+)}

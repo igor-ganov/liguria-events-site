@@ -22,7 +22,7 @@ export const UiDictSchema = Schema.Struct({
   reviews: ReviewsUiSchema,
   map: Schema.Struct({ retry: Schema.String, failed: Schema.String, locate: Schema.String }),
   auth: AuthUiSchema,
-  chips: Schema.Struct({ free: Schema.String, gems: Schema.String, made: Schema.String, clear: Schema.String }),
+  chips: Schema.Record({ key: Schema.Literal('free', 'gems', 'made', 'clear', 'quick', 'tonight', 'weekend', 'sunday'), value: Schema.String }),
   theme: Schema.Struct({ toggle: Schema.String, light: Schema.String, dark: Schema.String, system: Schema.String }),
   range: Schema.Struct({ from: Schema.String, to: Schema.String }),
   sort: Schema.Struct({ label: Schema.String, date: Schema.String, created: Schema.String }),

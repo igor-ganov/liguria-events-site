@@ -1,4 +1,5 @@
 import { branch } from '../branch.ts';
+import { startTimes } from './start-times.ts';
 import type { CompactEvent } from './event-schema.ts';
 
 const flag = (on: boolean): string =>
@@ -21,4 +22,7 @@ export const feedItemAttrs = (event: CompactEvent): Readonly<Record<string, stri
     () => '',
     () => String(event.cr),
   ),
+  // The hours and the length are what the quick filters (tonight…) read.
+  'data-times': startTimes(event).join(','),
+  'data-du': String(event.du ?? 0),
 });

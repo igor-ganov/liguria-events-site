@@ -54,7 +54,7 @@ landmarks:
   empty: Nessun luogo corrisponde.
   search: Cerca luoghi…
   kinds: { castle: Castelli, church: Chiese, museum: Musei, palace: Palazzi, monument: Monumenti, tower: Torri, lighthouse: Fari, square: Piazze, park: Parchi, heritage: Siti storici, beach: Spiagge, attraction: Attrazioni }
-chips: { free: 'Solo gratuiti', gems: 'Chicche', made: 'Creati qui', clear: 'Azzera' }
+chips: { free: 'Solo gratuiti', gems: 'Chicche', made: 'Creati qui', clear: 'Azzera', quick: 'Quando', tonight: 'Stasera', weekend: 'Questo weekend', sunday: 'Domenica sera' }
 theme: { toggle: 'Cambia tema colore', light: 'Chiaro', dark: 'Scuro', system: 'Sistema' }
 range: { from: 'Da', to: 'A' }
 sort: { label: 'Ordina', date: 'Per data', created: 'Più recenti' }

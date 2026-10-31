@@ -1,4 +1,6 @@
 import type { PreparedIndex } from '../../lib/search/index.ts';
+import type { QuickKind } from '../../lib/quick/quick-kind.ts';
+import type { QuickWindow } from '../../lib/quick/quick-window.ts';
 
 /** How a day's cards are ordered: by date (the server's curated order) or
  *  newest first. */
@@ -19,6 +21,12 @@ export type FeedState = {
   hits: ReadonlySet<string> | undefined;
   sort: FeedSort;
   index: PreparedIndex | undefined;
+  /** The quick filter pressed (tonight…), and what it meant when pressed. */
+  quick: QuickKind | '';
+  window: QuickWindow | undefined;
+  /** The holiday chip, by holiday id, and the events the job gave it. */
+  holiday: string;
+  holidayIds: ReadonlySet<string>;
 };
 
 /** Module-level, so it survives an SPA swap — readFeedParams resets it, so a
@@ -35,4 +43,8 @@ export const feedState: FeedState = {
   hits: undefined,
   sort: 'date',
   index: undefined,
+  quick: '',
+  window: undefined,
+  holiday: '',
+  holidayIds: new Set<string>(),
 };

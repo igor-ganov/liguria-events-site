@@ -1,4 +1,5 @@
 import { branch } from '../../lib/branch.ts';
+import { clearFeedFilters } from './clear-feed-filters.ts';
 import { feedState } from './feed-state.ts';
 import { isDefined } from '../../lib/is-defined.ts';
 import { queryAll } from '../../lib/dom/query-all.ts';
@@ -36,22 +37,11 @@ const wireToggle = (selector: string, key: 'free' | 'gems' | 'made', refresh: ()
     });
 };
 
-const clearAll = (refresh: () => void): void => {
-  feedState.cats.clear();
-  feedState.free = false;
-  feedState.gems = false;
-  feedState.made = false;
-  queryAll(document, '[data-feed-cat], [data-feed-free], [data-feed-gems], [data-feed-made]').forEach((chip) =>
-    chip.setAttribute('aria-pressed', 'false'),
-  );
-  refresh();
-};
-
-/** The category chips, the two flag toggles and the clear button. */
-export const wireFeedChips = (refresh: () => void): void => {
+/** The category chips, the flag toggles and the clear button. */
+export const wireFeedChips = (refresh: () => void, today: string): void => {
   queryAll(document, '[data-feed-cat]').forEach(wireCat(refresh));
   wireToggle('[data-feed-free]', 'free', refresh);
   wireToggle('[data-feed-gems]', 'gems', refresh);
   wireToggle('[data-feed-made]', 'made', refresh);
-  document.querySelector('[data-feed-clear]')?.addEventListener('click', () => clearAll(refresh));
+  document.querySelector('[data-feed-clear]')?.addEventListener('click', () => clearFeedFilters(refresh, today));
 };

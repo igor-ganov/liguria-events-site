@@ -353,6 +353,9 @@
 .region-current:hover {
   border-image-source: var(--t-pillola-filo);
 }
+.chip--holiday .holiday-motif {
+  color: currentColor;
+}
 
 /* A fieldset's legend has to sit above the drawn frame, and needs the page
    under it so the stroke does not run through the words. */
@@ -398,6 +401,15 @@
 }
 .chip {
   padding: 0.5rem 1.2rem;
+}
+/* The holiday chip wears the day's colour before it is pressed, too. */
+.chip--holiday {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent);
+  font-weight: 500;
+  border-image-source: var(--t-pillola-filo);
 }
 .cat-tag {
   padding: 0.26rem 0.8rem;
