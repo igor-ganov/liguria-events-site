@@ -25,6 +25,14 @@
   "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "dovego-uploads" }],
   "routes": [
     { "pattern": "dovego.it", "custom_domain": true },
+    // www stays a custom domain so the name resolves at all, but it is NOT a
+    // second site: a zone-level redirect rule (phase http_request_dynamic_redirect,
+    // "Redirects" ruleset, added 2026-10-31) answers every www request with a
+    // 301 to the apex before the worker and before static assets. It served the
+    // whole site at 200 until then, which is why bingbot spent 8 446 of its
+    // 12 507 daily fetches on www redirects and Applebot half its budget there.
+    // A redirect in middleware cannot replace it: prerendered pages never reach
+    // the worker.
     { "pattern": "www.dovego.it", "custom_domain": true }
   ],
   "env": {

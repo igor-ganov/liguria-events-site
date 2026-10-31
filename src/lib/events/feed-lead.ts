@@ -14,6 +14,11 @@ type Input = Readonly<{
   placeName: string;
   events: readonly CompactEvent[];
   today: string;
+  /** The days the page is about, when the page itself names them — a facet
+   *  called today, tomorrow or this weekend. Given one, the sentence says that
+   *  window instead of the span of what it lists, and drops the "on today, on
+   *  at the weekend" tail, which on such a page restates the same count. */
+  window?: Readonly<{ from: string; to: string }> | undefined;
 }>;
 
 const counted = (events: readonly CompactEvent[], from: string, to: string): number =>
@@ -30,8 +35,10 @@ const counted = (events: readonly CompactEvent[], from: string, to: string): num
  *
  * Nothing on means no sentence: the empty state already says so, and better.
  */
-export const feedLead = ({ lang, ui, placeName, events, today }: Input): string => {
-  const span = feedSpan(events, today);
+export const feedLead = ({ lang, ui, placeName, events, today, window: named }: Input): string => {
+  // Nothing listed means no sentence even when the window is named: the empty
+  // state says it better, and it says it in the reader's language.
+  const span = [named ?? feedSpan(events, today)].filter(() => events.length > 0).at(0);
   const weekend = weekendOf(today);
   const now = { today: counted(events, today, today), weekend: counted(events, weekend.from, weekend.to) };
   return [span]
@@ -45,7 +52,7 @@ export const feedLead = ({ lang, ui, placeName, events, today }: Input): string 
     )
     .map((line) =>
       [line, ui.lead.now.replace('{today}', String(now.today)).replace('{weekend}', String(now.weekend))]
-        .slice(0, 1 + Number(now.today + now.weekend > 0))
+        .slice(0, 1 + Number(named === undefined && now.today + now.weekend > 0))
         .join(' '),
     )
     .at(0) ?? '';
