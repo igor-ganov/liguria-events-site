@@ -1,5 +1,4 @@
 ---
-import ShareButton from '../../share/ShareButton.astro';
 import { subscribeLinks } from '../../../lib/seo/subscribe-links.ts';
 import { TELEGRAM_CHANNEL } from '../../../lib/channel/telegram-channel.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
@@ -12,8 +11,11 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // morning and the site linked it from nowhere at all, so it had two
 // subscribers. The navigation offers the bot — a different thing, which answers
 // questions and does not arrive on its own.
-type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui; title: string }>;
-const { region, city, site, ui, title } = Astro.props;
+//
+// Sharing the page moved up beside the filters (QuickFilters.astro): what is
+// passed on is the view as filtered, and one control is enough.
+type Props = Readonly<{ region: string; city?: string | undefined; site: URL | undefined; ui: Ui }>;
+const { region, city, site, ui } = Astro.props;
 const { note, calendar, rss, telegram } = ui.subscribe;
 const [feedRss, feedIcs] = subscribeLinks(region, site, city);
 ---
@@ -38,5 +40,4 @@ const [feedRss, feedIcs] = subscribeLinks(region, site, city);
     </svg>
     {telegram}
   </a>
-  <ShareButton ui={ui} title={title} />
 </aside>

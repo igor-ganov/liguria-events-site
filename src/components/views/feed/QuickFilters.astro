@@ -1,17 +1,27 @@
 ---
 import HolidayMotif from '../../holiday/HolidayMotif.astro';
+import ShareButton from '../../share/ShareButton.astro';
 import { QUICK_KINDS } from '../../../lib/quick/quick-kind.ts';
+import { quickHref } from '../../../lib/quick/quick-href.ts';
 import { pageHolidays } from '../../../layouts/page-holidays.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { QuickKind } from '../../../lib/quick/quick-kind.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
 // The quick row: the holiday of the day first, when there is one (the page
 // carries the coming ones; HolidayInit shows the one that is on), then the
-// three time filters. Each is a toggle button; the time filters are worked
-// out in the browser when pressed (wire-feed-quick.ts), as the page is static.
-type Props = Readonly<{ ui: Ui; lang: Locale }>;
-const { ui, lang } = Astro.props;
+// three time filters, then a way to pass the view on.
+//
+// Where the feed has quick pages (`base`: a region or a city), each time filter
+// is a link to its page — /en/liguria/tonight/ — and the one this page is links
+// back to the whole feed. On the whole feed a script filters in place and puts
+// the page's address in the bar instead (wire-feed-quick.ts); on a venue,
+// which has no such pages, they are toggle buttons.
+type Props = Readonly<{ ui: Ui; lang: Locale; title: string; base?: string | undefined; current?: QuickKind | '' | undefined }>;
+const { ui, lang, title, base, current = '' } = Astro.props;
 const holidays = await pageHolidays();
+const linked = base !== undefined && base !== '';
+const PAGE: readonly 'page'[] = ['page'];
 ---
 
 <p class="chips chips--quick" role="group" aria-label={ui.chips.quick} data-feed-quick-row>
@@ -27,7 +37,16 @@ const holidays = await pageHolidays();
       {holiday.name[lang]}
     </button>
   ))}
-  {QUICK_KINDS.map((kind) => (
+  {linked && QUICK_KINDS.map((kind) => (
+    <a
+      class="chip chip--quick"
+      data-feed-quick={kind}
+      href={quickHref(base ?? '', kind, current, '')}
+      aria-current={PAGE.filter(() => kind === current).at(0)}
+    >{ui.chips[kind]}</a>
+  ))}
+  {!linked && QUICK_KINDS.map((kind) => (
     <button class="chip chip--quick" data-feed-quick={kind} aria-pressed="false">{ui.chips[kind]}</button>
   ))}
 </p>
+<p class="feed-share"><ShareButton ui={ui} title={title} /></p>

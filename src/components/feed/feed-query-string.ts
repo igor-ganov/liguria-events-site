@@ -14,7 +14,8 @@ const params = (state: FeedState, today: string): readonly Param[] => [
     .filter((from) => from !== '' && from !== today && state.quick === '')
     .map((from): Param => ['from', from]),
   ...[state.to].filter((to) => to !== '' && state.quick === '').map((to): Param => ['to', to]),
-  ...[state.quick].filter((quick) => quick !== '').map((quick): Param => ['when', quick]),
+  // On a feed with quick pages the quick filter is the path, not the query.
+  ...[state.quick].filter((quick) => quick !== '' && state.base === '').map((quick): Param => ['when', quick]),
   ...[state.free].filter((free) => free).map((): Param => ['free', '1']),
   ...[state.gems].filter((gems) => gems).map((): Param => ['gems', '1']),
   ...[state.made].filter((made) => made).map((): Param => ['made', '1']),

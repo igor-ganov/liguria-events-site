@@ -1,14 +1,23 @@
 import { nextIsoDay } from '../calendar/next-iso-day.ts';
-import { weekendOf } from './weekend-of.ts';
+import { quickWindow } from '../quick/quick-window.ts';
+import type { QuickKind } from '../quick/quick-kind.ts';
 
 type Window = Readonly<{ from: string; to: string }>;
 
 const oneDay = (day: string): Window => ({ from: day, to: day });
 
+// A quick filter's days, as its page states them.
+const quick = (kind: QuickKind) => (today: string): Window => {
+  const { from, to } = quickWindow(kind, { day: today, minute: 0 });
+  return { from, to };
+};
+
 const WINDOWS: Readonly<Record<string, (today: string) => Window>> = {
   today: (today) => oneDay(today),
   tomorrow: (today) => oneDay(nextIsoDay(today)),
-  'this-weekend': (today) => weekendOf(today),
+  tonight: quick('tonight'),
+  'this-weekend': quick('weekend'),
+  'sunday-evening': quick('sunday'),
 };
 
 /**

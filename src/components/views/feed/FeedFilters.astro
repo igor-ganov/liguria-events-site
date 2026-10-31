@@ -3,17 +3,18 @@ import { CATEGORIES } from '../../../lib/events/categories.ts';
 import QuickFilters from './QuickFilters.astro';
 import { iconSvg } from '../../../lib/icons/icon-svg.ts';
 import type { Locale } from '../../../lib/i18n/locales.ts';
+import type { FeedQuickProps } from '../../../lib/quick/feed-quick-props.ts';
 import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 
-type Props = Readonly<{ ui: Ui; today: string; lang: Locale }>;
-const { ui, today, lang } = Astro.props;
+type Props = Readonly<{ ui: Ui; today: string; lang: Locale; title: string; quick: FeedQuickProps }>;
+const { ui, today, lang, title, quick } = Astro.props;
 ---
 
 <div class="feed-search">
   <input type="search" data-feed-search placeholder={ui.search.placeholder} aria-label={ui.search.placeholder} />
 </div>
 
-<QuickFilters ui={ui} lang={lang} />
+<QuickFilters ui={ui} lang={lang} title={title} base={quick.base} current={quick.current} />
 
 <div class="feed-dates">
   <label>{ui.range.from} <input type="date" data-feed-from value={today} /></label>

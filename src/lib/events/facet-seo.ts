@@ -8,6 +8,8 @@ const KEYS: Readonly<Record<string, keyof Ui['facets']>> = {
   tomorrow: 'tomorrow',
   'this-weekend': 'weekend',
   free: 'free',
+  tonight: 'tonight',
+  'sunday-evening': 'sunday',
 };
 
 // A category facet takes one template per language, filled from the category

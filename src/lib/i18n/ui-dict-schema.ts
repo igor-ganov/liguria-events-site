@@ -55,7 +55,7 @@ export const UiDictSchema = Schema.Struct({
   offline: Schema.Struct({ notice: Schema.String, saved: Schema.String, updated: Schema.String, reload: Schema.String, retry: Schema.String, listAway: Schema.String }),
   outbox: Schema.Struct({ queued: Schema.String, waiting: Schema.String, conflict: Schema.String, sent: Schema.String }),
   ...SubmitUiSchema,
-  facets: Schema.Struct({ category: Schema.Struct({ title: Schema.String, description: Schema.String }), today: Schema.Struct({ title: Schema.String, description: Schema.String }), tomorrow: Schema.Struct({ title: Schema.String, description: Schema.String }), weekend: Schema.Struct({ title: Schema.String, description: Schema.String }), free: Schema.Struct({ title: Schema.String, description: Schema.String }) }),
+  facets: Schema.Struct({ category: Schema.Struct({ title: Schema.String, description: Schema.String }), today: Schema.Struct({ title: Schema.String, description: Schema.String }), tomorrow: Schema.Struct({ title: Schema.String, description: Schema.String }), weekend: Schema.Struct({ title: Schema.String, description: Schema.String }), free: Schema.Struct({ title: Schema.String, description: Schema.String }), tonight: Schema.Struct({ title: Schema.String, description: Schema.String }), sunday: Schema.Struct({ title: Schema.String, description: Schema.String }) }),
   gone: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
   nothingHere: Schema.Struct({ heading: Schema.String, note: Schema.String, onward: Schema.String }),
   empty: Schema.String,

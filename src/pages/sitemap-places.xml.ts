@@ -2,6 +2,7 @@ import { cachedEvents } from '../data/cached-events.ts';
 import { EVENTS_URL } from '../data/events-url.ts';
 import { facetSitemapUrls } from '../lib/seo/facet-sitemap-urls.ts';
 import { isoToday } from '../lib/calendar/iso-today.ts';
+import { quickSitemapUrls } from '../lib/seo/quick-sitemap-urls.ts';
 import { sitemapXml } from '../lib/seo/sitemap-xml.ts';
 import { venueSitemapUrls } from '../lib/seo/venue-sitemap-urls.ts';
 import type { APIRoute } from 'astro';
@@ -23,6 +24,8 @@ export const GET: APIRoute = async ({ site }) => {
   return new Response(
     sitemapXml([
       ...facetSitemapUrls(payload.events, today, site),
+      // A region's tonight, this weekend and Sunday evening (a city's are facets).
+      ...quickSitemapUrls(payload.events, today, site),
       ...venueSitemapUrls(payload.events, today, site),
     ]),
     {

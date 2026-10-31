@@ -3,6 +3,7 @@ import { dayHeading } from '../calendar/day-heading.ts';
 import { EVENTS_URL } from '../../data/events-url.ts';
 import { feedExtras } from './feed-extras.ts';
 import { facetWindow } from './facet-window.ts';
+import { facetListLd } from '../seo/facet-list-ld.ts';
 import { feedLead } from './feed-lead.ts';
 import { feedViewModel } from './feed-view-model.ts';
 import { isoToday } from '../calendar/iso-today.ts';
@@ -37,6 +38,8 @@ export const feedPageView = async ({ lang, scope: given, today: when, site, ui }
     ...view,
     ...feedExtras({ lang, scope, corpus: payload.events, shown: view.events, path: view.path, site }),
     today,
+    // A facet page is a list — tonight in Liguria — and says so.
+    listLd: [given.facet].filter((facet) => facet !== undefined).map(() => facetListLd({ name: view.title, events: view.events, lang, site })).at(0),
     heading: dayHeading(ui),
     // The one sentence the page says about itself, before the cards start.
     lead: feedLead({ lang, ui, placeName: view.placeName, events: view.events, today, window: facetWindow(given.facet?.slug, today) }),

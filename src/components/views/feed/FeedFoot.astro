@@ -19,12 +19,11 @@ type Props = Readonly<{
   venue?: VenueView | undefined;
   today: string;
   placeName: string;
-  title: string;
   cityVenues: readonly CityVenue[];
   site: URL | undefined;
   ui: Ui;
 }>;
-const { lang, region, city, venue, today, placeName, title, cityVenues, site, ui } = Astro.props;
+const { lang, region, city, venue, today, placeName, cityVenues, site, ui } = Astro.props;
 ---
 
 {venue !== undefined && <VenuePast city={city ?? ''} slug={venue.slug} today={today} ui={ui} />}
@@ -36,4 +35,4 @@ const { lang, region, city, venue, today, placeName, title, cityVenues, site, ui
   />
 )}
 <p class="feed-empty" data-feed-empty hidden>{ui.empty}</p>
-<SubscribeBar region={region} city={city} site={site} ui={ui} title={title} />
+<SubscribeBar region={region} city={city} site={site} ui={ui} />

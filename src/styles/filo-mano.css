@@ -170,6 +170,7 @@
   box-shadow: none;
 }
 .chip[aria-pressed='true'],
+.chip[aria-current='page'],
 .chip--free[aria-pressed='true'],
 .chip--layer[aria-pressed='true'] {
   color: var(--on-accent);

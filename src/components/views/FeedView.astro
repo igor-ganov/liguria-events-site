@@ -14,6 +14,7 @@ import { siteJsonLd } from '../../lib/seo/site-json-ld.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 import { heroCount } from '../../lib/picks/hero-count.ts';
 import { feedPageView } from '../../lib/events/feed-page-view.ts';
+import { feedQuickProps } from '../../lib/quick/feed-quick-props.ts';
 import type { FeedProps } from './feed/feed-props.ts';
 
 type Props = FeedProps;
@@ -31,26 +32,28 @@ const view = await feedPageView({
   site: Astro.site,
   ui,
 });
-const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd, lead } = view;
-// A venue and a facet open with their days; everything else with highlights.
-const withPicks = venue === undefined && facet === undefined;
-const picksAhead = [heroCount(events, today)].filter(() => withPicks).at(0) ?? 0;
+const { events, groups, placeName, title, description, path, onward, today, heading, image, cityVenues, venueLd, listLd, lead } = view;
+const quick = feedQuickProps(lang, { region, city, venue, facet });
+// A venue and a facet open with their days; a whole feed (the one a quick chip
+// filters in place) with highlights.
+const picksAhead = [heroCount(events, today)].filter(() => quick.toggle).at(0) ?? 0;
 ---
 
 <Layout lang={lang} region={region} city={city} title={title} description={description} path={path} image={image}>
   <script is:inline type="application/ld+json" set:html={siteJsonLd()} />
   {venueLd !== undefined && <script is:inline type="application/ld+json" set:html={venueLd} />}
+  {listLd !== undefined && <script is:inline type="application/ld+json" set:html={listLd} />}
   <Fragment set:html={feedSprite()} />
   {venue === undefined && <FeedHead title={title} lead={lead} city={city} ui={ui} />}
   {venue !== undefined && (
     <VenueHeader lang={lang} region={region} city={city ?? ''} slug={venue.slug} name={venue.name} count={events.length} ui={ui} />
   )}
 
-  {withPicks && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
-  {groups.length > 0 && <FeedFilters ui={ui} today={today} lang={lang} />}
+  {quick.toggle && <FeedPicks events={events} today={today} ui={ui} lang={lang} />}
+  {groups.length > 0 && <FeedFilters ui={ui} today={today} lang={lang} title={title} quick={quick} />}
 
   {groups.length > 0 && <h2 class="visually-hidden">{ui.headings.allEvents}</h2>}
-  <Filo region={region} city={city ?? ''} today={today} hasDays={groups.length > 0}>
+  <Filo region={region} city={city ?? ''} today={today} hasDays={groups.length > 0} quickBase={quick.base} quick={quick.current} toggle={quick.toggle}>
     <FoldedGroups groups={groups} heading={heading} ui={ui} lang={lang} ahead={picksAhead} />
   </Filo>
   {groups.length === 0 && (
@@ -63,7 +66,7 @@ const picksAhead = [heroCount(events, today)].filter(() => withPicks).at(0) ?? 0
       invite={ui.contribute.empty.replace('{place}', placeName)}
     />
   )}
-  <FeedFoot lang={lang} region={region} city={city} venue={venue} today={today} placeName={placeName} title={title} cityVenues={cityVenues} site={Astro.site} ui={ui} />
+  <FeedFoot lang={lang} region={region} city={city} venue={venue} today={today} placeName={placeName} cityVenues={cityVenues} site={Astro.site} ui={ui} />
 </Layout>
 
 <script is:inline type="application/json" id="icons-data" set:html={feedIconsJson()} />

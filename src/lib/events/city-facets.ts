@@ -1,7 +1,7 @@
 import { CATEGORIES } from './categories.ts';
 import { nextIsoDay } from '../calendar/next-iso-day.ts';
 import { occursBetween } from './occurs-between.ts';
-import { weekendOf } from './weekend-of.ts';
+import { quickNarrow } from '../quick/quick-narrow.ts';
 import type { CompactEvent } from './event-schema.ts';
 
 /** A named narrowing of a city's feed, addressable as its own page. */
@@ -19,14 +19,12 @@ const onDay = (day: string) => (events: readonly CompactEvent[]) => events.filte
 export const FACETS: readonly Facet[] = [
   { slug: 'today', narrow: (events, today) => onDay(today)(events) },
   { slug: 'tomorrow', narrow: (events, today) => onDay(nextIsoDay(today))(events) },
-  {
-    slug: 'this-weekend',
-    narrow: (events, today) => {
-      const { from, to } = weekendOf(today);
-      return events.filter(occursBetween(from, to));
-    },
-  },
+  // The weekend is the quick filter's: from Friday evening, so the chip and the
+  // page it leads to show the same events (QuickFilters.astro).
+  { slug: 'this-weekend', narrow: quickNarrow('weekend') },
   { slug: 'free', narrow: (events) => events.filter((event) => event.f === true) },
+  { slug: 'tonight', narrow: quickNarrow('tonight') },
+  { slug: 'sunday-evening', narrow: quickNarrow('sunday') },
   // One facet per category, minus "other": nobody searches for other events.
   // The slug is the category id, so the vocabulary stays ours rather than being
   // translated three ways into three sets of URLs.
