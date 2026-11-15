@@ -48,6 +48,10 @@ describe('strategyOf', () => {
     assert.equal(strategyOf(get('/data/places-liguria.json'), ORIGIN), 'stale-while-revalidate');
   });
 
+  test('the loading tips are kept, so a tip is in hand offline', () => {
+    assert.equal(strategyOf(get('/tips/en.json'), ORIGIN), 'stale-while-revalidate');
+  });
+
   test('anything carrying a session or a mutation is never intercepted', () => {
     assert.equal(strategyOf(nav('/admin/'), ORIGIN), 'network-only');
     assert.equal(strategyOf(get('/api/favorites'), ORIGIN), 'network-only');

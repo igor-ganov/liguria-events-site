@@ -1,0 +1,17 @@
+---
+// Loading feedback (src/components/loading): the card that carries a tip when
+// a load runs long, and the polite live region that says a load has begun.
+// Both are per page: what is on screen during a navigation is the page being
+// left, and that is where the wait is shown.
+import type { Ui } from '../../lib/i18n/ui-schema.ts';
+
+type Props = { ui: Ui };
+const { ui } = Astro.props;
+---
+
+<loading-tip heading={ui.loading.tip}></loading-tip>
+<p id="loading-status" class="visually-hidden" role="status" data-busy-text={ui.loading.busy}></p>
+<script>
+  import { initLoading } from '../../components/loading/init-loading.ts';
+  initLoading();
+</script>

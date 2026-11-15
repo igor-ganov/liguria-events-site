@@ -1,0 +1,20 @@
+{
+  "tips": [
+    { "kind": "place", "text": "La Lanterna, il faro di Genova, è alta 77 metri e guida le navi nel porto dal 1543." },
+    { "kind": "site", "text": "Stasera, Questo weekend e Domenica sera sono a un tocco sopra il feed, e ognuno ha una pagina da condividere." },
+    { "kind": "event", "text": "Ogni maggio Camogli frigge migliaia di pesci in una padella gigante per la Sagra del Pesce." },
+    { "kind": "place", "text": "Le Cinque Terre e Portovenere sono Patrimonio dell'Umanità UNESCO dal 1997." },
+    { "kind": "site", "text": "Tocca il cuore su un evento per salvarlo. I preferiti possono diventare un percorso per la giornata." },
+    { "kind": "event", "text": "Il Festival della canzone di Sanremo si tiene in Riviera dal 1951." },
+    { "kind": "place", "text": "I Palazzi dei Rolli delle Strade Nuove di Genova ospitavano re e papi in visita; sono UNESCO dal 2006." },
+    { "kind": "site", "text": "La ricerca trova anche ciò che è scritto nella descrizione di un evento, non solo il titolo." },
+    { "kind": "event", "text": "Il 24 giugno Genova festeggia il patrono San Giovanni Battista con un falò sul mare." },
+    { "kind": "place", "text": "Il pesto alla genovese si fa con basilico ligure, pinoli, aglio, formaggio e olio d'oliva." },
+    { "kind": "site", "text": "Installa il sito come app: le pagine già aperte restano leggibili anche senza connessione." },
+    { "kind": "place", "text": "Boccadasse, borgo di pescatori dalle case colorate, si trova dentro la città di Genova." },
+    { "kind": "site", "text": "La mappa mostra anche monumenti e locali oltre agli eventi: cambia i livelli sopra di essa." },
+    { "kind": "event", "text": "Il pandolce, con uvetta e canditi, è il dolce genovese del Natale." },
+    { "kind": "site", "text": "Ogni filtro scelto è nell'indirizzo: un link apre la stessa lista per un amico." },
+    { "kind": "site", "text": "Organizzi qualcosa? Aggiungi il tuo evento al sito, gratis." }
+  ]
+}

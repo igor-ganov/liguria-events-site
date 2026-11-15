@@ -1,4 +1,5 @@
 ---
+import LoadingFeedback from './parts/LoadingFeedback.astro';
 import MobileMenu from '../components/MobileMenu.astro';
 import NavProgress from './parts/NavProgress.astro';
 import OfflineNotice from './parts/OfflineNotice.astro';
@@ -56,6 +57,7 @@ const uiData = JSON.stringify({ lang, ui });
     <MobileMenu lang={lang} path={path} region={region} locales={locales} />
     <SiteFooter ui={ui} lang={lang} generatedAt={payload?.generatedAt} />
     <SigninDialog ui={ui} />
+    <LoadingFeedback ui={ui} />
     <ShellScripts />
   </body>
 </html>

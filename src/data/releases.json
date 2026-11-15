@@ -57,6 +57,20 @@
     }
   },
   {
+    "date": "2026-11-15",
+    "example": "/liguria/",
+    "title": {
+      "en": "You can see what is loading, and read something while it does",
+      "it": "Si vede cosa sta caricando, e c’è qualcosa da leggere nell’attesa",
+      "ru": "Видно, что именно загружается, и есть что почитать, пока ждёте"
+    },
+    "body": {
+      "en": "The link, filter or button you pressed now shows that it is working until the page or the list arrives, and a second tap is ignored. When a page takes more than a moment, a short fact about Liguria or a tip about the site appears while you wait — offline too — and pages also open faster on a slow connection.",
+      "it": "Il link, il filtro o il pulsante che hai premuto ora mostra che sta lavorando finché la pagina o la lista non arriva, e un secondo tocco viene ignorato. Quando una pagina tarda un attimo, compare una curiosità sulla Liguria o un consiglio sul sito — anche offline — e le pagine si aprono più in fretta con una connessione lenta.",
+      "ru": "Ссылка, фильтр или кнопка, которую вы нажали, теперь показывает, что идёт загрузка, пока страница или список не появятся, а повторное нажатие игнорируется. Если страница грузится дольше мгновения, появляется короткий факт о Лигурии или совет по сайту — и без сети тоже, — а на медленной связи страницы открываются быстрее."
+    }
+  },
+  {
     "date": "2026-10-31",
     "example": "/liguria/tonight/",
     "title": {
