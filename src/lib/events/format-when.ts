@@ -1,4 +1,5 @@
 import { dateSpan } from './date-span.ts';
+import { eventHour } from './event-hour.ts';
 import type { CompactEvent } from './event-schema.ts';
 
 const present = (value: string | undefined): readonly string[] =>
@@ -6,4 +7,4 @@ const present = (value: string | undefined): readonly string[] =>
 
 /** '04.07–05.07 · 21:00 · Porto Antico' — omits unknown parts (AC-3.1). */
 export const formatWhen = (event: CompactEvent): string =>
-  [dateSpan(event), ...present(event.h), ...present(event.v)].join(' · ');
+  [dateSpan(event), ...present(eventHour(event)), ...present(event.v)].join(' · ');

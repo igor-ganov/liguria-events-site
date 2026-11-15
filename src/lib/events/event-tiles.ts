@@ -1,4 +1,5 @@
 import { durationText } from './duration-text.ts';
+import { eventHour } from './event-hour.ts';
 import { LOCALE_TAG } from '../i18n/locale-tag.ts';
 import { whenTile } from './when-tile.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -30,7 +31,7 @@ const euro = (lang: Locale, amount: number): string =>
  */
 export const eventTiles = ({ event, lang, labels, rating }: Input): readonly EventTile[] => [
   whenTile(event, lang),
-  ...held(event.h, (hour) => ({ key: 'starts', icon: 'clock', value: hour, label: labels.starts })),
+  ...held(eventHour(event), (hour) => ({ key: 'starts', icon: 'clock', value: hour, label: labels.starts })),
   ...held(dayCount(event), (count) => ({ key: 'dates', icon: 'layers', value: String(count), label: labels.dates })),
   ...held(event.du, (minutes) => ({ key: 'duration', icon: 'timer', value: durationText(lang, minutes), label: labels.duration })),
   ...held(event.pr, (amount) => ({ key: 'price', icon: 'euro', value: euro(lang, amount), label: labels.price })),

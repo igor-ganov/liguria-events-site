@@ -1,5 +1,6 @@
 import { CATEGORIES } from './categories.ts';
 import { nextIsoDay } from '../calendar/next-iso-day.ts';
+import { narrowOccurrences } from './narrow-occurrences.ts';
 import { occursBetween } from './occurs-between.ts';
 import { quickNarrow } from '../quick/quick-narrow.ts';
 import type { CompactEvent } from './event-schema.ts';
@@ -11,14 +12,17 @@ export type Facet = Readonly<{
   narrow: (events: readonly CompactEvent[], today: string) => readonly CompactEvent[];
 }>;
 
-const onDay = (day: string) => (events: readonly CompactEvent[]) => events.filter(occursBetween(day, day));
+// A container keeps only its nights on that day: the page for today must not
+// list next week's night of a run whose first night is today.
+const onDay = (day: string, today: string) => (events: readonly CompactEvent[]) =>
+  events.flatMap(narrowOccurrences(occursBetween(day, day), today));
 
 // Date windows go through occursBetween, the predicate the feed, the map and
 // the calendar already share — so a festival with no evening today does not
 // turn up under "today" just because its advertised run covers the date.
 export const FACETS: readonly Facet[] = [
-  { slug: 'today', narrow: (events, today) => onDay(today)(events) },
-  { slug: 'tomorrow', narrow: (events, today) => onDay(nextIsoDay(today))(events) },
+  { slug: 'today', narrow: (events, today) => onDay(today, today)(events) },
+  { slug: 'tomorrow', narrow: (events, today) => onDay(nextIsoDay(today), today)(events) },
   // The weekend is the quick filter's: from Friday evening, so the chip and the
   // page it leads to show the same events (QuickFilters.astro).
   { slug: 'this-weekend', narrow: quickNarrow('weekend') },

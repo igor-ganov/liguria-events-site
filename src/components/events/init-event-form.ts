@@ -2,16 +2,17 @@
 // /api/events/image first, then on submit navigates to the event's own page —
 // which, for a fresh submission, shows the author their pending event.
 import { isDefined } from '../../lib/is-defined.ts';
+import { isoToday } from '../../lib/calendar/iso-today.ts';
 import { eventFormMode } from './event-form-mode.ts';
 import { restoreDraft } from './restore-draft.ts';
 import { wireEventSubmit } from './wire-event-submit.ts';
 import { wireImageUpload } from './wire-image-upload.ts';
 import { wireProgramme } from './wire-programme.ts';
 
-// A build pinned to a fixed "today" (the dev/preview builds) must not date the
-// form from the visitor's clock, or the two disagree.
-const today = (): string =>
-  import.meta.env.PUBLIC_FIXED_TODAY ?? new Date().toISOString().slice(0, 10);
+// Today in Rome, where every event happens (or the pinned day of a dev
+// build). The UTC date was a day behind from midnight to one or two in the
+// morning, whatever the visitor's own zone.
+const today = (): string => isoToday();
 
 // Only an untouched start date is dated for the author — an edit keeps its own.
 const fillStart = (form: HTMLFormElement): void => {

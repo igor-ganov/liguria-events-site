@@ -1,6 +1,7 @@
 import { applyFeedFilter } from './apply-feed-filter.ts';
 import { buildFeedIndex } from './build-feed-index.ts';
 import { decodeEventList } from '../../lib/events/decode-event-list.ts';
+import { expandSessions } from '../../lib/events/expand-sessions.ts';
 import { feedIds } from './feed-ids.ts';
 import { insertFeedEvent } from './insert-feed-event.ts';
 import { loadFeedTail } from './load-feed-tail.ts';
@@ -27,7 +28,11 @@ const sorted = (extra: readonly CompactEvent[], held: ReadonlySet<string | undef
 const merge = (context: FeedContext, { fresh, kept }: Late): void =>
   wholeFeed(context.lang)(() => {
     kept.forEach((event) => replaceFeedEvent(context, event));
-    fresh.forEach((event) => insertFeedEvent(context, event));
+    // A fresh container is laid out like the build lays it out: one card per
+    // upcoming night, under its own day and with that night's hour. Inserted
+    // whole, it read as one card spanning its run with the umbrella's hour, and
+    // a group meeting on Tuesdays passed for Sunday evening.
+    expandSessions(fresh, context.today).forEach((event) => insertFeedEvent(context, event));
     buildFeedIndex(context.lang);
     runFeedSearch();
     applyFeedFilter();
