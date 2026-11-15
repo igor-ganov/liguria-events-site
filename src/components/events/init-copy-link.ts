@@ -1,3 +1,4 @@
+import { bindOnce } from '../../lib/dom/bind-once.ts';
 import { branch } from '../../lib/branch.ts';
 import { COPY_LINK } from './copy-link-selectors.ts';
 
@@ -28,7 +29,8 @@ const copy = async (button: Element): Promise<void> => {
   );
 };
 
+// Once per button: a page brought back as it was left keeps its listeners.
 export const initCopyLink = (): void =>
   document
-    .querySelectorAll(COPY_LINK.buttonSelector)
-    .forEach((node) => node.addEventListener('click', () => void copy(node)));
+    .querySelectorAll<HTMLElement>(COPY_LINK.buttonSelector)
+    .forEach((node) => bindOnce(node, 'copyBound', (button) => button.addEventListener('click', () => void copy(button))));

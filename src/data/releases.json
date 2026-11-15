@@ -2,6 +2,20 @@
   {
     "date": "2026-11-15",
     "example": "/liguria/",
+    "title": {
+      "en": "Back to the feed brings it back as you left it",
+      "it": "Tornando indietro, il feed è come l’avevi lasciato",
+      "ru": "Назад в ленту — и она такая же, какой вы её оставили"
+    },
+    "body": {
+      "en": "Open an event from the feed and press Back: the feed is there at once, with the same filters, sort and search, the same days folded and at the same place on the page. It used to show the list unsorted or from the top first, and then jump.",
+      "it": "Apri un evento dal feed e torna indietro: il feed è subito lì, con gli stessi filtri, lo stesso ordine e la stessa ricerca, gli stessi giorni chiusi e allo stesso punto della pagina. Prima mostrava l’elenco non ordinato o dall’inizio, e poi saltava.",
+      "ru": "Откройте событие из ленты и нажмите «Назад»: лента сразу на месте — с теми же фильтрами, сортировкой и поиском, теми же свёрнутыми днями и на том же месте страницы. Раньше сначала появлялся несортированный список или его начало, а потом страница прыгала."
+    }
+  },
+  {
+    "date": "2026-11-15",
+    "example": "/liguria/",
     "roadmap": "search-by-meaning",
     "title": {
       "en": "Search suggests events and venues by what you mean",
