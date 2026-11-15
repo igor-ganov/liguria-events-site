@@ -16,6 +16,7 @@ export const SHEETS = [
   'feed-days.css',
   'feed-days-shut.css',
   'event-page.css',
+  'event-thread.css',
   'tickets.css',
   'picks.css',
 ] as const;

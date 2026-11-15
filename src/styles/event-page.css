@@ -3,9 +3,9 @@
    button, the chips on the photograph) undo a drawn frame that is right on
    paper and wrong on a picture.
 
-   The page reads top to bottom as: the photograph with the name on it, the
-   facts as figures, what you can do, when exactly, where — and only then the
-   prose. Everything above the prose is meant to be taken in without reading. */
+   The page reads top to bottom as the photograph with the name on it, then
+   the feed's thread running down the page: every fact is a knot on it — when,
+   where, how much — and nothing is a boxed card. */
 
 /* ── the cover ───────────────────────────────────────────────────── */
 .event-cover {
@@ -39,7 +39,7 @@
 }
 /* The credit moves to the top corner: the bottom belongs to the name. */
 .event-cover .event-hero figcaption {
-  top: 0.6rem;
+  top: 2.9rem;
   right: 0.6rem;
   bottom: auto;
 }
@@ -47,7 +47,7 @@
   position: absolute;
   top: 0.6rem;
   left: 0.7rem;
-  right: 40%;
+  right: 3.2rem;
   margin: 0;
   display: flex;
   flex-wrap: wrap;
@@ -60,7 +60,7 @@
   margin: 0;
   padding: var(--fade) 1rem 1rem;
   color: #fff;
-  font-size: clamp(1.6rem, 6vw, 2.3rem);
+  font-size: clamp(1.4rem, 5.6vw, 2.3rem);
   font-weight: 500;
   line-height: 1.04;
   text-wrap: balance;
@@ -96,129 +96,15 @@
   translate: 0 -38%;
 }
 
-/* ── the facts, as figures ───────────────────────────────────────── */
-.event-tiles {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border-bottom: 1px solid var(--line);
-}
-.event-tiles li {
-  display: grid;
-  justify-items: center;
-  gap: 0.1rem;
-  min-width: 0;
-  padding: 0.8rem 0.3rem 0.7rem;
-  text-align: center;
-  background: var(--bg);
-}
-.event-tiles svg {
-  color: var(--accent);
-}
-.event-tiles b {
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.event-tiles span {
-  font-size: 0.66rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-
-/* ── what you can do ─────────────────────────────────────────────── */
-.event-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  gap: 0.3rem;
-  padding: 0.9rem 0;
-  border-bottom: 1px solid var(--line);
-}
-.event-actions .event-action,
-.event-actions .share-button {
-  display: grid;
-  justify-items: center;
-  gap: 0.3rem;
-  min-width: 3.8rem;
-  margin: 0;
-  padding: 0.2rem;
-  border: 0;
-  border-image: none;
-  border-radius: 0.6rem;
-  background: none;
-  box-shadow: none;
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.72rem;
-  text-decoration: none;
-  cursor: pointer;
-}
-.event-actions .share-button::after {
-  display: none;
-}
-.event-action-ring,
-.event-actions .share-button > svg {
-  box-sizing: border-box;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  background: var(--filo-velo);
-  color: var(--accent);
-}
-.event-action-ring {
-  display: grid;
-  place-items: center;
-}
-.event-actions .share-button > svg {
-  padding: 0.8rem;
-}
-.event-action--lead .event-action-ring {
-  background: var(--accent);
-  color: var(--on-accent);
-}
-.event-actions .event-fav svg {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.9;
-}
-.event-actions .event-fav[aria-pressed='true'] {
-  color: var(--ink);
-}
-.event-actions .event-fav[aria-pressed='true'] .event-action-ring {
-  background: hsl(350 78% 52%);
-  color: #fff;
-}
-.event-actions .event-fav[aria-pressed='true'] svg {
-  fill: currentColor;
-}
-.event-actions :is(.event-action, .share-button):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* On a phone the photograph runs edge to edge, as it did in the feed. */
 @media (max-width: 43.99rem) {
   .event-cover {
     width: auto;
     margin-inline: calc(-1 * var(--page-pad));
     border-radius: 0;
+    aspect-ratio: 16 / 9;
+    min-height: 12.5rem;
   }
-}
-
-/* A figure too long for its tile (a run across months) is set smaller rather
-   than cut: a date missing its last digits is worse than a small one. */
-.event-tiles li[data-long]:not([data-long='false']) b {
-  font-size: 0.92rem;
-  line-height: 1.45;
 }
 
 /* ── the photographs: the cover is the gallery ───────────────────────
@@ -291,215 +177,3 @@
   }
 }
 
-/* ── the page as a board of widgets ──────────────────────────────────
-   Under the facts and the buttons everything is the same piece: a card with
-   a glyph and a small name. On a phone they stack; with room they stand two
-   or three across, and the ones that are strips take the whole row. */
-.event-page {
-  max-width: 62rem;
-  margin: 0 auto;
-}
-.event-lead {
-  max-width: 44rem;
-  margin: 1.1rem 0 0;
-}
-.event-widgets {
-  columns: 2 22rem;
-  column-gap: 0.7rem;
-  margin: 1.1rem 0 0;
-}
-/* Columns, so each card is as tall as what it holds and the next one starts
-   right under it: no card is stretched to its neighbour, and none stands
-   beside a hole. A strip takes the whole width and the columns start again
-   under it. */
-.event-widgets > * {
-  break-inside: avoid;
-  margin-bottom: 0.7rem;
-}
-.event-widgets > [data-wide]:not([data-wide='false']) {
-  column-span: all;
-}
-/* The same glyph box a widget has, on the one block that is not built as one;
-   on the pages of places, where it stands alone, it keeps its plain heading. */
-.place-reviews .widget-ic {
-  display: none;
-}
-.event-widgets > .place-reviews .widget-ic {
-  display: grid;
-}
-.widget,
-.event-widgets > .place-reviews {
-  min-width: 0;
-  margin: 0 0 0.7rem;
-  padding: 0.85rem 0.9rem 0.95rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-.widget-h,
-.event-widgets > .place-reviews > h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0 0 0.7rem;
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-.widget-ic {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 0.5rem;
-  background: var(--filo-velo);
-  color: var(--accent);
-}
-.widget > p {
-  margin: 0 0 0.6rem;
-  line-height: 1.55;
-}
-.widget .desc-list {
-  margin: 0 0 0.6rem;
-}
-.widget > :last-child,
-.widget-fold > :last-child {
-  margin-bottom: 0;
-}
-.widget-chips {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-.widget-chips .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-}
-.widget-small {
-  margin: 0 0 0.65rem;
-  font-size: 0.76rem;
-  line-height: 1.4;
-  color: var(--ink-2);
-}
-.widget-fold {
-  margin-top: 0.7rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--line);
-}
-.widget-fold summary {
-  margin-bottom: 0.6rem;
-  font-size: 0.86rem;
-  font-weight: 500;
-  color: var(--accent);
-  cursor: pointer;
-}
-.widget-fold:not([open]) summary {
-  margin-bottom: 0;
-}
-
-/* ── when exactly: the programme as calendar leaves ──────────────── */
-.event-leaves {
-  list-style: none;
-  margin: 0;
-  padding: 0 0 0.3rem;
-  display: flex;
-  gap: 0.4rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-.event-leaves li {
-  flex: none;
-  display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: 0.15rem;
-  min-width: 4rem;
-  max-width: 9.5rem;
-  padding: 0.4rem 0.55rem 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: var(--bg);
-  text-align: center;
-}
-.event-leaves time {
-  display: grid;
-  justify-items: center;
-}
-.event-leaves small {
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-.event-leaves b {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 500;
-  line-height: 1.05;
-}
-.leaf-times {
-  font-size: 0.74rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent);
-}
-.leaf-title {
-  font-size: 0.72rem;
-  line-height: 1.2;
-  color: var(--ink-2);
-}
-
-/* ── where: the venue, the address, the map — once ───────────────── */
-.widget-place {
-  display: grid;
-  gap: 0.1rem;
-  font-style: normal;
-}
-.widget-place b {
-  font-weight: 500;
-}
-/* The venue's name leads to its page; underlined, so it does not read as a
-   link by its colour alone. */
-.widget-place a {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-}
-.widget-place span {
-  font-size: 0.86rem;
-  color: var(--ink-2);
-}
-.widget .event-map {
-  margin: 0.7rem 0;
-  border-radius: 0.75rem;
-  box-shadow: none;
-}
-.widget .event-map iframe {
-  height: 12rem;
-}
-
-/* ── what else is on, at the venue and in town: the feed's own tiles ─ */
-.event-at-venue .picks-strip,
-.event-also .picks-strip {
-  margin: 0 0 0.7rem;
-  padding: 0 0 0.3rem;
-}
-
-/* ── where it comes from, and the two ways to write to us ────────── */
-.event-sources .event-feedback {
-  margin: 0.7rem 0 0;
-}
-.event-widgets > .place-reviews .rv-signin {
-  margin: 0 0 0.6rem;
-}

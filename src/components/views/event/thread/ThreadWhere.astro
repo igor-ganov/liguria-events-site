@@ -1,0 +1,50 @@
+---
+import ShareButton from '../../../share/ShareButton.astro';
+import { placeLines } from '../../../../lib/events/thread/place-lines.ts';
+import { venueLink } from '../../../../lib/events/venue-link.ts';
+import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
+import type { DescriptionPart } from '../../../../lib/description/description-outline.ts';
+import type { EventContacts } from '../../../../lib/events/d1-published.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The second knot: the venue — a link to its own page when it is a place with
+// one — the address under it, how to get there when the event wrote more than
+// the address, and what a reader does next as plain words: directions, the
+// website, a call, share. No map frame: a link to a map that opens is better
+// than a box that may stay empty.
+type Props = Readonly<{
+  lang: Locale;
+  event: CompactEvent;
+  address: string | undefined;
+  contacts: EventContacts | undefined;
+  mapSearchUrl: string | undefined;
+  way: DescriptionPart | undefined;
+  title: string;
+  ui: Ui;
+}>;
+const { lang, event, address, contacts, mapSearchUrl, way, title, ui } = Astro.props;
+const page = venueLink(lang)(event);
+const { street, town } = placeLines(event, address);
+const phone = contacts?.phone?.replace(/\s+/g, '');
+---
+
+<li class="ev-knot ev-knot--lead ev-where">
+  {event.v !== undefined && (
+    <h2 class="ev-venue">
+      {page !== undefined && <a href={page}>{event.v}</a>}
+      {page === undefined && event.v}
+    </h2>
+  )}
+  <address class="ev-addr">
+    {street !== undefined && <span>{street}</span>}
+    {town !== undefined && <b>{town}</b>}
+  </address>
+  {way !== undefined && <section class="ev-way" set:html={way.html} />}
+  <p class="ev-links">
+    {mapSearchUrl && <a href={mapSearchUrl} target="_blank" rel="noopener">{ui.eventPage.directions}<span aria-hidden="true"> ↗</span></a>}
+    {contacts?.website && <a href={contacts.website} target="_blank" rel="noopener">{ui.eventPage.website}<span aria-hidden="true"> ↗</span></a>}
+    {phone && <a href={`tel:${phone}`}>{ui.eventPage.call}</a>}
+    <ShareButton ui={ui} title={title} />
+  </p>
+</li>

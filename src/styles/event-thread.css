@@ -1,0 +1,420 @@
+/* ══ The event page as a thread ═════════════════════════════════════
+   Under the photograph the feed's thread runs down the page, and every fact
+   hangs on it as a knot: when, where, how much, then what the event says, what
+   else is on, the reviews. Nothing is a boxed card; the small print closes it.
+   Loaded after event-page.css. */
+
+/* The heart keeps the event, in the corner of the photograph as on the feed
+   card; large enough for a thumb. */
+.event-cover .fav-btn {
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.event-page {
+  max-width: 44rem;
+  margin: 0 auto;
+  /* Clear of the menu button that floats over the bottom corner of every page. */
+  padding-bottom: 2.5rem;
+}
+
+/* ── the thread ────────────────────────────────────────────────────
+   One drawn line; the first two knots — when and where — are filled, the
+   rest are open rings. */
+.ev-thread {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0 0 0 1.7rem;
+  background: var(--t-corda) repeat-y 2px 0 / 14px 240px;
+}
+.ev-knot {
+  position: relative;
+  padding: 0 0 1.15rem;
+}
+.ev-knot::before {
+  content: '';
+  position: absolute;
+  left: calc(-1.7rem + 3px);
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  background: var(--t-nodo) no-repeat center / 100% 100%;
+}
+.ev-knot--lead::before {
+  left: calc(-1.7rem + 2px);
+  width: 14px;
+  height: 14px;
+  background-image: var(--t-nodo-nostra);
+}
+.ev-thread time {
+  font-variant-numeric: tabular-nums;
+}
+.ev-day {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.2rem 0.55rem;
+  margin: 0 0 0.15rem;
+  font: 600 0.95rem/1.4 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tenue);
+}
+.ev-pill {
+  display: inline-block;
+  padding: 0.2rem 0.85rem;
+  font: 500 0.72rem/1.5 var(--font-body);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  white-space: nowrap;
+  color: var(--filo);
+  border: 0;
+  border-image: var(--t-pillola-filo) 7 / 7px / 0 stretch;
+}
+.ev-pill--hot {
+  color: var(--sosta);
+  border-image-source: var(--t-pillola-sosta);
+}
+.ev-hour {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin: 0;
+  font: 500 2.5rem/1.05 var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--testo);
+}
+.ev-arrow {
+  margin: 0 0.25em;
+  font-weight: 400;
+  color: var(--tenue);
+}
+.ev-dur {
+  margin-left: 0.6rem;
+  font: 400 0.9rem/1.3 var(--font-body);
+  letter-spacing: 0;
+  color: var(--tenue);
+}
+.ev-sub {
+  margin: 0.1rem 0 0;
+  font-size: 0.88rem;
+  color: var(--tenue);
+}
+.ev-dates {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.8rem;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  font-size: 0.92rem;
+}
+.ev-dates .is-next {
+  padding: 0.05rem 0.8rem;
+  font-weight: 600;
+  color: var(--filo);
+  border-image: var(--t-pillola-filo) 7 / 7px / 0 stretch;
+}
+.ev-more {
+  color: var(--tenue);
+}
+
+/* ── the run as a wall calendar: crossed, filled, ringed ───────── */
+.ev-calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.6rem, 1fr));
+  gap: 0.7rem;
+  margin: 0.8rem 0 0;
+}
+.ev-month {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.7rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ev-month caption {
+  padding-bottom: 0.2rem;
+  text-align: left;
+  font: 500 0.9rem var(--font-display);
+  text-transform: capitalize;
+  color: var(--testo);
+}
+.ev-month th {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--tenue);
+}
+.ev-month td {
+  padding: 0.14rem 0;
+  color: var(--tenue);
+}
+.ev-month td[data-mark='on'] {
+  font-weight: 600;
+  color: var(--testo);
+  background: var(--t-cerchio) no-repeat center / 1.6em 1.6em;
+}
+.ev-month td[data-mark='next'] {
+  font-weight: 700;
+  color: var(--carta);
+  background: var(--t-cerchio-sosta) no-repeat center / 1.7em 1.7em;
+}
+.ev-month td[data-mark='gone'] {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* ── where ─────────────────────────────────────────────────────── */
+.ev-venue {
+  margin: 0 0 0.15rem;
+  font: 500 1.35rem/1.2 var(--font-display);
+}
+.ev-venue a,
+.ev-links a,
+.ev-links .share-button {
+  padding-bottom: 3px;
+  color: var(--filo);
+  text-decoration: none;
+  background: var(--t-riga-filo) repeat-x left bottom / 160px 4px;
+}
+.ev-addr {
+  display: grid;
+  font-style: normal;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  color: var(--testo);
+}
+.ev-addr b {
+  font-weight: 600;
+}
+.ev-way {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  color: var(--tenue);
+}
+.ev-way > :last-child {
+  margin-bottom: 0;
+}
+.ev-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.2rem;
+  margin: 0.45rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+/* Share, said as a word like the links beside it: the drawn frame and the
+   glyph of the button are for the feed. */
+.ev-links .share-button {
+  display: inline;
+  margin: 0;
+  padding: 0 0 3px;
+  border: 0;
+  border-image: none;
+  border-radius: 0;
+  box-shadow: none;
+  font: inherit;
+  cursor: pointer;
+}
+.ev-links .share-button > svg,
+.ev-links .share-button::after {
+  display: none;
+}
+
+/* ── how much, and what the event says ─────────────────────────── */
+.ev-price p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+.ev-price a {
+  color: var(--filo);
+}
+.ev-free {
+  color: var(--gratis);
+}
+.ev-lead > p {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+.ev-note {
+  margin: 0 0 0.35rem;
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+/* A run-in label: the name of the part in italics, its words on the line. */
+.ev-note > h3 {
+  display: inline;
+  margin: 0 0.4rem 0 0;
+  font: italic 400 0.93rem var(--font-display);
+  color: var(--tenue);
+}
+.ev-note > h3 + p {
+  display: inline;
+}
+.ev-note > p {
+  margin: 0 0 0.3rem;
+}
+/* A list right under the label runs on after it, its items split by semicolons. */
+.ev-note > h3 + .desc-list {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ev-note > h3 + .desc-list > li {
+  display: inline;
+  padding: 0;
+}
+.ev-note > h3 + .desc-list > li::before {
+  content: none;
+}
+.ev-note > h3 + .desc-list > li + li::before {
+  content: '; ';
+  position: static;
+  width: auto;
+  height: auto;
+  background: none;
+}
+.ev-note .desc-list,
+.ev-sessions {
+  margin: 0.2rem 0 0.3rem;
+  padding-left: 1.1rem;
+}
+.ev-fold summary {
+  font-size: 0.86rem;
+  color: var(--filo);
+  cursor: pointer;
+}
+
+/* ── what else is on: a short list, not a strip of cards ───────── */
+.ev-also-list {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0;
+  padding: 0;
+}
+.ev-also-item {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr;
+  gap: 0.65rem;
+  align-items: center;
+  font-size: 0.92rem;
+  line-height: 1.3;
+  color: var(--testo);
+  text-decoration: none;
+}
+.ev-also-item:hover > span:last-child,
+.ev-also-item:focus-visible > span:last-child {
+  text-decoration: underline;
+}
+.ev-also-item img,
+.ev-also-blank {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+  background: var(--filo-velo);
+}
+.ev-also-item small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--tenue);
+}
+.ev-onward {
+  margin: 0.45rem 0 0;
+  font-size: 0.88rem;
+}
+.ev-onward a {
+  color: var(--filo);
+}
+
+/* ── the small knots: other years, reviews ─────────────────────── */
+.ev-knot--small p,
+.ev-reviews {
+  font-size: 0.86rem;
+  color: var(--tenue);
+}
+.ev-knot--small p {
+  margin: 0;
+}
+.ev-knot--small a {
+  color: var(--filo);
+}
+/* The reviews say themselves in one line until there are some to read. */
+.ev-reviews .place-reviews {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.4rem;
+  margin: 0;
+}
+.ev-reviews .rv-none {
+  order: 1;
+}
+.ev-reviews .rv-signin {
+  order: 2;
+}
+.ev-reviews .rv-form,
+.ev-reviews .rv-list {
+  order: 3;
+  flex-basis: 100%;
+}
+.ev-reviews .place-reviews > h2 {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin: 0;
+  font: italic 400 0.93rem var(--font-display);
+  color: var(--tenue);
+}
+.ev-reviews .widget-ic {
+  display: none;
+}
+.ev-reviews .rv-none {
+  margin: 0;
+}
+.ev-reviews .rv-signin {
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-image: none;
+  background: none;
+  box-shadow: none;
+  color: var(--filo);
+  font: inherit;
+  text-decoration: underline;
+}
+.ev-reviews .rv-form,
+.ev-reviews .rv-list {
+  margin-top: 0.5rem;
+}
+
+/* ── the small print ───────────────────────────────────────────── */
+.ev-foot {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--tenue);
+  background: var(--t-riga-forte) repeat-x left top / 160px 4px;
+}
+.ev-foot p,
+.ev-foot .event-feedback {
+  display: block;
+  margin: 0 0 0.4rem;
+}
+.ev-foot a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.ev-thread a:focus-visible,
+.ev-thread button:focus-visible,
+.ev-foot a:focus-visible {
+  outline: 2px solid var(--filo);
+  outline-offset: 2px;
+}

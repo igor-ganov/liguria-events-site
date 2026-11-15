@@ -1,0 +1,53 @@
+---
+import type { DescriptionPart } from '../../../../lib/description/description-outline.ts';
+import type { ProgrammeLeaf } from '../../../../lib/events/programme-leaves.ts';
+
+// What the event says of itself: the lead as prose, then every part it wrote
+// under a heading of its own as a run-in note — the name in italics, the words
+// on the same line. Sessions with names of their own are listed under
+// "programme"; the whole written programme folds under them.
+type Props = Readonly<{
+  lead: string;
+  notes: readonly DescriptionPart[];
+  leaves: readonly ProgrammeLeaf[];
+  written: DescriptionPart | undefined;
+  labels: Readonly<{ programme: string; whole: string }>;
+}>;
+const { lead, notes, leaves, written, labels } = Astro.props;
+const shown = leaves.length > 0 || written !== undefined;
+---
+
+{(lead !== '' || notes.length > 0 || shown) && (
+  <li class="ev-knot ev-text">
+    {lead !== '' && <section class="ev-lead desc-lead" set:html={lead} />}
+    {notes.map((note) => (
+      <section class="ev-note" data-note={note.type}>
+        <h3>{note.label}</h3>
+        <Fragment set:html={note.html} />
+      </section>
+    ))}
+    {shown && (
+      <section class="ev-note ev-programme" data-note="programme">
+        <h3>{labels.programme}</h3>
+        {leaves.length > 0 && (
+        <ol class="ev-sessions">
+          {leaves.map((leaf) => (
+            <li>
+              <time datetime={leaf.iso}>{leaf.weekday} {leaf.day} {leaf.month}</time>
+              {leaf.times.length > 0 && <span> · {leaf.times.join(', ')}</span>}
+              {leaf.title !== undefined && <span> — {leaf.title}</span>}
+            </li>
+          ))}
+        </ol>
+        )}
+        {written !== undefined && leaves.length === 0 && <Fragment set:html={written.html} />}
+        {written !== undefined && leaves.length > 0 && (
+          <details class="ev-fold">
+            <summary>{labels.whole}</summary>
+            <Fragment set:html={written.html} />
+          </details>
+        )}
+      </section>
+    )}
+  </li>
+)}

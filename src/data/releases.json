@@ -1,6 +1,20 @@
 [
   {
     "date": "2026-11-15",
+    "example": "/event/1feb72e57808/",
+    "title": {
+      "en": "An event page reads down one thread: when, where, how much",
+      "it": "La pagina di un evento si legge lungo un filo: quando, dove, quanto",
+      "ru": "Страница события читается по одной нити: когда, где, сколько"
+    },
+    "body": {
+      "en": "Under the photograph the day and the hour come first, then the venue — a link to its own page — with directions and share as plain words, then the price. A weekly event shows how many meetings are left and a month calendar with past ones crossed out and the next one filled. The stack of boxes, the round buttons and the empty map are gone.",
+      "it": "Sotto la foto vengono prima il giorno e l’ora, poi il luogo — un link alla sua pagina — con indicazioni e condivisione in parole semplici, poi il prezzo. Un evento settimanale dice quanti incontri restano e mostra un calendario del mese con quelli passati barrati e il prossimo evidenziato. Spariscono la pila di riquadri, i pulsanti rotondi e la mappa vuota.",
+      "ru": "Под фотографией сначала день и час, затем место — ссылка на его страницу — с маршрутом и «поделиться» простыми словами, затем цена. Еженедельное событие показывает, сколько встреч осталось, и календарь месяца: прошедшие зачёркнуты, ближайшая выделена. Стопка карточек, круглые кнопки и пустая карта убраны."
+    }
+  },
+  {
+    "date": "2026-11-15",
     "example": "/liguria/",
     "title": {
       "en": "Back to the feed brings it back as you left it",

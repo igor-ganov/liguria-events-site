@@ -1,0 +1,39 @@
+---
+import { cellMark } from '../../../../lib/events/thread/cell-mark.ts';
+import { dayText } from '../../../../lib/events/thread/day-text.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { CalendarMonth } from '../../../../lib/events/thread/calendar-types.ts';
+
+// The run as a wall calendar, borrowed from the timetable sketch: the sessions
+// gone are crossed out, the next one is filled, the ones to come are ringed.
+// Weekday initials come from the page's language, Monday first: the days
+// listed are the week of Monday 2 November 2026, any week would do.
+type Props = Readonly<{ lang: Locale; months: readonly CalendarMonth[]; label: string; next: string }>;
+const { lang, months, label, next } = Astro.props;
+const MONDAYS = ['2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-07', '2026-11-08'];
+const initials = MONDAYS.map(dayText(lang, { weekday: 'narrow' }));
+const monthName = (month: string): string => dayText(lang, { month: 'long' })(`${month}-01`);
+---
+
+<section class="ev-calendar" aria-label={label}>
+  {months.map((month) => (
+    <table class="ev-month">
+      <caption>{monthName(month.month)}</caption>
+      <thead>
+        <tr>{initials.map((initial) => <th scope="col" abbr={initial}>{initial}</th>)}</tr>
+      </thead>
+      <tbody>
+        {month.weeks.map((week) => (
+          <tr>
+            {week.map((cell) => (
+              <td data-mark={cellMark(cell)}>
+                {cell.kind === 'day' && <time datetime={cell.iso}>{cell.day}</time>}
+                {cell.kind === 'day' && cell.mark === 'next' && <span class="visually-hidden">{next}</span>}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ))}
+</section>

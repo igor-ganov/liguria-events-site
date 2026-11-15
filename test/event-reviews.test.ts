@@ -5,7 +5,6 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { eventJsonLd } from '../src/lib/events/event-jsonld.ts';
-import { eventTiles } from '../src/lib/events/event-tiles.ts';
 import { isReviewSubject } from '../src/lib/places/is-review-subject.ts';
 import { reviewDenial } from '../src/lib/places/review-denial.ts';
 import { reviewSubjectOf } from '../src/lib/events/review-subject-of.ts';
@@ -44,20 +43,6 @@ describe('a review of an event', () => {
     assert.equal(reviewDenial({ ...review, place: 'evt:nope' })?.status, 400);
     assert.equal(reviewDenial({ ...review, region: 'atlantis' })?.status, 400);
     assert.equal(reviewDenial({ ...review, rating: 6 })?.status, 400);
-  });
-});
-
-const labels = { starts: 'starts', dates: 'dates', duration: 'lasts', price: 'from', reviews: 'Reviews' };
-
-describe('the rating tile', () => {
-  test('shows the average over the word for what it is', () => {
-    const tile = eventTiles({ event, lang: 'en', labels, rating: { avg: 4.6, count: 12 } }).find((item) => item.key === 'rating');
-    assert.deepEqual(tile, { key: 'rating', icon: 'star', value: '4.6', label: 'Reviews · 12' });
-  });
-
-  test('does not exist until somebody has rated', () => {
-    assert.equal(eventTiles({ event, lang: 'en', labels, rating: { avg: 0, count: 0 } }).some((item) => item.key === 'rating'), false);
-    assert.equal(eventTiles({ event, lang: 'en', labels }).some((item) => item.key === 'rating'), false);
   });
 });
 

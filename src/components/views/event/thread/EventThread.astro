@@ -1,0 +1,56 @@
+---
+import PlaceReviews from '../../place/PlaceReviews.astro';
+import ThreadAlso from './ThreadAlso.astro';
+import ThreadEditions from './ThreadEditions.astro';
+import ThreadFoot from './ThreadFoot.astro';
+import ThreadPrice from './ThreadPrice.astro';
+import ThreadText from './ThreadText.astro';
+import ThreadWhen from './ThreadWhen.astro';
+import ThreadWhere from './ThreadWhere.astro';
+import { alsoOn } from '../../../../lib/events/also-on.ts';
+import { crawlerAddress } from '../../../../lib/events/crawler-address.ts';
+import { descriptionOutline } from '../../../../lib/description/description-outline.ts';
+import { editionsOf } from '../../../../lib/events/editions-of.ts';
+import { eventWidgets } from '../../../../lib/events/event-widgets.ts';
+import { isoToday } from '../../../../lib/calendar/iso-today.ts';
+import { listedLeaves } from '../../../../lib/events/thread/listed-leaves.ts';
+import { programmeLeaves } from '../../../../lib/events/programme-leaves.ts';
+import { threadLabelsOf } from '../../../../lib/events/thread/thread-labels-of.ts';
+import { threadWhen } from '../../../../lib/events/thread/thread-when.ts';
+import { upcomingLeaves } from '../../../../lib/events/upcoming-leaves.ts';
+import { townOnward } from '../../../../lib/events/thread/town-onward.ts';
+import { venueLink } from '../../../../lib/events/venue-link.ts';
+import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
+import type { EventContacts } from '../../../../lib/events/d1-published.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { NamedLink } from '../../../../lib/events/event-links.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The page under the photograph, as the feed's thread running down it: every
+// fact is a knot — when, where, how much — then what the event says, what else
+// is on, and the reviews; the small print closes it. Nothing is a boxed card.
+type View = Readonly<{ region: string; title: string; desc: string; links: readonly NamedLink[]; tickets: string | undefined; mapSearchUrl: string | undefined }>;
+type Props = Readonly<{ lang: Locale; event: CompactEvent; contacts: EventContacts | undefined; view: View; subject: string; ui: Ui }>;
+const { lang, event, contacts, view, subject, ui } = Astro.props;
+const today = isoToday();
+const when = threadWhen(lang, threadLabelsOf(ui))(event, today);
+const leaves = listedLeaves(upcomingLeaves(programmeLeaves(event, lang), today), when.calendar.length > 0);
+const address = contacts?.address ?? crawlerAddress(event, contacts?.address);
+const outline = descriptionOutline(view.desc);
+const parts = eventWidgets({ parts: outline.parts, dated: leaves.length > 0, place: [event.v, address].filter((line): line is string => line !== undefined) });
+const [editions, also] = await Promise.all([editionsOf(event, Astro.locals.runtime.env.DB), alsoOn(event, today)]);
+const venuePage = venueLink(lang)(event);
+const venueName = event.v ?? '';
+---
+
+<ol class="ev-thread">
+  <ThreadWhen lang={lang} when={when} ui={ui} />
+  <ThreadWhere lang={lang} event={event} address={address} contacts={contacts} mapSearchUrl={view.mapSearchUrl} way={parts.way} title={view.title} ui={ui} />
+  <ThreadPrice lang={lang} event={event} tickets={view.tickets} ui={ui} />
+  <ThreadText lead={outline.lead} notes={parts.cards} leaves={leaves} written={parts.programme} labels={{ programme: ui.eventPage.programme, whole: ui.eventPage.fullProgramme }} />
+  <ThreadAlso lang={lang} kind="event-at-venue" heading={ui.headings.alsoAtVenue.replace('{place}', venueName)} events={also.venue.shown.slice(0, 4)} onward={[venuePage].filter((href): href is string => href !== undefined && also.venue.shown.length > 0).map((href) => ({ href, label: ui.eventPage.venuePage.replace('{place}', venueName) })).at(0)} />
+  <ThreadAlso lang={lang} kind="event-also" heading={ui.headings.alsoHere.replace('{place}', townOnward(lang, event, ui).place)} events={also.town.slice(0, 4)} onward={townOnward(lang, event, ui).onward} />
+  <ThreadEditions lang={lang} heading={ui.headings.editions} editions={editions} />
+  <li class="ev-knot ev-knot--small ev-reviews"><PlaceReviews subject={subject} region={view.region} ui={ui} /></li>
+</ol>
+<ThreadFoot lang={lang} region={view.region} event={event} title={view.title} links={view.links} ui={ui} />

@@ -1,0 +1,34 @@
+---
+import EventFeedback from '../EventFeedback.astro';
+import { localizedUrl } from '../../../../lib/i18n/localized-url.ts';
+import { regionUrl } from '../../../../lib/region/region-url.ts';
+import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { NamedLink } from '../../../../lib/events/event-links.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The quiet end of the page: where the words came from, the two ways to write
+// to us about the event, the way back to everything else, and an invitation to
+// make an event of one's own — as small print, not as boxes.
+type Props = Readonly<{ lang: Locale; region: string; event: CompactEvent; title: string; links: readonly NamedLink[]; ui: Ui }>;
+const { lang, region, event, title, links, ui } = Astro.props;
+---
+
+<footer class="ev-foot">
+  <p class="event-sources">
+    {ui.summaryNote}
+    {links.map((link) => (
+      <>
+        {' '}
+        <a href={link.url} target="_blank" rel="noopener">{link.name}<span aria-hidden="true"> ↗</span></a>
+      </>
+    ))}
+  </p>
+  <EventFeedback event={event} title={title} ui={ui} />
+  <p>
+    <a href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
+  </p>
+  <p data-own-event>
+    {ui.contribute.ownEvent} <a href={localizedUrl(lang, 'submit/')}>{ui.contribute.ownEventLink}</a>
+  </p>
+</footer>

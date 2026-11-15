@@ -1,6 +1,7 @@
 ---
 import EventHero from './EventHero.astro';
 import { BRAND_MARK } from '../../../lib/img/brand-mark.ts';
+import { favButtonHtml } from '../../../lib/favorites/fav-button-html.ts';
 import { iconSvg } from '../../../lib/icons/icon-svg.ts';
 import { uiIcon } from '../../../lib/icons/ui-icon.ts';
 import type { CompactEvent } from '../../../lib/events/event-schema.ts';
@@ -11,7 +12,8 @@ import type { Ui } from '../../../lib/i18n/ui-schema.ts';
 // name of the event over them — the way the feed card that led here looked,
 // and the place a reader swipes for the rest. An event that came with no
 // picture gets the mark of the site — never a stand-in that says something
-// about the event nobody checked.
+// about the event nobody checked. The heart in the corner keeps it, as on the
+// feed card.
 type Props = Readonly<{ event: CompactEvent; title: string; shots: readonly GalleryPhoto[]; ui: Ui }>;
 const { event, title, shots, ui } = Astro.props;
 ---
@@ -49,6 +51,7 @@ const { event, title, shots, ui } = Astro.props;
       <button type="button" data-shot-step="1" aria-label={ui.calNav.next}>›</button>
     </nav>
   )}
+  <Fragment set:html={favButtonHtml(event.id, ui.nav.favorites)} />
   <h1>{title}</h1>
 </header>
 
