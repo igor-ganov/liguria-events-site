@@ -13,6 +13,7 @@
 // worker, because an event page is rendered there.
 import { test, expect, devices } from '@playwright/test';
 import { feedLeaving } from './feed-leaving.ts';
+import { leaveViaVenue } from './leave-via-venue.ts';
 
 const { setups, viaRouter, viaFullLoad, leaveAndReturn, shown } = feedLeaving;
 
@@ -54,4 +55,45 @@ test.describe('on a phone', () => {
     expect(shown(frames).filter((frame) => frame !== left)).toEqual([]);
     expect(frames.at(-1)).toBe(left);
   });
+});
+
+// A venue's page is a feed too. Back from it gives the first feed back; Forward
+// gives the venue's back with ITS state, not the one just returned to — a
+// chip pressed there must not carry the first feed's filters into its address.
+test('router Back from a venue page, then Forward: each feed comes back with its own state', async ({ page }) => {
+  const { left, frames } = await leaveAndReturn(page, setups.sortedFiltered, leaveViaVenue);
+  // The page being left is a feed as well: until the swap the frames show it as
+  // it was (or hidden); from the first frame of the feed returned to, every one
+  // is that feed as it was left, and nothing else is ever shown in between.
+  const venue = frames[0];
+  const from = frames.indexOf(left);
+  expect(from).toBeGreaterThan(-1);
+  expect(shown(frames.slice(0, from)).filter((frame) => frame !== venue)).toEqual([]);
+  expect(frames.slice(from).filter((frame) => frame !== left)).toEqual([]);
+  await page.evaluate(() => history.forward());
+  // The address changes before the page does: wait for the venue's own head.
+  await expect(page.locator('.venue-head')).toHaveCount(1);
+  await expect(page).not.toHaveURL(/free=1/);
+  await page.locator('[data-feed-sort="created"]').click();
+  await expect(page).toHaveURL(/sort=created/);
+  expect(new URL(page.url()).searchParams.get('free')).toBeNull();
+});
+
+// The search box is a combobox that wires itself to the field when it joins
+// the page. A feed brought back keeps its field and its element: the box must
+// suggest after Back, and ask the meaning once per pause, not once per wiring.
+test('router Back after searching: the box still suggests, asking once, and the feed still filters', async ({ page }) => {
+  const docs: readonly Readonly<{ id: string; kind: string; title: string }>[] = await (await page.request.get('/data/suggest/liguria.en.json')).json();
+  const event = docs.find((doc) => doc.kind === 'event') ?? { id: '', kind: 'event', title: '' };
+  const asked: string[] = [];
+  await page.route('**/api/suggest?**', (route) => {
+    asked.push(route.request().url());
+    return route.fulfill({ json: { events: [event.id], venues: [] } });
+  });
+  const { left, frames } = await leaveAndReturn(page, setups.searched, viaRouter);
+  expect(shown(frames)[0]).toBe(left);
+  await page.locator('[data-feed-search]').fill('qxzqvj');
+  await expect(page.getByRole('listbox').getByRole('option')).toContainText([event.title.slice(0, 12)]);
+  expect(asked.filter((url) => url.includes('qxzqvj'))).toHaveLength(1);
+  await expect(page.locator('.feed-list > li:not([hidden])')).toHaveCount(0);
 });

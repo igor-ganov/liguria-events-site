@@ -16,14 +16,12 @@ const restore = ({ cats, ...rest }: FeedState): void => {
   cats.forEach((cat) => feedState.cats.add(cat));
 };
 
-// The page being left is a feed: its content and its state are kept as they are.
-const keep = (from: URL): void => {
+// The page being left is a feed: its content and its state, as they are. Read
+// before anything is brought back, which overwrites the state.
+const leaving = (from: URL): readonly Kept[] =>
   [document.querySelector('main')]
     .filter((main): main is HTMLElement => main?.querySelector('[data-feed-list]') instanceof HTMLElement)
-    .forEach((main) => {
-      held.kept = { path: from.pathname, entry: held.entry, main, state: copyOf(feedState) };
-    });
-};
+    .map((main) => ({ path: from.pathname, entry: held.entry, main, state: copyOf(feedState) }));
 
 // Back (or Forward) to the very history entry that was left: the page the
 // server sent is given the kept content in place of its own, before it is
@@ -51,8 +49,14 @@ export const keepFeed = (): void => {
   document.addEventListener('astro:page-load', () => {
     held.entry = entryNow();
   });
+  // From one feed to another (a venue's page is a feed too) the one left is
+  // read first, the one returned to is brought back, and only then is the one
+  // left kept in its place.
   document.addEventListener('astro:before-swap', (event) => {
+    const left = leaving(event.from);
     bringBack(event);
-    keep(event.from);
+    left.forEach((kept) => {
+      held.kept = kept;
+    });
   });
 };
