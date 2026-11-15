@@ -10,9 +10,9 @@ type Props = Readonly<{ ui: Ui; today: string; lang: Locale; title: string; quic
 const { ui, today, lang, title, quick } = Astro.props;
 ---
 
-<div class="feed-search">
+<search-suggest class="feed-search">
   <input type="search" data-feed-search placeholder={ui.search.placeholder} aria-label={ui.search.placeholder} />
-</div>
+</search-suggest>
 
 <QuickFilters ui={ui} lang={lang} title={title} base={quick.base} current={quick.current} />
 

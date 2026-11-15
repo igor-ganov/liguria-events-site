@@ -22,6 +22,7 @@ import { wireFeedHoliday } from './wire-feed-holiday.ts';
 import { wireFeedQuick } from './wire-feed-quick.ts';
 import { wireFeedSearch } from './wire-feed-search.ts';
 import { wireFeedSort } from './wire-feed-sort.ts';
+import { wireFeedSuggest } from './wire-feed-suggest.ts';
 import type { FeedContext } from './feed-context.ts';
 import type { PageData } from '../../lib/i18n/ui-schema.ts';
 
@@ -54,6 +55,7 @@ export const initFeed = (): void => {
       syncFeedUrl(feed.today);
     });
   wireFeedSearch(refresh);
+  wireFeedSuggest();
   wireFeedDescs(feed.lang);
   wireFeedDates(refresh);
   wireFeedChips(refresh, feed.today);

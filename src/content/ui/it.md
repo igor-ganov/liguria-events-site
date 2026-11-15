@@ -1,6 +1,6 @@
 ---
 nav: { calendar: 'Calendario', feed: 'Eventi', map: 'Mappa', landmarks: 'Luoghi', places: 'Locali', favorites: 'Preferiti', bot: 'Bot Telegram', ical: 'iCal' }
-search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla ricerca.' }
+search: { placeholder: 'Cerca eventi…', none: 'Nessun evento corrisponde alla ricerca.', events: 'Eventi', venues: 'Organizzatori e luoghi', suggested: 'Suggerimenti: {count}' }
 mapLayers: { events: 'Eventi', landmarks: 'Luoghi', places: 'Locali' }
 places:
   title: Locali e attività

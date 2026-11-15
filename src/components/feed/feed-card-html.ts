@@ -4,11 +4,13 @@ import { eventPath } from '../../lib/event-path.ts';
 import { favButtonHtml } from '../../lib/favorites/fav-button.ts';
 import { feedCardTags } from './feed-card-tags.ts';
 import { feedCardThumb } from './feed-card-thumb.ts';
+import { feedCardPlace } from './feed-card-place.ts';
 import { feedCardVenue } from './feed-card-venue.ts';
 import { feedCardWhen } from './feed-card-when.ts';
 import { spriteUse } from '../../lib/icons/sprite-use.ts';
 import { localizedUrl } from '../../lib/i18n/localized-url.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
+import { venueLink } from '../../lib/events/venue-link.ts';
 import type { CompactEvent } from '../../lib/events/event-schema.ts';
 import type { FeedContext } from './feed-context.ts';
 
@@ -21,9 +23,11 @@ const badge = (on: boolean, className: string, label: string): string =>
 /** The feed card: a photograph with the hour, the title and the place on it.
  *  ONE builder for the server-rendered feed and for an event published since
  *  the build, so the two can never drift apart. What is written about the
- *  event is not on it: the search fetches that when it is used (feedDescs). */
+ *  event is not on it: the search fetches that when it is used (feedDescs).
+ *  A venue with a page of its own is linked right after the card (feedCardPlace). */
 export const feedCardHtml = (context: FeedContext, event: CompactEvent): string => {
   const { lang, ui, icons } = context;
+  const place = [venueLink(lang)(event)].filter((href): href is string => href !== undefined).map(feedCardPlace(event));
   return (
     `<a class="photo-card" href="${localizedUrl(lang, eventPath(event))}">` +
     favButtonHtml(event.id, ui.nav.favorites, undefined, spriteUse('heart', 18, 'fav-glyph')) +
@@ -34,6 +38,7 @@ export const feedCardHtml = (context: FeedContext, event: CompactEvent): string 
     `${badge(event.pl === true, 'badge-made', ui.badges.made)}</header>` +
     `<footer class="photo-card-text">${feedCardWhen(event)}` +
     `<h4 class="mini-title photo-card-title">${escapeMarkup(titleOf(lang)(event))}</h4>` +
-    `${feedCardVenue(event)}</footer></a>`
+    `${feedCardVenue(event, place.length > 0)}</footer></a>` +
+    place.join('')
   );
 };

@@ -1,6 +1,21 @@
 [
   {
     "date": "2026-11-15",
+    "example": "/liguria/",
+    "roadmap": "search-by-meaning",
+    "title": {
+      "en": "Search suggests events and venues by what you mean",
+      "it": "La ricerca suggerisce eventi e luoghi in base a ciò che intendi",
+      "ru": "Поиск подсказывает события и площадки по смыслу"
+    },
+    "body": {
+      "en": "Start typing in the feed’s search box — “jazz tonight”, “concerto pianoforte”, “что поделать с детьми” — and suggestions appear in two groups, events and the organisers and venues that host such things, by meaning as well as by spelling. The place on every event card is now a link to that venue’s page.",
+      "it": "Inizia a scrivere nella ricerca del feed — “jazz stasera”, “concerto pianoforte”, “mostra fotografia” — e i suggerimenti compaiono in due gruppi, eventi e organizzatori e luoghi che li ospitano, per significato oltre che per ortografia. Il luogo su ogni scheda evento ora porta alla pagina di quel luogo.",
+      "ru": "Начните вводить запрос в поиске ленты — «джаз сегодня вечером», «concerto pianoforte», «что поделать с детьми» — и подсказки появятся в двух группах: события и организаторы и площадки, где такое проходит, по смыслу, а не только по написанию. Место на каждой карточке события теперь ведёт на страницу этой площадки."
+    }
+  },
+  {
+    "date": "2026-11-15",
     "example": "/liguria/sunday-evening/",
     "title": {
       "en": "Sunday evening means Sunday evening",

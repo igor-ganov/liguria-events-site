@@ -15,7 +15,7 @@ import { RouteUiSchema } from './route-ui-schema.ts';
  *  modules, so this file stays a readable table of contents. */
 export const UiDictSchema = Schema.Struct({
   nav: Schema.Struct({ calendar: Schema.String, feed: Schema.String, map: Schema.String, landmarks: Schema.String, places: Schema.String, favorites: Schema.String, bot: Schema.String, ical: Schema.String }),
-  search: Schema.Struct({ placeholder: Schema.String, none: Schema.String }),
+  search: Schema.Struct({ placeholder: Schema.String, none: Schema.String, events: Schema.String, venues: Schema.String, suggested: Schema.String }),
   mapLayers: Schema.Struct({ events: Schema.String, landmarks: Schema.String, places: Schema.String }),
   landmarks: LandmarksUiSchema,
   places: PlacesUiSchema,

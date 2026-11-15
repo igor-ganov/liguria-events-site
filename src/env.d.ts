@@ -6,6 +6,7 @@ interface Env {
   SESSION: KVNamespace;
   UPLOADS: R2Bucket;
   AI: unknown;
+  ASSETS: Fetcher;
   ENVIRONMENT: string;
   CRAWLER_ENABLED: string;
   FIXED_TODAY: string;
