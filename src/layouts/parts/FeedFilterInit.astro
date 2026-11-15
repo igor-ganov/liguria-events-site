@@ -16,6 +16,15 @@
       document.documentElement.classList.toggle('feed-filtering', isFiltered(search));
     };
     mark(location.search);
+    // A Back that builds the page again (the back/forward cache missed): the
+    // router scrolls to the saved place before the feed has its days, cuts the
+    // place short and saves the short one over it. The feed is kept out of sight
+    // and the place written down here, first; init-feed restores both.
+    var root = document.documentElement;
+    var nav = performance.getEntriesByType('navigation')[0];
+    var y = (history.state && history.state.scrollY) || 0;
+    root.classList.toggle('feed-returning', Boolean(nav) && nav.type === 'back_forward' && y > 0);
+    root.setAttribute('data-return-y', String(y));
     // SPA navigation: mark from the target URL before the swap paints.
     document.addEventListener('astro:before-preparation', function (e) {
       try { mark(new URL(e.to).search); } catch (_) {}
@@ -23,7 +32,7 @@
     // Safety net: never leave the list hidden if init-feed does not run.
     document.addEventListener('astro:page-load', function () {
       setTimeout(function () {
-        document.documentElement.classList.remove('feed-filtering');
+        document.documentElement.classList.remove('feed-filtering', 'feed-returning');
       }, 1500);
     });
   })();

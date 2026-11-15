@@ -1,3 +1,4 @@
+import { bindOnce } from '../../lib/dom/bind-once.ts';
 import { branch } from '../../lib/branch.ts';
 import { SHARE } from './share-selectors.ts';
 import { shareableUrl } from './shareable-url.ts';
@@ -36,7 +37,9 @@ const share = async (button: Element): Promise<void> => {
   );
 };
 
+// Once per button: a feed brought back as it was left (keepFeed) keeps its
+// buttons, and their listeners with them.
 export const initShare = (): void =>
   document
-    .querySelectorAll(SHARE.buttonSelector)
-    .forEach((node) => node.addEventListener('click', () => void share(node)));
+    .querySelectorAll<HTMLElement>(SHARE.buttonSelector)
+    .forEach((node) => bindOnce(node, 'shareBound', (button) => button.addEventListener('click', () => void share(button))));

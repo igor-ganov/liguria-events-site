@@ -2,11 +2,11 @@
 // appends events published since the build (from D1).
 import { applyFeedFilter } from './apply-feed-filter.ts';
 import { augmentFeed } from './augment-feed.ts';
-import { branch } from '../../lib/branch.ts';
 import { buildFeedIndex } from './build-feed-index.ts';
 import { DEFAULT_PAGE_DATA } from '../shared/default-page-data.ts';
 import { feedRest } from './feed-rest.ts';
 import { feedToday } from './feed-today.ts';
+import { openFeed } from './open-feed.ts';
 import { readFeedParams } from './read-feed-params.ts';
 import { readJsonIsland } from './read-json-island.ts';
 import { reorderFeed } from './reorder-feed.ts';
@@ -36,8 +36,7 @@ const context = (): FeedContext => {
   };
 };
 
-/** Wire the server-rendered feed: filters + late-published events. */
-export const initFeed = (): void => {
+const wireFeed = (): void => {
   const feed = context();
   readFeedParams(feed.today);
   stampFeedOrder();
@@ -62,17 +61,25 @@ export const initFeed = (): void => {
   wireFeedQuick(refresh, feed.today);
   wireFeedHoliday(refresh);
   wireFeedSort(feed.today, feedRest(feed.lang));
-  // The list was hidden up front on a filtered URL (see Layout.astro) to avoid
-  // flashing the unfiltered static list; once filtered it is revealed. An
-  // address that already filters is answered over the whole feed, so the days
-  // folded away are brought in before anything is shown.
+  // The list was hidden up front on a filtered URL (see FeedFilterInit) to
+  // avoid flashing the unfiltered static list; once filtered it is revealed.
   const show = (): void => {
     runFeedSearch();
     applyFeedFilter();
     reorderFeed();
     document.documentElement.classList.remove('feed-filtering');
   };
-  branch(location.search.length > 1)(() => whole(show), show);
+  openFeed(whole, show, augmentFeed(feed));
   watchFeedFold(() => whole(show));
-  void augmentFeed(feed);
 };
+
+/** Wire the server-rendered feed: filters + late-published events. Once: a
+ *  feed the router has brought back as it was left (keepFeed) is wired already,
+ *  and wiring it again would answer every chip twice. */
+export const initFeed = (): void =>
+  [document.querySelector('[data-feed-list]')]
+    .filter((list) => list?.hasAttribute('data-feed-ready') !== true)
+    .forEach((list) => {
+      list?.setAttribute('data-feed-ready', '');
+      wireFeed();
+    });

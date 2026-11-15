@@ -963,6 +963,9 @@ a.chip { text-decoration: none; }
    cards keep their layout (visibility, not display), and init-feed reveals the
    list the moment it has filtered — see the no-flash script in Layout.astro. */
 html.feed-filtering [data-feed-list] { visibility: hidden; }
+/* A Back that built the feed page again keeps it out of sight until it is the
+   feed the reader left, at the place they left it (FeedFilterInit, open-feed). */
+html.feed-returning main:has([data-feed-list]) { visibility: hidden; }
 
 #nav-progress {
   position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 200;

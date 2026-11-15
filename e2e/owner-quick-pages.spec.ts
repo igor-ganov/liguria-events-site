@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
 
 const PAGES = [
   { path: '/en/liguria/tonight/', title: /What.s on tonight in Liguria/, h1: /tonight in Liguria/ },
-  { path: '/it/liguria/this-weekend/', title: /Cosa fare questo weekend a Liguria/, h1: /questo weekend/ },
+  { path: '/it/liguria/this-weekend/', title: /Cosa fare questo weekend in Liguria/, h1: /questo weekend/ },
   { path: '/ru/liguria/sunday-evening/', title: /Что идёт в воскресенье вечером в Liguria/, h1: /воскресенье вечером/ },
   { path: '/en/liguria/genova/tonight/', title: /What.s on tonight in Genova/, h1: /tonight in Genova/ },
   { path: '/it/liguria/genova/sunday-evening/', title: /Cosa fare domenica sera a Genova/, h1: /domenica sera/ },
