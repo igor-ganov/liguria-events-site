@@ -1,6 +1,5 @@
 import { applyFeedFilter } from './apply-feed-filter.ts';
 import { buildFeedIndex } from './build-feed-index.ts';
-import { decodeEventList } from '../../lib/events/decode-event-list.ts';
 import { expandSessions } from '../../lib/events/expand-sessions.ts';
 import { feedIds } from './feed-ids.ts';
 import { insertFeedEvent } from './insert-feed-event.ts';
@@ -44,6 +43,9 @@ const merge = (context: FeedContext, { fresh, kept }: Late): void =>
 export const augmentFeed = async (context: FeedContext): Promise<void> => {
   try {
     const res = await fetch('/api/events/published.json', { headers: { accept: 'application/json' } });
+    // The decoder is fetched with the data, not with the page: it carries the
+    // schema library, which no first paint of a feed should wait for.
+    const { decodeEventList } = await import('../../lib/events/decode-event-list.ts');
     const extra = decodeEventList(await res.json());
     // What the feed holds includes its folded days, and those are a file the
     // page has not read yet: read before weighing, or every event in a folded
