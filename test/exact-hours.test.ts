@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { cardWhen } from '../src/lib/og/card-when.ts';
 import { eventDateTime } from '../src/lib/seo/event-datetime.ts';
 import { eventRssItems } from '../src/lib/seo/event-rss-items.ts';
-import { eventTiles } from '../src/lib/events/event-tiles.ts';
+import { eventHour } from '../src/lib/events/event-hour.ts';
 import { formatWhen } from '../src/lib/events/format-when.ts';
 import type { CompactEvent } from '../src/lib/events/event-schema.ts';
 
@@ -41,9 +41,7 @@ const weekly = ev({
   p: [{ date: '2026-11-10', time: '15:30' }, { date: '2026-11-17' }, { date: '2026-11-24', time: '15:30' }],
 });
 
-const labels = { starts: 'starts', dates: 'dates', duration: 'lasts', price: 'from' };
-const startsTile = (event: CompactEvent): string | undefined =>
-  eventTiles({ event, lang: 'en', labels }).find((tile) => tile.key === 'starts')?.value;
+const startsTile = (event: CompactEvent): string | undefined => eventHour(event);
 
 describe('the hour a container is printed with', () => {
   test('the event page states no single start when the sessions start at other hours', () => {

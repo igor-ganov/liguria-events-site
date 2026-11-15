@@ -1,0 +1,25 @@
+---
+import { eventPath } from '../../../../lib/event-path.ts';
+import { localizedUrl } from '../../../../lib/i18n/localized-url.ts';
+import type { ArchivedEvent } from '../../../../lib/events/archived-schema.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+
+// The same feast in other years, as one line of years: the year is what a
+// reader picks by, and the name is the one they are already looking at.
+type Props = Readonly<{ lang: Locale; heading: string; editions: readonly ArchivedEvent[] }>;
+const { lang, heading, editions } = Astro.props;
+---
+
+{editions.length > 0 && (
+  <li class="ev-knot ev-knot--small event-editions">
+    <p>
+      {heading}:
+      {editions.map((edition) => (
+        <>
+          {' '}
+          <a href={localizedUrl(lang, eventPath(edition))} title={edition.t}>{edition.s.slice(0, 4)}</a>
+        </>
+      ))}
+    </p>
+  </li>
+)}

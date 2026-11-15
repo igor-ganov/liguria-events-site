@@ -69,10 +69,11 @@ describe('eventWidgets', () => {
     assert.equal(widgets.programme?.type, 'programme');
     assert.deepEqual(types(widgets.cards), ['tickets']);
   });
-  test('without one, the programme and the dates are cards of their own', () => {
+  test('without one, the programme is a card of its own and the dates still are not', () => {
     const widgets = eventWidgets({ parts, dated: false, place: PLACE });
     assert.equal(widgets.programme, undefined);
-    assert.deepEqual(types(widgets.cards), ['programme', 'when', 'tickets']);
+    // The first knot of the page says when, so a written 'when' is never a card.
+    assert.deepEqual(types(widgets.cards), ['programme', 'tickets']);
   });
   test('directions that repeat the address are left out; ones that add to it go under the map', () => {
     assert.equal(eventWidgets({ parts, dated: true, place: PLACE }).way, undefined);

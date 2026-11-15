@@ -156,20 +156,6 @@
   border-top: 1px solid var(--line);
 }
 
-/* The two buttons under an event. */
-.event-feedback {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  margin: 1.2rem 0 0.4rem;
-}
-.event-feedback .chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-}
 .event-managed {
   font-size: 0.82rem;
   color: var(--free);

@@ -41,13 +41,11 @@ test('a signed-in reader rates an event, sees it counted, and can take it back',
 
   await expect(reviews(page).locator('.rv-comment', { hasText: words })).toBeVisible();
   await expect(reviews(page).locator('.rv-summary')).toContainText('4');
-  // The top of the page says it too, as a figure.
-  await expect(page.locator('[data-tile="rating"] b')).toHaveText('4');
 
   await expect(reviews(page)).toHaveAttribute('data-ready', 'true');
   await Promise.all([page.waitForEvent('load'), reviews(page).locator('[data-rv-delete]').click()]);
   await expect(reviews(page).locator('.rv-comment', { hasText: words })).toHaveCount(0);
-  await expect(page.locator('[data-tile="rating"]')).toHaveCount(0);
+  await expect(reviews(page).locator('.rv-summary')).toHaveCount(0);
 });
 
 test('the endpoint refuses a subject that is neither a place nor an event', async ({ request }) => {

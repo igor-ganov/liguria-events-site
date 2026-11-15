@@ -30,13 +30,10 @@ type Input = Readonly<{
   rating?: ReviewSummary | undefined;
 }>;
 
-const mapUrls = (event: CompactEvent) => {
-  const query = mapQuery(event);
-  return {
-    mapSearchUrl: query && `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
-    mapEmbedUrl: query && `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`,
-  };
-};
+// A link that opens a map, never a frame of one: a frame that may stay empty
+// is worse than the word "Directions".
+const mapSearchUrl = (event: CompactEvent): string | undefined =>
+  [mapQuery(event)].filter((query) => query !== undefined && query !== '').map((query) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query ?? '')}`).at(0);
 
 /** Everything the event page renders, derived in one place so the component
  *  stays markup. The description is light Markdown: the page lays it out as
@@ -79,6 +76,6 @@ export const eventDetailView = ({ lang, event, address, site, today, rating }: I
     // shared has to keep working — so it must say so.
     passed,
     jsonLd: eventJsonLd({ event, title, desc: descMeta, image, address, url, rating }),
-    ...mapUrls(event),
+    mapSearchUrl: mapSearchUrl(event),
   };
 };

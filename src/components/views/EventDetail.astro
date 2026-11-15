@@ -1,25 +1,20 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import type { EventDetailProps } from './event-detail-props.ts';
-import OwnEventInvite from '../events/OwnEventInvite.astro';
 import { keepOutOfSearch } from '../../lib/events/keep-out-of-search.ts';
 import NewEventLink from '../events/NewEventLink.astro';
 import EventOwnerBar from './event/EventOwnerBar.astro';
-import EventActions from './event/EventActions.astro';
-import EventBoard from './event/EventBoard.astro';
 import EventCover from './event/EventCover.astro';
 import EventPassed from '../events/EventPassed.astro';
-import EventTiles from './event/EventTiles.astro';
+import EventThread from './event/thread/EventThread.astro';
 import { placeReviewSummary } from '../../lib/places/reviews.ts';
 import { reviewSubjectOf } from '../../lib/events/review-subject-of.ts';
 import { cityName } from '../../lib/region/city-name.ts';
 import { eventDetailView } from '../../lib/events/event-detail-view.ts';
-import { eventTiles } from '../../lib/events/event-tiles.ts';
 import { isDefined } from '../../lib/is-defined.ts';
 import { canonicalUrl } from '../../lib/seo/canonical-url.ts';
 import { eventPath } from '../../lib/event-path.ts';
 import { isoToday } from '../../lib/calendar/iso-today.ts';
-import { regionUrl } from '../../lib/region/region-url.ts';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
 
 type Props = EventDetailProps;
@@ -34,31 +29,23 @@ const ui = await uiOf(lang);
 // The address a crawler event carries lives on the event itself; only a
 // user-submitted one has a contact block. Structured data needs whichever is
 // there — an event with no address at all is rejected outright by Google.
-// Read here, once, because two things need it before the reviews section
-// renders: the rating tile at the top and the structured data in the head.
+// The rating is read here, once, for the structured data in the head.
 const subject = reviewSubjectOf(event);
 const rating = await placeReviewSummary(Astro.locals.runtime.env.DB, subject);
 const view = eventDetailView({ lang, event, address: contacts?.address ?? event.a, site: Astro.site, today: isoToday(), rating });
-const { region, title, seoTitle, descPreview, heroImage, cover, more, tickets, passed, jsonLd, mapSearchUrl } = view;
-const tiles = eventTiles({ event, lang, labels: { ...ui.eventPage, reviews: ui.reviews.title }, rating });
+const { region, title, seoTitle, descPreview, heroImage, cover, more, passed, jsonLd } = view;
 ---
 
 <Layout lang={lang} region={region} title={seoTitle} description={descPreview || seoTitle} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
   <article class="event-page">
-    <p class="event-topbar">
-      <a class="back-link" href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
-    </p>
     {justCreated && (
       <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event), Astro.site)} title={title} unlisted={unlisted} />
     )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && <EventPassed lang={lang} region={region} city={cityName(event.ct ?? '')} label={ui.passedNote} allLabel={ui.headings.allEvents} />}
     <EventCover event={event} title={title} shots={[cover, ...more].filter(isDefined)} ui={ui} />
-    <EventTiles tiles={tiles} />
-    <EventActions event={event} title={title} tickets={tickets} contacts={contacts} mapSearchUrl={mapSearchUrl} ui={ui} />
-    <EventBoard lang={lang} event={event} contacts={contacts} view={view} subject={subject} ui={ui} />
-    {!justCreated && <OwnEventInvite ui={ui} lang={lang} />}
+    <EventThread lang={lang} event={event} contacts={contacts} view={view} subject={subject} ui={ui} />
   </article>
 </Layout>
 

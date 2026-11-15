@@ -1,0 +1,25 @@
+---
+import { priceLine } from '../../../../lib/events/thread/price-line.ts';
+import { threadLabelsOf } from '../../../../lib/events/thread/thread-labels-of.ts';
+import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The third knot: what it costs, and where the tickets are when a ticket
+// seller is among the sources.
+type Props = Readonly<{ lang: Locale; event: CompactEvent; tickets: string | undefined; ui: Ui }>;
+const { lang, event, tickets, ui } = Astro.props;
+const price = priceLine(lang, threadLabelsOf(ui))(event);
+---
+
+<li class="ev-knot ev-price">
+  <p>
+    <b class:list={[{ 'ev-free': price.free }]}>{price.text}</b>
+    {tickets !== undefined && (
+      <>
+        <span aria-hidden="true"> · </span>
+        <a href={tickets} target="_blank" rel="noopener">{ui.tickets}<span aria-hidden="true"> ↗</span></a>
+      </>
+    )}
+  </p>
+</li>

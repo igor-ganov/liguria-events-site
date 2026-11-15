@@ -44,27 +44,25 @@ test('an event page lists the other shows of its venue, before the town', async 
   const strip = page.locator('.event-at-venue');
   await expect(strip).toBeVisible();
   await expect(strip.locator('h2')).toContainText(here?.v ?? '');
-  const shown = (await hrefs(page, '.event-at-venue .pick-tile')).map(idOf);
+  const shown = (await hrefs(page, '.event-at-venue .ev-also-item')).map(idOf);
   expect(shown.length).toBeGreaterThan(0);
   expect(shown).not.toContain(here?.id);
   expect(shown.every((id) => rest.some((other) => other.id === id))).toBe(true);
-  const first = await page.locator('.event-widgets > .widget').evaluateAll((els) =>
-    els.map((el) => el.getAttribute('data-widget') ?? '').filter((name) => name === 'at-venue' || name === 'also'),
-  );
-  expect(first.at(0)).toBe('at-venue');
+  const first = await page.locator('.ev-thread > .ev-also').evaluateAll((els) => els.map((el) => el.classList.contains('event-at-venue')));
+  expect(first.at(0)).toBe(true);
   // The town strip carries on from there and never says the same show twice.
-  const town = (await hrefs(page, '.event-also .pick-tile')).map(idOf);
+  const town = (await hrefs(page, '.event-also .ev-also-item')).map(idOf);
   expect(town.filter((id) => shown.includes(id))).toEqual([]);
 });
 
 test('the venue name leads to the venue page', async ({ page, request }) => {
   const [here] = await aBusyVenue(request);
   await page.goto(`/it/event/${here?.id ?? ''}/`);
-  const name = page.locator('.event-where .widget-place a');
+  const name = page.locator('.ev-where .ev-venue a');
   await expect(name).toHaveText(here?.v ?? '');
   const path = `/it/${here?.rg ?? ''}/${here?.ct ?? ''}/${slugify(here?.v ?? '')}/`;
   await expect(name).toHaveAttribute('href', path);
-  await expect(page.locator('.event-at-venue a.chip')).toHaveAttribute('href', path);
+  await expect(page.locator('.event-at-venue .ev-onward a')).toHaveAttribute('href', path);
   const [response] = await Promise.all([page.waitForResponse((answer) => answer.url().endsWith(path)), name.click()]);
   expect(response.status()).toBe(200);
   await expect(page.locator('.venue-head h1')).toBeVisible();
@@ -74,16 +72,16 @@ test('"various places" is not a venue: no strip, and its name links nowhere', as
   const vague = (await corpus(request)).find((event) => (event.v ?? '') !== '' && (event.ct ?? '') !== '' && !real(event));
   expect(vague, 'the corpus holds no event without a real venue').toBeDefined();
   await page.goto(`/it/event/${vague?.id ?? ''}/`);
-  await expect(page.locator('.event-where .widget-place b')).toBeVisible();
+  await expect(page.locator('.ev-where .ev-venue')).toBeVisible();
   await expect(page.locator('.event-at-venue')).toHaveCount(0);
-  await expect(page.locator('.event-where .widget-place a')).toHaveCount(0);
+  await expect(page.locator('.ev-where .ev-venue a')).toHaveCount(0);
 });
 
 test('every tile is dated by the next day a reader can go, never a day gone', async ({ page, request }) => {
   // A season that opened in February showed "6 Feb" in October.
   const [here] = await aBusyVenue(request);
   await page.goto(`/it/event/${here?.id ?? ''}/`);
-  const days = await page.locator('.pick-tile').evaluateAll((els) => els.map((el) => el.getAttribute('data-day') ?? ''));
+  const days = await page.locator('.ev-also-item').evaluateAll((els) => els.map((el) => el.getAttribute('data-day') ?? ''));
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Rome' });
   expect(days.length).toBeGreaterThan(0);
   expect(days.filter((day) => day < today)).toEqual([]);

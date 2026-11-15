@@ -1,0 +1,42 @@
+---
+import ThreadCalendar from './ThreadCalendar.astro';
+import ThreadHour from './ThreadHour.astro';
+import type { ThreadWhen } from '../../../../lib/events/thread/thread-when.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The first knot: the day in words, the hour large, how it ends — then either
+// "one date only", the span of days, or the run with its next dates and its
+// month calendar. Everything a reader came to the page to check, first.
+type Props = Readonly<{ lang: Locale; when: ThreadWhen; ui: Ui }>;
+const { lang, when, ui } = Astro.props;
+const { line, once, span, run, calendar } = when;
+---
+
+<li class="ev-knot ev-knot--lead ev-when">
+  <h2 class="ev-day">
+    {run === undefined && <time datetime={line.iso}>{line.text}</time>}
+    {run !== undefined && <span>{run.line}</span>}
+    {run === undefined && line.isToday && <span class="ev-pill ev-pill--hot">{ui.eventPage.today}</span>}
+    {run !== undefined && <span class="ev-pill">{run.left}</span>}
+  </h2>
+  <ThreadHour line={line} endUnknown={ui.eventPage.endUnknown} />
+  {once !== undefined && <p class="ev-sub">{once}</p>}
+  {span !== undefined && <p class="ev-sub">{span}</p>}
+  {run !== undefined && (
+    <ol class="ev-dates" aria-label={ui.eventPage.dates}>
+      {run.dates.map((date, index) => (
+        <li class:list={[{ 'is-next': index === 0 }]}>
+          <time datetime={date.iso}>{date.text}</time>
+          {index === 0 && <span class="visually-hidden"> ({ui.eventPage.nextDate})</span>}
+        </li>
+      ))}
+      {run.more !== undefined && (
+        <li class="ev-more">
+          {run.more.text} <time datetime={run.more.iso}>{run.more.date}</time>
+        </li>
+      )}
+    </ol>
+  )}
+  {calendar.length > 0 && <ThreadCalendar lang={lang} months={calendar} label={ui.eventPage.calendar} next={ui.eventPage.nextDate} />}
+</li>

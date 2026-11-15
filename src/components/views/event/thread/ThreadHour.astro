@@ -1,0 +1,18 @@
+---
+import type { WhenLine } from '../../../../lib/events/thread/when-line.ts';
+
+// The hour large, and how it ends: "→ 18:00 2h 30m" when a source said how
+// long it lasts, "end not listed" when none did. Nothing at all with no hour.
+type Props = Readonly<{ line: WhenLine; endUnknown: string }>;
+const { line, endUnknown } = Astro.props;
+---
+
+{line.start !== undefined && (
+  <p class="ev-hour">
+    <time datetime={`${line.iso}T${line.start}`}>{line.start}</time>
+    {line.end !== undefined && <span class="ev-arrow" aria-hidden="true">→</span>}
+    {line.end !== undefined && <time datetime={line.end}>{line.end}</time>}
+    {line.duration !== undefined && <span class="ev-dur">{line.duration}</span>}
+    {line.end === undefined && <span class="ev-dur">{endUnknown}</span>}
+  </p>
+)}
