@@ -27,6 +27,9 @@ const PREFIXES: readonly (readonly [string, Strategy])[] = [
   ['/sprite/', 'cache-first'],
   ['/icons/', 'cache-first'],
   ['/data/', 'stale-while-revalidate'],
+  // The tips shown while a page loads: a few kilobytes, kept so that one is
+  // in hand when the network is not.
+  ['/tips/', 'stale-while-revalidate'],
 ];
 
 const byPrefix = (path: string): Strategy | undefined =>

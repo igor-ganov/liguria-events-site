@@ -1,4 +1,5 @@
 import { queryAll } from '../../lib/dom/query-all.ts';
+import { trackPending } from '../loading/track-pending.ts';
 
 // One fetch per page, however many things ask for the folded days at once.
 const held: { pending?: Promise<void> } = {};
@@ -31,6 +32,13 @@ const settle = (): void => {
  * could be, in which case the page keeps the days it has.
  */
 export const loadFeedTail = (): Promise<void> => {
+  const fetching = waiting().length > 0;
   held.pending ??= Promise.all(waiting().map(fill)).then(settle);
-  return held.pending;
+  // Whoever asks while the days are on their way — a chip, the search, the end
+  // of the list coming into view — is told about the wait (trackPending): the
+  // control just pressed shows it is busy, or else the list does.
+  return [held.pending]
+    .filter(() => fetching)
+    .map((pending) => trackPending(pending, document.querySelector('[data-feed-list]') ?? undefined))
+    .at(0) ?? held.pending;
 };

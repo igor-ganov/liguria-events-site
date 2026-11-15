@@ -134,6 +134,24 @@ html:not(:active-view-transition-type(theme))::view-transition-new(root) {
   clip-path: inset(50%); overflow: hidden; white-space: nowrap;
 }
 
+/* A control that started a load (src/components/loading): a ring that breathes
+   around exactly the link, chip or button that was pressed, so it is plain
+   which one the wait belongs to. An outline, not a border or a spinner beside
+   the label: nothing around it moves. Dashed and still for reduced motion. */
+[data-pending] {
+  cursor: progress;
+  outline: 2px solid transparent; outline-offset: 2px;
+  /* The delay keeps a load that is over at once from flashing a ring. */
+  animation: pending-breathe 0.9s ease-in-out 150ms infinite alternate;
+}
+@keyframes pending-breathe {
+  from { outline-color: var(--accent); }
+  to { outline-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-pending] { animation: none; outline: 2px dashed var(--accent); }
+}
+
 /* ══ header / footer ════════════════════════════════════════════════ */
 .site-head {
   position: sticky; top: 0; z-index: 10;

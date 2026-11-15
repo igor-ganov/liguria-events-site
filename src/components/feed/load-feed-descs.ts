@@ -1,4 +1,5 @@
 import { feedDescs } from './feed-descs.ts';
+import { trackPending } from '../loading/track-pending.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 // One fetch per file for the life of the page, however many times the search
@@ -12,7 +13,7 @@ const fetched = async (url: string): Promise<boolean> => {
 };
 
 const once = (url: string): Promise<boolean> => {
-  const pending = fetched(url).catch(() => {
+  const pending = trackPending(fetched(url), document.querySelector('[data-feed-search]') ?? undefined).catch(() => {
     asked.delete(url);
     return false;
   });

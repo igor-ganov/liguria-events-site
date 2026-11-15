@@ -14,5 +14,6 @@ export const DEFAULT_APP_UI = {
   share: { label: '', copied: '' },
   install: { label: '', hint: '' },
   offline: { notice: '', saved: '', updated: '', reload: '', retry: '', listAway: '' },
+  loading: { busy: 'Loading…', tip: 'Did you know?' },
   outbox: { queued: '', waiting: '', conflict: '', sent: '' },
 } as const;

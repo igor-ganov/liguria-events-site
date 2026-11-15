@@ -15,6 +15,12 @@ export default defineConfig({
   // round trip before anything could be painted — 0.7 s of a phone's first
   // paint on a slow connection — and every page links the same one anyway.
   build: { inlineStylesheets: 'always' },
+  // Fewer, larger script chunks. Left to itself the client build cut the shell
+  // into some sixty files of under a kilobyte, each one discovered only when the
+  // file importing it had arrived: four round trips deep before the feed was
+  // wired, which on a phone's slow connection held DOMContentLoaded back by
+  // seconds. Merging what is smaller than this flattens that waterfall.
+  vite: { build: { rollupOptions: { output: { experimentalMinChunkSize: 20_000 } } } },
     // wasmModuleImports: the link-preview card is rasterised in the worker, and
   // Workers refuse to compile WebAssembly from a buffer at runtime — the module
   // has to be bound at deploy time, which is what this import mode does.
