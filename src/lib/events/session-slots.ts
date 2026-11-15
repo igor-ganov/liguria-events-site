@@ -1,16 +1,15 @@
+import { sessionKey } from './session-key.ts';
 import type { Session } from './event-schema.ts';
 
 /** One thing to go to on one day, and every hour it starts. */
 export type SessionSlot = Readonly<{ session: Session; times: readonly string[] }>;
-
-const keyOf = (session: Session): string => `${session.date}|${session.title ?? ''}`;
 
 const timesOf = (group: readonly Session[]): readonly string[] =>
   [...new Set(group.map((session) => session.time).filter((time): time is string => time !== undefined))].sort();
 
 const grouped = (sessions: readonly Session[]): ReadonlyMap<string, readonly Session[]> =>
   sessions.reduce(
-    (groups, session) => groups.set(keyOf(session), [...(groups.get(keyOf(session)) ?? []), session]),
+    (groups, session) => groups.set(sessionKey(session), [...(groups.get(sessionKey(session)) ?? []), session]),
     new Map<string, readonly Session[]>(),
   );
 

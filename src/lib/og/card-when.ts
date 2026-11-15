@@ -1,3 +1,4 @@
+import { eventHour } from '../events/event-hour.ts';
 import type { CompactEvent } from '../events/event-schema.ts';
 
 const shortDate = (iso: string): string => iso.replace(/^\d{4}-(\d{2})-(\d{2})$/, '$2.$1');
@@ -13,5 +14,5 @@ const present = (value: string | undefined): readonly string[] =>
 export const cardWhen = (event: CompactEvent): string =>
   [
     [event.s, ...present(event.e)].map(shortDate).join('–'),
-    ...present(event.h),
+    ...present(eventHour(event)),
   ].join(' · ');

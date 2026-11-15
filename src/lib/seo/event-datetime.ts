@@ -1,4 +1,4 @@
-import { romeOffset } from './rome-offset.ts';
+import { romeOffsetAt } from './rome-offset-at.ts';
 
 /**
  * An ISO 8601 stamp for structured data: `2026-08-20T21:00:00+02:00` when the
@@ -11,5 +11,5 @@ import { romeOffset } from './rome-offset.ts';
 export const eventDateTime = (date: string, time: string | undefined): string =>
   [time]
     .filter((value): value is string => value !== undefined && /^\d{2}:\d{2}$/.test(value))
-    .map((value) => `${date}T${value}:00${romeOffset(date)}`)
+    .map((value) => `${date}T${value}:00${romeOffsetAt(date, value)}`)
     .at(0) ?? date;

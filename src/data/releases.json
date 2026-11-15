@@ -1,5 +1,19 @@
 [
   {
+    "date": "2026-11-15",
+    "example": "/liguria/sunday-evening/",
+    "title": {
+      "en": "Sunday evening means Sunday evening",
+      "it": "Domenica sera vuol dire domenica sera",
+      "ru": "«В воскресенье вечером» — это воскресный вечер"
+    },
+    "body": {
+      "en": "An event with several dates is now listed on tonight, this weekend, Sunday evening, today and tomorrow only for the date that falls there, at that date’s own hour — no more Sunday-morning fairs on Sunday evening, or January concerts on tonight’s page. Times in search results and the news feed now carry Rome’s offset correctly, including the nights the clocks change.",
+      "it": "Un evento con più date compare ora in stasera, questo weekend, domenica sera, oggi e domani solo per la data che vi cade, all’ora di quella data: niente più fiere della domenica mattina tra le serate, né concerti di gennaio nella pagina di stasera. Gli orari nei risultati di ricerca e nel feed delle novità ora usano il fuso di Roma, anche nelle notti del cambio d’ora.",
+      "ru": "Событие с несколькими датами теперь попадает в «сегодня вечером», «в эти выходные», «в воскресенье вечером», «сегодня» и «завтра» только той датой, что туда попадает, и со своим временем — больше никаких воскресных утренних ярмарок среди вечерних событий и январских концертов на странице сегодняшнего вечера. Время в результатах поиска и в ленте новостей теперь указано по римскому часовому поясу, в том числе в ночи перевода часов."
+    }
+  },
+  {
     "date": "2026-10-31",
     "example": "/liguria/tonight/",
     "title": {

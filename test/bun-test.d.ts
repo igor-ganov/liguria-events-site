@@ -9,6 +9,8 @@ declare module 'bun:test' {
   export const afterAll: (fn: () => void | Promise<void>) => void;
   export const beforeEach: (fn: () => void | Promise<void>) => void;
   export const afterEach: (fn: () => void | Promise<void>) => void;
+  /** Pins the clock Date and Intl read; called bare, it lets it run again. */
+  export const setSystemTime: (now?: Date | number) => void;
 
   type Matchers = {
     readonly not: Matchers;

@@ -1,4 +1,6 @@
 import { canonicalUrl } from './canonical-url.ts';
+import { eventDateTime } from './event-datetime.ts';
+import { eventHour } from '../events/event-hour.ts';
 import { descriptionPlain } from '../description/description-plain.ts';
 import { eventPath } from '../event-path.ts';
 import { isUpcoming } from '../events/is-upcoming.ts';
@@ -10,8 +12,10 @@ import type { RssItem } from './rss-xml.ts';
 // dump of the whole corpus.
 const CAP = 50;
 
+// The start as an instant: the hour on Rome's clock, in Rome's offset that day
+// — not the same digits read as Greenwich, which put a 21:00 concert at 22:00.
 const dateOf = (event: CompactEvent): string =>
-  new Date(`${event.s}T${event.h ?? '12:00'}:00Z`).toUTCString();
+  new Date(eventDateTime(event.s, eventHour(event) ?? '12:00')).toUTCString();
 
 /** The soonest upcoming events as feed entries, soonest first. */
 export const eventRssItems = (
