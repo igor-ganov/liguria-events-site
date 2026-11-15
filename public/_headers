@@ -20,3 +20,11 @@
   Cache-Control: no-cache
 /manifest.webmanifest
   Cache-Control: public, max-age=3600
+# robots.txt and the sitemaps were served revalidate-on-every-read, and
+# Googlebot took that literally: 189 fetches of robots.txt in the week to
+# 15 November, 13% of everything it spent on the site. A day is what Google
+# caches robots.txt for anyway, and the sitemaps change once a deploy.
+/robots.txt
+  Cache-Control: public, max-age=86400
+/sitemap-*
+  Cache-Control: public, max-age=3600
