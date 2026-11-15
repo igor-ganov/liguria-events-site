@@ -124,4 +124,19 @@ describe('feedCardHtml', () => {
     assert.ok(html.includes('Rock &amp; &lt;b&gt;roll&lt;/b&gt;'));
     assert.ok(!html.includes('<b>roll'));
   });
+  // A link cannot sit inside a link, so the venue's page is linked beside the
+  // card, and only when that page exists.
+  test('a venue with a page of its own is a link to it, beside the card', () => {
+    const html = feedCardHtml({ ...context, lang: 'it' }, event({ v: 'Teatro della Tosse', ct: 'genova', rg: 'liguria' }));
+    const [card = '', after = ''] = html.split('</footer></a>');
+    assert.ok(!card.includes('photo-card-venue'));
+    assert.ok(after.startsWith('<a class="photo-card-venue photo-card-place" href="/it/liguria/genova/teatro-della-tosse/">'));
+    assert.ok(after.includes('<span>Teatro della Tosse</span>'));
+  });
+  test('a venue without a page stays plain text inside the card, linking nowhere', () => {
+    const html = feedCardHtml(context, event({ v: 'Luoghi vari', ct: 'genova', rg: 'liguria' }));
+    assert.ok(html.endsWith('</footer></a>'));
+    assert.ok(html.includes('<span class="photo-card-venue">'));
+    assert.ok(!html.includes('photo-card-place'));
+  });
 });

@@ -24,3 +24,10 @@ describe('venueLink', () => {
     expect(venueLink('it')(townless)).toBeUndefined();
   });
 });
+
+describe('venueLink and the city facets', () => {
+  test('a venue whose slug is a facet would open the facet page, so it links nowhere', () => {
+    expect(venueLink('it')(event({ v: 'Today' }))).toBeUndefined();
+    expect(venueLink('it')(event({ v: 'Free' }))).toBeUndefined();
+  });
+});

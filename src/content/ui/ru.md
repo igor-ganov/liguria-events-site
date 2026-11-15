@@ -1,6 +1,6 @@
 ---
 nav: { calendar: 'Календарь', feed: 'Лента', map: 'Карта', landmarks: 'Места', places: 'Заведения', favorites: 'Избранное', bot: 'Telegram-бот', ical: 'iCal' }
-search: { placeholder: 'Поиск событий…', none: 'Ничего не найдено по запросу.' }
+search: { placeholder: 'Поиск событий…', none: 'Ничего не найдено по запросу.', events: 'События', venues: 'Организаторы и площадки', suggested: 'Подсказки: {count}' }
 mapLayers: { events: 'События', landmarks: 'Места', places: 'Заведения' }
 places:
   title: Заведения

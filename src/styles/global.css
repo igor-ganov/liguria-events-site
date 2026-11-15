@@ -1687,3 +1687,43 @@ html.feed-filtering [data-feed-list] { visibility: hidden; }
   .entry h1 { font-size: 2rem; }
   .entry-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* ── the venue on a card, as a link to its page ────────────────────── */
+/* It follows the card's own link (a link cannot hold another) and is laid
+   over the card's foot, where the plain venue name sits on other cards. */
+.photo-card:has(+ .photo-card-place) .photo-card-text { padding-bottom: 2.1rem; }
+.photo-card-place {
+  position: relative; z-index: 1;
+  box-sizing: border-box; height: 2.1rem; margin: -2.1rem 0 0; padding: 0 0.9rem 0.85rem;
+  width: fit-content; max-width: 100%; align-items: flex-end;
+  color: #fff; text-decoration: none; text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+.photo-card-place:hover span { text-decoration: underline; }
+.photo-card-place:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.feed-group[data-shut] .photo-card-place { display: none; }
+
+/* ── search suggestions: the combobox popup ────────────────────────── */
+search-suggest { display: block; }
+.suggest-list {
+  position: absolute; inset-inline: 0; top: 100%; z-index: 30;
+  margin: 0.4rem 0 0; padding: 0.35rem 0; list-style: none;
+  max-height: min(70vh, 26rem); overflow-y: auto;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 0.6rem;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.18);
+}
+.suggest-list[hidden] { display: none; }
+.suggest-group ul { list-style: none; margin: 0; padding: 0; }
+.suggest-heading {
+  display: block; padding: 0.45rem 0.9rem 0.2rem;
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-2);
+}
+.suggest-option { display: grid; gap: 0.1rem; padding: 0.45rem 0.9rem; cursor: pointer; }
+.suggest-option[aria-selected='true'],
+.suggest-option:hover { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+.suggest-title, .suggest-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest-title { font-weight: 600; }
+.suggest-sub { color: var(--ink-2); font-size: 0.8rem; }
+@media (forced-colors: active) {
+  .suggest-option[aria-selected='true'] { outline: 2px solid Highlight; outline-offset: -2px; }
+}

@@ -6,7 +6,7 @@ export const chromeUi = {
     calendar: z.string(), feed: z.string(), map: z.string(), landmarks: z.string(),
     places: z.string(), favorites: z.string(), bot: z.string(), ical: z.string(),
   }),
-  search: z.object({ placeholder: z.string(), none: z.string() }),
+  search: z.object({ placeholder: z.string(), none: z.string(), events: z.string(), venues: z.string(), suggested: z.string() }),
   mapLayers: z.object({ events: z.string(), landmarks: z.string(), places: z.string() }),
   map: z.object({ retry: z.string(), failed: z.string(), locate: z.string() }),
   chips: z.object({

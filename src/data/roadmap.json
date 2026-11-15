@@ -1,5 +1,20 @@
 [
   {
+    "id": "search-by-meaning",
+    "stage": "done",
+    "shipped": "2026-11-15",
+    "title": {
+      "en": "Search that understands what you mean",
+      "it": "Una ricerca che capisce cosa intendi",
+      "ru": "Поиск, который понимает смысл"
+    },
+    "note": {
+      "en": "Suggestions appear as you type, in English, Italian or Russian, with the events and the venues that host such things, and every card leads to its venue.",
+      "it": "I suggerimenti compaiono mentre scrivi, in italiano, inglese o russo, con gli eventi e i luoghi che li ospitano, e ogni scheda porta al suo luogo.",
+      "ru": "Подсказки появляются по мере ввода — на русском, итальянском или английском: события и площадки, где такое проходит, а каждая карточка ведёт на страницу площадки."
+    }
+  },
+  {
     "id": "feed-photo-cards",
     "stage": "done",
     "shipped": "2026-10-04",

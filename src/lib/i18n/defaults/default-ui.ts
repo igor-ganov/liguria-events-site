@@ -14,7 +14,7 @@ import type { Ui } from '../ui-schema.ts';
  *  sibling modules; what is left is small enough to read in one screen. */
 export const DEFAULT_UI: Ui = {
   nav: { calendar: 'Calendar', feed: 'Feed', map: 'Map', landmarks: 'Landmarks', places: 'Places', favorites: 'Favourites', bot: 'Telegram bot', ical: 'iCal' },
-  search: { placeholder: 'Search events…', none: 'No events match your search.' },
+  search: { placeholder: 'Search events…', none: 'No events match your search.', events: 'Events', venues: 'Organisers & venues', suggested: 'Suggestions: {count}' },
   mapLayers: { events: 'Events', landmarks: 'Landmarks', places: 'Places' },
   landmarks: DEFAULT_LANDMARKS_UI,
   places: DEFAULT_PLACES_UI,
