@@ -1,4 +1,4 @@
-import { dayText } from './day-text.ts';
+import { weekdayDayText } from './weekday-day-text.ts';
 import { durationText } from '../duration-text.ts';
 import { endHour } from './end-hour.ts';
 import type { Locale } from '../../i18n/locales.ts';
@@ -27,7 +27,7 @@ export const whenLine =
     const span = timed(start, minutes);
     return {
       iso: day,
-      text: dayText(lang, { weekday: 'short', day: 'numeric', month: 'long' })(day),
+      text: weekdayDayText(lang)(day),
       isToday: day === today,
       start,
       end: span.map(([hour, length]) => endHour(hour, length)).at(0),
