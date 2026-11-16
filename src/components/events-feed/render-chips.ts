@@ -3,6 +3,7 @@ import type { TemplateResult } from 'lit';
 import { CATEGORIES } from '../../lib/events/categories.ts';
 import { branch } from '../../lib/branch.ts';
 import { renderIcon } from '../shared/render-icon.ts';
+import { renderUiIcon } from '../shared/render-ui-icon.ts';
 import type { FeedHost } from './host.ts';
 
 /** The clear-selection chip only exists while at least one filter is active. */
@@ -10,7 +11,7 @@ const renderClear = (host: FeedHost): TemplateResult =>
   branch(host.selected.length > 0 || host.freeOnly || host.gemsOnly)(
     () => html`
       <button class="chip chip--clear" @click=${host.ctl.clearFilters}>
-        ✕ ${host.ui.chips.clear}
+        ${renderUiIcon('close')} ${host.ui.chips.clear}
       </button>
     `,
     () => html``,

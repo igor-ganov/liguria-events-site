@@ -1,5 +1,6 @@
 import { branch } from '../../lib/branch.ts';
 import { escHtml } from './esc-html.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { pressedAttr } from './pressed-attr.ts';
 import type { PickMode } from './pick-mode.ts';
 
@@ -18,10 +19,10 @@ export const baseControlHtml = (
   labels: BaseLabels,
 ): string =>
   `<div class="route-base no-print">` +
-  `<button type="button" class="chip" data-pick-base-route${pressedAttr(armed === 'route')}>🏠 ${escHtml(labels.setBase)}</button>` +
-  `<button type="button" class="chip" data-pick-base-global${pressedAttr(armed === 'global')}>🏠 ${escHtml(labels.setBaseDefault)}</button>` +
+  `<button type="button" class="chip" data-pick-base-route${pressedAttr(armed === 'route')}>${uiIcon('home', '1em')} ${escHtml(labels.setBase)}</button>` +
+  `<button type="button" class="chip" data-pick-base-global${pressedAttr(armed === 'global')}>${uiIcon('home', '1em')} ${escHtml(labels.setBaseDefault)}</button>` +
   branch(hasBase)(
-    () => `<button type="button" class="chip" data-clear-base>✕ ${escHtml(labels.clearBase)}</button>`,
+    () => `<button type="button" class="chip" data-clear-base>${uiIcon('close', '1em')} ${escHtml(labels.clearBase)}</button>`,
     () => '',
   ) +
   branch(armed !== undefined)(

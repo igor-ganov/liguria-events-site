@@ -42,6 +42,7 @@ export const DEFAULT_UI: Ui = {
   ...DEFAULT_APP_UI,
   headings: { ongoing: 'Ongoing this month', sources: 'Sources', allEvents: 'All events', editions: 'Other years', alsoHere: '{place}: what else is on', alsoAtVenue: '{place}: also on there' },
   calNav: { prev: 'Previous month', next: 'Next month' },
+  a11y: { close: 'Close', newTab: '(opens in a new tab)' },
   badges: { free: 'free', gem: 'gem', made: 'made here' },
   submitLead: { lead: '', pointLink: '', pointFree: '', pointWho: '' },
   eventForm: { title: '', description: '', image: '', categories: '', starts: '', addDate: '', removeDate: '', dateLabel: '', timeLabel: '', whatIsOn: '', whatIsOnHint: '', venue: '', address: '', addressHint: '', phone: '', website: '', freeEntry: '', mapLabel: '', mapHint: '', submitCreate: '', submitEdit: '', uploadImage: '', replaceImage: '' },

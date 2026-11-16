@@ -1,5 +1,6 @@
 ---
 import GeoHelp from './region/GeoHelp.astro';
+import UiIcon from './shared/UiIcon.astro';
 import HereButtons from './region/HereButtons.astro';
 import RegionRows from './region/RegionRows.astro';
 import { cachedEvents } from '../data/cached-events.ts';
@@ -31,7 +32,7 @@ const points = cityCentroids(payload.events);
       <circle cx="12" cy="10" r="2.5"></circle>
     </svg>
     <span>{label}</span>
-    <span aria-hidden="true">▾</span>
+    <UiIcon name="chevronDown" />
   </button>
 
   <dialog class="region-pop" data-region-pop>

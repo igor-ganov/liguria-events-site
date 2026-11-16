@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../shared/UiIcon.astro';
 import Layout from '../../layouts/Layout.astro';
 import PlaceBody from './place/PlaceBody.astro';
 import { branch } from '../../lib/branch.ts';
@@ -28,7 +29,7 @@ const notFound = { en: 'This place could not be found.', it: 'Luogo non trovato.
 
 <Layout lang={lang} region={region} title={place?.name ?? ui.places.title} description={place?.desc ?? place?.name ?? ui.places.intro} path={path}>
   <article class="event-page lm-detail">
-    <a class="back-link" href={localizedUrl(lang, `${region}/places/`)}>← {ui.places.title}</a>
+    <a class="back-link" href={localizedUrl(lang, `${region}/places/`)}><UiIcon name="arrowLeft" /> {ui.places.title}</a>
     {place && <PlaceBody place={place} lang={lang} region={region} ui={ui} />}
     {place === undefined && <p class="feed-empty">{notFound}</p>}
   </article>

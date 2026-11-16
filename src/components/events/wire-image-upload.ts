@@ -1,5 +1,6 @@
 import { isDefined } from '../../lib/is-defined.ts';
 import { setText } from '../../lib/dom/set-text.ts';
+import { setIconText } from '../../lib/dom/set-icon-text.ts';
 import { uploadEventImage } from './upload-event-image.ts';
 import { uploadedImageUrl } from './uploaded-image-url.ts';
 import type { ImageUpload } from './upload-event-image.ts';
@@ -20,7 +21,7 @@ const accept = (parts: ImageParts, url: string): void => {
     img.src = `${PREVIEW}${url}`;
     img.hidden = false;
   });
-  setText(parts.status, '✓ Uploaded');
+  setIconText(parts.status, 'check', 'Uploaded');
 };
 
 const settle = (parts: ImageParts, upload: ImageUpload): void => {

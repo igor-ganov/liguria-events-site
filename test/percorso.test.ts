@@ -5,6 +5,9 @@ import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
 import { stopClass } from '../src/components/percorso/stop-class.ts';
 import { routeSpanHtml } from '../src/components/favorites/route-span-html.ts';
+import { uiIcon } from '../src/lib/icons/ui-icon.ts';
+
+const ARROW = uiIcon('arrowRight', '1em');
 
 describe('stopClass', () => {
   test('a filled stop means made here, a hollow one means found elsewhere', () => {
@@ -14,13 +17,13 @@ describe('stopClass', () => {
 });
 
 describe('routeSpanHtml', () => {
-  test('a route across days keeps the arrow', () => {
-    assert.ok(routeSpanHtml('2026-07-04', '2026-07-06', 'en').includes('→'));
+  test('a route across days keeps the arrow, drawn as an icon', () => {
+    assert.ok(routeSpanHtml('2026-07-04', '2026-07-06', 'en').includes(ARROW));
   });
 
   test('a route inside one day names that day once', () => {
     const html = routeSpanHtml('2026-07-04', '2026-07-04', 'en');
-    assert.ok(!html.includes('→'), html);
+    assert.ok(!html.includes(ARROW), html);
     assert.equal(html.split('July').length - 1, 1, html);
   });
 });

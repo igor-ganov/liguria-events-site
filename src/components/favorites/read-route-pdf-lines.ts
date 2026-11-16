@@ -28,7 +28,7 @@ export const readRoutePdfLines = async (text: string): Promise<RoutePdfDoc | und
         lang,
         mode: payload.mode,
         durations: payload.durations,
-        labels: { min: ui.route.min, fromBase: ui.route.fromBase, toBase: ui.route.toBase },
+        labels: { min: ui.route.min, fromBase: ui.route.fromBase, toBase: ui.route.toBase, transfers: ui.route.transfers },
         baseOf,
       }),
     }))

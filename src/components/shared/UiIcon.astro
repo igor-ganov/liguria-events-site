@@ -1,0 +1,11 @@
+---
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
+import type { UiIconName } from '../../lib/icons/ui-icon-paths.ts';
+
+// The Astro face of uiIcon: `<UiIcon name="close" />` draws the icon at the
+// size of the surrounding text, in its colour, hidden from assistive tech.
+type Props = Readonly<{ name: UiIconName; size?: number | '1em' }>;
+const { name, size = '1em' } = Astro.props;
+---
+
+<Fragment set:html={uiIcon(name, size)} />

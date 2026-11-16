@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../../shared/UiIcon.astro';
 import { CATEGORIES } from '../../../lib/events/categories.ts';
 import QuickFilters from './QuickFilters.astro';
 import { iconSvg } from '../../../lib/icons/icon-svg.ts';
@@ -36,5 +37,5 @@ const { ui, today, lang, title, quick } = Astro.props;
   <button class="chip chip--free" data-feed-free aria-pressed="false">{ui.chips.free}</button>
   <button class="chip chip--gems" data-feed-gems aria-pressed="false">{ui.chips.gems}</button>
   <button class="chip chip--made" data-feed-made aria-pressed="false">{ui.chips.made}</button>
-  <button class="chip chip--clear" data-feed-clear hidden>✕ {ui.chips.clear}</button>
+  <button class="chip chip--clear" data-feed-clear hidden><UiIcon name="close" /> {ui.chips.clear}</button>
 </div>

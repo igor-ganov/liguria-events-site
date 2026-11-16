@@ -3,6 +3,7 @@ import type { TemplateResult } from 'lit';
 import { monthGrid } from '../../lib/calendar/month-grid.ts';
 import { monthTitle } from '../../lib/calendar/month-title.ts';
 import { renderDay } from './render-day.ts';
+import { renderUiIcon } from '../shared/render-ui-icon.ts';
 import { renderOngoing } from './render-ongoing.ts';
 import type { CalendarHost } from './host.ts';
 
@@ -10,9 +11,9 @@ export const renderCalendar = (host: CalendarHost): TemplateResult => {
   const title = monthTitle(host.ui)(host.monthKey);
   return html`
     <header class="cal-head">
-      <button class="nav-btn" @click=${host.ctl.prev} aria-label=${host.ui.calNav.prev}>‹</button>
+      <button class="nav-btn" @click=${host.ctl.prev} aria-label=${host.ui.calNav.prev}>${renderUiIcon('chevronLeft')}</button>
       <h2>${title}</h2>
-      <button class="nav-btn" @click=${host.ctl.next} aria-label=${host.ui.calNav.next}>›</button>
+      <button class="nav-btn" @click=${host.ctl.next} aria-label=${host.ui.calNav.next}>${renderUiIcon('chevronRight')}</button>
     </header>
     <!-- No ARIA table: below 44rem this becomes a list of days and the
          columns stop existing. Every cell carries its own date instead. -->

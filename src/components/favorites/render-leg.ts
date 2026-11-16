@@ -1,10 +1,15 @@
 import { escHtml } from './esc-html.ts';
+import { hiddenText } from './hidden-text.ts';
 import { legParts } from './leg-parts.ts';
 import { mapsLink } from './maps-link.ts';
 import { when } from './when.ts';
 import { distanceLabel } from '../../lib/favorites/distance-label.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Leg, Mode } from '../../lib/favorites/build-route.ts';
 import type { Ui } from './render-types.ts';
+
+const transfers = (count: number, ui: Ui): string =>
+  ` · ${uiIcon('transfer', '1em')}${hiddenText(ui.route.transfers)} ${count}`;
 
 /** One travel leg between two stops of a day. */
 export const renderLeg = (leg: Leg, mode: Mode, ui: Ui): string =>
@@ -12,9 +17,9 @@ export const renderLeg = (leg: Leg, mode: Mode, ui: Ui): string =>
   `${when(leg.real === true, ' data-real="1"')}>` +
   `<span class="route-leg-mode" data-mode="${mode}"></span>` +
   `<span>${distanceLabel(leg.meters)} · ${leg.minutes} ${escHtml(ui.route.min)}` +
-  when(Boolean(leg.transfers), ` · ⇄ ${leg.transfers}`) +
-  when(leg.tight, ` · ⚠ ${escHtml(ui.route.tight)}`) +
+  when(Boolean(leg.transfers), transfers(leg.transfers ?? 0, ui)) +
+  when(leg.tight, ` · ${uiIcon('warning', '1em')} ${escHtml(ui.route.tight)}`) +
   `</span>` +
-  legParts(leg) +
-  mapsLink(leg.mapsUrl) +
+  legParts(leg, ui) +
+  mapsLink(leg.mapsUrl, ui.a11y.newTab) +
   `</li>`;

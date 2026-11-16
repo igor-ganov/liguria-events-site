@@ -10,6 +10,7 @@ import { offScheduleFlag } from '../src/components/favorites/off-schedule-flag.t
 import { delButton } from '../src/components/favorites/del-button.ts';
 import { timelineBlock } from '../src/components/favorites/timeline-block.ts';
 import { travelChip } from '../src/components/favorites/travel-chip.ts';
+import { uiIcon } from '../src/lib/icons/ui-icon.ts';
 import { pauseBlock } from '../src/components/favorites/pause-block.ts';
 import { addPauseButton } from '../src/components/favorites/add-pause-button.ts';
 import { timelineGap } from '../src/components/favorites/timeline-gap.ts';
@@ -184,7 +185,7 @@ describe('timelineBlock', () => {
   test('marks a pinned stop and an off-schedule one', () => {
     const pinned = timelineBlock(item({ id: 'e1' }), ctxOf({ payload: payload({ times: { e1: '09:00' } }) }));
     assert.ok(pinned.includes('tl-block--pinned'));
-    assert.ok(pinned.includes('📌'));
+    assert.ok(pinned.includes(`${uiIcon('pushpin', '1em')}<span class="visually-hidden">Fixed time</span>`));
     assert.ok(timelineBlock(item({ id: 'e1', offSchedule: true }), ctxOf()).includes('tl-block--offschedule'));
   });
 
@@ -197,7 +198,7 @@ describe('timelineBlock', () => {
 describe('travelChip', () => {
   test('shows the travel time in the gap, in the route mode', () => {
     const html = travelChip(item({ id: 'b', travelMin: 20 }), 600, ctxOf());
-    assert.ok(html.includes('🚶 20m'));
+    assert.ok(html.includes(`${uiIcon('walk', '1em')}<span class="visually-hidden">Walking</span> 20m`));
     assert.ok(html.includes('style="top:63px"'));
   });
 
@@ -206,8 +207,8 @@ describe('travelChip', () => {
   });
 
   test('the glyph follows the mode', () => {
-    assert.ok(travelChip(item({ id: 'b', travelMin: 5 }), 600, ctxOf({ payload: payload({ mode: 'driving' }) })).includes('🚗'));
-    assert.ok(travelChip(item({ id: 'b', travelMin: 5 }), 600, ctxOf({ payload: payload({ mode: 'transit' }) })).includes('🚌'));
+    assert.ok(travelChip(item({ id: 'b', travelMin: 5 }), 600, ctxOf({ payload: payload({ mode: 'driving' }) })).includes(uiIcon('car', '1em')));
+    assert.ok(travelChip(item({ id: 'b', travelMin: 5 }), 600, ctxOf({ payload: payload({ mode: 'transit' }) })).includes(uiIcon('bus', '1em')));
   });
 });
 
@@ -221,7 +222,7 @@ describe('pauseBlock', () => {
     assert.ok(html.includes('data-tl-id="break:e1"'));
     assert.ok(html.includes('data-tl-start="600"'));
     assert.ok(html.includes('data-tl-dur="60"'));
-    assert.ok(html.includes('⏸ 1h'));
+    assert.ok(html.includes(`${uiIcon('pause', '1em')}<span class="visually-hidden">Break</span> 1h`));
     assert.ok(!html.includes('data-clear-pause'));
   });
 

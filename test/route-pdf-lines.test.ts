@@ -28,7 +28,7 @@ const opts = {
   lang: 'en' as const,
   mode: 'transit' as const,
   durations: {},
-  labels: { min: 'min', fromBase: 'From base', toBase: 'To base' },
+  labels: { min: 'min', fromBase: 'From base', toBase: 'To base', transfers: 'Transfers' },
 };
 
 test('routePdfLines: title, day heading, numbered stops, a leg with mode + transfers', () => {
@@ -43,7 +43,7 @@ test('routePdfLines: title, day heading, numbered stops, a leg with mode + trans
   assert.ok(legLine!.text.includes('1.2 km'));
   assert.ok(legLine!.text.includes('15 min'));
   assert.ok(legLine!.text.includes('transit'));
-  assert.ok(legLine!.text.includes('1⇄'));
+  assert.ok(legLine!.text.includes('Transfers: 1'));
 });
 
 test('routePdfLines: from/to base lines appear when a base is set', () => {
@@ -93,7 +93,7 @@ test('distanceLabel: metres below a kilometre, one decimal above', () => {
 
 test('legDetail: the transfer count only appears when there is one', () => {
   const direct: Leg = { meters: 1200, minutes: 15, mapsUrl: '', tight: false };
-  assert.equal(legDetail(leg, opts), '1.2 km · 15 min · 1⇄ · transit');
+  assert.equal(legDetail(leg, opts), '1.2 km · 15 min · Transfers: 1 · transit');
   assert.equal(legDetail({ ...leg, transfers: 0 }, opts), '1.2 km · 15 min · transit');
   assert.equal(legDetail(direct, opts), '1.2 km · 15 min · transit');
 });

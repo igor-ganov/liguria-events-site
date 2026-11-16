@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { BANNED_GLYPHS } from './kit/banned-glyphs.ts';
 
 // A transit leg shows the compact multimodal breakdown: mode, line, destination
-// and per-part time (🚶 → 🚌 20 → De Ferrari → 🚶), from the real routing.
+// and per-part time (walk, bus 20 to De Ferrari, walk), from the real routing,
+// each mode drawn as an icon and named for a screen reader.
 const PLAN = {
   itineraries: [
     {
@@ -35,7 +37,9 @@ test('a transit leg shows the compact walk → bus → walk breakdown', async ({
 
   const parts = page.locator('.route-leg[data-real="1"] .route-leg-parts').first();
   await expect(parts).toBeVisible();
-  await expect(parts).toContainText('🚌 20');
+  await expect(parts).toContainText('Bus 20');
+  await expect(parts.locator('.route-leg-part').nth(1).locator('svg.ui-icon').first()).toBeVisible();
   await expect(parts).toContainText('De Ferrari');
   await expect(parts.locator('.route-leg-part')).toHaveCount(3); // walk, bus, walk
+  expect(await page.locator('[data-route-output]').innerText()).not.toMatch(BANNED_GLYPHS);
 });

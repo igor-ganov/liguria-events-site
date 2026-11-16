@@ -1,0 +1,10 @@
+---
+import UiIcon from './UiIcon.astro';
+
+// What a link that leaves the site carries after its text: the arrow-out-of-a-
+// box icon, and for a screen reader the words the icon stands for.
+type Props = Readonly<{ label: string }>;
+const { label } = Astro.props;
+---
+
+<UiIcon name="external" /><span class="visually-hidden"> {label}</span>

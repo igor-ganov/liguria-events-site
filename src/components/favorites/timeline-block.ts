@@ -3,8 +3,10 @@ import { blockDuration } from './block-duration.ts';
 import { blockTitle } from './block-title.ts';
 import { delButton } from './del-button.ts';
 import { escHtml } from './esc-html.ts';
+import { hiddenText } from './hidden-text.ts';
 import { offScheduleFlag } from './off-schedule-flag.ts';
 import { when } from './when.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { timeOfMinutes } from '../../lib/favorites/day-schedule.ts';
 import type { ScheduledStop } from '../../lib/favorites/day-schedule.ts';
 import type { DayCtx } from './timeline-types.ts';
@@ -24,8 +26,8 @@ export const timelineBlock = (item: ScheduledStop, ctx: DayCtx): string => {
     `data-tl-start="${item.startMin}" data-tl-dur="${blockDuration(item, event, payload.durations)}" ` +
     `style="top:${(item.startMin - ctx.start) * PX_PER_MIN}px;height:${height}px">` +
     `<span class="tl-resize tl-resize--top no-print" data-tl-resize="top" aria-hidden="true"></span>` +
-    `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">⠿</span>` +
-    `<span class="tl-time">${timeOfMinutes(item.startMin)}–${timeOfMinutes(item.endMin)}${when(pinned, ' 📌')}</span>` +
+    `<span class="tl-grip no-print" data-tl-grip aria-hidden="true">${uiIcon('grip', '1em')}</span>` +
+    `<span class="tl-time">${timeOfMinutes(item.startMin)}–${timeOfMinutes(item.endMin)}${when(pinned, ` ${uiIcon('pushpin', '1em')}${hiddenText('Fixed time')}`)}</span>` +
     `<span class="tl-title">${blockTitle(item, event, lang)}</span>` +
     offScheduleFlag(item, event) +
     delButton(item.id, editable) +

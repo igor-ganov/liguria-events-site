@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../shared/UiIcon.astro';
 import Layout from '../../layouts/Layout.astro';
 import LandmarkArticle from './landmark/LandmarkArticle.astro';
 import { uiOf } from '../../lib/i18n/ui-of.ts';
@@ -28,7 +29,7 @@ const notFound = { en: 'This landmark could not be found.', it: 'Luogo non trova
 
 <Layout lang={lang} region={region} title={title} description={description} path={path}>
   <article class="event-page lm-detail">
-    <a class="back-link" href={localizedUrl(lang, `${region}/landmarks/`)}>← {ui.landmarks.title}</a>
+    <a class="back-link" href={localizedUrl(lang, `${region}/landmarks/`)}><UiIcon name="arrowLeft" /> {ui.landmarks.title}</a>
     {found.map((item) => <LandmarkArticle item={item} ui={ui} lang={lang} region={region} />)}
     {found.length === 0 && <p class="feed-empty">{notFound}</p>}
   </article>

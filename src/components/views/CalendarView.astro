@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../shared/UiIcon.astro';
 import Layout from '../../layouts/Layout.astro';
 import MiniCard from '../shared/MiniCard.astro';
 import MonthGrid from './calendar/MonthGrid.astro';
@@ -51,14 +52,14 @@ const description = ui.seo.calendar.replace('{place}', placeName);
 
   <header class="cal-head">
     {previous !== undefined && (
-      <a class="nav-btn" href={monthUrl(previous)} aria-label={ui.calNav.prev}>‹</a>
+      <a class="nav-btn" href={monthUrl(previous)} aria-label={ui.calNav.prev}><UiIcon name="chevronLeft" /></a>
     )}
-    {previous === undefined && <span class="nav-btn nav-off" aria-hidden="true">‹</span>}
+    {previous === undefined && <span class="nav-btn nav-off" aria-hidden="true"><UiIcon name="chevronLeft" /></span>}
     <h2>{title}</h2>
     {following !== undefined && (
-      <a class="nav-btn" href={monthUrl(following)} aria-label={ui.calNav.next}>›</a>
+      <a class="nav-btn" href={monthUrl(following)} aria-label={ui.calNav.next}><UiIcon name="chevronRight" /></a>
     )}
-    {following === undefined && <span class="nav-btn nav-off" aria-hidden="true">›</span>}
+    {following === undefined && <span class="nav-btn nav-off" aria-hidden="true"><UiIcon name="chevronRight" /></span>}
   </header>
 
   <MonthGrid lang={lang} ui={ui} monthKey={monthKey} title={title} events={events} />

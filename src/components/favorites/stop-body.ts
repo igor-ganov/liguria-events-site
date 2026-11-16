@@ -1,5 +1,6 @@
 import { escHtml } from './esc-html.ts';
 import { when } from './when.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { eventDuration, formatDuration } from '../../lib/favorites/event-duration.ts';
 import { titleOf } from '../../lib/events/title-of.ts';
 import { eventPath } from '../../lib/event-path.ts';
@@ -9,7 +10,7 @@ import type { Locale } from '../../lib/i18n/locales.ts';
 import type { Durations } from './render-types.ts';
 
 const durationCell = (id: string, dur: number): string =>
-  `<span class="route-stop-dur" title="Duration">⏱ ${escHtml(formatDuration(dur))} ` +
+  `<span class="route-stop-dur" title="Duration">${uiIcon('timer', '1em')} ${escHtml(formatDuration(dur))} ` +
   `<input type="number" class="dur-input" data-dur-input data-dur-id="${escHtml(id)}" ` +
   `value="${dur}" min="15" step="15" aria-label="Duration in minutes" /></span>`;
 

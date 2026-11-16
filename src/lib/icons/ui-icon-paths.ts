@@ -1,5 +1,10 @@
+import { CHROME_ICON_PATHS } from './chrome-icon-paths.ts';
+import { MODE_ICON_PATHS } from './mode-icon-paths.ts';
+
 /** Inner SVG markup for chrome/UI icons — 24×24 viewBox, stroke=currentColor,
- *  feather-style, matching src/lib/icons/icon-paths.ts. Keyed by a stable name. */
+ *  feather-style, matching src/lib/icons/icon-paths.ts. Keyed by a stable name.
+ *  The control marks (arrows, close, tick…) and the transport modes live in
+ *  files of their own and are merged in here. */
 export const UI_ICON_PATHS = {
   feed: '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
   calendar: '<rect x="3.5" y="4.5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17M8 3v3M16 3v3"/>',
@@ -24,6 +29,8 @@ export const UI_ICON_PATHS = {
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/>',
   route: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/>',
   photo: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4 17l5-4 4 3 3-2.5 4 3.5"/>',
+  ...CHROME_ICON_PATHS,
+  ...MODE_ICON_PATHS,
 } as const;
 
 export type UiIconName = keyof typeof UI_ICON_PATHS;

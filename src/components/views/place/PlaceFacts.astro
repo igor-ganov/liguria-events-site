@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../../shared/UiIcon.astro';
 import { uiIcon } from '../../../lib/icons/ui-icon.ts';
 import { localizedUrl } from '../../../lib/i18n/localized-url.ts';
 import type { Place } from '../../../lib/places/place-schema.ts';
@@ -15,7 +16,7 @@ const siteText = site?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 <dl class="event-facts">
   <div>
     <dt title={ui.places.address}><Fragment set:html={uiIcon('pin', 17)} /></dt>
-    <dd>{place.address ?? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+    <dd>{place.address ?? `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`} <a class="map-link" href={mapUrl}><UiIcon name="map" /> {ui.mapLink}</a></dd>
   </div>
   {place.phone && (
     <div>

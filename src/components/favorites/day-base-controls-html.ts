@@ -1,4 +1,5 @@
 import { escHtml } from './esc-html.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import { pressedAttr } from './pressed-attr.ts';
 import type { PickMode } from './pick-mode.ts';
 
@@ -12,6 +13,6 @@ export const dayBaseControlsHtml = (
   labels: DayBaseLabels,
 ): string =>
   `<div class="route-day-base no-print">` +
-  `<button type="button" class="chip" data-pick-base data-day="${escHtml(day)}"${pressedAttr(armed === 'base')}>🏠 ${escHtml(labels.dayBase)}</button>` +
-  `<button type="button" class="chip" data-pick-final data-day="${escHtml(day)}"${pressedAttr(armed === 'final')}>🏁 ${escHtml(labels.dayFinal)}</button>` +
+  `<button type="button" class="chip" data-pick-base data-day="${escHtml(day)}"${pressedAttr(armed === 'base')}>${uiIcon('home', '1em')} ${escHtml(labels.dayBase)}</button>` +
+  `<button type="button" class="chip" data-pick-final data-day="${escHtml(day)}"${pressedAttr(armed === 'final')}>${uiIcon('flag', '1em')} ${escHtml(labels.dayFinal)}</button>` +
   `</div>`;
