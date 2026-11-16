@@ -1,6 +1,8 @@
 import { branch } from '../../lib/branch.ts';
 import { dayLabel } from '../../lib/favorites/day-label.ts';
 import { escHtml } from './esc-html.ts';
+import { hiddenText } from './hidden-text.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 import type { Locale } from '../../lib/i18n/locales.ts';
 
 /**
@@ -12,7 +14,7 @@ export const routeSpanHtml = (from: string, to: string, lang: Locale): string =>
   const day = (iso: string): string => escHtml(dayLabel(iso, lang));
   const text = branch(from === to)(
     () => day(from),
-    () => `${day(from)} → ${day(to)}`,
+    () => `${day(from)} ${uiIcon('arrowRight', '1em')}${hiddenText('–')} ${day(to)}`,
   );
   return `<p class="route-span">${text}</p>`;
 };

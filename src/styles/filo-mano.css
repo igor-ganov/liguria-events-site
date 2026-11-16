@@ -396,9 +396,13 @@
 }
 .account-signin,
 .account-signout,
-.account-submit,
-.nav-btn {
+.account-submit {
   padding: 0.52rem 1.05rem;
+}
+/* A fixed round button around one icon: padding would push the icon off
+   centre, so the grid it already is does the centring. */
+.nav-btn {
+  padding: 0;
 }
 .chip {
   padding: 0.5rem 1.2rem;

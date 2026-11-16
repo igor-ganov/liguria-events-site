@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../components/shared/UiIcon.astro';
 import '../styles/pages/404.css';
 // Server-rendered, and that is the point: a prerendered 404.html is handed
 // straight to the reader by the assets layer, which never runs the worker — so
@@ -30,6 +31,6 @@ const home = regionUrl('en', LEGACY_REGION);
       We couldn't find the page you were looking for. It may have moved, or the link may be out of
       date.
     </p>
-    <p><a href={home}>← Back to events</a></p>
+    <p><a href={home}><UiIcon name="arrowLeft" /> Back to events</a></p>
   </article>
 </Layout>

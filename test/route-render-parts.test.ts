@@ -22,8 +22,12 @@ import { dayMarkers } from '../src/components/favorites/day-markers.ts';
 import { routeMarkers } from '../src/components/favorites/route-markers.ts';
 import type { Leg, RouteDay, RouteStop } from '../src/lib/favorites/build-route.ts';
 import type { ItineraryOpts } from '../src/components/favorites/render-types.ts';
+import { uiIcon } from '../src/lib/icons/ui-icon.ts';
+import type { UiIconName } from '../src/lib/icons/ui-icon-paths.ts';
 
 const ui = DEFAULT_UI;
+const icon = (name: UiIconName): string => uiIcon(name, '1em');
+const hidden = (text: string): string => `<span class="visually-hidden">${text}</span>`;
 
 const stop = (o: Partial<RouteStop> & Pick<RouteStop, 'id'>): RouteStop => ({
   t: o.id,
@@ -56,43 +60,61 @@ describe('when', () => {
 
 describe('mapsLink', () => {
   test('links a leg that has directions and nothing for one that has none', () => {
-    assert.ok(mapsLink('https://maps/x').includes('href="https://maps/x"'));
-    assert.equal(mapsLink(''), '');
+    assert.ok(mapsLink('https://maps/x', 'new tab').includes('href="https://maps/x"'));
+    assert.equal(mapsLink('', 'new tab'), '');
+  });
+
+  test('marks the link external with an icon, and says so to a screen reader', () => {
+    assert.ok(mapsLink('https://maps/x', 'new tab').includes(`${icon('external')}${hidden(' new tab')}`));
   });
 });
 
 describe('segmentText', () => {
-  test('a walk shows only its icon and minutes', () => {
-    assert.equal(segmentText({ mode: 'walk', minutes: 4 }), '<span class="route-leg-part">🚶 4′</span>');
+  const part = segmentText(ui);
+
+  test('a walk shows only its icon, named for a screen reader, and minutes', () => {
+    assert.equal(part({ mode: 'walk', minutes: 4 }), `<span class="route-leg-part">${icon('walk')}${hidden('Walking')} 4′</span>`);
   });
 
   test('a vehicle shows its line and destination', () => {
     assert.equal(
-      segmentText({ mode: 'bus', line: '20', to: 'De Ferrari', minutes: 12 }),
-      '<span class="route-leg-part">🚌 20 → De Ferrari 12′</span>',
+      part({ mode: 'bus', line: '20', to: 'De Ferrari', minutes: 12 }),
+      `<span class="route-leg-part">${icon('bus')}${hidden('Bus')} 20 ${icon('arrowRight')} De Ferrari 12′</span>`,
     );
   });
 
   test('a walk never shows a destination, and an unknown mode falls back to the bus icon', () => {
-    assert.equal(segmentText({ mode: 'walk', to: 'Piazza', minutes: 3 }), '<span class="route-leg-part">🚶 3′</span>');
-    assert.ok(segmentText({ mode: 'hyperloop', minutes: 1 }).includes('🚌'));
+    assert.equal(part({ mode: 'walk', to: 'Piazza', minutes: 3 }), `<span class="route-leg-part">${icon('walk')}${hidden('Walking')} 3′</span>`);
+    assert.ok(part({ mode: 'hyperloop', minutes: 1 }).includes(icon('bus')));
+  });
+
+  test('every mode the router names draws its own icon', () => {
+    const modes: readonly (readonly [string, UiIconName, string])[] = [
+      ['metro', 'metro', 'Metro'],
+      ['train', 'train', 'Train'],
+      ['funicular', 'funicular', 'Funicular'],
+      ['boat', 'ferry', 'Ferry'],
+    ];
+    modes.forEach(([mode, name, label]) =>
+      assert.ok(part({ mode, minutes: 1 }).includes(`${icon(name)}${hidden(label)}`), mode),
+    );
   });
 
   test('escapes the line and destination', () => {
-    assert.ok(segmentText({ mode: 'bus', line: '<b>', minutes: 1 }).includes('&#60;b&#62;'));
+    assert.ok(part({ mode: 'bus', line: '<b>', minutes: 1 }).includes('&#60;b&#62;'));
   });
 });
 
 describe('legParts', () => {
   test('nothing when there are no parts, or a single walk already summed on the leg', () => {
-    assert.equal(legParts(leg()), '');
-    assert.equal(legParts(leg({ segments: [{ mode: 'walk', minutes: 4 }] })), '');
+    assert.equal(legParts(leg(), ui), '');
+    assert.equal(legParts(leg({ segments: [{ mode: 'walk', minutes: 4 }] }), ui), '');
   });
 
   test('shows the breakdown once a vehicle or a second part is involved', () => {
-    assert.ok(legParts(leg({ segments: [{ mode: 'bus', minutes: 9 }] })).includes('route-leg-parts'));
-    const two = legParts(leg({ segments: [{ mode: 'walk', minutes: 2 }, { mode: 'walk', minutes: 3 }] }));
-    assert.ok(two.includes('route-leg-arrow'));
+    assert.ok(legParts(leg({ segments: [{ mode: 'bus', minutes: 9 }] }), ui).includes('route-leg-parts'));
+    const two = legParts(leg({ segments: [{ mode: 'walk', minutes: 2 }, { mode: 'walk', minutes: 3 }] }), ui);
+    assert.ok(two.includes(`<span class="route-leg-arrow">${icon('arrowRight')}</span>`));
   });
 });
 
@@ -108,14 +130,14 @@ describe('renderLeg', () => {
   test('flags a tight connection in the class and the text', () => {
     const html = renderLeg(leg({ tight: true }), 'transit', ui);
     assert.ok(html.includes('route-leg--tight'));
-    assert.ok(html.includes('⚠ Tight connection'));
+    assert.ok(html.includes(`${icon('warning')} Tight connection`));
   });
 
   test('marks a really routed leg and counts its transfers', () => {
     const html = renderLeg(leg({ real: true, transfers: 2 }), 'transit', ui);
     assert.ok(html.includes('route-leg--real'));
     assert.ok(html.includes('data-real="1"'));
-    assert.ok(html.includes('⇄ 2'));
+    assert.ok(html.includes(`${icon('transfer')}${hidden('Transfers')} 2`));
   });
 
   test('kilometres once the leg is long enough, and no link without directions', () => {
@@ -129,7 +151,7 @@ describe('baseLegRow', () => {
   test('reads as a leg from the base', () => {
     const html = baseLegRow(leg(), 'From base', 'walking', ui);
     assert.ok(html.includes('route-leg--base'));
-    assert.ok(html.includes('🏠 From base'));
+    assert.ok(html.includes(`${icon('home')} From base`));
     assert.ok(html.includes('500 m'));
   });
 });

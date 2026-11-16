@@ -1,5 +1,6 @@
 import { disabledAttr } from './disabled-attr.ts';
 import { escHtml } from './esc-html.ts';
+import { uiIcon } from '../../lib/icons/ui-icon.ts';
 
 export type ControlLabels = Readonly<{ moveUp: string; moveDown: string; remove: string }>;
 
@@ -15,8 +16,8 @@ export const controlsHtml = (
   labels: ControlLabels,
 ): string =>
   `<div class="route-edit-controls">` +
-  `<button type="button" class="route-ctl" data-op="up" data-id="${escHtml(id)}" data-day="${escHtml(day)}"${disabledAttr(index === 0)} aria-label="${escHtml(labels.moveUp)}">↑</button>` +
-  `<button type="button" class="route-ctl" data-op="down" data-id="${escHtml(id)}" data-day="${escHtml(day)}"${disabledAttr(index === last)} aria-label="${escHtml(labels.moveDown)}">↓</button>` +
+  `<button type="button" class="route-ctl" data-op="up" data-id="${escHtml(id)}" data-day="${escHtml(day)}"${disabledAttr(index === 0)} aria-label="${escHtml(labels.moveUp)}">${uiIcon('arrowUp', '1em')}</button>` +
+  `<button type="button" class="route-ctl" data-op="down" data-id="${escHtml(id)}" data-day="${escHtml(day)}"${disabledAttr(index === last)} aria-label="${escHtml(labels.moveDown)}">${uiIcon('arrowDown', '1em')}</button>` +
   moveSelect +
-  `<button type="button" class="route-ctl route-ctl--del" data-op="remove" data-id="${escHtml(id)}" data-day="${escHtml(day)}" aria-label="${escHtml(labels.remove)}">✕</button>` +
+  `<button type="button" class="route-ctl route-ctl--del" data-op="remove" data-id="${escHtml(id)}" data-day="${escHtml(day)}" aria-label="${escHtml(labels.remove)}">${uiIcon('close', '1em')}</button>` +
   `</div>`;

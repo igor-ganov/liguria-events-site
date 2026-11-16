@@ -280,8 +280,11 @@ html:not(:active-view-transition-type(theme))::view-transition-new(root) {
   padding: 0.7rem 1rem; border: none; border-radius: var(--radius-sm);
   background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer;
 }
-.signin-x-row { display: flex; justify-content: flex-end; margin: -0.5rem -0.5rem 0 0; }
-.signin-x { background: none; border: none; color: var(--ink-2); font-size: 1.1rem; cursor: pointer; }
+.signin-dialog .signin-x-row { flex-direction: row; justify-content: flex-end; margin: -0.5rem -0.5rem 0 0; }
+.signin-x {
+  display: grid; place-items: center; inline-size: 2.75rem; block-size: 2.75rem; padding: 0;
+  background: none; border: none; color: var(--ink-2); font-size: 1.25rem; cursor: pointer;
+}
 .signin-or { display: flex; align-items: center; color: var(--ink-2); font-size: 0.8rem; margin: 0.7rem 0 0.4rem; }
 .signin-or::before, .signin-or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .signin-or span { padding: 0 0.6rem; }
@@ -885,7 +888,7 @@ a.chip { text-decoration: none; }
   position: absolute; left: 0; top: 0; bottom: 0; width: 1.25rem;
   display: flex; align-items: center; justify-content: center;
   cursor: grab; touch-action: none; color: var(--muted); opacity: 0.5;
-  font-size: 0.7rem; letter-spacing: -1px;
+  font-size: 0.85rem;
   -webkit-user-drag: none; -webkit-touch-callout: none;
 }
 .tl-grip:active { cursor: grabbing; }
@@ -1362,6 +1365,10 @@ html.feed-returning main:has([data-feed-list]) { visibility: hidden; }
 .lm-thumb-icon { display: grid; place-items: center; height: 100%; color: var(--lm, #5c6bc0); }
 .lm-name { transition: color var(--speed); }
 .lm-icon, .ui-icon { flex: none; vertical-align: -0.16em; }
+/* An icon is never the click target: the control around it is. Event
+   delegation that compares event.target with a button keeps working when the
+   press lands on the drawing. */
+.ui-icon { pointer-events: none; }
 .lm-info { padding: 0.65rem 0.8rem; display: flex; flex-direction: column; gap: 0.28rem; }
 .lm-name { font-weight: 700; line-height: 1.25; color: var(--ink); }
 .lm-kind { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.74rem; font-weight: 700; color: var(--lm, #5c6bc0); }

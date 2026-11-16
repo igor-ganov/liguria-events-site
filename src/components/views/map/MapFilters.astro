@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../../shared/UiIcon.astro';
 import { CATEGORIES } from '../../../lib/events/categories.ts';
 import { iconSvg } from '../../../lib/icons/icon-svg.ts';
 import { uiIcon } from '../../../lib/icons/ui-icon.ts';
@@ -33,6 +34,6 @@ const { ui } = Astro.props;
     }
     <button class="chip chip--free" data-map-free aria-pressed="false" disabled>{ui.chips.free}</button>
     <button class="chip chip--gems" data-map-gems aria-pressed="false" disabled>{ui.chips.gems}</button>
-    <button class="chip chip--clear" data-map-clear hidden disabled>✕ {ui.chips.clear}</button>
+    <button class="chip chip--clear" data-map-clear hidden disabled><UiIcon name="close" /> {ui.chips.clear}</button>
   </div>
 </div>

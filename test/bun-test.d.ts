@@ -3,7 +3,9 @@
  *  so the deploy's typecheck judges the tests rather than the shim. */
 declare module 'bun:test' {
   export const describe: (name: string, fn: () => void) => void;
-  export const test: (name: string, fn: () => void | Promise<void>) => void;
+  type TestFn = (name: string, fn: () => void | Promise<void>) => void;
+  /** `skipIf(true)` registers the test as skipped, so the run reports it. */
+  export const test: TestFn & { readonly skipIf: (condition: boolean) => TestFn };
   export const it: (name: string, fn: () => void | Promise<void>) => void;
   export const beforeAll: (fn: () => void | Promise<void>) => void;
   export const afterAll: (fn: () => void | Promise<void>) => void;

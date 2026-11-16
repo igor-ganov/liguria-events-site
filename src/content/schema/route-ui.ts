@@ -13,4 +13,6 @@ export const routeUi = z.object({
   setDefault: z.string(), setBase: z.string(), setBaseDefault: z.string(),
   clearBase: z.string(), clickMap: z.string(), dayBase: z.string(),
   dayFinal: z.string(), fromBase: z.string(), toBase: z.string(),
+  bus: z.string(), metro: z.string(), train: z.string(), funicular: z.string(),
+  boat: z.string(), transfers: z.string(),
 });

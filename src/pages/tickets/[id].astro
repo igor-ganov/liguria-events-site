@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../../components/shared/UiIcon.astro';
 import '../../styles/pages/tickets._id.css';
 import { ROOT_ONLY } from '../../lib/i18n/root-only-locales.ts';
 export const prerender = false;
@@ -30,7 +31,7 @@ Astro.response.status = [404].filter(() => ticket === undefined).at(0) ?? 200;
 
 <Layout lang="en" title={ticket?.eventTitle ?? 'Request not found'} path={`tickets/${Astro.params.id ?? ''}/`} locales={ROOT_ONLY} noindex={true}>
   <section class="ticket-card">
-    <p class="event-topbar"><a class="back-link" href="/tickets/">← My requests</a></p>
+    <p class="event-topbar"><a class="back-link" href="/tickets/"><UiIcon name="arrowLeft" /> My requests</a></p>
     {ticket === undefined && <h1>Request not found</h1>}
     {ticket !== undefined && (
       <TicketThread ticket={ticket} messages={messages.at(0) ?? []} admin={admin}>

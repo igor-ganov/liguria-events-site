@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../shared/UiIcon.astro';
 import { branch } from '../../lib/branch.ts';
 import type { Session } from '../../lib/events/event-schema.ts';
 import type { Ui } from '../../lib/i18n/ui-schema.ts';
@@ -44,7 +45,7 @@ const rows: readonly Session[] = branch(sessions.length > 0)(
           <input type="date" data-session-date value={session.date} aria-label={ui.eventForm.dateLabel} />
           <input type="time" data-session-time value={session.time ?? ''} aria-label={ui.eventForm.timeLabel} />
           <input type="text" data-session-title maxlength="200" value={session.title ?? ''} aria-label={ui.eventForm.whatIsOn} placeholder={ui.eventForm.whatIsOnHint} />
-          <button type="button" data-programme-remove aria-label={ui.eventForm.removeDate}>×</button>
+          <button type="button" data-programme-remove aria-label={ui.eventForm.removeDate}><UiIcon name="close" /></button>
         </li>
       ))}
     </ol>

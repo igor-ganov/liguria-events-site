@@ -1,4 +1,5 @@
 ---
+import UiIcon from '../../shared/UiIcon.astro';
 import { cityName } from '../../../lib/region/city-name.ts';
 import { regionName } from '../../../lib/region/region-name.ts';
 import { regionUrl } from '../../../lib/region/region-url.ts';
@@ -26,7 +27,7 @@ const invited = localizedUrl(lang, `venues/?venue=${region}/${city}/${slug}`);
 <header class="venue-head">
   <p class="venue-crumbs">
     <a href={regionUrl(lang, region)}>{regionName(region)}</a>
-    <span aria-hidden="true">›</span>
+    <UiIcon name="chevronRight" />
     <a href={localizedUrl(lang, `${region}/${city}/`)}>{place}</a>
   </p>
   <h1>{name}</h1>

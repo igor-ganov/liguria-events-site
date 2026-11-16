@@ -1,4 +1,5 @@
 ---
+import ExternalMark from '../../shared/ExternalMark.astro';
 import EventMapEmbed from '../event/EventMapEmbed.astro';
 import PlaceFacts from './PlaceFacts.astro';
 import PlaceReviews from './PlaceReviews.astro';
@@ -47,6 +48,6 @@ const sources = placeSources(place);
 {sources.length > 0 && (
   <section class="event-sources">
     <h2>{ui.headings.sources}</h2>
-    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">{s.name} <ExternalMark label={ui.a11y.newTab} /></a></li>))}</ul>
   </section>
 )}

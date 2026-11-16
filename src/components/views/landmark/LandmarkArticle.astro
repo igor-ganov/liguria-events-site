@@ -1,4 +1,6 @@
 ---
+import ExternalMark from '../../shared/ExternalMark.astro';
+import UiIcon from '../../shared/UiIcon.astro';
 import EventMapEmbed from '../event/EventMapEmbed.astro';
 import { landmarkIcon } from '../../../lib/landmarks/landmark-icon.ts';
 import { landmarkColor } from '../../../lib/landmarks/landmark-color.ts';
@@ -36,7 +38,7 @@ const favHtml = landmarkFavHtml(lang, ui.nav.favorites)(item);
 <dl class="event-facts">
   <div>
     <dt><Fragment set:html={uiIcon('pin', 17)} /></dt>
-    <dd>{item.lat.toFixed(5)}, {item.lng.toFixed(5)} <a class="map-link" href={mapUrl}>↗ {ui.mapLink}</a></dd>
+    <dd>{item.lat.toFixed(5)}, {item.lng.toFixed(5)} <a class="map-link" href={mapUrl}><UiIcon name="map" /> {ui.mapLink}</a></dd>
   </div>
 </dl>
 {item.desc && <p class="event-desc">{item.desc}</p>}
@@ -44,6 +46,6 @@ const favHtml = landmarkFavHtml(lang, ui.nav.favorites)(item);
 {sources.length > 0 && (
   <section class="event-sources">
     <h2>{ui.headings.sources}</h2>
-    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">↗ {s.name}</a></li>))}</ul>
+    <ul>{sources.map((s) => (<li><a href={s.url} target="_blank" rel="noopener">{s.name} <ExternalMark label={ui.a11y.newTab} /></a></li>))}</ul>
   </section>
 )}

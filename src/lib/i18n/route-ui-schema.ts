@@ -13,4 +13,6 @@ export const RouteUiSchema = Schema.Struct({
   day: Schema.String, setDefault: Schema.String,
   setBase: Schema.String, setBaseDefault: Schema.String, clearBase: Schema.String, clickMap: Schema.String,
   dayBase: Schema.String, dayFinal: Schema.String, fromBase: Schema.String, toBase: Schema.String,
+  bus: Schema.String, metro: Schema.String, train: Schema.String, funicular: Schema.String,
+  boat: Schema.String, transfers: Schema.String,
 });

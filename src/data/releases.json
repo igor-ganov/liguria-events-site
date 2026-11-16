@@ -1,5 +1,19 @@
 [
   {
+    "date": "2026-11-16",
+    "example": "/en/liguria/",
+    "title": {
+      "en": "Arrows, crosses and transport modes are drawn, not typed",
+      "it": "Frecce, croci e mezzi di trasporto sono disegnati, non digitati",
+      "ru": "Стрелки, крестики и виды транспорта нарисованы, а не набраны символами"
+    },
+    "body": {
+      "en": "The close crosses, back arrows, month arrows, the region picker caret, the external-link marks and every transport mode on a route — walk, bus, train, metro, funicular, car, ferry, home and finish — were characters from whatever font the phone had: a different size on every device, emoji in colour that ignored the dark theme. They are now line icons in the site’s own style, the size and colour of the text around them, and a screen reader still hears what each one means.",
+      "it": "Le croci di chiusura, le frecce indietro e dei mesi, il triangolino della scelta della regione, i segni dei link esterni e ogni mezzo di un percorso — a piedi, autobus, treno, metro, funicolare, auto, traghetto, casa e arrivo — erano caratteri del font che il telefono aveva: di misura diversa su ogni dispositivo, emoji a colori che ignoravano il tema scuro. Ora sono icone a linea nello stile del sito, della misura e del colore del testo accanto, e un lettore di schermo sente ancora cosa vuol dire ciascuna.",
+      "ru": "Крестики закрытия, стрелки «назад» и переключения месяцев, треугольник выбора региона, значки внешних ссылок и все виды транспорта в маршруте — пешком, автобус, поезд, метро, фуникулёр, машина, паром, дом и финиш — были символами из того шрифта, что нашёлся в телефоне: разного размера на каждом устройстве, цветные эмодзи, не замечавшие тёмную тему. Теперь это линейные иконки в стиле сайта, размером и цветом с текст рядом, а экранный диктор по-прежнему называет, что каждая значит."
+    }
+  },
+  {
     "date": "2026-11-15",
     "example": "/event/1feb72e57808/",
     "title": {

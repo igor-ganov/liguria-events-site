@@ -1,4 +1,5 @@
 import { escHtml } from './esc-html.ts';
+import { externalMark } from './external-mark.ts';
 import { isDefined } from '../../lib/is-defined.ts';
 import { googleMapsUrl } from '../../lib/favorites/google-maps.ts';
 import type { DayBase } from '../../lib/favorites/base-point.ts';
@@ -12,6 +13,6 @@ export const gmapsButton = (day: RouteDay, mode: Mode, db?: DayBase): string =>
     .map(
       (url) =>
         `<a class="route-gmaps no-print" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer" ` +
-        `title="Open this day as a route in Google Maps">↗ Google Maps</a>`,
+        `title="Open this day as a route in Google Maps">Google Maps${externalMark('(opens in a new tab)')}</a>`,
     )
     .join('');

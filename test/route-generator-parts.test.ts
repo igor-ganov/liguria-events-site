@@ -1,5 +1,6 @@
 import { describe, test } from 'bun:test';
 import assert from 'node:assert/strict';
+import { uiIcon } from '../src/lib/icons/ui-icon.ts';
 import { addPause } from '../src/components/favorites/add-pause.ts';
 import { asArray } from '../src/components/favorites/as-array.ts';
 import { asIdList } from '../src/components/favorites/as-id-list.ts';
@@ -476,7 +477,7 @@ describe('generated-route markup', () => {
     assert.ok(html.startsWith('<p class="route-span">'));
     assert.ok(html.includes('Saturday'));
     assert.ok(html.includes('Monday'));
-    assert.ok(html.includes(' → '));
+    assert.ok(html.includes(` ${uiIcon('arrowRight', '1em')}`));
   });
 
   test('the view toggle presses exactly the active view', () => {
