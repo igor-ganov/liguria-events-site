@@ -1,0 +1,17 @@
+---
+import ThreadCalendar from './ThreadCalendar.astro';
+import TileCollage from './TileCollage.astro';
+import type { CalendarMonth } from '../../../../lib/events/thread/calendar-types.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
+
+// The month tile: the run as a wall calendar, or — for a single date or a span
+// — the week it falls in. Several months take the full width of the grid.
+type Props = Readonly<{ lang: Locale; months: readonly CalendarMonth[]; wide: boolean; pictures: readonly string[]; ui: Ui }>;
+const { lang, months, wide, pictures, ui } = Astro.props;
+---
+
+<li class:list={['ev-tile', 'ev-cal', { 'ev-tile--wide': wide }]}>
+  <TileCollage pictures={pictures} tone="soft" columns={2} />
+  <ThreadCalendar lang={lang} months={months} label={ui.eventPage.calendar} next={ui.eventPage.nextDate} />
+</li>

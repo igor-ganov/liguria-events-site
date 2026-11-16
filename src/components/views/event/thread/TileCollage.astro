@@ -1,0 +1,15 @@
+---
+// Photographs of other events behind a tile's words, toned into the tile's
+// colour so they dress it without pulling the eye: grey and multiplied into a
+// coloured tile, grey and screened onto a dark one, faint on paper. Never the
+// event's own photograph, never fetched before it: lazy, low priority. A tile
+// with no hand of pictures stays plain colour.
+type Props = Readonly<{ pictures: readonly string[]; tone: 'duo' | 'screen' | 'soft'; columns: number }>;
+const { pictures, tone, columns } = Astro.props;
+---
+
+{pictures.length > 0 && (
+  <span class:list={['ev-collage', `ev-collage--${tone}`]} style={`--columns: ${columns}`} aria-hidden="true">
+    {pictures.map((src) => <img src={src} alt="" loading="lazy" fetchpriority="low" decoding="async" referrerpolicy="no-referrer" />)}
+  </span>
+)}

@@ -37,6 +37,27 @@
   --velo: #0c1a1f;
   --velo-forza: 0.74;
 
+  /* The event page's tiles (event-thread.css): grounds the words sit on
+     directly, with photographs of other events toned into them and one
+     outline of the site's mark laid across them. Tile grounds stay deep in
+     both themes: white words sit on them. test/event-tiles.test.ts checks
+     every word at its worst: the outline (screen, --tegola-segno-forza) over
+     a collage that lightens (screen, --tegola-screen-forza) or darkens
+     (multiply, --tegola-soft-forza). */
+  --tegola-filo: #255465;
+  --tegola-notte: #0f1114;
+  --tegola-sosta: #7c4322;
+  --tegola-carta: #f4f2ec;
+  --su-tegola: #ffffff;
+  --tegola-segno: #f2822a;
+  --tegola-segno-forza: 0.32;
+  --tegola-screen-forza: 0.28;
+  --tegola-soft-forza: 0.2;
+  --tegola-duo-forza: 0.55;
+  /* Room the floating menu button (56px, 16px from the corner) needs under
+     the last words of a page so it never parks on them. */
+  --fab-clear: 6.5rem;
+
   --shadow-sm: 0 1px 2px rgb(32 35 42 / 0.05);
   --shadow-md: 0 4px 16px -6px rgb(32 35 42 / 0.16);
   --shadow-lg: 0 18px 44px -18px rgb(32 35 42 / 0.34);
@@ -77,6 +98,12 @@
   --allarme: #e08872;
   /* On dark the line colour is the light one, so its ink has to be dark. */
   --su-filo: #16181c;
+  --tegola-filo: #1f4a59;
+  --tegola-notte: #0f1114;
+  --tegola-sosta: #6f3c1e;
+  --tegola-carta: #23272d;
+  --su-tegola: #ffffff;
+  --tegola-segno: #f2822a;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-md: 0 4px 16px -6px rgb(0 0 0 / 0.6);

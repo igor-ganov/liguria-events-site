@@ -1,23 +1,25 @@
 ---
-import ThreadCalendar from './ThreadCalendar.astro';
 import ThreadHour from './ThreadHour.astro';
+import TileMark from './TileMark.astro';
+import TileCollage from './TileCollage.astro';
 import type { ThreadWhen } from '../../../../lib/events/thread/thread-when.ts';
-import type { Locale } from '../../../../lib/i18n/locales.ts';
 import type { Ui } from '../../../../lib/i18n/ui-schema.ts';
 
-// The first knot: the day in words, the hour large, how it ends — then either
-// "one date only", the span of days, or the run with its next dates and its
-// month calendar. Everything a reader came to the page to check, first.
-type Props = Readonly<{ lang: Locale; when: ThreadWhen; ui: Ui }>;
-const { lang, when, ui } = Astro.props;
-const { line, once, span, run, calendar } = when;
+// The first tile: the day in words, the hour large, how it ends — then either
+// "one date only", the span of days, or the run with its next dates. Everything
+// a reader came to the page to check, first. "Today" is said on the photograph.
+// The outline of the site's mark is drawn from here and runs across the grid.
+type Props = Readonly<{ when: ThreadWhen; pictures: readonly string[]; ui: Ui }>;
+const { when, pictures, ui } = Astro.props;
+const { line, once, span, run } = when;
 ---
 
-<li class="ev-knot ev-knot--lead ev-when">
+<li class="ev-tile ev-when">
+  <TileCollage pictures={pictures} tone="duo" columns={2} />
+  <TileMark />
   <h2 class="ev-day">
     {run === undefined && <time datetime={line.iso}>{line.text}</time>}
     {run !== undefined && <span>{run.line}</span>}
-    {run === undefined && line.isToday && <span class="ev-pill ev-pill--hot">{ui.eventPage.today}</span>}
     {run !== undefined && <span class="ev-pill">{run.left}</span>}
   </h2>
   <ThreadHour line={line} endUnknown={ui.eventPage.endUnknown} />
@@ -38,5 +40,4 @@ const { line, once, span, run, calendar } = when;
       )}
     </ol>
   )}
-  {calendar.length > 0 && <ThreadCalendar lang={lang} months={calendar} label={ui.eventPage.calendar} next={ui.eventPage.nextDate} />}
 </li>

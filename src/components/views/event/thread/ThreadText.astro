@@ -11,14 +11,15 @@ type Props = Readonly<{
   notes: readonly DescriptionPart[];
   leaves: readonly ProgrammeLeaf[];
   written: DescriptionPart | undefined;
-  labels: Readonly<{ programme: string; whole: string }>;
+  labels: Readonly<{ about: string; programme: string; whole: string }>;
 }>;
 const { lead, notes, leaves, written, labels } = Astro.props;
 const shown = leaves.length > 0 || written !== undefined;
 ---
 
 {(lead !== '' || notes.length > 0 || shown) && (
-  <li class="ev-knot ev-text">
+  <li class="ev-tile ev-tile--wide ev-text">
+    <h2 class="ev-lab">{labels.about}</h2>
     {lead !== '' && <section class="ev-lead desc-lead" set:html={lead} />}
     {notes.map((note) => (
       <section class="ev-note" data-note={note.type}>

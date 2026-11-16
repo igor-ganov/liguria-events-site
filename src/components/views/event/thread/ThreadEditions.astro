@@ -11,7 +11,7 @@ const { lang, heading, editions } = Astro.props;
 ---
 
 {editions.length > 0 && (
-  <li class="ev-knot ev-knot--small event-editions">
+  <li class="ev-tile ev-tile--wide ev-small event-editions">
     <p>
       {heading}:
       {editions.map((edition) => (
