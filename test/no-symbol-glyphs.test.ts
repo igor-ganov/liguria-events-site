@@ -18,15 +18,12 @@ import { BANNED_GLYPHS } from '../e2e/kit/banned-glyphs.ts';
 
 const BANNED = BANNED_GLYPHS;
 
-// The event page is being rebuilt on branch `ux/event-tiles`, which brings its
-// own icons; its folder joins this guard when that branch lands.
-const NOT_YET = ['src/components/views/event/'];
 const NOT_OURS = ['src/data/', 'src/lib/search/README.md'];
 
 const SOURCES = readdirSync('src', { recursive: true, encoding: 'utf8' })
   .map((path) => `src/${path.replaceAll('\\', '/')}`)
   .filter((path) => /\.(ts|astro|css|md)$/.test(path))
-  .filter((path) => ![...NOT_YET, ...NOT_OURS].some((skip) => path.startsWith(skip)));
+  .filter((path) => !NOT_OURS.some((skip) => path.startsWith(skip)));
 
 /** The file with its comments blanked out: block, JSDoc, HTML, and line
  *  comments (a `//` after a colon is a URL, not a comment). */
