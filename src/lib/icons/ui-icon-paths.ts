@@ -31,6 +31,7 @@ export const UI_ICON_PATHS = {
   photo: '<rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4 17l5-4 4 3 3-2.5 4 3.5"/>',
   ...CHROME_ICON_PATHS,
   ...MODE_ICON_PATHS,
+  share: '<path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>',
 } as const;
 
 export type UiIconName = keyof typeof UI_ICON_PATHS;

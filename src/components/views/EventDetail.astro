@@ -38,21 +38,24 @@ const { region, title, seoTitle, descPreview, heroImage, cover, more, passed, js
 
 <Layout lang={lang} region={region} title={seoTitle} description={descPreview || seoTitle} path={eventPath(event)} image={heroImage} ogType="article" noindex={keepOutOfSearch(status, visibility)}>
   <script is:inline type="application/ld+json" set:html={jsonLd} />
-  <article class="event-page">
+  <article class="event-page" data-shy-fab>
     {justCreated && (
       <NewEventLink ui={ui} url={canonicalUrl(lang, eventPath(event), Astro.site)} title={title} unlisted={unlisted} />
     )}
     {editable && <EventOwnerBar eventId={event.id} status={status} />}
     {passed && <EventPassed lang={lang} region={region} city={cityName(event.ct ?? '')} label={ui.passedNote} allLabel={ui.headings.allEvents} />}
-    <EventCover event={event} title={title} shots={[cover, ...more].filter(isDefined)} ui={ui} />
+    <EventCover lang={lang} event={event} title={title} shots={[cover, ...more].filter(isDefined)} ui={ui} />
     <EventThread lang={lang} event={event} contacts={contacts} view={view} subject={subject} ui={ui} />
   </article>
 </Layout>
 
 <script>
   import { initPlaceReviews } from '../../components/places/init-place-reviews.ts';
+  import { shyFab } from '../../components/menu/shy-fab.ts';
   // Run for this visit and for every later navigation: a ClientRouter swap
   // brings a new reviews section that has not been wired yet.
   initPlaceReviews();
   document.addEventListener('astro:page-load', initPlaceReviews);
+  // The menu button steps aside while the page is read (data-shy-fab).
+  shyFab();
 </script>

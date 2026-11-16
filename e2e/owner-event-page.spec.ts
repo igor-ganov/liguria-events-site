@@ -60,7 +60,7 @@ test('a run of sessions says how many of them are left', async ({ page, request 
   await expect(page.locator('.ev-when .ev-pill')).toHaveText(new RegExp(`of ${days(run)} left`));
 });
 
-test('the heart is on the photograph, large enough for a thumb, and share is a word', async ({ page, request }) => {
+test('the heart is on the photograph, large enough for a thumb, and share is beside it', async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const event = await pick(request, (candidate) => candidate.img !== undefined);
   await page.goto(`/en/event/${event.id}/`);
@@ -68,7 +68,7 @@ test('the heart is on the photograph, large enough for a thumb, and share is a w
   await expect(heart).toBeVisible();
   const box = await heart.boundingBox();
   expect(Math.min(box?.width ?? 0, box?.height ?? 0)).toBeGreaterThanOrEqual(44);
-  await expect(page.locator('.ev-where').getByRole('button', { name: 'Share' })).toBeVisible();
+  await expect(page.locator('.event-cover').getByRole('button', { name: 'Share' })).toBeVisible();
 });
 
 test('on a phone the photograph runs edge to edge and nothing runs off the side', async ({ page, request }) => {

@@ -1,0 +1,26 @@
+---
+import { BRAND_MARK } from '../../../../lib/img/brand-mark.ts';
+import { dayText } from '../../../../lib/events/thread/day-text.ts';
+import { eventPath } from '../../../../lib/event-path.ts';
+import { largeCover } from '../../../../lib/img/large-cover.ts';
+import { localizedUrl } from '../../../../lib/i18n/localized-url.ts';
+import { titleOf } from '../../../../lib/events/title-of.ts';
+import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
+import type { Locale } from '../../../../lib/i18n/locales.ts';
+
+// One other event as a feed tile: its photograph — or the site's mark on its
+// ground when it came with none — the hour large, the day, the name.
+type Props = Readonly<{ lang: Locale; event: CompactEvent; day: string }>;
+const { lang, event, day } = Astro.props;
+const short = dayText(lang, { weekday: 'short', day: 'numeric', month: 'short' });
+---
+
+<a class="ev-also-item" href={localizedUrl(lang, eventPath(event))} data-day={day}>
+  {event.img !== undefined && <img src={event.th ?? largeCover(event.img)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />}
+  {event.img === undefined && <span class="ev-also-blank" set:html={BRAND_MARK} />}
+  <span class="ev-also-text">
+    {event.h !== undefined && <b>{event.h}</b>}
+    <small><time datetime={day}>{short(day).replace(',', '')}</time></small>
+    <span class="ev-also-title">{titleOf(lang)(event)}</span>
+  </span>
+</a>

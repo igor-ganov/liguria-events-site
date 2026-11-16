@@ -1,0 +1,29 @@
+---
+import UiIcon from '../../shared/UiIcon.astro';
+import { iconSvg } from '../../../lib/icons/icon-svg.ts';
+import type { CompactEvent } from '../../../lib/events/event-schema.ts';
+import type { Ui } from '../../../lib/i18n/ui-schema.ts';
+
+// The top left corner of the photograph: what kind of event it is, "today"
+// when it is on today, free and gem, and which photograph of how many.
+type Props = Readonly<{ event: CompactEvent; today: boolean; shots: number; ui: Ui }>;
+const { event, today, shots, ui } = Astro.props;
+---
+
+<p class="event-cover-tags">
+  {event.c.map((category) => (
+    <span class="cat-tag" data-cat={category}>
+      <Fragment set:html={iconSvg(category, 13)} />
+      {ui.cat[category]}
+    </span>
+  ))}
+  {today && <span class="ev-today">{ui.eventPage.today}</span>}
+  {event.f === true && <span class="badge-free">{ui.badges.free}</span>}
+  {event.x === true && <span class="badge-gem">{ui.badges.gem}</span>}
+  {shots > 1 && (
+    <span class="event-cover-count">
+      <UiIcon name="photo" size={13} />
+      <span><b data-shot-at>1</b>/{shots}</span>
+    </span>
+  )}
+</p>

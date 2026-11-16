@@ -2,6 +2,8 @@
 import EventFeedback from '../EventFeedback.astro';
 import { localizedUrl } from '../../../../lib/i18n/localized-url.ts';
 import { regionUrl } from '../../../../lib/region/region-url.ts';
+import UiIcon from '../../../shared/UiIcon.astro';
+import ExternalMark from '../../../shared/ExternalMark.astro';
 import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
 import type { Locale } from '../../../../lib/i18n/locales.ts';
 import type { NamedLink } from '../../../../lib/events/event-links.ts';
@@ -20,13 +22,13 @@ const { lang, region, event, title, links, ui } = Astro.props;
     {links.map((link) => (
       <>
         {' '}
-        <a href={link.url} target="_blank" rel="noopener">{link.name}<span aria-hidden="true"> ↗</span></a>
+        <a href={link.url} target="_blank" rel="noopener">{link.name}<span class="ev-ext"><ExternalMark label={ui.a11y.newTab} /></span></a>
       </>
     ))}
   </p>
   <EventFeedback event={event} title={title} ui={ui} />
   <p>
-    <a href={regionUrl(lang, region)}>← {ui.headings.allEvents}</a>
+    <a href={regionUrl(lang, region)}><span class="ev-back"><UiIcon name="arrowLeft" /></span>{ui.headings.allEvents}</a>
   </p>
   <p data-own-event>
     {ui.contribute.ownEvent} <a href={localizedUrl(lang, 'submit/')}>{ui.contribute.ownEventLink}</a>

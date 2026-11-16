@@ -1,17 +1,15 @@
 ---
-import { eventPath } from '../../../../lib/event-path.ts';
-import { dayText } from '../../../../lib/events/thread/day-text.ts';
+import AlsoTile from './AlsoTile.astro';
 import { isoToday } from '../../../../lib/calendar/iso-today.ts';
-import { largeCover } from '../../../../lib/img/large-cover.ts';
-import { localizedUrl } from '../../../../lib/i18n/localized-url.ts';
 import { nextDayOn } from '../../../../lib/events/next-day-on.ts';
-import { titleOf } from '../../../../lib/events/title-of.ts';
 import type { CompactEvent } from '../../../../lib/events/event-schema.ts';
 import type { Locale } from '../../../../lib/i18n/locales.ts';
 
-// Other events as a short list on the thread — a small picture, the next day
-// a reader can go and the hour, the name — ending at the page where the rest
-// are. Used twice: the venue's other shows, then the town's.
+// Other events as the feed's photograph tiles, two to a row and touching —
+// the next day a reader can go and the hour, the name — ending at the page
+// where the rest are. Used twice: the venue's other shows, then the town's.
+// With no other event to show, only the way onward stays: a heading over
+// nothing reads as a bug.
 type Props = Readonly<{
   lang: Locale;
   kind: 'event-at-venue' | 'event-also';
@@ -21,24 +19,16 @@ type Props = Readonly<{
 }>;
 const { lang, kind, heading, events, onward } = Astro.props;
 const dayOn = nextDayOn(isoToday());
-const short = dayText(lang, { weekday: 'short', day: 'numeric', month: 'short' });
 ---
 
 {(events.length > 0 || onward !== undefined) && (
-  <li class:list={['ev-knot', 'ev-also', kind]}>
-    <h2 class="ev-day">{heading}</h2>
+  <li class:list={['ev-tile', 'ev-tile--wide', 'ev-also', kind]}>
+    {events.length > 0 && <h2 class="ev-lab">{heading}</h2>}
     {events.length > 0 && (
       <ul class="ev-also-list">
         {events.map((one) => (
           <li>
-            <a class="ev-also-item" href={localizedUrl(lang, eventPath(one))} data-day={dayOn(one)}>
-              {one.img !== undefined && <img src={one.th ?? largeCover(one.img)} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />}
-              {one.img === undefined && <span class="ev-also-blank" aria-hidden="true" />}
-              <span>
-                <small><time datetime={dayOn(one)}>{short(dayOn(one)).replace(',', '')}</time>{one.h !== undefined && ` · ${one.h}`}</small>
-                {titleOf(lang)(one)}
-              </span>
-            </a>
+            <AlsoTile lang={lang} event={one} day={dayOn(one)} />
           </li>
         ))}
       </ul>

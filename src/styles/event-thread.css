@@ -1,247 +1,332 @@
-/* ══ The event page as a thread ═════════════════════════════════════
-   Under the photograph the feed's thread runs down the page, and every fact
-   hangs on it as a knot: when, where, how much, then what the event says, what
-   else is on, the reviews. Nothing is a boxed card; the small print closes it.
-   Loaded after event-page.css. */
-
-/* The heart keeps the event, in the corner of the photograph as on the feed
-   card; large enough for a thumb. */
-.event-cover .fav-btn {
-  top: 0.5rem;
-  right: 0.5rem;
-  width: 2.75rem;
-  height: 2.75rem;
-}
+/* ══ The event page as tiles ═════════════════════════════════════════
+   Under the photograph the facts sit as the feed's tiles: when, where, how
+   much and the month side by side, with no gaps and no margins, each on its
+   own colour and wearing other events' photographs toned into it; then what
+   the event says, what else is on, other years and the reviews across the
+   full width; the small print closes it. One large outline of the site's
+   mark runs across the first tiles, under every word.
+   Loaded after event-page.css. Colours: --tegola-* in filo-tokens.css, each
+   checked for the words on it by test/event-tiles.test.ts. */
 
 .event-page {
   max-width: 44rem;
   margin: 0 auto;
-  /* Clear of the menu button that floats over the bottom corner of every page. */
-  padding-bottom: 2.5rem;
 }
 
-/* ── the thread ────────────────────────────────────────────────────
-   One drawn line; the first two knots — when and where — are filled, the
-   rest are open rings. */
+/* ── the grid ──────────────────────────────────────────────────────
+   The grid is where the outline blends: the tiles are not stacking
+   contexts, so the outline (z 1) lies over their colours and collages and
+   under their words (z 2). It is cut at the grid's edges. */
 .ev-thread {
-  list-style: none;
-  margin: 1rem 0 0;
-  padding: 0 0 0 1.7rem;
-  background: var(--t-corda) repeat-y 2px 0 / 14px 240px;
-}
-.ev-knot {
   position: relative;
-  padding: 0 0 1.15rem;
+  isolation: isolate;
+  overflow: clip;
+  container-type: inline-size;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
-.ev-knot::before {
-  content: '';
-  position: absolute;
-  left: calc(-1.7rem + 3px);
-  top: 0.35rem;
-  width: 12px;
-  height: 12px;
-  background: var(--t-nodo) no-repeat center / 100% 100%;
+.ev-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 10.75rem;
+  padding: 0.9rem;
+  overflow-wrap: anywhere;
 }
-.ev-knot--lead::before {
-  left: calc(-1.7rem + 2px);
-  width: 14px;
-  height: 14px;
-  background-image: var(--t-nodo-nostra);
+.ev-tile > :not(.ev-collage, .ev-mark) {
+  position: relative;
+  z-index: 2;
+}
+.ev-tile--wide {
+  grid-column: 1 / -1;
 }
 .ev-thread time {
   font-variant-numeric: tabular-nums;
+}
+.ev-when {
+  background: var(--tegola-filo);
+  color: var(--su-tegola);
+}
+.ev-where {
+  background: var(--tegola-notte);
+  color: var(--su-tegola);
+}
+.ev-price {
+  min-height: 7.75rem;
+  background: var(--tegola-sosta);
+  color: var(--su-tegola);
+}
+.ev-cal {
+  min-height: 7.75rem;
+  background: var(--tegola-carta);
+  color: var(--testo);
+}
+.ev-text,
+.ev-small,
+.ev-also {
+  min-height: 0;
+  justify-content: flex-start;
+  background: var(--carta);
+  color: var(--testo);
+}
+.ev-tile a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.ev-tile a:focus-visible,
+.ev-tile button:focus-visible,
+.ev-foot a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* ── collages of other events, toned into the tile ─────────────────── */
+.ev-collage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 2), 1fr);
+  pointer-events: none;
+}
+.ev-collage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+.ev-collage--duo img {
+  filter: grayscale(1) contrast(1.15);
+  mix-blend-mode: multiply;
+  opacity: var(--tegola-duo-forza);
+}
+.ev-collage--screen img {
+  filter: grayscale(1);
+  mix-blend-mode: screen;
+  opacity: var(--tegola-screen-forza);
+}
+.ev-collage--soft img {
+  filter: grayscale(1) contrast(1.1) brightness(1.15);
+  mix-blend-mode: multiply;
+  opacity: var(--tegola-soft-forza);
+}
+
+/* ── the outline of the mark ───────────────────────────────────────
+   Drawn from the first tile, sized and placed against the whole grid
+   (cqi): about two thirds of its width, from a third of the way across,
+   slightly blurred — 0.8% of its own width. */
+.ev-mark {
+  position: absolute;
+  z-index: 1;
+  left: 30cqi;
+  top: -10cqi;
+  width: 64cqi;
+  height: 80cqi;
+  color: var(--tegola-segno);
+  opacity: var(--tegola-segno-forza);
+  mix-blend-mode: screen;
+  filter: blur(0.51cqi);
+  pointer-events: none;
+}
+
+/* ── labels ────────────────────────────────────────────────────── */
+.ev-lab,
+.ev-day,
+.ev-month caption {
+  margin: 0;
+  font: 600 0.68rem/1.3 var(--font-body);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: inherit;
 }
 .ev-day {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.2rem 0.55rem;
-  margin: 0 0 0.15rem;
-  font: 600 0.95rem/1.4 var(--font-display);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--tenue);
+  gap: 0.35rem 0.5rem;
 }
-.ev-pill {
+.ev-pill,
+.ev-today {
   display: inline-block;
-  padding: 0.2rem 0.85rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
   font: 500 0.72rem/1.5 var(--font-body);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   text-transform: none;
   white-space: nowrap;
-  color: var(--filo);
-  border: 0;
-  border-image: var(--t-pillola-filo) 7 / 7px / 0 stretch;
+  background: var(--su-tegola);
+  color: var(--tegola-notte);
 }
-.ev-pill--hot {
-  color: var(--sosta);
-  border-image-source: var(--t-pillola-sosta);
-}
+
+/* ── when ──────────────────────────────────────────────────────── */
 .ev-hour {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  gap: 0 0.5rem;
   margin: 0;
-  font: 500 2.5rem/1.05 var(--font-display);
-  letter-spacing: -0.02em;
-  color: var(--testo);
+  font: 500 3.1rem/0.95 var(--font-display);
+  letter-spacing: -0.03em;
+}
+.ev-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 1.6rem;
 }
 .ev-arrow {
-  margin: 0 0.25em;
-  font-weight: 400;
-  color: var(--tenue);
+  display: inline-flex;
 }
-.ev-dur {
-  margin-left: 0.6rem;
-  font: 400 0.9rem/1.3 var(--font-body);
+.ev-dur,
+.ev-sub,
+.ev-more {
+  margin: 0;
+  font: 400 0.8rem/1.35 var(--font-body);
   letter-spacing: 0;
-  color: var(--tenue);
-}
-.ev-sub {
-  margin: 0.1rem 0 0;
-  font-size: 0.88rem;
-  color: var(--tenue);
 }
 .ev-dates {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 0.8rem;
-  margin: 0.45rem 0 0;
+  gap: 0.2rem 0.6rem;
+  margin: 0;
   padding: 0;
-  font-size: 0.92rem;
+  font-size: 0.8rem;
 }
 .ev-dates .is-next {
-  padding: 0.05rem 0.8rem;
+  padding: 0 0.5rem;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
   font-weight: 600;
-  color: var(--filo);
-  border-image: var(--t-pillola-filo) 7 / 7px / 0 stretch;
-}
-.ev-more {
-  color: var(--tenue);
-}
-
-/* ── the run as a wall calendar: crossed, filled, ringed ───────── */
-.ev-calendar {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(6.6rem, 1fr));
-  gap: 0.7rem;
-  margin: 0.8rem 0 0;
-}
-.ev-month {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.7rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.ev-month caption {
-  padding-bottom: 0.2rem;
-  text-align: left;
-  font: 500 0.9rem var(--font-display);
-  text-transform: capitalize;
-  color: var(--testo);
-}
-.ev-month th {
-  font-size: 0.6rem;
-  font-weight: 500;
-  color: var(--tenue);
-}
-.ev-month td {
-  padding: 0.14rem 0;
-  color: var(--tenue);
-}
-.ev-month td[data-mark='on'] {
-  font-weight: 600;
-  color: var(--testo);
-  background: var(--t-cerchio) no-repeat center / 1.6em 1.6em;
-}
-.ev-month td[data-mark='next'] {
-  font-weight: 700;
-  color: var(--carta);
-  background: var(--t-cerchio-sosta) no-repeat center / 1.7em 1.7em;
-}
-.ev-month td[data-mark='gone'] {
-  text-decoration: line-through;
-  opacity: 0.6;
 }
 
 /* ── where ─────────────────────────────────────────────────────── */
 .ev-venue {
-  margin: 0 0 0.15rem;
-  font: 500 1.35rem/1.2 var(--font-display);
+  margin: 0;
+  font: 500 1.3rem/1.1 var(--font-display);
+  text-wrap: balance;
 }
-.ev-venue a,
-.ev-links a,
-.ev-links .share-button {
-  padding-bottom: 3px;
-  color: var(--filo);
+.ev-venue a {
   text-decoration: none;
-  background: var(--t-riga-filo) repeat-x left bottom / 160px 4px;
 }
 .ev-addr {
   display: grid;
   font-style: normal;
-  font-size: 0.98rem;
-  line-height: 1.45;
-  color: var(--testo);
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 .ev-addr b {
-  font-weight: 600;
+  font-weight: 500;
 }
 .ev-way {
-  margin: 0.3rem 0 0;
-  font-size: 0.9rem;
-  color: var(--tenue);
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
-.ev-way > :last-child {
-  margin-bottom: 0;
+.ev-way > * {
+  margin: 0;
 }
 .ev-links {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.4rem 1.2rem;
-  margin: 0.45rem 0 0;
-  font-size: 0.92rem;
-  font-weight: 500;
-}
-/* Share, said as a word like the links beside it: the drawn frame and the
-   glyph of the button are for the feed. */
-.ev-links .share-button {
-  display: inline;
+  gap: 0.3rem 0.9rem;
   margin: 0;
-  padding: 0 0 3px;
-  border: 0;
-  border-image: none;
-  border-radius: 0;
-  box-shadow: none;
-  font: inherit;
-  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
 }
-.ev-links .share-button > svg,
-.ev-links .share-button::after {
-  display: none;
+.ev-ext,
+.ev-back {
+  display: inline-flex;
+  vertical-align: -0.1em;
+  margin-left: 0.2em;
+}
+.ev-back {
+  margin: 0 0.3em 0 0;
+}
+.ev-tile .ev-ext svg {
+  stroke-width: 2.4;
 }
 
-/* ── how much, and what the event says ─────────────────────────── */
-.ev-price p {
+/* ── price ─────────────────────────────────────────────────────── */
+.ev-price-text {
+  display: grid;
+  gap: 0.3rem;
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.84rem;
 }
-.ev-price a {
-  color: var(--filo);
+.ev-price-text b {
+  font: 500 1.15rem/1.15 var(--font-display);
 }
-.ev-free {
-  color: var(--gratis);
+.ev-price-text a {
+  font-weight: 600;
+}
+
+/* ── the month: crossed, filled, ringed ────────────────────────── */
+.ev-calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.6rem, 1fr));
+  gap: 0.7rem 1rem;
+  flex: 1;
+}
+.ev-month {
+  width: 100%;
+  height: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ev-month caption {
+  padding-bottom: 0.5rem;
+  text-align: left;
+}
+.ev-month thead tr {
+  height: 100%;
+}
+.ev-month th {
+  vertical-align: bottom;
+  font-size: 0.62rem;
+  font-weight: 500;
+}
+.ev-month td {
+  padding: 0.18rem 0;
+}
+.ev-month td[data-mark='on'] {
+  font-weight: 600;
+  background: var(--t-cerchio) no-repeat center / 1.7em 1.7em;
+}
+.ev-month td[data-mark='next'] {
+  font-weight: 700;
+  color: var(--su-tegola);
+  background: radial-gradient(circle closest-side, var(--tegola-filo) 92%, transparent 96%) no-repeat center / 1.95em 1.95em;
+}
+.ev-month td[data-mark='gone'] {
+  font-weight: 300;
+  text-decoration: line-through;
+}
+
+/* ── what the event says ───────────────────────────────────────── */
+.ev-text {
+  gap: 0.6rem;
+  padding-block: 1.1rem;
 }
 .ev-lead > p {
   margin: 0 0 0.5rem;
   font-size: 1rem;
   line-height: 1.55;
 }
+.ev-lead > :last-child {
+  margin-bottom: 0;
+}
 .ev-note {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: 0.93rem;
   line-height: 1.5;
 }
@@ -289,60 +374,124 @@
   color: var(--filo);
   cursor: pointer;
 }
+.ev-free {
+  font-weight: 600;
+}
 
-/* ── what else is on: a short list, not a strip of cards ───────── */
+/* ── what else is on: the feed's photograph tiles ──────────────── */
+.ev-also {
+  gap: 0;
+  padding: 0;
+}
+.ev-also > .ev-lab {
+  padding: 1rem 0.9rem 0.6rem;
+}
 .ev-also-list {
   list-style: none;
   display: grid;
-  gap: 0.5rem;
-  margin: 0.35rem 0 0;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
   padding: 0;
 }
+.ev-also-list > li:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
 .ev-also-item {
-  display: grid;
-  grid-template-columns: 3.2rem 1fr;
-  gap: 0.65rem;
-  align-items: center;
-  font-size: 0.92rem;
-  line-height: 1.3;
-  color: var(--testo);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 11.9rem;
+  height: 100%;
+  padding: 2.6rem 0.75rem 0.75rem;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.55);
+}
+.ev-tile .ev-also-item {
+  color: #fff;
   text-decoration: none;
 }
-.ev-also-item:hover > span:last-child,
-.ev-also-item:focus-visible > span:last-child {
-  text-decoration: underline;
+.ev-also-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--velo) 92%, transparent) 0,
+    color-mix(in srgb, var(--velo) calc(var(--velo-forza) * 100%), transparent) 55%,
+    transparent 85%
+  );
 }
 .ev-also-item img,
 .ev-also-blank {
-  width: 3.2rem;
-  height: 3.2rem;
-  border-radius: 0.5rem;
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  background: var(--filo-velo);
 }
-.ev-also-item small {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--tenue);
+.ev-also-blank {
+  --brand-mark-wave: var(--tegola-filo);
+  display: grid;
+  place-items: center;
+  background: var(--tegola-filo);
+  color: #fbfaf7;
+}
+.ev-also-blank .brand-mark {
+  width: auto;
+  height: 34%;
+  opacity: 0.92;
+  translate: 0 -38%;
+}
+.ev-also-text {
+  display: grid;
+  gap: 0.15rem;
+}
+.ev-also-text b {
+  font: 500 1.35rem/1 var(--font-display);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ev-also-text small {
+  font-size: 0.74rem;
+}
+.ev-also-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font: 500 0.98rem/1.15 var(--font-display);
+}
+.ev-also-item:hover .ev-also-title,
+.ev-also-item:focus-visible .ev-also-title {
+  text-decoration: underline;
+}
+.ev-also-item:focus-visible {
+  outline: 3px solid var(--su-tegola);
+  outline-offset: -3px;
 }
 .ev-onward {
-  margin: 0.45rem 0 0;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
   font-size: 0.88rem;
-}
-.ev-onward a {
-  color: var(--filo);
+  font-weight: 500;
 }
 
-/* ── the small knots: other years, reviews ─────────────────────── */
-.ev-knot--small p,
-.ev-reviews {
+/* ── the small tiles: other years, reviews ─────────────────────── */
+.ev-small {
+  padding-block: 0.7rem;
   font-size: 0.86rem;
   color: var(--tenue);
 }
-.ev-knot--small p {
+.ev-small p {
   margin: 0;
 }
-.ev-knot--small a {
+.ev-small a {
   color: var(--filo);
 }
 /* The reviews say themselves in one line until there are some to read. */
@@ -355,29 +504,10 @@
 }
 .ev-reviews .rv-none {
   order: 1;
+  margin: 0;
 }
 .ev-reviews .rv-signin {
   order: 2;
-}
-.ev-reviews .rv-form,
-.ev-reviews .rv-list {
-  order: 3;
-  flex-basis: 100%;
-}
-.ev-reviews .place-reviews > h2 {
-  display: inline-flex;
-  gap: 0.4rem;
-  margin: 0;
-  font: italic 400 0.93rem var(--font-display);
-  color: var(--tenue);
-}
-.ev-reviews .widget-ic {
-  display: none;
-}
-.ev-reviews .rv-none {
-  margin: 0;
-}
-.ev-reviews .rv-signin {
   display: inline;
   padding: 0;
   border: 0;
@@ -390,17 +520,29 @@
 }
 .ev-reviews .rv-form,
 .ev-reviews .rv-list {
+  order: 3;
+  flex-basis: 100%;
   margin-top: 0.5rem;
 }
+.ev-reviews .place-reviews > h2 {
+  display: inline-flex;
+  gap: 0.4rem;
+  margin: 0;
+  font: italic 400 0.93rem var(--font-display);
+  color: var(--tenue);
+}
+.ev-reviews .widget-ic {
+  display: none;
+}
 
-/* ── the small print ───────────────────────────────────────────── */
+/* ── the small print ───────────────────────────────────────────────
+   The last words clear the floating menu button, which otherwise parks on
+   them at the end of the page. */
 .ev-foot {
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
+  padding: 1rem 0 var(--fab-clear);
   font-size: 0.8rem;
   line-height: 1.5;
   color: var(--tenue);
-  background: var(--t-riga-forte) repeat-x left top / 160px 4px;
 }
 .ev-foot p,
 .ev-foot .event-feedback {
@@ -412,9 +554,28 @@
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
-.ev-thread a:focus-visible,
-.ev-thread button:focus-visible,
-.ev-foot a:focus-visible {
-  outline: 2px solid var(--filo);
-  outline-offset: 2px;
+
+/* The menu button stays out of the words of an event page: hidden from the
+   first frame, back when the reader scrolls up or reaches the end, where the
+   foot leaves room for it (shy-fab.ts sets data-fab-back). */
+:root:has([data-shy-fab]):not([data-fab-back]) .fab-menu:not(.open) .mobile-fab {
+  opacity: 0;
+  translate: 0 1.5rem;
+  pointer-events: none;
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root:has([data-shy-fab]):not([data-fab-back]) .fab-menu:not(.open) .mobile-fab {
+    translate: none;
+  }
+}
+
+/* On a phone the tiles run edge to edge, as the photograph does. */
+@media (max-width: 43.99rem) {
+  .ev-thread {
+    margin-inline: calc(-1 * var(--page-pad));
+  }
+  .ev-foot {
+    padding-inline: 0;
+  }
 }

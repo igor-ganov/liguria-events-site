@@ -6,7 +6,7 @@ export const DEFAULT_APP_UI = {
   notify: { title: '', lead: '', on: '', off: '', at: '', where: '', asked: '', refused: '', done: '' },
   testers: { title: '', lead: '', join: '', install: '' },
   progress: { roadmap: '', roadmapLead: '', releases: '', releasesLead: '', now: '', next: '', later: '', done: '', example: '', here: '' },
-  eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "", allInCity: "", venuePage: "", fullProgramme: "", today: "", endUnknown: "", oneDate: "", datesCount: "", left: "", more: "", freeEntry: "", priceUnknown: "", nextDate: "", calendar: "" },
+  eventPage: { starts: "", dates: "", duration: "", price: "", website: "", call: "", directions: "", programme: "", where: "", actions: "", report: "", claim: "", managed: "", allInCity: "", venuePage: "", fullProgramme: "", today: "", endUnknown: "", oneDate: "", datesCount: "", left: "", more: "", freeEntry: "", priceUnknown: "", nextDate: "", calendar: "", cost: "", about: "" },
   entry: { heading: "Where are you going?", lead: "", pickHeading: "", regionsHeading: "All regions", hereRegion: "My region", hereCity: "My city", country: "Italy" },
   picks: { title: "", day: "", week: "", month: "", thisWeek: "" },
   feedDay: { allDay: 'All day' },

@@ -1,0 +1,13 @@
+---
+import { BRAND_PATHS } from '../../../../lib/img/brand-paths.ts';
+
+// One large outline of the site's mark — the pin with the wave — running
+// across the tiles: thick, faint and soft, screened onto their colours. It
+// sits under every word (event-thread.css stacks the words above it) and is
+// only drawing, so it is hidden from assistive technology.
+---
+
+<svg class="ev-mark" viewBox="0 0 32 40" fill="none" aria-hidden="true" focusable="false">
+  <path d={BRAND_PATHS.pin} stroke="currentColor" stroke-width="2.6" />
+  <path d={BRAND_PATHS.wave} stroke="currentColor" stroke-width="2.6" stroke-linecap="round" />
+</svg>

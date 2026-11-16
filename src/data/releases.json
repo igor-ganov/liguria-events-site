@@ -1,6 +1,20 @@
 [
   {
     "date": "2026-11-16",
+    "example": "/event/71b09bd2e319/",
+    "title": {
+      "en": "An event page is the feed's tiles: when, where, how much, side by side",
+      "it": "La pagina di un evento è fatta di riquadri come il feed: quando, dove, quanto, uno accanto all’altro",
+      "ru": "Страница события сложена из плиток, как лента: когда, где, сколько — рядом"
+    },
+    "body": {
+      "en": "Under the photograph the day and the hour, the venue, the price and the month now sit as tiles with no gaps, each in its own colour and dressed in faint photographs of other events nearby, with one large outline of our mark running across them. The heart and share are bold buttons on the photograph, today says so on it, what else is on is shown as photographs two to a row, and the menu button steps aside while you read.",
+      "it": "Sotto la foto il giorno e l’ora, il luogo, il prezzo e il mese sono ora riquadri senza spazi tra loro, ognuno del suo colore e vestito di foto sbiadite di altri eventi vicini, con un grande contorno del nostro simbolo che li attraversa. Il cuore e la condivisione sono pulsanti ben visibili sulla foto, «oggi» è scritto lì, gli altri eventi sono foto due per riga, e il pulsante del menu si sposta mentre leggi.",
+      "ru": "Под фотографией день и час, место, цена и месяц теперь стоят плитками без промежутков, каждая своего цвета и в бледных фотографиях других событий рядом, а через них проходит большой контур нашего знака. Сердце и «поделиться» — крупные кнопки на фото, «сегодня» написано там же, что ещё идёт — фотографии по две в ряд, а кнопка меню уходит в сторону, пока вы читаете."
+    }
+  },
+  {
+    "date": "2026-11-16",
     "example": "/en/liguria/",
     "title": {
       "en": "Arrows, crosses and transport modes are drawn, not typed",
