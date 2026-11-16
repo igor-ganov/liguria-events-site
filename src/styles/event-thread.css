@@ -555,15 +555,17 @@
   text-underline-offset: 0.15em;
 }
 
-/* The menu button steps aside while an event page is read (shy-fab.ts). */
-:root[data-fab-away] .fab-menu:not(.open) .mobile-fab {
+/* The menu button stays out of the words of an event page: hidden from the
+   first frame, back when the reader scrolls up or reaches the end, where the
+   foot leaves room for it (shy-fab.ts sets data-fab-back). */
+:root:has([data-shy-fab]):not([data-fab-back]) .fab-menu:not(.open) .mobile-fab {
   opacity: 0;
   translate: 0 1.5rem;
   pointer-events: none;
   visibility: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
-  :root[data-fab-away] .fab-menu:not(.open) .mobile-fab {
+  :root:has([data-shy-fab]):not([data-fab-back]) .fab-menu:not(.open) .mobile-fab {
     translate: none;
   }
 }

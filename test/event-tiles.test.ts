@@ -141,9 +141,13 @@ describe('fabMove', () => {
     expect(fabMove({ previous: 200, current: 260, room: 900 })).toBe('away');
   });
 
-  test('and comes back when they scroll up, at the top, and at the end', () => {
+  test('even from the very top: the first screen is read too', () => {
+    expect(fabMove({ previous: 0, current: 30, room: 900 })).toBe('away');
+  });
+
+  test('and comes back when they scroll up, and at the end', () => {
     expect(fabMove({ previous: 400, current: 380, room: 900 })).toBe('back');
-    expect(fabMove({ previous: 10, current: 30, room: 900 })).toBe('back');
+    expect(fabMove({ previous: 30, current: 0, room: 900 })).toBe('back');
     expect(fabMove({ previous: 900, current: 960, room: 0 })).toBe('back');
   });
 

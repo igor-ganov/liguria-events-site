@@ -8,6 +8,8 @@ import type { Locale } from '../../../../lib/i18n/locales.ts';
 // Other events as the feed's photograph tiles, two to a row and touching —
 // the next day a reader can go and the hour, the name — ending at the page
 // where the rest are. Used twice: the venue's other shows, then the town's.
+// With no other event to show, only the way onward stays: a heading over
+// nothing reads as a bug.
 type Props = Readonly<{
   lang: Locale;
   kind: 'event-at-venue' | 'event-also';
@@ -21,7 +23,7 @@ const dayOn = nextDayOn(isoToday());
 
 {(events.length > 0 || onward !== undefined) && (
   <li class:list={['ev-tile', 'ev-tile--wide', 'ev-also', kind]}>
-    <h2 class="ev-lab">{heading}</h2>
+    {events.length > 0 && <h2 class="ev-lab">{heading}</h2>}
     {events.length > 0 && (
       <ul class="ev-also-list">
         {events.map((one) => (

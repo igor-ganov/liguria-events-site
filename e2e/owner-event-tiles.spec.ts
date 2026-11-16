@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
 import { largeCover } from '../src/lib/img/large-cover.ts';
 import type { APIRequestContext, Locator } from '@playwright/test';
 
-type Wire = Readonly<{ id: string; s: string; e?: string; img?: string; th?: string; k?: boolean; h?: string; v?: string; ct?: string }>;
+type Wire = Readonly<{ id: string; s: string; e?: string; img?: string; th?: string; k?: boolean; h?: string; v?: string; ct?: string; rg?: string }>;
 
 // The map corpus is trimmed to what a map needs; the worker reads its pages
 // from the full one, so the events are picked from that.
@@ -130,7 +130,6 @@ test('the menu button steps aside while the page is read, and comes back on the 
   const event = await pick(request, pictured);
   await page.goto(`/en/event/${event.id}/`);
   const fab = page.locator('.mobile-fab');
-  await expect(fab).toBeVisible();
   await page.mouse.wheel(0, 600);
   await expect(fab).toBeHidden();
   await page.mouse.wheel(0, -200);
@@ -159,4 +158,34 @@ test('the page draws its arrows and marks as icons, never as special characters'
     return texts.filter((text) => text.parentElement?.closest('h1, .ev-text, .ev-also-title, .event-editions a') === null).map((text) => text.data).join(' ');
   });
   expect(ours.match(/[←-⇿✕×✓✔▲-▿‹›]|\p{Extended_Pictographic}/gu) ?? []).toEqual([]);
+});
+
+test('on the first screen the menu button covers none of the words', async ({ page, request }) => {
+  for (const event of [await pick(request, pictured), await pick(request, (candidate) => candidate.img === undefined && candidate.k !== true && candidate.rg === 'liguria')]) {
+    await page.goto(`/en/event/${event.id}/`);
+    await page.waitForLoadState('load');
+    const covered = await page.evaluate(() => {
+      const fab = document.querySelector('.mobile-fab');
+      const shown = [fab].filter((button): button is Element => button !== null && getComputedStyle(button).visibility !== 'hidden' && Number(getComputedStyle(button).opacity) > 0);
+      const words = [...document.querySelectorAll('.event-page h1, .event-page h2, .event-page p, .event-page time, .event-page td, .event-page th, .event-page a, .event-page address')];
+      return shown.flatMap((button) => {
+        const box = button.getBoundingClientRect();
+        return words
+          .map((word) => word.getBoundingClientRect())
+          .filter((word) => word.width > 0 && word.x < box.right && box.x < word.right && word.y < box.bottom && box.y < word.bottom)
+          .map((word) => `${Math.round(word.x)},${Math.round(word.y)}`);
+      });
+    });
+    expect(covered, `event ${event.id}`).toEqual([]);
+  }
+});
+
+test('a list of other events with nothing in it says nothing, but its way onward stays', async ({ page, request }) => {
+  const event = await pick(request, (candidate) => candidate.img === undefined && candidate.k !== true && candidate.rg === 'liguria' && candidate.ct === 'la-spezia');
+  await page.goto(`/en/event/${event.id}/`);
+  const blocks = page.locator('.ev-also');
+  expect(await blocks.count()).toBeGreaterThan(0);
+  const shape = await blocks.evaluateAll((all) => all.map((block) => [block.querySelectorAll('h2').length, Number(block.querySelectorAll('.ev-also-item').length > 0)]));
+  shape.forEach(([heading, items]) => expect(heading).toBe(items));
+  await expect(page.locator('.event-also .ev-onward a')).toHaveCount(1);
 });
